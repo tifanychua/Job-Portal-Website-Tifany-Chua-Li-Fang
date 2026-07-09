@@ -4,6 +4,26 @@ from database import db
 router = APIRouter()
 
 
+def get_skills(skill_ids):
+    """
+    Retrieve skill details based on skill document IDs
+    """
+
+    skills = []
+
+    for skill_id in skill_ids:
+
+        skill_doc = db.collection("skills").document(skill_id).get()
+
+        if skill_doc.exists:
+
+            skill = skill_doc.to_dict()
+
+            skills.append({"id": skill_id, "name": skill.get("name")})
+
+    return skills
+
+
 # Get all shortlisted applicants
 @router.get("/api/applicants/shortlisted")
 def get_shortlisted_candidates():
@@ -18,19 +38,11 @@ def get_shortlisted_candidates():
 
         data["id"] = doc.id
 
-        # Retrieve skills from skills collection
+        # Get skill IDs from applicant document
+        skill_ids = data.get("skills", [])
 
-        skills = []
-
-        skill_docs = db.collection("skills").where("applicantId", "==", doc.id).stream()
-
-        for skill_doc in skill_docs:
-
-            skill = skill_doc.to_dict()
-
-            skills.append({"name": skill.get("skillName"), "category": skill.get("category")})
-
-        data["skills"] = skills
+        # Convert skill IDs to skill details
+        data["skills"] = get_skills(skill_ids)
 
         applicants.append(data)
 
@@ -51,16 +63,8 @@ def get_single_candidate(id: str):
 
     data["id"] = id
 
-    skills = []
+    skill_ids = data.get("skills", [])
 
-    skill_docs = db.collection("skills").where("applicantId", "==", id).stream()
-
-    for skill_doc in skill_docs:
-
-        skill = skill_doc.to_dict()
-
-        skills.append({"name": skill.get("skillName"), "category": skill.get("category")})
-
-    data["skills"] = skills
+    data["skills"] = get_skills(skill_ids)
 
     return data
