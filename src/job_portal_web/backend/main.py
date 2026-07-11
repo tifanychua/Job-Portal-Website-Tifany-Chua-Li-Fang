@@ -2,8 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from interview import router as interview_router
-from applicant import router as applicant_router
+from .interview import router as interview_router
+from .applicant import router as applicant_router
 
 import os
 
@@ -74,6 +74,14 @@ def applicants_page(request: Request):
 
     return templates.TemplateResponse(
         request=request, name="applicants.html", context={"active_page": "applicants"}
+    )
+
+
+@app.get("/chat")
+def chat_page(request: Request):
+
+    return templates.TemplateResponse(
+        request=request, name="chat.html", context={"active_page": "chat"}
     )
 
 
