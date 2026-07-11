@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>JobConnect - Messages</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<div class="container">
+
+    <!-- Left Sidebar -->
+    {% include "components/sidebar.html" %}
+
+    <!-- Main Content -->
+    <main>
+
+        <div class="page-title">
+
+            <h1>Messages</h1>
+
+            <p>Communicate securely with employers regarding your job applications.</p>
+
+        </div>
+
+        <section class="chat-card">
+
+            <!-- Chat Header -->
+            <div class="chat-header">
+
+                <img src="/static/images/company.png">
+
+                <div>
+
+                    <h2>ABC Technology Sdn Bhd</h2>
+
+                    <p>Software Engineer</p>
+
+                </div>
+
+            </div>
+
+            <!-- Chat Messages -->
+
+            <div class="chat-body" id="chatBody">
+
+                <div class="message-left">
+
+                    <p>Hello Tifany.</p>
+
+                    <p>
+                        Thank you for applying for our Software Engineer position.
+                    </p>
+
+                    <small>10:15 AM</small>
+
+                </div>
+
+                <div class="message-right">
+
+                    <p>
+                        Thank you.
+                    </p>
+
+                    <p>
+                        I would like to ask whether this role is hybrid?
+                    </p>
+
+                    <small>10:17 AM</small>
+
+                </div>
+
+                <div class="message-left">
+
+                    <p>
+                        Yes.
+                    </p>
+
+                    <p>
+                        Employees work from home every Friday.
+                    </p>
+
+                    <small>10:18 AM</small>
+
+                </div>
+
+            </div>
+
+            <!-- Input -->
+
+            <div class="chat-footer">
+
+                <input
+                type="text"
+                id="messageInput"
+                placeholder="Type your message...">
+
+                <button
+                class="primary"
+                onclick="sendMessage()">
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                    Send
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Right Panel -->
+
+    <div class="right-panel">
+
+        <div class="card">
+
+            <h3>Application Summary</h3>
+
+            <p><strong>Company</strong></p>
+
+            <span>ABC Technology Sdn Bhd</span>
+
+            <p><strong>Position</strong></p>
+
+            <span>Software Engineer</span>
+
+            <p><strong>Status</strong></p>
+
+            <span>Shortlisted</span>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Recruitment Progress</h3>
+
+            <p>
+
+                ✓ Application Submitted
+
+                <br><br>
+
+                ✓ Shortlisted
+
+                <br><br>
+
+                ○ Interview
+
+                <br><br>
+
+                ○ Offer
+
+                <br><br>
+
+                ○ Hired
+
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <h3>Conversation Tips</h3>
+
+            <ul>
+
+                <li>Communicate professionally.</li>
+
+                <li>Ask questions related to the job application.</li>
+
+                <li>Avoid sharing sensitive personal information.</li>
+
+                <li>Be respectful and concise.</li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% include "components/footer.html" %}
+
+<script>
+
+function sendMessage(){
+
+    let input = document.getElementById("messageInput");
+
+    if(input.value.trim() === ""){
+
+        alert("Please enter a message.");
+
+        return;
+
+    }
+
+    // Backend implementation later
+
+    console.log(input.value);
+
+    input.value="";
+
+}
+
+document.getElementById("messageInput")
+
+.addEventListener("keypress",function(event){
+
+    if(event.key==="Enter"){
+
+        event.preventDefault();
+
+        sendMessage();
+
+    }
+
+});
+
+</script>
+
+</body>
+
+</html>
