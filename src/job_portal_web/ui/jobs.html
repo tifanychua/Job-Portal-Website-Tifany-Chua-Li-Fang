@@ -6,6 +6,7 @@
 <title>JobConnect — Find Your Dream Job</title>
 <link rel="stylesheet" href="/static/css/home.css">
 <link rel="stylesheet" href="/static/css/jobs.css">
+<link rel="stylesheet" href="/static/css/base.css">
 <link rel="stylesheet" href="/static/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -145,6 +146,10 @@
 
 {% for job in jobs %}
 
+<a
+    href="/jobs/{{ job.id }}"
+    class="job-card-link"
+>
 <div class="job-card">
 
 
@@ -159,9 +164,9 @@
 
     <div class="job-info">
         <div class="job-title-row">
-            <a href="#" class="job-title">
-                {{ job.position }}
-            </a>
+            <div class="job-title">
+                {{ job.job_title }}
+            </div>
         </div>
 
         <div class="job-company">
@@ -187,14 +192,15 @@
 
     <div class="job-side">
         <button class="bookmark-btn">
-            <i class="fa-regular fa-bookmark"></i>
+            <i class="fa-regular fa-save"></i>
         </button>
-        <div class="job-posted">
+    <div class="job-posted">
             {{ job.postedDate }}
         </div>
     </div>
 
 </div>
+</a>
 
 
 {% else %}

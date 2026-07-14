@@ -1,8 +1,4 @@
-/* ==========================================================================
-   Homepage-specific styles (extends style.css design tokens)
-   ========================================================================== */
 
-/* ---------- Hero ---------- */
 .home-hero {
   background: linear-gradient(135deg, #EEF2FF 0%, #F8FAFC 60%);
   padding: 48px 40px 0;
@@ -28,15 +24,12 @@
   margin-bottom: 0;
 }
 
-/* Illustration side */
-.hero-illustration {
-  position: relative;
-  height: 320px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+.hero-illustration{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
-.hero-illustration svg { width: 100%; height: 100%; max-width: 460px; }
 
 .floating-stat {
   position: absolute;
@@ -172,6 +165,11 @@
 }
 .featured-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
 
+.featured-card-link{
+    text-decoration:none;
+    color:inherit;
+    display:block;
+}
 .featured-card-top {
   display: flex;
   align-items: flex-start;

@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JobConnect — Find Your Dream Job</title>
-<link rel="stylesheet" href="/static/css/home.css">
-<link rel="stylesheet" href="/static/css/jobs.css">
+<link rel="stylesheet" href="/static/css/base.css">
 <link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/css/home.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
@@ -37,33 +37,10 @@
         </div>
       </div>
 
-      <svg viewBox="0 0 460 340" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="300" cy="170" r="150" fill="#E0E7FF"/>
-        <circle cx="410" cy="90" r="6" fill="#2563EB"/>
-        <g opacity="0.5">
-          <rect x="40" y="130" width="10" height="10" fill="#A5B4FC"/>
-          <rect x="58" y="130" width="10" height="10" fill="#A5B4FC"/>
-          <rect x="76" y="130" width="10" height="10" fill="#A5B4FC"/>
-          <rect x="40" y="148" width="10" height="10" fill="#A5B4FC"/>
-          <rect x="58" y="148" width="10" height="10" fill="#A5B4FC"/>
-        </g>
-
-        <!-- woman -->
-        <g transform="translate(140,70)">
-          <rect x="10" y="130" width="95" height="170" rx="30" fill="#93C5FD"/>
-          <rect x="30" y="150" width="55" height="120" rx="18" fill="#1E293B"/>
-          <circle cx="57" cy="70" r="46" fill="#F4C6A0"/>
-          <path d="M11 60 Q57 10 103 60 L103 95 Q57 65 11 95 Z" fill="#1E293B"/>
-        </g>
-
-        <!-- man -->
-        <g transform="translate(235,35)">
-          <rect x="10" y="150" width="105" height="180" rx="30" fill="#1D4ED8"/>
-          <rect x="35" y="168" width="55" height="140" rx="16" fill="#0F172A"/>
-          <circle cx="62" cy="80" r="50" fill="#D9A876"/>
-          <path d="M12 70 Q62 20 112 70 L112 90 Q62 55 12 90 Z" fill="#0F172A"/>
-        </g>
-      </svg>
+      <img
+    src="/image/home.png"
+    alt="Hero Illustration"
+    class="hero-image" style="width:350px; height:auto">
     </div>
   </div>
 
@@ -80,9 +57,16 @@
       </div>
       <div class="search-field select-field">
         <select name="category">
-          <option>All Categories</option>
-          {% for c in categories %}<option>{{ c.name }}</option>{% endfor %}
-        </select>
+          <option value="">
+              All Categories
+          </option>
+          {% for category in categories %}
+              <option value="{{ category }}">
+                  {{ category }}
+              </option>
+          {% endfor %}
+
+      </select>
       </div>
       <button type="submit" class="btn-search text-button">Search Jobs</button>
     </form>
@@ -110,36 +94,62 @@
   <div class="featured-grid">
 
 {% for job in featured_jobs %}
+
+<a href="/jobs/{{ job.id }}" class="featured-card-link">
+
 <div class="featured-card">
+
     <div class="featured-card-top">
         <div class="featured-logo">
-            <img 
-            src="/static/images/{{ job.company_logo }}"
-            alt="{{ job.company_logo }}"
-            width="50"
-            height="50">
-        </div>
-        <button class="bookmark-btn">
-            <i class="fa-regular fa-bookmark"></i>
+          {% if job.company_logo %}
+              <img
+                  src="/image/{{ job.company_logo }}"
+                  alt="{{ job.company_name }}"
+                  width="50"
+                  height="50"
+              >
+          {% else %}
+              <div class="company-logo-placeholder">
+                  {{ job.company_name[:1] }}
+              </div>
+          {% endif %}
+      </div>
+
+        <button class="bookmark-btn" type="button">
+            <i class="fa-regular fa-heart"></i>
         </button>
     </div>
-    <a href="#" class="job-title">
+
+
+    <div class="job-title">
         {{ job.job_title }}
-    </a>
+    </div>
+
+
     <div class="job-company">
         {{ job.company_name }}
     </div>
+
+
     <div class="job-meta">
         <i class="fa-solid fa-location-dot"></i>
         {{ job.location }}
     </div>
+
+
     <span class="badge-pill">
         {{ job.employment_type }}
     </span>
+
+
     <div class="job-salary">
         {{ job.salary_text }}
     </div>
+
 </div>
+
+</a>
+
 {% endfor %}
 </div>
 </section>

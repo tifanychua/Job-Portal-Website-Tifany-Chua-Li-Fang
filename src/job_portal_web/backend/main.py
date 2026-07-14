@@ -1,21 +1,22 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
 
 from interview import router as interview_router
 from applicant import router as applicant_router
 from jobs import router as jobs_router
 from homepage import router as home_router
+from job_information import router as job_information_router
+from job_apply import router as job_apply_router
+from job_application import router as job_application_router
 
 import os
 
-
 app = FastAPI()
 
+app.add_middleware(SessionMiddleware, secret_key="jobconnect-secret-key")
 
-# ==========================
-# PATH
-# ==========================
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -24,38 +25,21 @@ UI_DIR = os.path.join(BASE_DIR, "ui")
 print("UI PATH:", UI_DIR)
 
 
-# ==========================
-# JINJA
-# ==========================
-
 templates = Jinja2Templates(directory=UI_DIR)
 
 
-# ==========================
-# STATIC
-# ==========================
+app.mount("/static", StaticFiles(directory=UI_DIR), name="static")
 
-app.mount(
-    "/static",
-    StaticFiles(directory=UI_DIR),
-    name="static"
-)
+app.mount("/image", StaticFiles(directory="src/job_portal_web/image"), name="image")
 
-
-# ==========================
-# ROUTERS
-# ==========================
 app.include_router(home_router)
 app.include_router(interview_router)
 app.include_router(applicant_router)
 app.include_router(jobs_router)
+app.include_router(job_information_router)
+app.include_router(job_apply_router)
+app.include_router(job_application_router)
 
-
-
-
-# ==========================
-# PAGES
-# ==========================
 
 """
 @app.get("/")
@@ -114,14 +98,9 @@ def schedule_page(request: Request):
     )
 """
 
-#print(app.routes)
+# print(app.routes)
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(
-        app,
-        host="127.0.0.1",
-        port=8000,
-        reload=False
-    )
+    uvicorn.run(app, host="127.0.0.1", port=8000, reload=False)

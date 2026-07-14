@@ -1,157 +1,9 @@
 /* ==========================================================================
-   JobConnect — Design Tokens (from spec)
+   JobConnect — JOBS PAGE ONLY
+   Loaded by: jobs.html (NOT home.html)
    ========================================================================== */
-:root {
-  --color-primary: #2563EB;
-  --color-secondary: #0F172A;
-  --color-success: #22C55E;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
-  --color-info: #3B82F6;
 
-  --color-bg: #F8FAFC;
-  --color-card-bg: #FFFFFF;
-  --color-border: #E2E8F0;
-  --color-text: #1E293B;
-  --color-text-secondary: #64748B;
-
-  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-
-  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-hover: 0 4px 12px rgba(15, 23, 42, 0.08);
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: var(--font-family);
-  background: var(--color-bg);
-  color: var(--color-text);
-  line-height: 1.5;
-}
-
-a { text-decoration: none; color: inherit; }
-ul { list-style: none; }
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
-input, select { font-family: inherit; }
-
-/* ---------- Typography scale (from spec) ---------- */
-.text-page-title       { font-size: 36px; font-weight: 700; }      /* Main Page Title */
-.text-section-title    { font-size: 32px; font-weight: 700; }      /* Section Title */
-.text-page-title-alt   { font-size: 28px; font-weight: 700; }      /* Page Title */
-.text-card-title       { font-size: 24px; font-weight: 600; }      /* Card Title */
-.text-secondary-title  { font-size: 20px; font-weight: 600; }      /* Secondary Title */
-.text-small-section    { font-size: 18px; font-weight: 600; }      /* Small Section Title */
-.text-form-label       { font-size: 14px; font-weight: 500; }      /* Form Label */
-.text-normal           { font-size: 16px; font-weight: 400; }      /* Normal Text */
-.text-small             { font-size: 14px; font-weight: 400; }     /* Small Text */
-.text-caption           { font-size: 12px; font-weight: 400; }     /* Caption Text */
-.text-button             { font-size: 16px; font-weight: 400; }    /* Button Text */
-.text-sidebar-menu       { font-size: 16px; font-weight: 500; }    /* Sidebar Menu */
-.text-navbar-menu        { font-size: 16px; font-weight: 500; }    /* Navbar Menu */
-.text-table-content      { font-size: 14px; font-weight: 500; }    /* Table Content */
-
-/* ==========================================================================
-   Navbar
-   ========================================================================== */
-.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 40px;
-  background: var(--color-card-bg);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.navbar-left { display: flex; align-items: center; gap: 40px; }
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--color-secondary);
-}
-.brand .brand-pin { color: var(--color-primary); font-size: 20px; }
-.brand .brand-connect { color: var(--color-primary); }
-
-.navbar-menu { display: flex; align-items: center; gap: 32px; }
-.navbar-menu li a {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--color-text);
-  padding-bottom: 6px;
-}
-.navbar-menu li a.active {
-  color: var(--color-primary);
-  border-bottom: 2px solid var(--color-primary);
-}
-
-.navbar-right { display: flex; align-items: center; gap: 20px; }
-
-.icon-btn {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: var(--color-text-secondary);
-  font-size: 18px;
-}
-.icon-btn:hover { background: var(--color-bg); }
-.icon-btn .badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--color-danger);
-  color: #fff;
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.lang-select {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  color: var(--color-text);
-}
-
-.btn {
-  font-size: 16px;
-  font-weight: 400;
-  padding: 9px 20px;
-  border-radius: var(--radius-md);
-  transition: background 0.15s ease, opacity 0.15s ease;
-}
-.btn-outline {
-  border: 1px solid var(--color-border);
-  color: var(--color-text);
-  background: var(--color-card-bg);
-}
-.btn-outline:hover { background: var(--color-bg); }
-.btn-primary {
-  background: var(--color-primary);
-  color: #fff;
-}
-.btn-primary:hover { opacity: 0.92; }
-.btn-block { width: 100%; }
-
-/* ==========================================================================
-   Hero / Search
-   ========================================================================== */
+/* ---------- Page hero (search bar strip at top of jobs.html) ---------- */
 .hero {
   background: linear-gradient(180deg, #EEF2FF 0%, #F8FAFC 100%);
   padding: 40px;
@@ -165,47 +17,7 @@ input, select { font-family: inherit; }
   margin-bottom: 24px;
 }
 
-.search-bar {
-  display: flex;
-  gap: 12px;
-  background: transparent;
-}
-.search-field {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--color-card-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 12px 16px;
-}
-.search-field.select-field { flex: 0.6; }
-.search-field input,
-.search-field select {
-  border: none;
-  outline: none;
-  width: 100%;
-  font-size: 16px;
-  color: var(--color-text);
-  background: transparent;
-}
-.search-field input::placeholder { color: var(--color-text-secondary); }
-.search-field .icon { color: var(--color-text-secondary); }
-
-.btn-search {
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 16px;
-  padding: 12px 32px;
-  border-radius: var(--radius-md);
-  white-space: nowrap;
-}
-.btn-search:hover { opacity: 0.92; }
-
-/* ==========================================================================
-   Layout
-   ========================================================================== */
+/* ---------- 3-column layout ---------- */
 .page-body {
   max-width: 1400px;
   margin: 0 auto;
@@ -287,7 +99,7 @@ input, select { font-family: inherit; }
   margin-top: 4px;
 }
 
-/* ---------- Job results ---------- */
+/* ---------- Job results (center column) ---------- */
 .results-header {
   display: flex;
   align-items: center;
@@ -353,15 +165,6 @@ input, select { font-family: inherit; }
   color: var(--color-text-secondary);
 }
 
-.badge-pill {
-  font-size: 12px;
-  font-weight: 500;
-  padding: 3px 10px;
-  border-radius: 999px;
-}
-.badge-success { background: #DCFCE7; color: #15803D; }
-.badge-info { background: #DBEAFE; color: #1D4ED8; }
-
 .job-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .tag {
   font-size: 12px;
@@ -379,11 +182,9 @@ input, select { font-family: inherit; }
   justify-content: space-between;
   min-width: 70px;
 }
-.bookmark-btn { color: var(--color-text-secondary); font-size: 18px; }
-.bookmark-btn:hover { color: var(--color-primary); }
 .job-posted { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; }
 
-/* ---------- Right sidebar ---------- */
+/* ---------- Right sidebar (job alerts / popular searches / CTA) ---------- */
 .side-card {
   background: var(--color-card-bg);
   border: 1px solid var(--color-border);
@@ -431,30 +232,26 @@ input, select { font-family: inherit; }
 .cta-card p { color: var(--color-text-secondary); }
 .cta-card h4 { color: var(--color-text); }
 
-/* ---------- Footer / pagination (optional extra) ---------- */
+/* ---------- Pagination ---------- */
 .pagination {
-    display: flex;
-    gap: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 24px;
 }
-
-.page-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 40px;
-    height: 40px;
-
-    border: 1px solid #ddd;
-    border-radius: 8px;
-
-    text-decoration: none;
-    color: #333;
+.pagination button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--color-text);
+  background: var(--color-card-bg);
 }
-
-.page-btn.active {
-    background: #2563eb;
-    color: white;
+.pagination button.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
 }
 
 /* ---------- Responsive ---------- */
@@ -462,8 +259,6 @@ input, select { font-family: inherit; }
   .page-body { grid-template-columns: 1fr; }
 }
 @media (max-width: 700px) {
-  .navbar-menu { display: none; }
-  .search-bar { flex-direction: column; }
   .hero { padding: 24px; }
   .page-body { padding: 16px; }
 }
