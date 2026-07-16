@@ -22,20 +22,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 
 <body>
-
-
-<!-- ================= HEADER ================= -->
-
 {% include "components/header.html" %}
 
-<div class="container" id="schedule-list">
-
-{% include "components/sidebar.html" %}
-
-
-
-<!-- ================= MAIN ================= -->
-
+<div class="schedule-page">
 
 <main>
 
@@ -57,10 +46,6 @@ View and manage all upcoming candidate interviews.
 </div>
 
 <section class="filter-card interview-control-card">
-
-
-<!-- Interview Summary -->
-
 <div class="summary-section">
 
 
@@ -110,13 +95,7 @@ Next Interview
 No Interview
 </strong>
 </div>
-
-
 </div>
-
-
-
-
 
 <div class="summary-box">
 
@@ -129,35 +108,15 @@ No Interview
 <p>
 Total Candidates
 </p>
-
-
 <strong id="totalCandidate">
 0 Candidates
 </strong>
-
-
 </div>
-
-
 </div>
-
-
-
 </div>
-
-
 </div>
-
-
-
-
 
 <hr>
-
-
-
-<!-- Search and Filter -->
-
 
 <div class="filter-section">
 
@@ -179,10 +138,6 @@ onkeyup="filterInterviews()">
 
 </div>
 
-
-
-
-
 <div>
 
 
@@ -197,21 +152,36 @@ Interview Status
 Scheduled
 </option>
 
+
 <option value="All">
 All Status
 </option>
 
-<option value="Completed">
-Completed
+
+<option value="Accepted">
+Accepted
 </option>
+
+
+<option value="Declined">
+Declined
+</option>
+
+
+<option value="Reschedule Requested">
+Reschedule Requested
+</option>
+
 
 <option value="Cancelled">
 Cancelled
 </option>
 
-<option value="Rescheduled">
-Rescheduled
+
+<option value="Completed">
+Completed
 </option>
+
 
 </select>
 
@@ -303,72 +273,78 @@ Action
 
 
 </main>
+
 </div>
 {% include "components/footer.html" %}
 
 
 <script>
 
+
 let interviewList = [];
+
 let currentInterviewId = "";
-
-
-// ================= LOAD INTERVIEWS =================
 
 function loadInterviews(){
 
+
 fetch("/api/interviews")
 
+
 .then(response=>response.json())
+
 
 .then(data=>{
 
 
-// ensure default status
-
 data.forEach(interview=>{
 
-    if(!interview.status){
-        interview.status = "Scheduled";
-    }
+
+if(!interview.status){
+
+interview.status = "Scheduled";
+
+}
+
 
 });
+
 
 
 interviewList = data;
 
 
-// update summary
 
 updateSummary(data);
 
 
-// display table
 
 filterInterviews();
+
+
+
+})
+
+.catch(error=>{
+
+
+console.log(error);
 
 
 });
 
 
+
 }
 
-
-
-// ================= SUMMARY =================
-
 function updateSummary(data){
-
-
 let today = new Date();
-
-
-
 let upcoming = data.filter(interview=>{
 
 
+
 let interviewDate = new Date(
-    interview.date + "T" + interview.time
+interview.date + "T" + interview.time
 );
 
 
@@ -376,41 +352,40 @@ let interviewDate = new Date(
 return (
 
 interviewDate >= today &&
-
 interview.status !== "Cancelled" &&
-
-interview.status !== "Completed"
+interview.status !== "Completed"&&
+interview.status !== "Declined"
 
 );
-
-
 });
-
-
-
-
-// Upcoming interviews
 
 document.getElementById(
 "totalInterview"
 ).innerHTML =
+
 upcoming.length + " Scheduled";
 
+let candidates = new Set(
+
+upcoming.map(
+interview=>interview.candidateName
+)
+
+);
 
 
-
-// Total candidates
 
 document.getElementById(
 "totalCandidate"
 ).innerHTML =
-upcoming.length + " Candidates";
+
+candidates.size + " Candidates";
 
 
 
 
 
-// Next interview
+
 
 if(upcoming.length > 0){
 
@@ -422,7 +397,9 @@ upcoming.sort((a,b)=>{
 return new Date(
 a.date+"T"+a.time
 )
+
 -
+
 new Date(
 b.date+"T"+b.time
 );
@@ -441,13 +418,20 @@ document.getElementById(
 ).innerHTML =
 
 next.candidateName
+
 +
 "<br>"
+
 +
+
 next.date
+
 +
+
 " "
+
 +
+
 next.time;
 
 
@@ -460,68 +444,60 @@ else{
 document.getElementById(
 "nextInterview"
 ).innerHTML =
+
 "No Interview";
 
 
 }
 
 
+
 }
-
-
-
-
-// ================= SEARCH + FILTER =================
 
 
 function filterInterviews(){
 
-
 let keyword =
+
 document.getElementById(
 "searchCandidate"
 ).value
+
 .toLowerCase();
 
-
-
 let status =
+
 document.getElementById(
 "statusFilter"
 ).value;
-
-
 
 let filtered = interviewList.filter(interview=>{
 
 
 let nameMatch =
 
-interview.candidateName
+(interview.candidateName || "")
+
 .toLowerCase()
+
 .includes(keyword);
-
-
 
 let statusMatch =
 
-status==="All"
+
+status === "All"
 
 ||
 
-interview.status===status;
-
-
+interview.status === status;
 
 return nameMatch && statusMatch;
-
-
 
 });
 
 
-
 displayInterviews(filtered);
+
 
 
 }
@@ -529,130 +505,145 @@ displayInterviews(filtered);
 
 
 
-// ================= DISPLAY TABLE =================
-
-
 function displayInterviews(data){
-
-
 let table =
+
 document.getElementById(
 "interviewTable"
 );
 
-
-
 table.innerHTML="";
 
-
-
-data.forEach(interview=>{
+if(data.length === 0){
 
 
 
-table.innerHTML += `
+table.innerHTML = `
 
 
 <tr>
 
+<td colspan="8">
+
+
+No interview available.
+
+
+</td>
+
+</tr>
+
+
+`;
+
+return;
+}
+
+data.forEach(interview=>{
+
+let statusClass =
+
+interview.status.replaceAll(
+" ",
+"-"
+);
+
+table.innerHTML += `
+
+<tr>
 
 <td>
-
 
 <div class="candidate-mini">
 
-
 <img src="/static/images/avatar.jpg">
 
-
 <div>
-
 <strong>
-${interview.candidateName}
+
+${interview.candidateName || "-"}
+
 </strong>
 
-
 <p>
-${interview.position}
+
+${interview.position || "-"}
+
 </p>
-
-
 </div>
-
-
 </div>
-
-
 </td>
-
-
-
-
-<td>
-${interview.position}
-</td>
-
-
-
-<td>
-${interview.date}
-</td>
-
-
-
-<td>
-${interview.time}
-</td>
-
-
-
-<td>
-${interview.duration}
-</td>
-
-
-
-<td>
-${interview.interviewer}
-</td>
-
-
-
 
 <td>
 
-<span class="${interview.status}">
+${interview.position || "-"}
+
+</td>
+
+<td>
+
+${interview.date || "-"}
+
+</td>
+
+<td>
+
+${interview.time || "-"}
+
+</td>
+
+<td>
+
+${interview.duration || "-"}
+
+</td>
+
+<td>
+
+${interview.interviewer || "-"}
+
+</td>
+
+<td>
+
+<span class="${statusClass}">
+
 ${interview.status}
+
 </span>
 
 </td>
 
 
-
-
 <td>
-
-
 <button onclick="openReschedule('${interview.id}')">
+
 
 <i class="fa-solid fa-calendar"></i>
 
+
 Reschedule
 
+
 </button>
-
-
 
 <button onclick="cancelInterview('${interview.id}')">
 
+
 <i class="fa-solid fa-xmark"></i>
 
+
 Cancel
+
 
 </button>
 
 
+
 </td>
+
+
+
 
 
 
@@ -667,25 +658,26 @@ Cancel
 });
 
 
+
 }
-
-
-
-
-// ================= CANCEL =================
 
 
 function cancelInterview(id){
 
 
+
 if(confirm(
+
 "Are you sure you want to cancel this interview?"
+
 )){
 
 
 
 fetch(
+
 "/api/interviews/"+id+"/cancel",
+
 {
 
 method:"PUT"
@@ -694,101 +686,72 @@ method:"PUT"
 
 )
 
-
 .then(response=>response.json())
-
 .then(data=>{
-
-
 alert(data.message);
-
-
 loadInterviews();
-
 
 });
 
-
 }
 
-
 }
-
-
-
-
-// ================= RESCHEDULE =================
 
 
 function openReschedule(id){
 
-
-currentInterviewId=id;
-
-
+currentInterviewId = id;
 
 fetch(
-"/api/interviews/"+id
-)
 
+"/api/interviews/"+id
+
+)
 
 .then(response=>response.json())
 
 .then(data=>{
-
-
 document.getElementById(
 "rescheduleStage"
-).value=data.stage;
-
-
+).value = data.stage;
 
 document.getElementById(
 "rescheduleDate"
-).value=data.date;
-
-
+).value = data.date;
 
 document.getElementById(
 "rescheduleTime"
-).value=data.time;
-
-
+).value = data.time;
 
 document.getElementById(
 "rescheduleDuration"
-).value=data.duration;
-
-
+).value = data.duration;
 
 document.getElementById(
 "rescheduleInterviewer"
-).value=data.interviewer;
-
-
+).value = data.interviewer;
 
 document.getElementById(
 "rescheduleMeetingLink"
-).value=data.meetingLink || "";
-
-
+).value = data.meetingLink || "";
 
 document.getElementById(
 "rescheduleNotes"
-).value=data.notes || "";
+).value = data.notes || "";
 
+let radio = document.querySelector(
 
-
-
-document.querySelector(
 'input[name="rescheduleType"][value="'+data.interviewType+'"]'
-).checked=true;
 
+);
 
+if(radio){
+
+radio.checked = true;
+
+}
 
 toggleRescheduleLink();
-
-
 
 document.getElementById(
 "rescheduleModal"
@@ -799,30 +762,35 @@ document.getElementById(
 });
 
 
+
 }
-
-
-
 
 
 function toggleRescheduleLink(){
 
 
-let type =
-document.querySelector(
+
+let type = document.querySelector(
+
 'input[name="rescheduleType"]:checked'
+
 ).value;
 
 
 
-let container =
-document.getElementById(
+
+
+let container = document.getElementById(
+
 "rescheduleLinkContainer"
+
 );
 
 
 
-if(type==="online"){
+
+
+if(type === "online"){
 
 
 container.style.display="block";
@@ -837,50 +805,41 @@ container.style.display="none";
 
 
 document.getElementById(
+
 "rescheduleMeetingLink"
+
 ).value="";
 
 
 }
 
 
+
 }
-
-
-
-
 
 function closeReschedule(){
 
 
+
 document.getElementById(
+
 "rescheduleModal"
 ).style.display="none";
-
 
 }
 
 
-
-
-
 function updateInterview(){
-
-
-let data={
-
-
+let data = {
 stage:
 document.getElementById(
 "rescheduleStage"
 ).value,
 
-
 date:
 document.getElementById(
 "rescheduleDate"
 ).value,
-
 
 time:
 document.getElementById(
@@ -888,86 +847,60 @@ document.getElementById(
 ).value,
 
 
+
 duration:
 document.getElementById(
 "rescheduleDuration"
 ).value,
 
-
 interviewType:
 document.querySelector(
 'input[name="rescheduleType"]:checked'
 ).value,
-
-
 meetingLink:
 document.getElementById(
 "rescheduleMeetingLink"
 ).value,
-
 
 interviewer:
 document.getElementById(
 "rescheduleInterviewer"
 ).value,
 
-
 notes:
 document.getElementById(
 "rescheduleNotes"
 ).value,
 
-
-status:"Rescheduled"
-
-
-};
-
-
-
+status:"Scheduled"};
 
 fetch(
+
 "/api/interviews/"+currentInterviewId,
+
 {
 
 method:"PUT",
-
 headers:{
-
 "Content-Type":"application/json"
-
 },
-
 body:JSON.stringify(data)
-
-
 }
-
 )
 
-
 .then(response=>response.json())
-
 .then(data=>{
-
-
 alert(data.message);
-
-
 closeReschedule();
-
-
 loadInterviews();
-
-
 
 });
 
-
 }
 
-loadInterviews();
 
+
+loadInterviews();
 
 </script>
 

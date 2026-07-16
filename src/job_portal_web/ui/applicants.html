@@ -29,7 +29,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 <body>
 
+
 {% include "components/header.html" %}
+
 
 
 <div class="container">
@@ -37,7 +39,12 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 
 <!-- LEFT SIDEBAR -->
+
 {% include "components/sidebar.html" %}
+
+
+
+
 
 <!-- MAIN -->
 
@@ -60,10 +67,17 @@ Select a candidate to schedule an interview.
 
 
 </div>
+
+
+
+
 <section class="table-card">
+
+
 <h3>
 Applicants Ready For Interview
 </h3>
+
 
 
 
@@ -78,31 +92,44 @@ Loading applicants...
 
 
 </section>
+
+
 </main>
+
+
+
 </div>
 
+
+
+
+
 {% include "components/footer.html" %}
+
+
+
 
 
 <script>
 
 
-fetch(
-"/api/applicants/shortlisted"
-)
+fetch("/api/applicants/shortlisted")
+
 
 
 .then(response => response.json())
+
 
 
 .then(data => {
 
 
 
-let container =
-document.getElementById(
+let container = document.getElementById(
 "candidateList"
 );
+
+
 
 
 
@@ -126,7 +153,9 @@ return;
 
 
 
+
 let html = "";
+
 
 
 
@@ -135,7 +164,14 @@ data.forEach(candidate => {
 
 
 
+
 let skills = "";
+
+
+
+
+
+if(candidate.skills && candidate.skills.length > 0){
 
 
 
@@ -161,15 +197,31 @@ ${skill.name}
 
 
 
+}
+else{
+
+
+skills = "No skills provided";
+
+
+}
+
+
+
+
+
 
 
 html +=
 
 
 
+
 `
 
 <div class="candidate-card">
+
+
 
 
 
@@ -181,7 +233,10 @@ html +=
 
 
 
+
+
 <div class="candidate-info">
+
 
 
 <h2>
@@ -189,6 +244,7 @@ html +=
 ${candidate.name}
 
 </h2>
+
 
 
 
@@ -205,11 +261,13 @@ ${candidate.position}
 
 
 
+
 <span class="status">
 
-Shortlisted
+${candidate.status}
 
 </span>
+
 
 
 
@@ -222,7 +280,12 @@ Shortlisted
 
 
 
+
+
 <div class="candidate-details">
+
+
+
 
 
 
@@ -236,6 +299,7 @@ Email
 </p>
 
 
+
 <span>
 
 ${candidate.email}
@@ -243,7 +307,12 @@ ${candidate.email}
 </span>
 
 
+
 </div>
+
+
+
+
 
 
 
@@ -259,14 +328,20 @@ Phone
 </p>
 
 
+
 <span>
 
-${candidate.phone}
+${candidate.phoneNumber || "-"}
 
 </span>
 
 
+
 </div>
+
+
+
+
 
 
 
@@ -282,6 +357,7 @@ Skills
 </p>
 
 
+
 <span>
 
 ${skills}
@@ -289,7 +365,16 @@ ${skills}
 </span>
 
 
+
 </div>
+
+
+
+
+
+
+
+
 
 <div>
 
@@ -301,18 +386,26 @@ Resume
 </p>
 
 
-<a href="#">
+
+<a href="/${candidate.resume_path}" target="_blank">
+
 View Resume
+
 </a>
 
 
+
+</div>
+
+
+
+
+
+
+
 </div>
 
 
-
-
-
-</div>
 
 
 
@@ -323,15 +416,24 @@ View Resume
 <a href="/interview_schedule?id=${candidate.id}">
 
 
+
 <button class="primary">
 
 
+
 <i class="fa-solid fa-calendar-check"></i>
+
 Schedule Interview
+
+
 </button>
 
 
+
 </a>
+
+
+
 
 
 
@@ -356,20 +458,29 @@ container.innerHTML = html;
 
 
 
-.catch(error=>{
+
+
+.catch(error => {
+
 
 
 console.log(error);
+
 
 
 document.getElementById(
 "candidateList"
 ).innerHTML =
 
+
 `
+
 <p>
+
 Failed to load applicants.
+
 </p>
+
 
 `;
 
@@ -380,6 +491,8 @@ Failed to load applicants.
 
 
 </script>
+
+
 
 
 

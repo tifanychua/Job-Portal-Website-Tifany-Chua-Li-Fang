@@ -1,13 +1,33 @@
 from fastapi import APIRouter
-from .database import db
+from .database import db, bucket
+from datetime import timedelta
 
 router = APIRouter()
 
 
+# =================================
+# Generate Firebase Storage Resume URL
+# =================================
+
+
+def get_resume_url(path):
+
+    if not path:
+        return None
+
+    blob = bucket.blob(path)
+
+    url = blob.generate_signed_url(expiration=timedelta(hours=1), method="GET")
+
+    return url
+
+
+# =================================
+# Get Skills
+# =================================
+
+
 def get_skills(skill_ids):
-    """
-    Retrieve skill details based on skill document IDs
-    """
 
     skills = []
 
@@ -24,47 +44,137 @@ def get_skills(skill_ids):
     return skills
 
 
-# Get all shortlisted applicants
+# =================================
+# Get Job Seeker
+# =================================
+
+
+def get_job_seeker(job_seeker_id):
+
+    if not job_seeker_id:
+
+        return None
+
+    seeker_doc = db.collection("job_seeker").document(job_seeker_id).get()
+
+    if not seeker_doc.exists:
+
+        return None
+
+    seeker = seeker_doc.to_dict()
+
+    skill_ids = seeker.get("skill", [])
+
+    seeker["skills"] = get_skills(skill_ids)
+
+    seeker.pop("skill", None)
+
+    return seeker
+
+
+# =================================
+# GET ALL SHORTLISTED APPLICANTS
+# =================================
+
+
 @router.get("/api/applicants/shortlisted")
 def get_shortlisted_candidates():
 
     applicants = []
 
-    docs = db.collection("applicants").where("status", "==", "Shortlisted").stream()
+    docs = db.collection("application").where("status", "==", "Shortlisted").stream()
 
     for doc in docs:
 
-        data = doc.to_dict()
+        application = doc.to_dict()
 
-        data["id"] = doc.id
+        application["id"] = doc.id
 
-        # Get skill IDs from applicant document
-        skill_ids = data.get("skills", [])
+        # Get job seeker information
 
-        # Convert skill IDs to skill details
-        data["skills"] = get_skills(skill_ids)
+        job_seeker_id = application.get("job_seeker_id")
 
-        applicants.append(data)
+        seeker = get_job_seeker(job_seeker_id)
+
+        if seeker:
+
+            application.update(seeker)
+
+        # Answers
+
+        answers = application.get("answers") or {}
+
+        application["years_experience"] = answers.get("years_experience")
+
+        application["notice_period"] = answers.get("notice_period")
+
+        application["relocate"] = answers.get("relocate")
+
+        # Resume
+
+        application["resume_filename"] = application.get("resume_filename")
+
+        application["resume_path"] = application.get("resume_path")
+
+        application["resume_url"] = get_resume_url(application.get("resume_path"))
+
+        application.pop("answers", None)
+
+        applicants.append(application)
 
     return applicants
 
 
-# Get one shortlisted applicant
+# =================================
+# GET SINGLE SHORTLISTED APPLICANT
+# =================================
+
+
 @router.get("/api/applicants/shortlisted/{id}")
 def get_single_candidate(id: str):
 
-    doc = db.collection("applicants").document(id).get()
+    doc = db.collection("application").document(id).get()
 
     if not doc.exists:
 
         return {"error": "Applicant not found"}
 
-    data = doc.to_dict()
+    application = doc.to_dict()
 
-    data["id"] = id
+    application["id"] = id
 
-    skill_ids = data.get("skills", [])
+    # Get job seeker
 
-    data["skills"] = get_skills(skill_ids)
+    job_seeker_id = application.get("job_seeker_id")
 
-    return data
+    seeker = get_job_seeker(job_seeker_id)
+
+    if seeker:
+
+        application.update(seeker)
+
+    # Answers
+
+    answers = application.get("answers") or {}
+
+    application["years_experience"] = answers.get("years_experience")
+
+    application["notice_period"] = answers.get("notice_period")
+
+    application["relocate"] = answers.get("relocate")
+
+    # ===========================
+    # Resume
+    # ===========================
+
+    application["resume_filename"] = application.get("resume_filename")
+
+    application["resume_path"] = application.get("resume_path")
+
+    # Generate Firebase URL here
+
+    application["resume_url"] = get_resume_url(application.get("resume_path"))
+
+    application.pop("answers", None)
+
+    return application

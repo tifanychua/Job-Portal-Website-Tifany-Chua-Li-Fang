@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>My Interviews</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+</head>
+
+
+<body>
+
+
+{% include "components/header.html" %}
+
+
+
+<div class="container applicant-container">
+
+<main>
+
+
+<div class="page-title">
+
+<h1>
+My Interviews
+</h1>
+
+<p>
+View your interview invitations and manage your responses.
+</p>
+
+</div>
+
+
+
+
+<section id="interviewList" class="interview-list">
+
+
+</section>
+
+
+
+</main>
+
+
+</div>
+
+
+
+
+{% include "components/footer.html" %}
+
+
+
+
+
+<script>
+
+
+function loadInterviews(){
+
+
+fetch(`/api/applicant/interviews?application_id={{ application_id }}`)
+.then(res=>res.json())
+
+
+.then(data=>{
+
+
+let container = document.getElementById(
+"interviewList"
+);
+
+
+
+container.innerHTML = "";
+
+
+
+// No interview
+
+if(data.length === 0){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+<h3>
+No Interview Invitation
+</h3>
+
+<p>
+You currently have no scheduled interviews.
+</p>
+
+</div>
+
+`;
+
+
+return;
+
+}
+
+
+
+// Error
+
+if(data.error){
+
+
+container.innerHTML = `
+
+<div class="empty-state">
+
+<h3>
+${data.error}
+</h3>
+
+</div>
+
+`;
+
+
+return;
+
+}
+
+
+
+
+data.forEach(interview=>{
+
+
+let statusClass = "";
+
+
+if(interview.status){
+
+statusClass = interview.status
+.toLowerCase()
+.replaceAll(" ","-");
+}
+
+
+
+
+container.innerHTML += `
+
+
+<div class="interview-card">
+
+
+
+<div class="interview-card-header">
+
+
+<div>
+
+
+<h2>
+
+${interview.companyName || "Company"}
+
+</h2>
+
+
+<h3>
+
+${interview.position || "Position"}
+
+</h3>
+
+
+</div>
+
+
+
+
+<span class="${statusClass}">
+
+${interview.status}
+
+</span>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="interview-info">
+
+
+<div>
+
+
+<strong>
+Date
+</strong>
+
+
+<p>
+
+${interview.date}
+
+</p>
+
+
+</div>
+
+
+
+
+<div>
+
+
+<strong>
+Time
+</strong>
+
+
+<p>
+
+${interview.time}
+
+</p>
+
+
+</div>
+
+
+
+
+
+<div>
+
+
+<strong>
+Interview Type
+</strong>
+
+
+<p>
+
+${interview.interviewType}
+
+</p>
+
+
+</div>
+
+
+
+
+
+<div>
+
+
+<strong>
+Interviewer
+</strong>
+
+
+<p>
+
+${interview.interviewer}
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<div class="action-buttons">
+
+
+<a href="/my_interviews/detail/${interview.id}">
+
+<button class="primary">
+
+View Details
+
+</button>
+
+
+</a>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+`;
+
+
+
+});
+
+
+})
+
+
+.catch(error=>{
+
+
+console.log(error);
+
+
+document.getElementById("interviewList").innerHTML = `
+
+
+<div class="empty-state">
+
+<h3>
+Failed to load interviews
+</h3>
+
+<p>
+Please try again later.
+</p>
+
+</div>
+
+
+`;
+
+
+});
+
+
+}
+
+
+
+loadInterviews();
+
+
+</script>
+
+
+
+
+</body>
+
+</html>

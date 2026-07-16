@@ -35,10 +35,9 @@ class Context:
     def __init__(self):
 
         self.response = None
-
-        self.email_called = False
-
+        self.email_called = None
         self.interview_data = {}
+        self.email_content = {}
 
 
 @pytest.fixture
@@ -75,8 +74,65 @@ def employer_schedule_interview(context):
 @when("the interview details are saved")
 def save_interview(client, context, mocker):
 
-    # Mock email sending
+    # -------------------------------
+    # Mock email service
+    # -------------------------------
+
     mock_email = mocker.patch("job_portal_web.backend.interview.send_interview_email")
+
+    # -------------------------------
+    # Mock Firestore documents
+    # -------------------------------
+
+    mock_application = mocker.Mock()
+
+    mock_application.exists = True
+
+    mock_application.to_dict.return_value = {"job_seeker_id": "J000001"}
+
+    mock_company = mocker.Mock()
+
+    mock_company.exists = True
+
+    mock_company.to_dict.return_value = {"companyName": "ABC Company", "address": "Penang"}
+
+    mock_seeker = mocker.Mock()
+
+    mock_seeker.exists = True
+
+    mock_seeker.to_dict.return_value = {"email": "james@gmail.com", "name": "James"}
+
+    # -------------------------------
+    # Mock Firestore collections
+    # -------------------------------
+
+    def fake_collection(name):
+
+        collection = mocker.Mock()
+
+        if name == "interviews":
+
+            collection.add.return_value = ("mock_interview_id", None)
+
+        elif name == "applications":
+
+            collection.document.return_value.get.return_value = mock_application
+
+        elif name == "company":
+
+            collection.document.return_value.get.return_value = mock_company
+
+        elif name == "job_seeker":
+
+            collection.document.return_value.get.return_value = mock_seeker
+
+        return collection
+
+    mocker.patch("job_portal_web.backend.interview.db.collection", side_effect=fake_collection)
+
+    # -------------------------------
+    # Call API
+    # -------------------------------
 
     context.response = client.post("/api/interviews", json=context.interview_data)
 

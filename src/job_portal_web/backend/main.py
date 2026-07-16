@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
 from .interview import router as interview_router
 from .applicant import router as applicant_router
 
@@ -10,10 +9,6 @@ import os
 app = FastAPI()
 
 
-# ==========================
-# PATH
-# ==========================
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 UI_DIR = os.path.join(BASE_DIR, "ui")
@@ -21,32 +16,13 @@ UI_DIR = os.path.join(BASE_DIR, "ui")
 
 print("UI PATH:", UI_DIR)
 
-
-# ==========================
-# JINJA
-# ==========================
-
 templates = Jinja2Templates(directory=UI_DIR)
 
 
-# ==========================
-# STATIC
-# ==========================
-
 app.mount("/static", StaticFiles(directory=UI_DIR), name="static")
-
-
-# ==========================
-# ROUTERS
-# ==========================
 
 app.include_router(interview_router)
 app.include_router(applicant_router)
-
-
-# ==========================
-# PAGES
-# ==========================
 
 
 @app.get("/")
@@ -90,4 +66,24 @@ def schedule_page(request: Request):
 
     return templates.TemplateResponse(
         request=request, name="interview_schedule.html", context={"active_page": "applicants"}
+    )
+
+
+@app.get("/my_interviews/{application_id}")
+def my_interviews_page(request: Request, application_id: str):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="applicant_interview.html",
+        context={"active_page": "interviews", "application_id": application_id},
+    )
+
+
+@app.get("/my_interviews/detail/{interview_id}")
+def my_interview_detail_page(request: Request, interview_id: str):
+
+    return templates.TemplateResponse(
+        request=request,
+        name="applicant_interview_detail.html",
+        context={"active_page": "interviews", "interview_id": interview_id},
     )

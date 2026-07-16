@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Interview Details</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+</head>
+
+
+<body>
+
+
+{% include "components/header.html" %}
+
+
+
+<div class="applicant-interview-container">
+
+
+<main>
+
+
+<div class="applicant-page-title">
+
+<h1>
+Interview Details
+</h1>
+
+
+<p>
+Review your interview invitation and respond.
+</p>
+
+
+</div>
+
+
+
+
+
+<div class="applicant-detail-card">
+
+
+
+<div class="applicant-detail-header">
+
+
+<div>
+
+<h2 id="company"></h2>
+
+<h3 id="position"></h3>
+
+</div>
+
+
+<span id="status" class="applicant-status"></span>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="applicant-detail-grid">
+
+
+
+<div class="applicant-detail-box">
+
+<strong>
+Date
+</strong>
+
+<p id="date"></p>
+
+</div>
+
+
+
+<div class="applicant-detail-box">
+
+<strong>
+Time
+</strong>
+
+<p id="time"></p>
+
+</div>
+
+
+
+<div class="applicant-detail-box">
+
+<strong>
+Duration
+</strong>
+
+<p id="duration"></p>
+
+</div>
+
+
+
+<div class="applicant-detail-box">
+
+<strong>
+Interview Type
+</strong>
+
+<p id="type"></p>
+
+</div>
+
+
+
+<div class="applicant-detail-box">
+
+<strong>
+Interviewer
+</strong>
+
+<p id="interviewer"></p>
+
+</div>
+
+
+
+<div class="applicant-detail-box">
+
+<strong>
+Meeting Link
+</strong>
+
+<p id="meetingLink"></p>
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="applicant-detail-notes">
+
+
+<h3>
+Additional Notes
+</h3>
+
+
+<p id="notes"></p>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="applicant-detail-actions">
+
+
+<button
+class="applicant-accept-btn"
+onclick="acceptInterview()">
+
+Accept
+
+</button>
+
+
+
+<button
+class="applicant-decline-btn"
+onclick="declineInterview()">
+
+Decline
+
+</button>
+
+
+
+
+<button
+class="applicant-reschedule-btn"
+onclick="openRescheduleModal()">
+
+Request Reschedule
+
+</button>
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ================================
+     RESCHEDULE MODAL
+================================ -->
+
+
+<div id="interviewRescheduleModal"
+class="interview-reschedule-modal">
+
+
+
+<div class="interview-reschedule-content">
+
+
+
+<h2>
+Request Reschedule
+</h2>
+
+
+
+
+<label>
+Preferred Date
+</label>
+
+
+<input
+type="date"
+id="requestedDate"
+class="interview-reschedule-input">
+
+
+
+
+
+
+<label>
+Preferred Time
+</label>
+
+
+<input
+type="time"
+id="requestedTime"
+class="interview-reschedule-input">
+
+
+
+
+
+
+<label>
+Reason
+</label>
+
+
+<textarea
+id="rescheduleReason"
+class="interview-reschedule-input"
+placeholder="Enter reason for reschedule">
+</textarea>
+
+
+
+
+
+
+
+<div class="interview-reschedule-buttons">
+
+
+<button
+class="interview-reschedule-submit"
+onclick="submitReschedule()">
+
+Submit Request
+
+</button>
+
+
+
+
+
+<button
+class="interview-reschedule-cancel"
+onclick="closeRescheduleModal()">
+
+Cancel
+
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+</main>
+
+
+</div>
+
+
+
+
+
+{% include "components/footer.html" %}
+
+
+
+
+
+
+
+
+
+<script>
+
+
+let interviewId =
+window.location.pathname.split("/").pop();
+
+
+
+
+
+
+
+fetch("/api/interviews/" + interviewId)
+
+
+.then(res => res.json())
+
+
+.then(data => {
+
+
+
+document.getElementById("company").innerHTML =
+data.companyName || data.company || "Company";
+
+
+
+document.getElementById("position").innerHTML =
+data.position || "-";
+
+
+
+document.getElementById("date").innerHTML =
+data.date || "-";
+
+
+
+document.getElementById("time").innerHTML =
+data.time || "-";
+
+
+
+document.getElementById("duration").innerHTML =
+data.duration || "-";
+
+
+
+document.getElementById("type").innerHTML =
+data.interviewType || "-";
+
+
+
+document.getElementById("interviewer").innerHTML =
+data.interviewer || "-";
+
+
+
+document.getElementById("meetingLink").innerHTML =
+data.meetingLink || "-";
+
+
+
+document.getElementById("notes").innerHTML =
+data.notes || "No additional notes";
+
+
+
+document.getElementById("status").innerHTML =
+data.status || "Pending";
+
+
+
+
+
+if(
+data.status === "Accepted" ||
+data.status === "Declined" ||
+data.status === "Reschedule Requested"
+){
+
+document.querySelector(
+".applicant-detail-actions"
+).style.display="none";
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+
+
+function acceptInterview(){
+
+
+fetch(
+"/api/interviews/"+interviewId+"/accept",
+{
+method:"PUT"
+}
+
+)
+
+
+.then(()=>{
+
+alert(
+"Interview accepted"
+);
+
+
+location.reload();
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+function declineInterview(){
+
+
+fetch(
+"/api/interviews/"+interviewId+"/decline",
+{
+method:"PUT"
+}
+
+)
+
+
+.then(()=>{
+
+
+alert(
+"Interview declined"
+);
+
+
+location.reload();
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+function openRescheduleModal(){
+
+
+document.getElementById(
+"interviewRescheduleModal"
+).style.display="flex";
+
+
+}
+
+
+
+
+
+
+
+function closeRescheduleModal(){
+
+
+document.getElementById(
+"interviewRescheduleModal"
+).style.display="none";
+
+
+}
+
+
+
+
+
+
+
+
+
+
+function submitReschedule(){
+
+
+
+let requestedDate =
+document.getElementById(
+"requestedDate"
+).value;
+
+
+
+
+let requestedTime =
+document.getElementById(
+"requestedTime"
+).value;
+
+
+
+
+let reason =
+document.getElementById(
+"rescheduleReason"
+).value;
+
+
+
+
+
+
+if(
+!requestedDate ||
+!requestedTime ||
+!reason
+){
+
+
+alert(
+"Please fill in all fields"
+);
+
+
+return;
+
+
+}
+
+
+
+
+
+
+
+fetch(
+"/api/interviews/"+interviewId+"/reschedule-request",
+{
+
+
+method:"PUT",
+
+
+headers:{
+
+
+"Content-Type":
+"application/json"
+
+
+},
+
+
+
+body:JSON.stringify({
+
+
+requestedDate:
+requestedDate,
+
+
+requestedTime:
+requestedTime,
+
+
+reason:
+reason
+
+
+})
+
+
+}
+
+
+)
+
+
+
+.then(res=>res.json())
+
+
+.then(()=>{
+
+
+alert(
+"Reschedule request sent"
+);
+
+
+
+closeRescheduleModal();
+
+
+
+location.reload();
+
+
+
+});
+
+
+
+}
+
+
+
+</script>
+
+
+
+
+
+</body>
+
+</html>
