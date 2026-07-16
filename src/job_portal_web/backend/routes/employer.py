@@ -24,35 +24,66 @@ templates = Jinja2Templates(
 # ==================================================
 
 @router.post("/publish-job-confirm")
-async def publish_job_confirm(request: Request):
+async def publish_job_confirm(
+    request: Request
+):
 
     job = request.session.get("job")
 
+
+    # No job information found
+
     if not job:
+
         return RedirectResponse(
             url="/publish-job",
             status_code=303
         )
 
+
     company_id = "C000001"
 
-    # Let Firestore automatically generate document ID
-    doc_ref = db.collection("job_list").document()
 
-    # Additional fields
+    # Generate Firestore document ID
+
+    doc_ref = (
+        db.collection("job_list")
+        .document()
+    )
+
+
+    # Add job information
+
     job["company_id"] = company_id
-    job["status"] = "Active"
-    job["created_at"] = firestore.SERVER_TIMESTAMP
-    job["updated_at"] = firestore.SERVER_TIMESTAMP
 
-    # Save to Firestore
+    job["status"] = "Active"
+
+    job["created_at"] = (
+        firestore.SERVER_TIMESTAMP
+    )
+
+    job["updated_at"] = (
+        firestore.SERVER_TIMESTAMP
+    )
+
+
+    # Save job to Firestore
+
     doc_ref.set(job)
 
-    # Clear session
-    request.session.pop("job", None)
+
+    # Clear temporary session
+
+    request.session.pop(
+        "job",
+        None
+    )
+
+
+    # Redirect with successful status
 
     return RedirectResponse(
-        url="/manage-jobs",
+        url="/manage-jobs?success=posted",
         status_code=303
     )
 
@@ -200,7 +231,7 @@ async def review_job(
         request.session.pop("job", None)
 
         return RedirectResponse(
-            url="/manage-jobs",
+            url="/manage-jobs?success=draft",
             status_code=303
         )
 
@@ -266,7 +297,7 @@ async def delete_job(job_id: str):
     })
 
     return RedirectResponse(
-        url="/manage-jobs",
+        url="/manage-jobs?success=deleted",
         status_code=303
     )
 
@@ -416,7 +447,7 @@ async def review_edit_job(
             )
 
         return RedirectResponse(
-            url="/manage-jobs",
+            url="/manage-jobs?success=draft",
             status_code=303
         )
 
@@ -474,6 +505,6 @@ async def update_job_confirm(
     request.session.pop("edit_job", None)
 
     return RedirectResponse(
-        url="/manage-jobs",
+        url="/manage-jobs?success=edited",
         status_code=303
     )

@@ -50,7 +50,17 @@
         <!-- Manage Jobs -->
         <li>
             <a href="/manage-jobs"
-               class="{% if request.url.path == '/manage-jobs' %}active{% endif %}">
+                class="
+                {% if
+                    request.url.path == '/manage-jobs'
+                    or request.url.path == '/publish-job'
+                    or request.url.path == '/review-job'
+                    or request.url.path.startswith('/edit-job/')
+                    or request.url.path.startswith('/review-edit-job/')
+                %}
+                    active
+                {% endif %}
+                ">
 
                 <i class="fa-regular fa-folder-open"></i>
                 <span>Manage Jobs</span>

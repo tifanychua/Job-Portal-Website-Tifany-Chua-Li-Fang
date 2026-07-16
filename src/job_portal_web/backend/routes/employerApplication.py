@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from firebase_admin import storage
+from firebase_admin import firestore
 from fastapi.templating import Jinja2Templates
 from datetime import timedelta
 from pydantic import BaseModel
@@ -410,6 +411,15 @@ async def view_applications(
         ).strip().lower() == "submitted"
     )
 
+    # Count Reviewed applications
+    reviewed_count = sum(
+        1
+        for application in applications
+        if str(
+            application.get("status", "")
+        ).strip().lower() == "reviewed"
+    )
+
 
     # Count Shortlisted applications
     shortlisted_count = sum(
@@ -460,6 +470,7 @@ async def view_applications(
             # Application statistics
             "total_count": total_count,
             "new_count": new_count,
+            "reviewed_count": reviewed_count,
             "shortlisted_count": shortlisted_count,
             "offered_count": offered_count,
             "rejected_count": rejected_count
@@ -591,15 +602,19 @@ async def update_application_status(
     # ==================================================
 
     status_mapping = {
-
-        # UI: New
-        # Firestore: Submitted
+        # New application
 
         "new":
             "Submitted",
 
         "submitted":
             "Submitted",
+
+
+        # Reviewed application
+
+        "reviewed":
+            "Reviewed",
 
 
         # Other statuses
@@ -688,13 +703,21 @@ async def update_application_status(
 
 
     # ==================================================
-    # Update Firestore Status
+    # Update Firestore Status and Time
     # ==================================================
 
     application_ref.update({
 
+        # Update application status
+
         "status":
-            firestore_status
+            firestore_status,
+
+
+        # Store the current server date and time
+
+        "updated_on":
+            firestore.SERVER_TIMESTAMP
 
     })
 

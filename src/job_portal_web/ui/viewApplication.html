@@ -89,6 +89,39 @@
 
             </div>
 
+            <!-- Reviewed Applications -->
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-icon reviewed-icon">
+
+                        <i class="fa-regular fa-eye"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="stat-number">
+
+                            {{ reviewed_count }}
+
+                        </div>
+
+
+                        <div class="stat-label">
+
+                            Reviewed
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
 
             <!-- Shortlisted Applications -->
             <div class="stat-card">
@@ -226,6 +259,7 @@
                 <select id="statusFilter">
                     <option value="all">All Status</option>
                     <option value="new">New</option>
+                    <option value="reviewed">Reviewed</option>
                     <option value="shortlisted">Shortlisted</option>
                     <option value="offered">Offered</option>
                     <option value="rejected">Rejected</option>
@@ -517,93 +551,221 @@
 
                                 </a>
 
+                                <!-- Interview Management -->
 
-                                <!-- More -->
+                                {% if status == "shortlisted" %}
+
+                                <!-- Enabled for shortlisted applications -->
+
+                                <a
+                                    href="/interview-management/{{ application.application_id }}"
+
+                                    class="
+                                        action-button
+                                        interview-button
+                                    "
+
+                                    title="Manage Interview"
+                                >
+
+                                    <i class="fa-regular fa-calendar-check"></i>
+
+                                </a>
+
+
+                                {% else %}
+
+
+                                <!-- Disabled placeholder -->
+
+                                <button
+                                    type="button"
+
+                                    class="
+                                        action-button
+                                        disabled-action-button
+                                    "
+
+                                    title="Available after applicant is shortlisted"
+
+                                    disabled
+                                >
+
+                                    <i class="fa-regular fa-calendar-check"></i>
+
+                                </button>
+
+
+                                {% endif %}
+
+
+                                <!-- More / Change Status -->
+
+                                {% if status != "offered"
+                                    and status != "rejected" %}
 
                                 <div class="status-menu-container">
 
                                     <!-- Three-dot button -->
+
                                     <button
                                         type="button"
                                         class="action-button status-menu-button"
+
                                         onclick="toggleStatusMenu(
                                             event,
                                             '{{ application.application_id }}'
                                         )"
+
                                         title="Change Status"
                                     >
+
                                         <i class="fa-solid fa-ellipsis-vertical"></i>
+
                                     </button>
 
 
                                     <!-- Status dropdown -->
+
                                     <div
                                         class="status-dropdown"
+
                                         id="status-menu-{{ application.application_id }}"
                                     >
 
-                                        <!-- New -->
+
+                                        <!-- Reviewed -->
+
                                         <button
                                             type="button"
                                             class="status-option"
+
                                             onclick="updateApplicationStatus(
-                                                event,
                                                 '{{ application.application_id }}',
-                                                'Submitted'
+                                                'Reviewed'
                                             )"
                                         >
-                                            <span class="status-badge status-new">
-                                                New
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-reviewed
+                                                "
+                                            >
+
+                                                Reviewed
+
                                             </span>
+
                                         </button>
 
 
                                         <!-- Shortlisted -->
+
                                         <button
                                             type="button"
                                             class="status-option"
+
                                             onclick="updateApplicationStatus(
-                                                event,
                                                 '{{ application.application_id }}',
                                                 'Shortlisted'
                                             )"
                                         >
-                                            <span class="status-badge status-shortlisted">
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-shortlisted
+                                                "
+                                            >
+
                                                 Shortlisted
+
                                             </span>
+
                                         </button>
 
 
                                         <!-- Offered -->
+
                                         <button
                                             type="button"
                                             class="status-option"
+
                                             onclick="updateApplicationStatus(
-                                                event,
                                                 '{{ application.application_id }}',
                                                 'Offered'
                                             )"
                                         >
-                                            <span class="status-badge status-offered">
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-offered
+                                                "
+                                            >
+
                                                 Offered
+
                                             </span>
+
                                         </button>
 
 
                                         <!-- Rejected -->
+
                                         <button
                                             type="button"
                                             class="status-option"
+
                                             onclick="updateApplicationStatus(
-                                                event,
                                                 '{{ application.application_id }}',
                                                 'Rejected'
                                             )"
                                         >
-                                            <span class="status-badge status-rejected">
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-rejected
+                                                "
+                                            >
+
                                                 Rejected
+
                                             </span>
+
                                         </button>
+
+                                    </div>
+
+                                </div>
+
+
+                                {% else %}
+
+
+                                <!-- Final status cannot be changed -->
+
+                                <button
+                                    type="button"
+
+                                    class="
+                                        action-button
+                                        status-locked-button
+                                    "
+
+                                    title="Final status cannot be changed"
+
+                                    disabled
+                                >
+
+                                    <i class="fa-solid fa-lock"></i>
+
+                                </button>
+
+
+                                {% endif %}
 
                                     </div>
 
@@ -1341,6 +1503,45 @@
             newStatus
         ) {
 
+            // Convert Submitted into New
+            // for the confirmation message
+
+            const displayStatus =
+
+                newStatus === "Submitted"
+
+                ?
+
+                "New"
+
+                :
+
+                newStatus;
+
+
+            // Ask employer for confirmation
+
+            const isConfirmed = confirm(
+
+                "Are you sure you want to change " +
+                "this application status to \"" +
+                displayStatus +
+                "\"?"
+
+            );
+
+
+            // Stop if employer clicks Cancel
+
+            if (!isConfirmed) {
+
+                return;
+
+            }
+
+
+            // Continue updating if employer clicks OK
+
             try {
 
                 const response = await fetch(
@@ -1353,13 +1554,18 @@
                         method: "PUT",
 
                         headers: {
+
                             "Content-Type":
                                 "application/json"
+
                         },
 
                         body: JSON.stringify({
+
                             status: newStatus
+
                         })
+
                     }
 
                 );
@@ -1372,9 +1578,13 @@
                 if (!response.ok) {
 
                     alert(
+
                         result.detail
+
                         ||
+
                         "Unable to update status."
+
                     );
 
                     return;
@@ -1382,25 +1592,95 @@
                 }
 
 
-                // Refresh page to display
-                // the updated status and counts
+                // Find the selected application row
 
-                window.location.reload();
+                const statusMenu = document.getElementById(
+                    "status-menu-" + applicationId
+                );
 
+
+                const applicationRow =
+                    statusMenu.closest("tr");
+
+
+                // Find the status badge in this row
+
+                const statusBadge =
+                    applicationRow.querySelector(
+                        ".application-status"
+                    );
+
+
+                // Update displayed status
+
+                statusBadge.textContent =
+                    displayStatus;
+
+
+                // Remove the previous status colour
+
+                statusBadge.classList.remove(
+                    "status-submitted",
+                    "status-new",
+                    "status-reviewed",
+                    "status-shortlisted",
+                    "status-offered",
+                    "status-rejected"
+                );
+
+
+                // Add the new status colour
+
+                statusBadge.classList.add(
+                    "status-" +
+                    displayStatus.toLowerCase()
+                );
+
+
+                // Update the row status for filtering
+
+                applicationRow.dataset.status =
+                    newStatus.toLowerCase();
+
+
+                // Close the status dropdown
+
+                statusMenu.classList.remove(
+                    "show"
+                );
+
+                // Display successful update message
+
+                alert(
+
+                    "Application status successfully changed to \"" +
+
+                    displayStatus +
+
+                    "\"."
+
+                );
 
             }
+
 
             catch (error) {
 
                 console.error(
+
                     "Status update error:",
+
                     error
+
                 );
 
 
                 alert(
+
                     "Something went wrong while " +
+
                     "updating the application status."
+
                 );
 
             }

@@ -458,5 +458,59 @@
 
 </script>
 
+    <!-- ========================================== -->
+    <!-- Job Action Success Messages -->
+    <!-- ========================================== -->
+
+    {% set success =
+        request.query_params.get("success")
+    %}
+
+
+    {% if success == "posted" %}
+
+    <script>
+
+        alert(
+            "Job posting has been published successfully."
+        );
+
+    </script>
+
+
+    {% elif success == "draft" %}
+
+    <script>
+
+        alert(
+            "Job posting has been saved as a draft successfully."
+        );
+
+    </script>
+
+
+    {% elif success == "edited" %}
+
+    <script>
+
+        alert(
+            "Job posting has been updated successfully."
+        );
+
+    </script>
+
+
+    {% elif success == "deleted" %}
+
+    <script>
+
+        alert(
+            "Job posting has been deleted successfully."
+        );
+
+    </script>
+
+    {% endif %}
+
 </body>
 </html>

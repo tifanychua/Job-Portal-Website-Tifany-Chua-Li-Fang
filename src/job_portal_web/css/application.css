@@ -50,7 +50,7 @@ body {
 
 .application-stats {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 16px;
     margin-bottom: 28px;
 }
@@ -609,4 +609,97 @@ body {
     color: #dc3545;
 
     background-color: #ffe5e8;
+}
+
+.status-reviewed {
+    color: #ea580c;
+    background-color: #ffedd5;
+}
+
+.reviewed-icon {
+    color: #f97316;
+    background-color: #ffedd5;
+}
+
+/* ========================================== */
+/* Application Actions */
+/* ========================================== */
+
+.application-actions {
+
+    display: grid;
+
+    /* Always reserve four action spaces */
+
+    grid-template-columns:
+        repeat(4, 42px);
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+/* All action buttons use the same size */
+
+.action-button {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #dbe3ef;
+
+    border-radius: 9px;
+
+    background-color: #ffffff;
+
+}
+
+
+/* Disabled interview button */
+
+.disabled-action-button {
+
+    color: #b8c2d1;
+
+    background-color: #f8fafc;
+
+    border-color: #e5eaf1;
+
+    cursor: not-allowed;
+
+    opacity: 0.65;
+
+}
+
+
+/* Active interview button */
+
+.interview-button {
+
+    color: #059669;
+
+    background-color: #ecfdf5;
+
+    border-color: #86efac;
+
+}
+
+
+.interview-button:hover {
+
+    color: #047857;
+
+    background-color: #d1fae5;
+
 }
