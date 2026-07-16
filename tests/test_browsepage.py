@@ -66,6 +66,42 @@ def test_view_job_summary_information(client: TestClient):
 
     assert response.status_code == 200
 
+# --------------------------------------------------
+# 3. Acceptance Test
+# --------------------------------------------------
+
+
+def test_filter_job_opportunities(client: TestClient):
+    """
+    Acceptance test:
+    Job seeker filters job opportunities
+    """
+
+
+    response = client.get(
+        "/jobs",
+        params={
+            "location": "Kuala Lumpur",
+            "position": "Software Engineer",
+            "benefits": "Medical Insurance"
+        }
+    )
+
+
+    if response.status_code == 200:
+
+        print(
+            "✅ SUCCESS: Filtered job opportunities displayed"
+        )
+
+    else:
+
+        print(
+            "❌ FAILED: Unable to filter jobs"
+        )
+
+
+    assert response.status_code == 200
 
 # --------------------------------------------------
 # BDD Feature Loading
@@ -146,3 +182,110 @@ def verify_job_summary(context):
         print("❌ FAILED: Job summary information missing")
 
     assert context.response.status_code == 200
+
+
+# --------------------------------------------------
+# Scenario 3:
+# Job seeker filters job opportunities
+# --------------------------------------------------
+
+
+@given("job postings are available in the system")
+def job_postings_available():
+    pass
+
+
+
+@when("the job seeker applies filters such as job position, location, or benefits")
+def apply_job_filters(client, context):
+
+    context.response = client.get(
+        "/jobs",
+        params={
+            "location": "Kuala Lumpur",
+            "position": "Software Engineer",
+            "benefits": "Medical Insurance"
+        }
+    )
+
+
+
+@then("the system should display job opportunities that match the selected filters")
+def verify_filtered_jobs(context):
+
+    assert context.response.status_code == 200
+
+
+    page = context.response.text.lower()
+
+
+    if "software engineer" in page or "kuala lumpur" in page:
+
+        print(
+            "✅ SUCCESS: Filtered job opportunities displayed"
+        )
+
+    else:
+
+        print(
+            "❌ FAILED: Filtered jobs not displayed"
+        )
+
+
+    assert (
+        "software engineer" in page
+        or "kuala lumpur" in page
+    )
+    
+# --------------------------------------------------
+# Scenario 3:
+# Job seeker filters job opportunities
+# --------------------------------------------------
+
+
+@given("job postings are available in the system")
+def job_postings_available():
+    pass
+
+
+
+@when("the job seeker applies filters such as job position, location, or benefits")
+def apply_job_filters(client, context):
+
+    context.response = client.get(
+        "/jobs",
+        params={
+            "location": "Kuala Lumpur",
+            "position": "Software Engineer",
+            "benefits": "Medical Insurance"
+        }
+    )
+
+
+
+@then("the system should display job opportunities that match the selected filters")
+def verify_filtered_jobs(context):
+
+    assert context.response.status_code == 200
+
+
+    page = context.response.text.lower()
+
+
+    if "software engineer" in page or "kuala lumpur" in page:
+
+        print(
+            "✅ SUCCESS: Filtered job opportunities displayed"
+        )
+
+    else:
+
+        print(
+            "❌ FAILED: Filtered jobs not displayed"
+        )
+
+
+    assert (
+        "software engineer" in page
+        or "kuala lumpur" in page
+    )

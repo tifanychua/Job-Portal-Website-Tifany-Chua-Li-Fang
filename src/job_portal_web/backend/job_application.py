@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from datetime import timedelta
-
+from google.cloud.firestore_v1.base_query import FieldFilter
 from database import db, bucket
 from job_information import _find_company
 from job_apply import UI_DIR, _get_current_applicant, _get_screening_questions
@@ -101,7 +101,17 @@ def my_applications(request: Request, status: str = "all"):
         #     return RedirectResponse(url="/login?next=/application", status_code=302)
         applicant_id = "J000001"
 
-    docs = db.collection("application").where("job_seeker_id", "==", applicant_id).stream()
+    docs = (
+    db.collection("application")
+    .where(
+        filter=FieldFilter(
+            "job_seeker_id",
+            "==",
+            applicant_id
+        )
+    )
+    .stream()
+)
 
     application = []
     counts = {key: 0 for key in STATUS_META}

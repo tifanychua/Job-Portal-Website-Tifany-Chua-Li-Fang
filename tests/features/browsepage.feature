@@ -12,3 +12,8 @@ Scenario: Job seeker views job summary information
     Given the job seeker is viewing the job listing page
     When job postings are displayed
     Then the system should show the job title, company name and location
+
+Scenario: Job seeker filters job opportunities
+    Given job postings are available in the system
+    When the job seeker applies filters such as job position, location, or benefits
+    Then the system should display job opportunities that match the selected filters

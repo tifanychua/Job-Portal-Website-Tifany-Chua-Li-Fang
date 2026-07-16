@@ -7,6 +7,7 @@ from database import db
 
 from main import app
 
+
 # --------------------------------------------------
 # Test Client Fixture
 # --------------------------------------------------
@@ -18,6 +19,91 @@ def client() -> TestClient:
     Shared FastAPI test client.
     """
     return TestClient(app)
+
+
+# --------------------------------------------------
+# 1. Acceptance Test
+# --------------------------------------------------
+
+
+def test_view_complete_job_information(client: TestClient):
+    """
+    Acceptance test: Job seeker views complete job details
+
+    Given a job posting exists in the system
+    When the job seeker opens the job details page
+    Then the system should display complete job information
+    """
+
+    jobs = list(db.collection("job_list").limit(1).stream())
+
+    job_id = jobs[0].id
+
+    response = client.get(f"/jobs/{job_id}")
+
+    if response.status_code == 200:
+        print("✅ SUCCESS: Job seeker views complete job details")
+    else:
+        print("❌ FAILED: Unable to display job details")
+
+    assert response.status_code == 200
+
+
+
+# --------------------------------------------------
+# 2. Acceptance Test
+# --------------------------------------------------
+
+
+def test_view_required_job_information(client: TestClient):
+    """
+    Acceptance test: Job seeker views required job information
+
+    Given a job posting exists
+    When the job seeker views job details
+    Then the system should display job title, description,
+    requirements, location and company information
+    """
+
+    jobs = list(db.collection("job_list").limit(1).stream())
+
+    job_id = jobs[0].id
+
+    response = client.get(f"/jobs/{job_id}")
+
+    if response.status_code == 200:
+
+        data = response.text
+
+        required_fields = [
+            "job",
+            "description",
+            "location",
+            "company"
+        ]
+
+        missing_fields = []
+
+        for field in required_fields:
+            if field.lower() not in data.lower():
+                missing_fields.append(field)
+
+        if len(missing_fields) == 0:
+            print(
+                "✅ SUCCESS: Job seeker views required job information"
+            )
+        else:
+            print(
+                f"❌ FAILED: Missing information {missing_fields}"
+            )
+
+        assert len(missing_fields) == 0
+
+    else:
+        print("❌ FAILED: Job detail page cannot be opened")
+
+    assert response.status_code == 200
+
 
 
 # --------------------------------------------------
@@ -59,11 +145,6 @@ def open_job_details(client, context):
 
     jobs = list(db.collection("job_list").limit(1).stream())
 
-    print("TOTAL JOB:", len(jobs))
-
-    for job in jobs:
-        print("JOB ID:", job.id)
-
     job_id = jobs[0].id
 
     context.response = client.get(f"/jobs/{job_id}")
@@ -78,6 +159,7 @@ def verify_complete_job_information(context):
         print("❌ FAILED: Unable to display job details")
 
     assert context.response.status_code == 200
+
 
 
 # --------------------------------------------------
@@ -110,7 +192,12 @@ def verify_required_job_information(context):
 
         data = context.response.text
 
-        required_fields = ["job", "description", "location", "company"]
+        required_fields = [
+            "job",
+            "description",
+            "location",
+            "company"
+        ]
 
         missing_fields = []
 
@@ -123,7 +210,9 @@ def verify_required_job_information(context):
                 "✅ SUCCESS: Job title, description, requirements, location and company information displayed"
             )
         else:
-            print(f"❌ FAILED: Missing information {missing_fields}")
+            print(
+                f"❌ FAILED: Missing information {missing_fields}"
+            )
 
         assert len(missing_fields) == 0
 
