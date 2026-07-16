@@ -303,8 +303,18 @@ async def review_page(request: Request):
 @router.get("/delete-job/{job_id}")
 async def delete_job(job_id: str):
 
-    # Change status to Deleted instead of permanently deleting document
-    db.collection("job_list").document(job_id).update({
+    doc_ref = db.collection("job_list").document(job_id)
+
+    doc = doc_ref.get()
+
+    if not doc.exists:
+
+        return RedirectResponse(
+            url="/manage-jobs?error=notfound",
+            status_code=303
+        )
+
+    doc_ref.update({
         "status": "Deleted",
         "updated_at": firestore.SERVER_TIMESTAMP
     })
