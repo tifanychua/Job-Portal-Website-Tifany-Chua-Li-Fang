@@ -7,7 +7,7 @@ from firebase_admin import firestore
 from fastapi.templating import Jinja2Templates
 from datetime import timedelta
 from pydantic import BaseModel
-
+from src.job_portal_web.backend.helper import get_company
 from src.job_portal_web.backend.database import db
 
 
@@ -61,6 +61,8 @@ async def view_applications(
     # Later retrieve from the employer login session
 
     company_id = "C000001"
+
+    company = get_company()
 
     # ==================================================
     # Retrieve Jobs Posted by Current Company
@@ -461,13 +463,11 @@ async def view_applications(
         context={
             "request": request,
 
-            # Application records
-            "applications": applications,
+            "company": company,
 
-            # Jobs for the Select Job dropdown
+            "applications": applications,
             "jobs": jobs,
 
-            # Application statistics
             "total_count": total_count,
             "new_count": new_count,
             "reviewed_count": reviewed_count,

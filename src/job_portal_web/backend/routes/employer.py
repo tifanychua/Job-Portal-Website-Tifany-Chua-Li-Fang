@@ -5,7 +5,7 @@ import uuid
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
+from src.job_portal_web.backend.helper import get_company
 from firebase_admin import firestore
 from src.job_portal_web.backend.database import db
 
@@ -92,6 +92,8 @@ async def manage_jobs(request: Request):
 
     company_id = "C000001"
 
+    company = get_company()
+
     job_docs = (
         db.collection("job_list")
         .where("company_id", "==", company_id)
@@ -116,7 +118,8 @@ async def manage_jobs(request: Request):
         name="jobPosted.html",
         context={
             "request": request,
-            "jobs": jobs
+            "jobs": jobs,
+            "company": company
         }
     )
 
@@ -129,6 +132,8 @@ async def manage_jobs(request: Request):
 async def publish_job(request: Request):
 
     job = request.session.get("job", {})
+
+    company = get_company()
 
     # Get job categories from Firebase
     category_docs = db.collection("job_category").stream()
@@ -145,7 +150,8 @@ async def publish_job(request: Request):
         context={
             "request": request,
             "job": job,
-            "categories": categories
+            "categories": categories,
+            "company": company
         }
     )
 
@@ -234,6 +240,8 @@ async def review_job(
             url="/manage-jobs?success=draft",
             status_code=303
         )
+    
+    company = get_company()
 
     # If not draft, show the review page
     return templates.TemplateResponse(
@@ -242,7 +250,9 @@ async def review_job(
         context={
             "request": request,
             "job": request.session["job"],
-            "is_edit": False
+            "is_edit": False,
+            "company": company
+            
         }
     )
 
@@ -269,6 +279,8 @@ async def cancel_job(request: Request):
 @router.get("/review-job", response_class=HTMLResponse)
 async def review_page(request: Request):
 
+    company = get_company()
+    
     job = request.session.get("job")
 
     if not job:
@@ -283,7 +295,8 @@ async def review_page(request: Request):
         context={
             "request": request,
             "job": job,
-            "is_edit": False
+            "is_edit": False,
+            "company": company
         }
     )
 
@@ -317,6 +330,7 @@ async def edit_job(request: Request, job_id: str):
             status_code=303
         )
 
+    company = get_company()
     job = job_doc.to_dict()
 
     # Temporarily add Firestore document ID for HTML
@@ -335,7 +349,8 @@ async def edit_job(request: Request, job_id: str):
         context={
             "request": request,
             "job": job,
-            "categories": categories
+            "categories": categories,
+            "company": company
         }
     )
 
@@ -368,6 +383,8 @@ async def review_edit_job(
     action: str = Form("review")
 ):
 
+    company = get_company()
+    
     # Get original job from Firestore
     job_doc = db.collection("job_list").document(job_id).get()
 
@@ -458,7 +475,6 @@ async def review_edit_job(
 
     request.session["edit_job"] = edited_job
 
-
     # Go to review page
     return templates.TemplateResponse(
         request=request,
@@ -466,7 +482,8 @@ async def review_edit_job(
         context={
             "request": request,
             "job": edited_job,
-            "is_edit": True
+            "is_edit": True,
+            "company": company
         }
     )
 
