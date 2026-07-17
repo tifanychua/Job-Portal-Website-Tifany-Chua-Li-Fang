@@ -48,6 +48,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "ui"))
 async def view_applications(request: Request):
 
     import time
+
     start = time.time()
 
     company_id = "C000001"
@@ -131,21 +132,13 @@ async def view_applications(request: Request):
 
         if job_seeker:
 
-            application["applicant_name"] = (
-                job_seeker.get("name") or "Unknown Applicant"
-            )
+            application["applicant_name"] = job_seeker.get("name") or "Unknown Applicant"
 
-            application["applicant_email"] = (
-                job_seeker.get("email") or "No email provided"
-            )
+            application["applicant_email"] = job_seeker.get("email") or "No email provided"
 
-            application["experience"] = (
-                job_seeker.get("experience") or "Not provided"
-            )
+            application["experience"] = job_seeker.get("experience") or "Not provided"
 
-            application["skills"] = (
-                job_seeker.get("skills") or []
-            )
+            application["skills"] = job_seeker.get("skills") or []
 
         applications.append(application)
 
@@ -155,30 +148,15 @@ async def view_applications(request: Request):
 
     total_count = len(applications)
 
-    new_count = sum(
-        1 for a in applications
-        if a["status"].lower() == "submitted"
-    )
+    new_count = sum(1 for a in applications if a["status"].lower() == "submitted")
 
-    reviewed_count = sum(
-        1 for a in applications
-        if a["status"].lower() == "reviewed"
-    )
+    reviewed_count = sum(1 for a in applications if a["status"].lower() == "reviewed")
 
-    shortlisted_count = sum(
-        1 for a in applications
-        if a["status"].lower() == "shortlisted"
-    )
+    shortlisted_count = sum(1 for a in applications if a["status"].lower() == "shortlisted")
 
-    offered_count = sum(
-        1 for a in applications
-        if a["status"].lower() == "offered"
-    )
+    offered_count = sum(1 for a in applications if a["status"].lower() == "offered")
 
-    rejected_count = sum(
-        1 for a in applications
-        if a["status"].lower() == "rejected"
-    )
+    rejected_count = sum(1 for a in applications if a["status"].lower() == "rejected")
 
     print("Route time:", time.time() - start)
 

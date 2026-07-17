@@ -135,6 +135,6 @@ def home(request: Request):
             "top_companies": companies[:5],
             "categories": categories,
             "total_jobs": total_jobs,
-            "total_companies": len(companies), 
+            "total_companies": len(companies),
         },
     )
