@@ -1,23 +1,43 @@
 from pathlib import Path
+import json
+import os
 
 import firebase_admin
 
 from firebase_admin import credentials, firestore, storage
 
+
 # ==================================================
-# Firebase Key Location
+# Firebase Configuration
 # ==================================================
 
 BASE_DIR = Path(__file__).resolve().parent
 
 KEY_PATH = BASE_DIR / "firebase_key.json"
 
+STORAGE_BUCKET = "job-portal-website-fc6fd.firebasestorage.app"
+
 
 # ==================================================
 # Firebase Credentials
 # ==================================================
 
-cred = credentials.Certificate(str(KEY_PATH))
+if os.getenv("FIREBASE_KEY"):
+    # GitHub Actions / Production
+    firebase_credentials = json.loads(os.getenv("FIREBASE_KEY"))
+
+    cred = credentials.Certificate(firebase_credentials)
+
+elif KEY_PATH.exists():
+    # Local development
+    cred = credentials.Certificate(str(KEY_PATH))
+
+else:
+    raise FileNotFoundError(
+        "Firebase credentials not found. "
+        "Please provide firebase_key.json locally "
+        "or set FIREBASE_KEY environment variable."
+    )
 
 
 # ==================================================
@@ -25,9 +45,11 @@ cred = credentials.Certificate(str(KEY_PATH))
 # ==================================================
 
 if not firebase_admin._apps:
-
     firebase_admin.initialize_app(
-        cred, {"storageBucket": "job-portal-website-fc6fd.firebasestorage.app"}
+        cred,
+        {
+            "storageBucket": STORAGE_BUCKET
+        },
     )
 
 
