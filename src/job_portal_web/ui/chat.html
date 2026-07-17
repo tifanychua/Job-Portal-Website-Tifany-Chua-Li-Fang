@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>
+JobConnect - Messages
+</title>
+
+
+<link rel="stylesheet" href="/static/style.css">
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+
+</head>
+
+
+
+<body>
+
+
+
+<!-- HEADER -->
+
+<header>
+
+
+<div class="logo">
+
+<i class="fa-solid fa-location-dot"></i>
+
+<span>
+JobConnect
+</span>
+
+
+</div>
+
+
+
+
+<nav>
+
+<a href="#">
+Home
+</a>
+
+<a href="#">
+Jobs
+</a>
+
+<a href="#">
+Companies
+</a>
+
+<a href="#">
+Interviews
+</a>
+
+<a href="#">
+Career Advice
+</a>
+
+<a href="#">
+About Us
+</a>
+
+
+</nav>
+
+
+
+
+<div class="nav-right">
+
+
+<i class="fa-solid fa-globe"></i>
+
+<span>
+EN
+</span>
+
+
+<i class="fa-regular fa-heart"></i>
+
+
+
+<div class="notification">
+
+<i class="fa-regular fa-bell"></i>
+
+<span class="badge">
+3
+</span>
+
+
+</div>
+
+
+
+
+
+<div class="profile">
+
+
+<img src="/static/images/avatar.jpg">
+
+
+<div>
+
+<h4>
+John Tan
+</h4>
+
+
+<small>
+Employer
+</small>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</header>
+
+<div class="container chat-page single-chat">
+
+
+<!-- MAIN CONTENT -->
+
+
+<main>
+
+
+
+<div class="page-title">
+
+
+<h1>
+Messages
+</h1>
+
+
+<p>
+Communicate securely with applicants regarding job applications.
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+<section class="chat-card">
+
+
+
+
+
+<div class="chat-header">
+
+
+<img id="chatImage"
+src="/static/images/company.png">
+
+
+<div>
+
+<h2 id="chatName">
+Loading...
+</h2>
+
+
+<p id="chatPosition">
+Loading...
+</p>
+
+
+</div>
+
+
+
+<span class="status" id="chatStatus">
+
+Shortlisted
+
+</span>
+
+
+</div>
+
+
+<div class="chat-body"
+id="chatBody">
+
+
+</div>
+
+<div class="chat-footer">
+
+
+<input
+
+type="text"
+
+id="messageInput"
+
+placeholder="Type your message..."
+
+>
+
+
+
+<button
+
+class="primary"
+
+onclick="sendMessage()"
+
+>
+
+
+<i class="fa-solid fa-paper-plane"></i>
+
+
+Send
+
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+</section>
+
+
+
+
+
+
+</main>
+
+</div>
+
+
+<footer>
+
+
+About Us &nbsp;&nbsp;
+
+Privacy Policy &nbsp;&nbsp;
+
+Terms of Use &nbsp;&nbsp;
+
+Help Center
+
+
+<br><br>
+
+
+© 2026 JobConnect
+
+
+</footer>
+
+
+
+
+
+
+
+
+
+<script>
+
+
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+
+
+
+const employerId =
+params.get(
+"employerId"
+);
+
+
+
+const jobSeekerId =
+params.get(
+"jobSeekerId"
+);
+
+
+
+
+
+// Current sender
+
+const senderId =
+params.get(
+"senderId"
+);
+
+
+const senderType =
+params.get(
+"senderType"
+);
+
+const conversationId =
+`${employerId}_${jobSeekerId}`;
+
+async function loadChatHeader(){
+
+    let response = await fetch(
+        `/api/chat/info/${employerId}/${jobSeekerId}?senderType=${senderType}`
+    );
+
+
+    let data = await response.json();
+
+
+    document.getElementById(
+        "chatName"
+    ).innerHTML = data.name;
+
+
+    document.getElementById(
+        "chatPosition"
+    ).innerHTML = data.position;
+
+
+    if(data.image){
+
+        document.getElementById(
+            "chatImage"
+        ).src =
+        "/static/images/" + data.image;
+
+    }
+
+}
+
+
+loadChatHeader();
+
+async function loadMessages(){
+
+
+const response =
+await fetch(
+`/api/messages/${conversationId}`
+);
+
+
+
+let messages =
+await response.json();
+
+
+messages.sort((a,b)=>{
+
+    return new Date(a.time) - new Date(b.time);
+
+});
+
+
+
+
+const chatBody =
+document.getElementById(
+"chatBody"
+);
+
+
+
+chatBody.innerHTML = "";
+
+
+
+
+messages.forEach(msg=>{
+
+
+const div =
+document.createElement(
+"div"
+);
+
+
+
+
+if(
+msg.senderId === senderId
+){
+
+
+div.className =
+"message-right";
+
+
+}
+
+else{
+
+
+div.className =
+"message-left";
+
+
+}
+
+
+
+
+
+div.innerHTML = `
+
+
+<p>
+${msg.message}
+</p>
+
+
+<small>
+${formatTime(msg.time)}
+</small>
+
+
+
+`;
+
+
+
+
+chatBody.appendChild(div);
+
+
+
+});
+
+
+
+chatBody.scrollTop =
+chatBody.scrollHeight;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+async function sendMessage(){
+
+
+
+const input =
+document.getElementById(
+"messageInput"
+);
+
+
+
+
+const text =
+input.value.trim();
+
+
+
+
+if(text === "")
+{
+
+return;
+
+}
+
+
+
+
+
+
+await fetch(
+"/api/messages",
+{
+
+
+method:"POST",
+
+
+
+headers:{
+
+
+"Content-Type":
+"application/json"
+
+
+},
+
+
+
+
+body:JSON.stringify({
+
+
+
+conversationId:
+conversationId,
+
+
+
+senderId:
+senderId,
+
+
+
+senderType:
+senderType,
+
+
+
+message:
+text
+
+
+
+})
+
+
+}
+
+);
+
+
+
+
+
+
+input.value = "";
+
+
+
+loadMessages();
+
+
+
+}
+
+
+
+document
+
+.getElementById(
+"messageInput"
+)
+
+.addEventListener(
+
+"keypress",
+
+function(e){
+
+
+
+if(e.key==="Enter"){
+
+
+sendMessage();
+
+
+}
+
+
+
+
+}
+
+);
+
+
+
+
+
+
+
+loadMessages();
+
+function formatTime(time){
+
+    const date = new Date(time);
+
+    return date.toLocaleTimeString([], {
+        hour:"2-digit",
+        minute:"2-digit"
+    });
+
+}
+
+</script>
+
+
+
+
+</body>
+
+</html>

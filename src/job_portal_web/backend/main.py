@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from .interview import router as interview_router
 from .applicant import router as applicant_router
+from .chat import router as chat_router
 
 import os
 
@@ -23,6 +24,7 @@ app.mount("/static", StaticFiles(directory=UI_DIR), name="static")
 
 app.include_router(interview_router)
 app.include_router(applicant_router)
+app.include_router(chat_router)
 
 
 @app.get("/")
@@ -54,10 +56,12 @@ def applicants_page(request: Request):
 
 
 @app.get("/chat")
-def chat_page(request: Request):
+def chat_page(request: Request, employerId: str, jobSeekerId: str):
 
     return templates.TemplateResponse(
-        request=request, name="chat.html", context={"active_page": "chat"}
+        request=request,
+        name="chat.html",
+        context={"active_page": "chat", "employerId": employerId, "jobSeekerId": jobSeekerId},
     )
 
 

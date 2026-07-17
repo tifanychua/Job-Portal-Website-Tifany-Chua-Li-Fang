@@ -5,13 +5,50 @@ from pytest_bdd import scenarios, given, when, then
 
 from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend import interview
+
+# --------------------------------------------------
+# BDD Feature
+# --------------------------------------------------
 
 scenarios("features/request_reschedule_interview.feature")
 
 
+# --------------------------------------------------
+# Test Client
+# --------------------------------------------------
+
+
 @pytest.fixture
 def client():
+
     return TestClient(app)
+
+
+# --------------------------------------------------
+# Mock Email Notification
+# --------------------------------------------------
+
+
+@pytest.fixture
+def mock_email(monkeypatch):
+
+    async def fake_send_email(*args, **kwargs):
+        return None
+
+    async def fake_send_notification(*args, **kwargs):
+        return None
+
+    monkeypatch.setattr(interview, "send_interview_email", fake_send_email)
+
+    monkeypatch.setattr(interview, "send_employer_interview_notification", fake_send_notification)
+
+    monkeypatch.setattr(interview, "notify_employer", fake_send_notification)
+
+
+# --------------------------------------------------
+# Context
+# --------------------------------------------------
 
 
 class Context:
@@ -19,6 +56,7 @@ class Context:
     def __init__(self):
 
         self.interview_id = None
+
         self.response = None
 
 
@@ -28,9 +66,9 @@ def context():
     return Context()
 
 
-# -------------------------------
-# Create scheduled interview
-# -------------------------------
+# --------------------------------------------------
+# Helper Function
+# --------------------------------------------------
 
 
 def create_interview(client):
@@ -64,13 +102,14 @@ def create_interview(client):
     return interviews[-1]["id"]
 
 
-# =================================================
-# Scenario 1
-# =================================================
+# ==================================================
+# Scenario 1:
+# Job Seeker Requests Reschedule
+# ==================================================
 
 
 @given("the job seeker has a scheduled interview")
-def scheduled_interview(client, context):
+def scheduled_interview(client, context, mock_email):
 
     context.interview_id = create_interview(client)
 
@@ -100,13 +139,14 @@ def verify_sent(context):
     assert context.response.status_code == 200
 
 
-# =================================================
-# Scenario 2
-# =================================================
+# ==================================================
+# Scenario 2:
+# Save Reschedule Request
+# ==================================================
 
 
 @given("the job seeker has submitted a reschedule request")
-def submitted_request(client, context):
+def submitted_request(client, context, mock_email):
 
     context.interview_id = create_interview(client)
 
@@ -130,6 +170,8 @@ def process_request(client, context):
 
 @then("the reschedule request details should be saved in the database")
 def verify_saved(context):
+
+    assert context.response.status_code == 200
 
     data = context.response.json()
 

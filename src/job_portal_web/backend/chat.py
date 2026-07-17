@@ -2,10 +2,15 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime
 
-from database import db
-from encryption import encrypt_message, decrypt_message
+from .database import db
+from .encryption import encrypt_message, decrypt_message
 
 router = APIRouter()
+
+
+# ==========================
+# Message Model
+# ==========================
 
 
 class Message(BaseModel):
@@ -70,3 +75,44 @@ def send_message(message: Message):
     db.collection("messages").add(data)
 
     return {"message": "Message sent successfully"}
+
+
+# ==========================
+# Get Chat Information
+# ==========================
+
+
+@router.get("/api/chat/info/{employer_id}/{job_seeker_id}")
+def get_chat_info(employer_id: str, job_seeker_id: str, senderType: str):
+
+    # Job seeker chatting with employer
+    if senderType == "job_seeker":
+
+        company_doc = db.collection("company").document(employer_id).get()
+
+        if company_doc.exists:
+
+            company = company_doc.to_dict()
+
+            return {
+                "name": company.get("companyName", "Company"),
+                "position": "Employer",
+                "image": "company.png",
+            }
+
+    # Employer chatting with job seeker
+    else:
+
+        seeker_doc = db.collection("job_seeker").document(job_seeker_id).get()
+
+        if seeker_doc.exists:
+
+            seeker = seeker_doc.to_dict()
+
+            return {
+                "name": seeker.get("name", "Job Seeker"),
+                "position": "Applicant",
+                "image": "avatar.jpg",
+            }
+
+    return {"name": "Unknown User", "position": "", "image": "avatar.jpg"}
