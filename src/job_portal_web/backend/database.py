@@ -6,6 +6,7 @@ import firebase_admin
 
 from firebase_admin import credentials, firestore, storage
 
+
 # ==================================================
 # Firebase Configuration
 # ==================================================
@@ -21,9 +22,11 @@ STORAGE_BUCKET = "job-portal-website-fc6fd.firebasestorage.app"
 # Firebase Credentials
 # ==================================================
 
-if os.getenv("FIREBASE_KEY"):
+firebase_key = os.getenv("FIREBASE_KEY")
+
+if firebase_key:
     # GitHub Actions / Production
-    firebase_credentials = json.loads(os.getenv("FIREBASE_KEY"))
+    firebase_credentials = json.loads(firebase_key)
 
     cred = credentials.Certificate(firebase_credentials)
 
