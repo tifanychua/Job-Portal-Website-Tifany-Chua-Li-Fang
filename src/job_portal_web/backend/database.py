@@ -6,7 +6,6 @@ import firebase_admin
 
 from firebase_admin import credentials, firestore, storage
 
-
 # ==================================================
 # Firebase Configuration
 # ==================================================
@@ -47,9 +46,7 @@ else:
 if not firebase_admin._apps:
     firebase_admin.initialize_app(
         cred,
-        {
-            "storageBucket": STORAGE_BUCKET
-        },
+        {"storageBucket": STORAGE_BUCKET},
     )
 
 
