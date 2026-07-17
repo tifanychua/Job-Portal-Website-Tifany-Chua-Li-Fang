@@ -1,66 +1,174 @@
 from fastapi import APIRouter
-from database import db
+from .database import db, bucket
+from datetime import timedelta
 
 router = APIRouter()
 
 
-# Get all shortlisted applicants
+# =================================
+# Generate Firebase Storage Resume URL
+# =================================
+
+
+def get_resume_url(path):
+
+    if not path:
+        return None
+
+    blob = bucket.blob(path)
+
+    url = blob.generate_signed_url(expiration=timedelta(hours=1), method="GET")
+
+    return url
+
+
+# =================================
+# Get Skills
+# =================================
+
+
+def get_skills(skill_ids):
+
+    skills = []
+
+    for skill_id in skill_ids:
+
+        skill_doc = db.collection("skills").document(skill_id).get()
+
+        if skill_doc.exists:
+
+            skill = skill_doc.to_dict()
+
+            skills.append({"id": skill_id, "name": skill.get("name")})
+
+    return skills
+
+
+# =================================
+# Get Job Seeker
+# =================================
+
+
+def get_job_seeker(job_seeker_id):
+
+    if not job_seeker_id:
+        return None
+
+    seeker_doc = db.collection("job_seeker").document(job_seeker_id).get()
+
+    if not seeker_doc.exists:
+        return None
+
+    seeker = seeker_doc.to_dict()
+
+    skill_ids = seeker.get("skill", [])
+
+    seeker["skills"] = get_skills(skill_ids)
+
+    seeker.pop("skill", None)
+
+    return seeker
+
+
+# =================================
+# GET ALL SHORTLISTED APPLICANTS
+# =================================
+
+
 @router.get("/api/applicants/shortlisted")
 def get_shortlisted_candidates():
 
     applicants = []
 
-    docs = db.collection("applicants").where("status", "==", "Shortlisted").stream()
+    docs = db.collection("application").where("status", "==", "Shortlisted").stream()
 
     for doc in docs:
 
-        data = doc.to_dict()
+        application = doc.to_dict()
 
-        data["id"] = doc.id
+        application["applicationId"] = doc.id
 
-        # Retrieve skills from skills collection
+        # Get job seeker information
 
-        skills = []
+        job_seeker_id = application.get("job_seeker_id")
 
-        skill_docs = db.collection("skills").where("applicantId", "==", doc.id).stream()
+        seeker = get_job_seeker(job_seeker_id)
 
-        for skill_doc in skill_docs:
+        if seeker:
+            application.update(seeker)
 
-            skill = skill_doc.to_dict()
+        # Answers
 
-            skills.append({"name": skill.get("skillName"), "category": skill.get("category")})
+        answers = application.get("answers") or {}
 
-        data["skills"] = skills
+        application["years_experience"] = answers.get("years_experience")
 
-        applicants.append(data)
+        application["notice_period"] = answers.get("notice_period")
+
+        application["relocate"] = answers.get("relocate")
+
+        # Resume
+
+        application["resume_filename"] = application.get("resume_filename")
+
+        application["resume_path"] = application.get("resume_path")
+
+        application["resume_url"] = get_resume_url(application.get("resume_path"))
+
+        application.pop("answers", None)
+
+        applicants.append(application)
 
     return applicants
 
 
-# Get one shortlisted applicant
-@router.get("/api/applicants/shortlisted/{id}")
-def get_single_candidate(id: str):
+# =================================
+# GET SINGLE APPLICATION
+# Used for Schedule Interview Page
+# =================================
 
-    doc = db.collection("applicants").document(id).get()
+
+@router.get("/api/applications/{application_id}")
+def get_application(application_id: str):
+
+    doc = db.collection("application").document(application_id).get()
 
     if not doc.exists:
 
-        return {"error": "Applicant not found"}
+        return {"error": "Application not found"}
 
-    data = doc.to_dict()
+    application = doc.to_dict()
 
-    data["id"] = id
+    application["applicationId"] = application_id
 
-    skills = []
+    # Get job seeker information
 
-    skill_docs = db.collection("skills").where("applicantId", "==", id).stream()
+    job_seeker_id = application.get("job_seeker_id")
 
-    for skill_doc in skill_docs:
+    seeker = get_job_seeker(job_seeker_id)
 
-        skill = skill_doc.to_dict()
+    if seeker:
 
-        skills.append({"name": skill.get("skillName"), "category": skill.get("category")})
+        application.update(seeker)
 
-    data["skills"] = skills
+    # Answers
 
-    return data
+    answers = application.get("answers") or {}
+
+    application["years_experience"] = answers.get("years_experience")
+
+    application["notice_period"] = answers.get("notice_period")
+
+    application["relocate"] = answers.get("relocate")
+
+    # Resume
+
+    application["resume_filename"] = application.get("resume_filename")
+
+    application["resume_path"] = application.get("resume_path")
+
+    application["resume_url"] = get_resume_url(application.get("resume_path"))
+
+    application.pop("answers", None)
+
+    return application

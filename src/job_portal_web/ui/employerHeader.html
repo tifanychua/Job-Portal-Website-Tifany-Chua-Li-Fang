@@ -1,0 +1,130 @@
+<header class="topbar">
+
+    <!-- Left -->
+    <div class="topbar-left">
+        <img src="/images/companyLogo.png" class="logo" alt="Company Logo">
+    </div>
+
+    <!-- Right -->
+    <div class="topbar-right">
+
+        <button class="icon-btn notification">
+            <i class="fa-regular fa-bell"></i>
+            <span class="badge">3</span>
+        </button>
+
+        <div class="profile">
+            <img src="/images/user.png" alt="User">
+
+            <span class="company-name">
+               {{ company.companyName if company else "Company" }}
+            </span>
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- Sidebar -->
+<div class="sidebar">
+
+    <div class="sidebar-title">
+        EMPLOYER
+    </div>
+
+    <ul class="sidebar-menu">
+
+        <!-- Company Profile -->
+        <li>
+            <a href="/company-profile"
+               class="{% if request.url.path == '/company-profile' %}active{% endif %}">
+
+                <i class="fa-regular fa-user"></i>
+                <span>Company Profile</span>
+
+            </a>
+        </li>
+
+
+        <!-- Manage Jobs -->
+        <li>
+            <a href="/manage-jobs"
+                class="
+                {% if
+                    request.url.path == '/manage-jobs'
+                    or request.url.path == '/publish-job'
+                    or request.url.path == '/review-job'
+                    or request.url.path.startswith('/edit-job/')
+                    or request.url.path.startswith('/review-edit-job/')
+                %}
+                    active
+                {% endif %}
+                ">
+
+                <i class="fa-regular fa-folder-open"></i>
+                <span>Manage Jobs</span>
+
+            </a>
+        </li>
+
+        <!-- Scheduled Interview -->
+<li>
+    <a href="/schedule_list"
+       class="{% if request.url.path == '/schedule_list' %}active{% endif %}">
+
+        <i class="fa-regular fa-calendar-check"></i>
+        <span>Scheduled Interview</span>
+
+    </a>
+</li>
+
+
+        <!-- Applications -->
+        <li>
+            <a href="/applications"
+            class="{% if request.url.path == '/applications' %}active{% endif %}">
+
+                <i class="fa-regular fa-file-lines"></i>
+                <span>Applications</span>
+
+            </a>
+        </li>
+
+
+        <!-- Messages -->
+        <li>
+            <a href="http://127.0.0.1:8000/chat?employerId=C000001&jobSeekerId=J000001&senderId=C000001&senderType=employer"
+               class="{% if request.url.path == '/messages' %}active{% endif %}">
+
+                <i class="fa-regular fa-envelope"></i>
+                <span>Messages</span>
+
+            </a>
+        </li>
+
+
+        <!-- Subscription -->
+        <li>
+            <a href="/subscription"
+               class="{% if request.url.path == '/subscription' %}active{% endif %}">
+
+                <i class="fa-regular fa-credit-card"></i>
+                <span>Subscription</span>
+
+            </a>
+        </li>
+
+    </ul>
+
+
+    <div class="sidebar-bottom">
+
+        <a href="/logout">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Log Out</span>
+        </a>
+
+    </div>
+
+</div>

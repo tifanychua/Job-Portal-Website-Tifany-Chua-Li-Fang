@@ -1,0 +1,210 @@
+:root {
+  --color-primary: #2563EB;
+  --color-secondary: #0F172A;
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #3B82F6;
+
+  --color-bg: #F8FAFC;
+  --color-card-bg: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-text: #1E293B;
+  --color-text-secondary: #64748B;
+
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-hover: 0 4px 12px rgba(15, 23, 42, 0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-family);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select { font-family: inherit; }
+
+/* ---------- Typography scale (from spec) ---------- */
+.text-page-title       { font-size: 36px; font-weight: 700; }      /* Main Page Title */
+.text-section-title    { font-size: 32px; font-weight: 700; }      /* Section Title */
+.text-page-title-alt   { font-size: 28px; font-weight: 700; }      /* Page Title */
+.text-card-title       { font-size: 24px; font-weight: 600; }      /* Card Title */
+.text-secondary-title  { font-size: 20px; font-weight: 600; }      /* Secondary Title */
+.text-small-section    { font-size: 18px; font-weight: 600; }      /* Small Section Title */
+.text-form-label       { font-size: 14px; font-weight: 500; }      /* Form Label */
+.text-normal           { font-size: 16px; font-weight: 400; }      /* Normal Text */
+.text-small             { font-size: 14px; font-weight: 400; }     /* Small Text */
+.text-caption           { font-size: 12px; font-weight: 400; }     /* Caption Text */
+.text-button             { font-size: 16px; font-weight: 400; }    /* Button Text */
+.text-sidebar-menu       { font-size: 16px; font-weight: 500; }    /* Sidebar Menu */
+.text-navbar-menu        { font-size: 16px; font-weight: 500; }    /* Navbar Menu */
+.text-table-content      { font-size: 14px; font-weight: 500; }    /* Table Content */
+
+/* ==========================================================================
+   Navbar — appears on every page
+   ========================================================================== */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 40px;
+  background: var(--color-card-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.navbar-left { display: flex; align-items: center; gap: 40px; }
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-secondary);
+}
+.brand .brand-pin { color: var(--color-primary); font-size: 20px; }
+.brand .brand-connect { color: var(--color-primary); }
+
+.navbar-menu { display: flex; align-items: center; gap: 32px; }
+.navbar-menu li a {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-text);
+  padding-bottom: 6px;
+}
+.navbar-menu li a.active {
+  color: var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+}
+
+.navbar-right { display: flex; align-items: center; gap: 20px; }
+
+.icon-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--color-text-secondary);
+  font-size: 18px;
+}
+.icon-btn:hover { background: var(--color-bg); }
+.icon-btn .badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lang-select {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--color-text);
+}
+
+/* ==========================================================================
+   Buttons — used by navbar, hero, sidebars, everywhere
+   ========================================================================== */
+.btn {
+  font-size: 16px;
+  font-weight: 400;
+  padding: 9px 20px;
+  border-radius: var(--radius-md);
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+.btn-outline {
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  background: var(--color-card-bg);
+}
+.btn-outline:hover { background: var(--color-bg); }
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+.btn-primary:hover { opacity: 0.92; }
+.btn-block { width: 100%; }
+
+/* ==========================================================================
+   Search bar component — used inside home.html's hero card
+   AND inside jobs.html's page hero (markup is identical on both pages)
+   ========================================================================== */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  background: transparent;
+}
+.search-field {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+}
+.search-field.select-field { flex: 0.6; }
+.search-field input,
+.search-field select {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 16px;
+  color: var(--color-text);
+  background: transparent;
+}
+.search-field input::placeholder { color: var(--color-text-secondary); }
+.search-field .icon { color: var(--color-text-secondary); }
+
+.btn-search {
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 16px;
+  padding: 12px 32px;
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+}
+.btn-search:hover { opacity: 0.92; }
+
+.badge-pill {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.badge-success { background: #DCFCE7; color: #15803D; }
+.badge-info { background: #DBEAFE; color: #1D4ED8; }
+
+.bookmark-btn { color: var(--color-text-secondary); font-size: 18px; }
+.bookmark-btn:hover { color: var(--color-primary); }
+
+/* ---------- Responsive (shared) ---------- */
+@media (max-width: 700px) {
+  .navbar-menu { display: none; }
+  .search-bar { flex-direction: column; }
+}

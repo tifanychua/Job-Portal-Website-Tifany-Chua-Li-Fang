@@ -8,7 +8,8 @@
 
 <title>JobConnect - Schedule Interview</title>
 
-<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/css/employerInterview.css">
+<link rel="stylesheet" href="/css/employerHeader.css">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -22,269 +23,13 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 </head>
 
 
-
 <body>
 
 
+    {% include "employerHeader.html" %}
 
-<!-- HEADER -->
 
-<header>
-
-
-<div class="logo">
-
-<i class="fa-solid fa-location-dot"></i>
-
-<span>
-JobConnect
-</span>
-
-</div>
-
-
-
-<nav>
-
-<a href="#">
-Home
-</a>
-
-<a href="#">
-Jobs
-</a>
-
-<a href="#">
-Companies
-</a>
-
-<a href="#">
-Interviews
-</a>
-
-<a href="#">
-Career Advice
-</a>
-
-<a href="#">
-About Us
-</a>
-
-
-</nav>
-
-
-
-
-<div class="nav-right">
-
-
-<i class="fa-solid fa-globe"></i>
-
-<span>
-EN
-</span>
-
-
-<i class="fa-regular fa-heart"></i>
-
-
-<div class="notification">
-
-<i class="fa-regular fa-bell"></i>
-
-<span class="badge">
-3
-</span>
-
-
-</div>
-
-
-
-
-<div class="profile">
-
-
-<img id="candidateImage" src="/static/images/avatar.jpg">
-
-<div>
-
-<h4>
-Pai Wen
-</h4>
-
-<small>
-Employer
-</small>
-
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-
-</header>
-
-
-
-
-
-
-
-
-<div class="container">
-
-
-
-
-
-<!-- LEFT SIDEBAR -->
-
-
-<aside>
-
-
-<h5>
-JOB EMPLOYER
-</h5>
-
-
-
-<ul>
-
-
-<li>
-
-<i class="fa-solid fa-table-columns"></i>
-
-Dashboard
-
-</li>
-
-
-
-<li>
-
-<i class="fa-solid fa-briefcase"></i>
-
-My Jobs
-
-</li>
-
-
-
-
-<li class="active">
-
-<i class="fa-solid fa-users"></i>
-
-Applicants
-
-</li>
-
-
-
-
-<li>
-
-<a href="/schedule_list">
-
-<i class="fa-solid fa-calendar-days"></i>
-
-Interviews
-
-</a>
-
-</li>
-
-
-
-
-<li>
-
-<i class="fa-solid fa-building"></i>
-
-Company Profile
-
-</li>
-
-
-
-<li>
-
-<i class="fa-solid fa-gear"></i>
-
-Settings
-
-</li>
-
-
-
-
-<li>
-
-<i class="fa-solid fa-right-from-bracket"></i>
-
-Logout
-
-</li>
-
-
-
-</ul>
-
-
-
-
-
-<div class="progress-card">
-
-
-<h4>
-Hiring Progress
-</h4>
-
-
-
-<div class="circle">
-80%
-</div>
-
-
-
-<p>
-12 / 15 positions filled
-</p>
-
-
-
-<a href="#">
-View Hiring Report →
-</a>
-
-
-</div>
-
-
-
-</aside>
-
-
-
-
-
-
-
-
-
-<!-- MAIN CONTENT -->
-
+<div class="interview-container">
 
 <main>
 
@@ -310,8 +55,7 @@ Arrange an interview with shortlisted candidate.
 
 
 
-
-<a class="back-btn">
+<a class="back-btn" href="http://127.0.0.1:8000/applications">
 
 <i class="fa-solid fa-arrow-left"></i>
 
@@ -324,20 +68,21 @@ Back to Shortlisted Candidates
 
 
 
-
-
-
-<!-- Candidate Card -->
-
-
 <section class="candidate-card">
 
+
 <input type="hidden" id="candidateId">
+
+
+
 <div class="candidate-top">
 
 
-<img src="/static/images/james.jpg">
+<div class="candidate-avatar">
 
+<i class="fa-solid fa-user"></i>
+
+</div>
 
 
 <div class="candidate-info">
@@ -349,31 +94,7 @@ Back to Shortlisted Candidates
 <p id="candidatePosition"></p>
 
 
-
-
-<div class="rating">
-
-
-★★★★★
-
-
-<span>
-
-Match Score
-
-<strong>
-95%
-</strong>
-
-</span>
-
-
 </div>
-
-
-
-</div>
-
 
 
 
@@ -387,7 +108,6 @@ Shortlisted
 
 
 </div>
-
 
 
 
@@ -464,9 +184,16 @@ Resume
 </p>
 
 
-<a href="#">
+<a id="resumeLink" 
+href="#" 
+target="_blank"
+class="resume-btn">
+
 View Resume
+
 </a>
+
+<p id="resumeName"></p>
 
 
 </div>
@@ -479,7 +206,10 @@ View Resume
 </section>
 
 
-<!-- INTERVIEW FORM -->
+
+
+
+
 
 <section class="form-card">
 
@@ -487,6 +217,7 @@ View Resume
 <h3>
 Interview Details
 </h3>
+
 
 
 
@@ -536,13 +267,9 @@ Interview Date
 </label>
 
 
-<input 
-type="date"
-id="date">
-
+<input type="date" id="date" min="">
 
 </div>
-
 
 
 
@@ -555,14 +282,10 @@ Interview Time
 </label>
 
 
-<input 
-type="time"
-id="time">
+<input type="time" id="time">
 
 
 </div>
-
-
 
 
 
@@ -587,9 +310,11 @@ Select Duration
 30 Minutes
 </option>
 
+
 <option value="60 Minutes" selected>
 60 Minutes
 </option>
+
 
 <option value="90 Minutes">
 90 Minutes
@@ -609,14 +334,12 @@ Select Duration
 
 <div>
 
-
 <label>
 Interview Type
 </label>
 
 
 <div class="radio">
-
 
 
 <label>
@@ -635,10 +358,9 @@ Online
 
 
 
-
 <label>
 
-<input 
+<input
 type="radio"
 name="type"
 value="physical"
@@ -649,12 +371,9 @@ Physical
 </label>
 
 
-
 </div>
 
-
 </div>
-
 
 
 
@@ -664,13 +383,15 @@ Physical
 
 <div>
 
-
 <label>
 Interviewer
 </label>
 
 
-<input type="text"id="interviewer" placeholder="Enter interviewer name">
+<input 
+type="text"
+id="interviewer"
+placeholder="Enter interviewer name">
 
 
 </div>
@@ -681,7 +402,8 @@ Interviewer
 
 
 
-<div class="full">
+
+<div class="full" id="meetingLinkContainer">
 
 
 <label>
@@ -703,7 +425,6 @@ placeholder="https://meet.google.com">
 
 
 
-
 <div class="full">
 
 
@@ -713,6 +434,7 @@ Notes
 
 
 <textarea 
+id="notes"
 rows="4"
 placeholder="Add interview instructions...">
 </textarea>
@@ -722,24 +444,19 @@ placeholder="Add interview instructions...">
 
 
 
+
 </div>
 
 
 
 
 
-<!-- Feedback Message -->
-
-
 <div id="message"></div>
 
 
 
-
-
-
-
 <div class="buttons">
+
 
 
 <button class="cancel">
@@ -760,7 +477,6 @@ onclick="validateInterview()">
 
 <i class="fa-solid fa-calendar-check"></i>
 
-
 Confirm Interview Schedule
 
 
@@ -776,205 +492,7 @@ Confirm Interview Schedule
 
 
 
-
 </main>
-
-
-
-
-
-
-
-
-
-<!-- RIGHT SIDEBAR -->
-
-
-<div class="right-panel">
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Candidate Summary
-</h3>
-
-
-<p>
-<strong>
-Position
-</strong>
-</p>
-
-<span>
-Software Engineer
-</span>
-
-
-
-<p>
-<strong>
-Experience
-</strong>
-</p>
-
-
-<span>
-2 Years
-</span>
-
-
-
-
-<p>
-<strong>
-Skills
-</strong>
-</p>
-
-
-<span>
-Java • SQL • Spring Boot
-</span>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Scheduling Tips
-</h3>
-
-
-<ul>
-
-
-<li>
-Choose suitable time
-</li>
-
-
-<li>
-Avoid interviewer conflicts
-</li>
-
-
-<li>
-Include meeting link
-</li>
-
-
-<li>
-Send reminder
-</li>
-
-
-</ul>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-Recruitment Process
-</h3>
-
-
-<p>
-
-Shortlisted Candidate
-
-<br>
-
-↓
-
-<br>
-
-Interview Scheduled
-
-<br>
-
-↓
-
-<br>
-
-Candidate Evaluation
-
-<br>
-
-↓
-
-<br>
-
-Hiring Decision
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<footer>
-
-About Us &nbsp;&nbsp;
-
-Privacy Policy &nbsp;&nbsp;
-
-Terms of Use &nbsp;&nbsp;
-
-Help Center
-
-
-<br><br>
-
-
-© 2026 JobConnect
-
-
-</footer>
 
 
 
@@ -991,12 +509,43 @@ window.location.search
 );
 
 
-let candidateId = params.get("id");
+
+let applicationId = params.get("applicationId");
+
+window.onload = function(){
+
+
+toggleMeetingLink();
+
+
+// Prevent selecting past date
+
+let today = new Date();
+
+
+let yyyy =
+today.getFullYear();
+
+
+let mm =
+String(today.getMonth()+1)
+.padStart(2,"0");
+
+
+let dd =
+String(today.getDate())
+.padStart(2,"0");
+
+
+
+document.getElementById("date")
+.min =
+`${yyyy}-${mm}-${dd}`;
 
 
 
 fetch(
-"/api/applicants/shortlisted/" + candidateId
+"/api/applications/" + applicationId
 )
 
 
@@ -1011,36 +560,38 @@ candidateData=data;
 
 
 document.getElementById(
-"candidateId"
-).value=data.id;
-
-
-
-document.getElementById(
 "candidateName"
-).innerHTML=data.name;
+).innerHTML =
+data.name || "-";
 
 
 
 document.getElementById(
 "candidatePosition"
-).innerHTML=data.position;
+).innerHTML =
+data.position || "-";
 
 
 
 document.getElementById(
 "candidateEmail"
-).innerHTML=data.email;
+).innerHTML =
+data.email || "-";
 
 
 
 document.getElementById(
 "candidatePhone"
-).innerHTML=data.phone;
+).innerHTML =
+data.phoneNumber || "-";
 
 
 
 let skillText="";
+
+
+
+if(data.skills && data.skills.length){
 
 
 data.skills.forEach(skill=>{
@@ -1052,32 +603,62 @@ skillText += skill.name + ", ";
 });
 
 
-
-document.getElementById(
-"candidateSkills"
-).innerHTML =
+skillText =
 skillText.slice(0,-2);
 
 
+}
 
-if(data.image){
+else{
 
-document.getElementById(
-"candidateImage"
-).src =
-"/static/images/"+data.image;
+
+skillText="No skills provided";
+
 
 }
 
 
 
-});
-
-
 document.getElementById(
 "candidateSkills"
 ).innerHTML =
-skillText.slice(0,-2);
+skillText;
+
+
+
+if(data.resume_url){
+
+
+document.getElementById(
+"resumeLink"
+).href =
+data.resume_url;
+
+
+
+document.getElementById(
+"resumeName"
+).innerHTML =
+data.resume_filename || "";
+
+}
+
+
+})
+
+
+
+.catch(error=>{
+
+
+console.log(error);
+
+
+});
+
+
+};
+
 
 
 function validateInterview(){
@@ -1090,25 +671,30 @@ document.getElementById("stage").value;
 let date =
 document.getElementById("date").value;
 
+
 let time =
 document.getElementById("time").value;
 
+
 let duration =
 document.getElementById("duration").value;
+
+
 let interviewer =
 document.getElementById("interviewer").value;
-let meetingLink =
-document.getElementById("meetingLink").value;
-let message =
-document.getElementById("message");
+
+
 
 if(stage === ""){
+
 showError(
 "Please select interview stage."
 );
 
 return;
+
 }
+
 
 if(date === ""){
 
@@ -1117,26 +703,49 @@ showError(
 );
 
 return;
+
 }
 
 let selectedDate =
 new Date(date);
+
+
 let today =
 new Date();
-today.setHours(0,0,0,0);
+
+
+today.setHours(
+0,0,0,0
+);
+
+
+
 if(selectedDate < today){
+
+
 showError(
 "Interview date cannot be before today."
 );
+
+
 return;
+
+
 }
 
+
+
 if(time === ""){
+
 showError(
 "Please select interview time."
 );
+
 return;
+
 }
+
+
 
 if(duration === ""){
 
@@ -1144,11 +753,11 @@ showError(
 "Please select interview duration."
 );
 
-
 return;
 
-
 }
+
+
 
 if(interviewer.trim() === ""){
 
@@ -1160,13 +769,24 @@ return;
 
 }
 
+
+
 let interviewType =
 document.querySelector(
 'input[name="type"]:checked'
 ).value;
 
-if(interviewType === "online" && meetingLink === ""){
 
+
+let meetingLink =
+document.getElementById("meetingLink").value;
+
+
+
+if(
+interviewType === "online" &&
+meetingLink === ""
+){
 
 showError(
 "Meeting link is required for online interview."
@@ -1174,10 +794,7 @@ showError(
 
 return;
 
-
 }
-
-
 
 
 
@@ -1188,81 +805,147 @@ saveInterview();
 }
 
 
+
+
 function saveInterview(){
+
 
 let interviewData = {
 
-candidateId:candidateData.id,
+
+candidateId: applicationId,
+
+companyId:"C000001",
+
 
 candidateName:candidateData.name,
 
+
 position:candidateData.position,
 
-    stage: document.getElementById("stage").value,
 
-    date: document.getElementById("date").value,
+stage:
+document.getElementById("stage").value,
 
-    time: document.getElementById("time").value,
 
-    duration: document.getElementById("duration").value,
+date:
+document.getElementById("date").value,
 
-    interviewType:
-    document.querySelector(
-        'input[name="type"]:checked'
-    ).value,
 
-    interviewer:
+time:
+document.getElementById("time").value,
+
+
+duration:
+document.getElementById("duration").value,
+
+
+interviewType:
+document.querySelector(
+'input[name="type"]:checked'
+).value,
+
+
+interviewer:
 document.getElementById("interviewer").value,
 
-    meetingLink:
-    document.getElementById("meetingLink").value,
 
-    notes:
-    document.querySelector("textarea").value
+meetingLink:
+document.getElementById("meetingLink").value,
+
+
+notes:
+document.getElementById("notes").value
+
+
 };
 
 
-console.log(interviewData);
 
 
-fetch("/api/interviews", {
+fetch("/api/interviews",{
 
-    method:"POST",
 
-    headers:{
-        "Content-Type":"application/json"
-    },
+method:"POST",
 
-    body:JSON.stringify(interviewData)
+
+headers:{
+
+
+"Content-Type":"application/json"
+
+
+},
+
+
+body:JSON.stringify(interviewData)
+
+
 
 })
 
-.then(response => response.json())
-.then(data => {
-    console.log(data);
-    showSuccess(data.message);
+
+.then(response=>response.json())
+
+
+.then(data=>{
+
+
+alert(
+data.message || "Interview scheduled successfully"
+);
+
+
+window.location.href="/schedule_list";
+
+
 })
+
 
 .catch(error=>{
-    console.log(error);
-    showError("Failed to schedule interview.");
+
+
+console.log(error);
+
+
+showError(
+"Failed to schedule interview."
+);
+
+
 });
 
+
+
 }
+
+
+
+
+
+
 
 function showError(messageText){
+
+
 let message =
 document.getElementById("message");
+
+
 message.innerHTML =
 messageText;
+
+
 message.className =
 "error";
+
+
 }
 
-function showSuccess(messageText){
-    alert(messageText);
-    window.location.href = "/schedule_list";
-}
+
+
+
+
 
 function toggleMeetingLink(){
 
@@ -1274,13 +957,25 @@ document.querySelector(
 
 
 
+let container =
+document.getElementById(
+"meetingLinkContainer"
+);
+
+
+
 let link =
-document.getElementById("meetingLink");
+document.getElementById(
+"meetingLink"
+);
 
 
 
 
-if(type === "physical"){
+if(type==="physical"){
+
+
+container.style.display="none";
 
 
 link.value="";
@@ -1294,18 +989,19 @@ link.disabled=true;
 else{
 
 
+container.style.display="block";
+
+
 link.disabled=false;
 
-
 }
-
-
-
 }
 
 
 
 </script>
+
+
 </body>
 
 </html>

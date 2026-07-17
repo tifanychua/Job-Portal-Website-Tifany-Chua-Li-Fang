@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add a New Job</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/publishJob.css">
+</head>
+<body>
+    {% include "employerHeader.html" %}
+
+    <form action="/review-job" method="post" id="jobForm" novalidate>
+
+    <main class="main-content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+
+            <div>
+                <h1>Post a New Job</h1>
+                <p>
+                    Fill in the job details below to attract the right candidates.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- ===========================
+                Job Information
+        ============================ -->
+
+        <div class="job-card">
+
+            <div class="card-title">
+
+                <img src="/images/number-1.png" alt="Step 1">
+
+                <h2>Job Information</h2>
+
+            </div>
+
+            <div class="form-grid">
+
+                <!-- Job Title -->
+                <div class="form-group full-width">
+
+                    <label>
+                        Job Title <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="job_title"
+                        id="jobTitle"
+                        value="{{ job.get('job_title', '') }}"
+                        placeholder="e.g. Senior Software Engineer"
+                        required>
+
+                </div>
+
+                <!-- Job Category -->
+                <div class="form-group">
+
+                    <label>
+                        Job Category <span>*</span>
+                    </label>
+
+                    <select name="category" id="category" required>
+                        <option value="" disabled
+                            {% if not job.get('category') %}selected{% endif %}>
+                            Select job category
+                        </option>
+
+                        {% for category in categories %}
+
+                            <option
+                                value="{{ category.category_name }}"
+                                {% if job.get('category') == category.category_name %}
+                                    selected
+                                {% endif %}>
+
+                                {{ category.category_name }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <!-- Employment Type -->
+                <div class="form-group">
+
+                    <label>
+                        Employment Type <span>*</span>
+                    </label>
+
+                    <select name="employment_type" id="employment_type" required>
+
+                        <option value="" disabled
+                            {% if not job.get('employment_type') %}selected{% endif %}>
+                            Select employment type
+                        </option>
+
+                        <option value="Full-time"
+                            {% if job.get('employment_type') == 'Full-time' %}selected{% endif %}>
+                            Full-time
+                        </option>
+
+                        <option value="Part-time"
+                            {% if job.get('employment_type') == 'Part-time' %}selected{% endif %}>
+                            Part-time
+                        </option>
+
+                        <option value="Contract"
+                            {% if job.get('employment_type') == 'Contract' %}selected{% endif %}>
+                            Contract
+                        </option>
+
+                        <option value="Internship"
+                            {% if job.get('employment_type') == 'Internship' %}selected{% endif %}>
+                            Internship
+                        </option>
+
+                        <option value="Temporary"
+                            {% if job.get('employment_type') == 'Temporary' %}selected{% endif %}>
+                            Temporary
+                        </option>
+
+                        <option value="Freelance"
+                            {% if job.get('employment_type') == 'Freelance' %}selected{% endif %}>
+                            Freelance
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Position -->
+                <div class="form-group">
+
+                    <label>
+                        Job Position / Level <span>*</span>
+                    </label>
+
+                    <select id="position" name="position" required>
+
+                        <option value="" disabled
+                            {% if not job.get('position') %}selected{% endif %}>
+                            Select position level
+                        </option>
+
+                        <option value="Internship"
+                            {% if job.get('position') == 'Internship' %}selected{% endif %}>
+                            Internship
+                        </option>
+
+                        <option value="Entry Level"
+                            {% if job.get('position') == 'Entry Level' %}selected{% endif %}>
+                            Entry Level
+                        </option>
+
+                        <option value="Junior Executive"
+                            {% if job.get('position') == 'Junior Executive' %}selected{% endif %}>
+                            Junior Executive
+                        </option>
+
+                        <option value="Senior Executive"
+                            {% if job.get('position') == 'Senior Executive' %}selected{% endif %}>
+                            Senior Executive
+                        </option>
+
+                        <option value="Manager"
+                            {% if job.get('position') == 'Manager' %}selected{% endif %}>
+                            Manager
+                        </option>
+
+                        <option value="Senior Manager"
+                            {% if job.get('position') == 'Senior Manager' %}selected{% endif %}>
+                            Senior Manager
+                        </option>
+
+                        <option value="Director"
+                            {% if job.get('position') == 'Director' %}selected{% endif %}>
+                            Director
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Vacancies -->
+                <div class="form-group">
+
+                    <label>
+                        Number of Vacancies <span>*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        name="vacancies"
+                        value="{{ job.get('vacancies', '') }}"
+                        min="1"
+                        required>
+
+                </div>
+
+                <!-- Location -->
+                <div class="form-group full-width">
+
+                    <label>
+                        Work Location <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="location"
+                        id="workLocation"
+                        value="{{ job.get('location', '') }}"
+                        placeholder="e.g. Kuala Lumpur, Malaysia"
+                        required>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ===========================
+                Job Details
+        =========================== -->
+
+        <div class="job-card">
+
+            <div class="card-title">
+
+                <img src="/images/number-2.png" alt="Step 2">
+
+                <h2>Job Details</h2>
+
+            </div>
+
+            <!-- Job Description -->
+            <div class="form-group">
+
+                <label>
+                    Job Description <span>*</span>
+                </label>
+
+                <textarea
+                    rows="7"
+                    name="job_desc"
+                    required
+                    placeholder="Provide a detailed description of the job role, daily tasks, company background, and what candidates can expect.">{{ job.get('job_desc', '') }}</textarea>
+
+            </div>
+
+            <div class="details-grid">
+
+                <!-- Responsibilities -->
+                <div class="form-group">
+
+                    <label>
+                        Job Responsibilities <span>*</span>
+                    </label>
+
+                    <textarea
+                        rows="6"
+                        name="job_responsibility"
+                        required
+                        placeholder="Example:
+                                • Develop and maintain web applications
+                                • Collaborate with designers and project managers
+                                • Write clean and maintainable code">{{ job.get('job_responsibility', '') }}</textarea>
+
+                </div>
+
+                <!-- Requirements -->
+                <div class="form-group">
+
+                    <label>
+                        Job Requirements <span>*</span>
+                    </label>
+
+                    <textarea
+                        rows="6"
+                        name="job_req"
+                        required
+                        placeholder="Example:
+                        • Bachelor's Degree in Computer Science
+                        • 2+ years of experience
+                        • Knowledge of Python, HTML, CSS and SQL">{{ job.get('job_req', '') }}</textarea>
+
+                </div>
+
+            </div>
+
+            <!-- Additional Information -->
+            <div class="form-group">
+
+                <label style="margin-top:28px;">
+                    Additional Information
+                </label>
+
+                <textarea
+                    rows="5"
+                    name="additional_info"
+                    placeholder="Optional information such as working hours, company culture, dress code, probation period, travel requirements or any additional notes.">{{ job.get('additional_info', '') }}</textarea>
+
+            </div>
+
+        </div>
+
+        <!-- ===========================
+                Salary & Benefits
+        =========================== -->
+
+        <div class="job-card">
+
+            <div class="card-title">
+
+                <img src="/images/number-3.png" alt="Step 3">
+
+                <h2>Salary & Benefits</h2>
+
+            </div>
+
+            <!-- Salary Type -->
+
+            <div class="form-group">
+
+                <label>
+                    Salary Type <span>*</span>
+                </label>
+
+                <div class="salary-type">
+
+                    <label class="radio-item">
+                        <input
+                            type="radio"
+                            name="salaryType"
+                            value="fixed"
+                            {% if job.get('salaryType', 'fixed') == 'fixed' %}checked{% endif %}>
+                        Fixed
+                    </label>
+
+                    <label class="radio-item">
+                        <input
+                            type="radio"
+                            name="salaryType"
+                            value="range"
+                            {% if job.get('salaryType') == 'range' %}checked{% endif %}>
+                        Range
+                    </label>
+
+                    <label class="radio-item">
+                        <input
+                            type="radio"
+                            name="salaryType"
+                            value="negotiable"
+                            {% if job.get('salaryType') == 'negotiable' %}checked{% endif %}>
+                        Negotiable
+                    </label>
+
+                </div>
+
+            </div>
+
+            <!-- Fixed Salary -->
+
+            <div id="fixedSalary" class="salary-section">
+
+                <div class="form-group">
+
+                    <label>
+                        Salary (RM) <span>*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        name="salary"
+                        value="{{ job.get('salary', '') }}"
+                        min="0"
+                        step="0.01"
+                        placeholder="e.g. 4500">
+
+                </div>
+
+            </div>
+
+            <!-- Salary Range -->
+
+            <div id="rangeSalary" name="salary"
+                class="salary-section"
+                style="display:none;">
+
+                <div class="salary-grid">
+
+                    <div class="form-group">
+
+                        <label>
+                            Minimum Salary (RM)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="minSalary"
+                            id="minSalary"
+                            min="0"
+                            step="0.01"
+                            value="{{ job.get('minSalary', '') }}"
+                            placeholder="Minimum">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+                            Maximum Salary (RM)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="maxSalary"
+                            id="maxSalary"
+                            min="0"
+                            step="0.01"
+                            value="{{ job.get('maxSalary', '') }}"
+                            placeholder="Maximum">
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Benefits -->
+
+            <div class="form-group benefit-section">
+
+                <label>
+                    Benefits
+                </label>
+
+                <div class="benefits-grid">
+
+                    <label><input type="checkbox" name="benefits" value="EPF" {% if 'EPF' in job.get('benefits', []) %}checked{% endif %}>EPF</label>
+                    <label><input type="checkbox" name="benefits" value="SOCSO" {% if 'SOCSO' in job.get('benefits', []) %}checked{% endif %}>SOCSO</label>
+                    <label><input type="checkbox" name="benefits" value="EIS" {% if 'EIS' in job.get('benefits', []) %}checked{% endif %}>EIS</label>
+                    <label><input type="checkbox" name="benefits" value="Annual Leave" {% if 'Annual Leave' in job.get('benefits', []) %}checked{% endif %}>Annual Leave</label>
+                    <label><input type="checkbox" name="benefits" value="Medical Leave" {% if 'Medical Leave' in job.get('benefits', []) %}checked{% endif %}>Medical Leave</label>
+                    <label><input type="checkbox" name="benefits" value="Medical Insurance" {% if 'Medical Insurance' in job.get('benefits', []) %}checked{% endif %}>Medical Insurance</label>
+                    <label><input type="checkbox" name="benefits" value="Dental Coverage" {% if 'Dental Coverage' in job.get('benefits', []) %}checked{% endif %}>Dental Coverage</label>
+                    <label><input type="checkbox" name="benefits" value="Performance Bonus" {% if 'Performance Bonus' in job.get('benefits', []) %}checked{% endif %}>Performance Bonus</label>
+                    <label><input type="checkbox" name="benefits" value="Annual Bonus" {% if 'Annual Bonus' in job.get('benefits', []) %}checked{% endif %}>Annual Bonus</label>
+                    <label><input type="checkbox" name="benefits" value="Flexible Working Hours" {% if 'Flexible Working Hours' in job.get('benefits', []) %}checked{% endif %}>Flexible Working Hours</label>
+                    <label><input type="checkbox" name="benefits" value="Work From Home" {% if 'Work From Home' in job.get('benefits', []) %}checked{% endif %}>Work From Home</label>
+                    <label><input type="checkbox" name="benefits" value="Hybrid Working" {% if 'Hybrid Working' in job.get('benefits', []) %}checked{% endif %}>Hybrid Working</label>
+                    <label><input type="checkbox" name="benefits" value="Training Provided" {% if 'Training Provided' in job.get('benefits', []) %}checked{% endif %}>Training Provided</label>
+                    <label><input type="checkbox" name="benefits" value="Career Development" {% if 'Career Development' in job.get('benefits', []) %}checked{% endif %}>Career Development</label>
+                    <label><input type="checkbox" name="benefits" value="Parking Allowance" {% if 'Parking Allowance' in job.get('benefits', []) %}checked{% endif %}>Parking Allowance</label>
+                    <label><input type="checkbox" name="benefits" value="Meal Allowance" {% if 'Meal Allowance' in job.get('benefits', []) %}checked{% endif %}>Meal Allowance</label>
+                    <label><input type="checkbox" name="benefits" value="Transport Allowance" {% if 'Transport Allowance' in job.get('benefits', []) %}checked{% endif %}>Transport Allowance</label>
+
+                    <div class="other-benefit">
+
+                        <label class="other-check">
+                            <input
+                                type="checkbox"
+                                id="otherBenefit"
+                                {% if job.get("other_benefit") %}checked{% endif %}>
+                            Other
+                        </label>
+
+                        <input
+                            type="text"
+                            id="otherBenefitInput"
+                            name="other_benefit"
+                            class="other-input"
+                            placeholder="Please specify..."
+                            value="{{ job.get('other_benefit', '') }}"
+                            {% if not job.get("other_benefit") %}disabled{% endif %}>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ===========================
+                Bottom Buttons
+        =========================== -->
+
+        <div class="action-buttons">
+
+            <a href="/cancel-job"
+                class="cancel-btn"
+                onclick="return confirm('Are you sure you want to cancel? All unsaved job information will be lost.')">
+
+                <i class="fa-solid fa-xmark"></i>
+                Cancel
+
+            </a>
+
+            <button type="submit"
+                    class="draft-btn"
+                    name="action"
+                    value="draft">
+                <i class="fa-regular fa-floppy-disk"></i>
+                Save as Draft
+            </button>
+
+            <button type="submit"
+                class="next-btn"
+                name="action"
+                value="review">
+
+            Next: Review & Publish
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </button>
+
+        </div>
+
+    </main>
+    </form>
+    
+
+    <script>
+        const form = document.getElementById("jobForm");
+
+        const salaryType = document.querySelectorAll(
+            'input[name="salaryType"]'
+        );
+
+        const fixedSalary = document.getElementById("fixedSalary");
+        const rangeSalary = document.getElementById("rangeSalary");
+
+        const salary = document.querySelector('input[name="salary"]');
+        const minSalary = document.getElementById("minSalary");
+        const maxSalary = document.getElementById("maxSalary");
+
+        const otherBenefit = document.getElementById("otherBenefit");
+        const otherInput = document.getElementById("otherBenefitInput");
+
+
+        // ==========================================
+        // Salary Type
+        // ==========================================
+
+        function updateSalaryFields() {
+
+            const selectedType = document.querySelector(
+                'input[name="salaryType"]:checked'
+            ).value;
+
+            if (selectedType === "fixed") {
+
+                fixedSalary.style.display = "block";
+                rangeSalary.style.display = "none";
+
+                salary.required = true;
+                minSalary.required = false;
+                maxSalary.required = false;
+
+            } else if (selectedType === "range") {
+
+                fixedSalary.style.display = "none";
+                rangeSalary.style.display = "block";
+
+                salary.required = false;
+                minSalary.required = true;
+                maxSalary.required = true;
+
+            } else {
+
+                fixedSalary.style.display = "none";
+                rangeSalary.style.display = "none";
+
+                salary.required = false;
+                minSalary.required = false;
+                maxSalary.required = false;
+            }
+        }
+
+
+        salaryType.forEach(radio => {
+
+            radio.addEventListener("change", function () {
+                updateSalaryFields();
+            });
+
+        });
+
+        updateSalaryFields();
+
+
+        // ==========================================
+        // Other Benefit
+        // ==========================================
+
+        otherBenefit.addEventListener("change", function () {
+
+            otherInput.disabled = !this.checked;
+            otherInput.required = this.checked;
+
+            if (!this.checked) {
+                otherInput.value = "";
+                otherInput.classList.remove("input-error");
+            }
+
+        });
+
+
+        // ==========================================
+        // Remove red border when user enters value
+        // ==========================================
+
+        form.querySelectorAll("input, select, textarea").forEach(field => {
+
+            field.addEventListener("input", function () {
+
+                if (this.value.trim() !== "") {
+                    this.classList.remove("input-error");
+                }
+
+            });
+
+            field.addEventListener("change", function () {
+
+                if (this.value.trim() !== "") {
+                    this.classList.remove("input-error");
+                }
+
+            });
+
+        });
+
+
+        // ==========================================
+        // Validate Before Submit
+        // ==========================================
+
+        form.addEventListener("submit", function (event) {
+
+            // Detect which button was clicked
+            const clickedButton = event.submitter;
+
+            let isValid = true;
+            let firstInvalidField = null;
+
+            const requiredFields = form.querySelectorAll(
+                "input[required], select[required], textarea[required]"
+            );
+
+            requiredFields.forEach(field => {
+
+                field.classList.remove("input-error");
+
+                if (field.disabled || field.offsetParent === null) {
+                    return;
+                }
+
+                if (field.value.trim() === "") {
+
+                    field.classList.add("input-error");
+                    isValid = false;
+
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                }
+
+            });
+
+            if (!isValid) {
+
+                event.preventDefault();
+
+                firstInvalidField.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+                firstInvalidField.focus();
+
+                return;
+            }
+
+            // Ask for confirmation only when Save as Draft is clicked
+            if (clickedButton && clickedButton.value === "draft") {
+
+                const confirmed = confirm(
+                    "Are you sure you want to save this job posting as a draft? You can edit and publish it later."
+                );
+
+                if (!confirmed) {
+                    event.preventDefault();
+                }
+            }
+
+        });
+
+        const jobTitle = document.getElementById("jobTitle");
+
+            jobTitle.addEventListener("input", function () {
+
+                // Allow alphabet, spaces, hyphen, slash, and brackets only
+                this.value = this.value.replace(/[^A-Za-z\s\-\/()]/g, "");
+
+            });
+            
+    </script>
+</body>
+
+</html>

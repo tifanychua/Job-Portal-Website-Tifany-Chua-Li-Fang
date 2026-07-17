@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>JobConnect - Scheduled Interviews</title>
+
+<link rel="stylesheet" href="/static/style.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+
+<body>
+
+
+<!-- ================= HEADER ================= -->
+
+{% include "components/header.html" %}
+
+<div class="container" id="schedule-list">
+
+{% include "components/sidebar.html" %}
+
+
+
+<!-- ================= MAIN ================= -->
+
+
+<main>
+
+
+
+<div class="page-title">
+
+
+<h1>
+Scheduled Interviews
+</h1>
+
+
+<p>
+View and manage all upcoming candidate interviews.
+</p>
+
+
+</div>
+
+<section class="filter-card interview-control-card">
+
+
+<!-- Interview Summary -->
+
+<div class="summary-section">
+
+
+<h3>
+Interview Summary
+</h3>
+
+
+<div class="summary-grid">
+
+
+<div class="summary-box">
+
+<i class="fa-solid fa-calendar-check"></i>
+
+<div>
+
+<p>
+Upcoming Interviews
+</p>
+
+<strong id="totalInterview">
+0 Scheduled
+</strong>
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="summary-box">
+
+
+<i class="fa-solid fa-clock"></i>
+
+
+<div>
+
+<p>
+Next Interview
+</p>
+
+<strong id="nextInterview">
+No Interview
+</strong>
+</div>
+
+
+</div>
+
+
+
+
+
+<div class="summary-box">
+
+
+<i class="fa-solid fa-users"></i>
+
+
+<div>
+
+<p>
+Total Candidates
+</p>
+
+
+<strong id="totalCandidate">
+0 Candidates
+</strong>
+
+
+</div>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<hr>
+
+
+
+<!-- Search and Filter -->
+
+
+<div class="filter-section">
+
+
+<div>
+
+
+<label>
+Search Candidate
+</label>
+
+
+<input 
+type="text"
+id="searchCandidate"
+placeholder="Search candidate name..."
+onkeyup="filterInterviews()">
+
+
+</div>
+
+
+
+
+
+<div>
+
+
+<label>
+Interview Status
+</label>
+
+
+<select id="statusFilter" onchange="filterInterviews()">
+
+<option value="Scheduled" selected>
+Scheduled
+</option>
+
+<option value="All">
+All Status
+</option>
+
+<option value="Completed">
+Completed
+</option>
+
+<option value="Cancelled">
+Cancelled
+</option>
+
+<option value="Rescheduled">
+Rescheduled
+</option>
+
+</select>
+
+
+</div>
+
+
+</div>
+
+
+
+</section>
+
+<section class="table-card">
+<h3>
+All Scheduled Interviews
+</h3>
+
+
+<table>
+
+
+<thead>
+
+
+<tr>
+
+
+<th>
+Candidate
+</th>
+
+
+<th>
+Position
+</th>
+
+
+<th>
+Date
+</th>
+
+
+<th>
+Time
+</th>
+
+
+<th>
+Duration
+</th>
+
+
+<th>
+Interviewer
+</th>
+
+
+<th>
+Status
+</th>
+
+
+<th>
+Action
+</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+
+<tbody id="interviewTable">
+
+</tbody>
+
+
+
+</table>
+
+
+
+</section>
+
+
+
+</main>
+</div>
+{% include "components/footer.html" %}
+
+
+<script>
+
+let interviewList = [];
+let currentInterviewId = "";
+
+
+// ================= LOAD INTERVIEWS =================
+
+function loadInterviews(){
+
+fetch("/api/interviews")
+
+.then(response=>response.json())
+
+.then(data=>{
+
+
+// ensure default status
+
+data.forEach(interview=>{
+
+    if(!interview.status){
+        interview.status = "Scheduled";
+    }
+
+});
+
+
+interviewList = data;
+
+
+// update summary
+
+updateSummary(data);
+
+
+// display table
+
+filterInterviews();
+
+
+});
+
+
+}
+
+
+
+// ================= SUMMARY =================
+
+function updateSummary(data){
+
+
+let today = new Date();
+
+
+
+let upcoming = data.filter(interview=>{
+
+
+let interviewDate = new Date(
+    interview.date + "T" + interview.time
+);
+
+
+
+return (
+
+interviewDate >= today &&
+
+interview.status !== "Cancelled" &&
+
+interview.status !== "Completed"
+
+);
+
+
+});
+
+
+
+
+// Upcoming interviews
+
+document.getElementById(
+"totalInterview"
+).innerHTML =
+upcoming.length + " Scheduled";
+
+
+
+
+// Total candidates
+
+document.getElementById(
+"totalCandidate"
+).innerHTML =
+upcoming.length + " Candidates";
+
+
+
+
+
+// Next interview
+
+if(upcoming.length > 0){
+
+
+
+upcoming.sort((a,b)=>{
+
+
+return new Date(
+a.date+"T"+a.time
+)
+-
+new Date(
+b.date+"T"+b.time
+);
+
+
+});
+
+
+
+let next = upcoming[0];
+
+
+
+document.getElementById(
+"nextInterview"
+).innerHTML =
+
+next.candidateName
++
+"<br>"
++
+next.date
++
+" "
++
+next.time;
+
+
+
+}
+
+else{
+
+
+document.getElementById(
+"nextInterview"
+).innerHTML =
+"No Interview";
+
+
+}
+
+
+}
+
+
+
+
+// ================= SEARCH + FILTER =================
+
+
+function filterInterviews(){
+
+
+let keyword =
+document.getElementById(
+"searchCandidate"
+).value
+.toLowerCase();
+
+
+
+let status =
+document.getElementById(
+"statusFilter"
+).value;
+
+
+
+let filtered = interviewList.filter(interview=>{
+
+
+let nameMatch =
+
+interview.candidateName
+.toLowerCase()
+.includes(keyword);
+
+
+
+let statusMatch =
+
+status==="All"
+
+||
+
+interview.status===status;
+
+
+
+return nameMatch && statusMatch;
+
+
+
+});
+
+
+
+displayInterviews(filtered);
+
+
+}
+
+
+
+
+// ================= DISPLAY TABLE =================
+
+
+function displayInterviews(data){
+
+
+let table =
+document.getElementById(
+"interviewTable"
+);
+
+
+
+table.innerHTML="";
+
+
+
+data.forEach(interview=>{
+
+
+
+table.innerHTML += `
+
+
+<tr>
+
+
+<td>
+
+
+<div class="candidate-mini">
+
+
+<img src="/static/images/avatar.jpg">
+
+
+<div>
+
+<strong>
+${interview.candidateName}
+</strong>
+
+
+<p>
+${interview.position}
+</p>
+
+
+</div>
+
+
+</div>
+
+
+</td>
+
+
+
+
+<td>
+${interview.position}
+</td>
+
+
+
+<td>
+${interview.date}
+</td>
+
+
+
+<td>
+${interview.time}
+</td>
+
+
+
+<td>
+${interview.duration}
+</td>
+
+
+
+<td>
+${interview.interviewer}
+</td>
+
+
+
+
+<td>
+
+<span class="${interview.status}">
+${interview.status}
+</span>
+
+</td>
+
+
+
+
+<td>
+
+
+<button onclick="openReschedule('${interview.id}')">
+
+<i class="fa-solid fa-calendar"></i>
+
+Reschedule
+
+</button>
+
+
+
+<button onclick="cancelInterview('${interview.id}')">
+
+<i class="fa-solid fa-xmark"></i>
+
+Cancel
+
+</button>
+
+
+</td>
+
+
+
+</tr>
+
+
+
+`;
+
+
+
+});
+
+
+}
+
+
+
+
+// ================= CANCEL =================
+
+
+function cancelInterview(id){
+
+
+if(confirm(
+"Are you sure you want to cancel this interview?"
+)){
+
+
+
+fetch(
+"/api/interviews/"+id+"/cancel",
+{
+
+method:"PUT"
+
+}
+
+)
+
+
+.then(response=>response.json())
+
+.then(data=>{
+
+
+alert(data.message);
+
+
+loadInterviews();
+
+
+});
+
+
+}
+
+
+}
+
+
+
+
+// ================= RESCHEDULE =================
+
+
+function openReschedule(id){
+
+
+currentInterviewId=id;
+
+
+
+fetch(
+"/api/interviews/"+id
+)
+
+
+.then(response=>response.json())
+
+.then(data=>{
+
+
+document.getElementById(
+"rescheduleStage"
+).value=data.stage;
+
+
+
+document.getElementById(
+"rescheduleDate"
+).value=data.date;
+
+
+
+document.getElementById(
+"rescheduleTime"
+).value=data.time;
+
+
+
+document.getElementById(
+"rescheduleDuration"
+).value=data.duration;
+
+
+
+document.getElementById(
+"rescheduleInterviewer"
+).value=data.interviewer;
+
+
+
+document.getElementById(
+"rescheduleMeetingLink"
+).value=data.meetingLink || "";
+
+
+
+document.getElementById(
+"rescheduleNotes"
+).value=data.notes || "";
+
+
+
+
+document.querySelector(
+'input[name="rescheduleType"][value="'+data.interviewType+'"]'
+).checked=true;
+
+
+
+toggleRescheduleLink();
+
+
+
+document.getElementById(
+"rescheduleModal"
+).style.display="block";
+
+
+
+});
+
+
+}
+
+
+
+
+
+function toggleRescheduleLink(){
+
+
+let type =
+document.querySelector(
+'input[name="rescheduleType"]:checked'
+).value;
+
+
+
+let container =
+document.getElementById(
+"rescheduleLinkContainer"
+);
+
+
+
+if(type==="online"){
+
+
+container.style.display="block";
+
+
+}
+
+else{
+
+
+container.style.display="none";
+
+
+document.getElementById(
+"rescheduleMeetingLink"
+).value="";
+
+
+}
+
+
+}
+
+
+
+
+
+function closeReschedule(){
+
+
+document.getElementById(
+"rescheduleModal"
+).style.display="none";
+
+
+}
+
+
+
+
+
+function updateInterview(){
+
+
+let data={
+
+
+stage:
+document.getElementById(
+"rescheduleStage"
+).value,
+
+
+date:
+document.getElementById(
+"rescheduleDate"
+).value,
+
+
+time:
+document.getElementById(
+"rescheduleTime"
+).value,
+
+
+duration:
+document.getElementById(
+"rescheduleDuration"
+).value,
+
+
+interviewType:
+document.querySelector(
+'input[name="rescheduleType"]:checked'
+).value,
+
+
+meetingLink:
+document.getElementById(
+"rescheduleMeetingLink"
+).value,
+
+
+interviewer:
+document.getElementById(
+"rescheduleInterviewer"
+).value,
+
+
+notes:
+document.getElementById(
+"rescheduleNotes"
+).value,
+
+
+status:"Rescheduled"
+
+
+};
+
+
+
+
+fetch(
+"/api/interviews/"+currentInterviewId,
+{
+
+method:"PUT",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify(data)
+
+
+}
+
+)
+
+
+.then(response=>response.json())
+
+.then(data=>{
+
+
+alert(data.message);
+
+
+closeReschedule();
+
+
+loadInterviews();
+
+
+
+});
+
+
+}
+
+loadInterviews();
+
+
+</script>
+
+
+
+<div id="rescheduleModal" class="modal">
+
+
+    <div class="modal-content">
+
+
+        <h3>
+            Reschedule Interview
+        </h3>
+
+
+        <input 
+        type="hidden" 
+        id="rescheduleId">
+
+
+
+        <div class="modal-form">
+
+
+            <!-- Interview Stage -->
+
+            <div class="modal-field">
+
+                <label>
+                    Interview Stage
+                </label>
+
+                <select id="rescheduleStage">
+
+                    <option value="Technical Interview">
+                        Technical Interview
+                    </option>
+
+                    <option value="HR Interview">
+                        HR Interview
+                    </option>
+
+                    <option value="Final Interview">
+                        Final Interview
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+
+
+            <!-- Date -->
+
+            <div class="modal-field">
+
+                <label>
+                    Interview Date
+                </label>
+
+                <input 
+                type="date"
+                id="rescheduleDate">
+
+            </div>
+
+
+
+
+
+            <!-- Time -->
+
+            <div class="modal-field">
+
+                <label>
+                    Interview Time
+                </label>
+
+                <input 
+                type="time"
+                id="rescheduleTime">
+
+            </div>
+
+
+
+
+
+            <!-- Duration -->
+
+            <div class="modal-field">
+
+                <label>
+                    Duration
+                </label>
+
+                <select id="rescheduleDuration">
+
+
+                    <option value="30 Minutes">
+                        30 Minutes
+                    </option>
+
+
+                    <option value="60 Minutes">
+                        60 Minutes
+                    </option>
+
+
+                    <option value="90 Minutes">
+                        90 Minutes
+                    </option>
+
+
+                </select>
+
+
+            </div>
+
+
+
+
+
+
+            <!-- Interview Type -->
+
+            <div class="modal-field">
+
+
+                <label>
+                    Interview Type
+                </label>
+
+
+                <div class="radio">
+
+
+                    <label>
+
+                        <input 
+                        type="radio"
+                        name="rescheduleType"
+                        value="online"
+                        onchange="toggleRescheduleLink()">
+
+                        Online
+
+                    </label>
+
+
+
+
+                    <label>
+
+                        <input 
+                        type="radio"
+                        name="rescheduleType"
+                        value="physical"
+                        onchange="toggleRescheduleLink()">
+
+                        Physical
+
+                    </label>
+
+
+                </div>
+
+
+            </div>
+
+
+
+
+
+
+
+            <!-- Interviewer -->
+
+            <div class="modal-field">
+
+
+                <label>
+                    Interviewer
+                </label>
+
+
+                <input 
+                type="text"
+                id="rescheduleInterviewer"
+                placeholder="Enter interviewer name">
+
+
+            </div>
+
+
+
+
+
+
+
+
+            <!-- Meeting Link -->
+
+            <div 
+            class="modal-field full-width"
+            id="rescheduleLinkContainer">
+
+
+                <label>
+                    Meeting Link
+                </label>
+
+
+                <input 
+                type="text"
+                id="rescheduleMeetingLink"
+                placeholder="https://meet.google.com">
+
+
+            </div>
+
+
+
+
+
+
+
+
+            <!-- Notes -->
+
+            <div class="modal-field full-width">
+
+
+                <label>
+                    Notes
+                </label>
+
+
+                <textarea
+                id="rescheduleNotes"
+                rows="3"
+                placeholder="Add interview instructions...">
+                </textarea>
+
+
+            </div>
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+        <!-- Buttons -->
+
+
+        <div class="modal-buttons">
+
+
+            <button 
+            onclick="closeReschedule()">
+
+                Cancel
+
+            </button>
+
+
+
+
+
+            <button 
+            onclick="updateInterview()">
+
+                Update Interview
+
+            </button>
+
+
+
+        </div>
+
+
+
+    </div>
+
+
+</div>
+
+</body>
+
+
+</html>

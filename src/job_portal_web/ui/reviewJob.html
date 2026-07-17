@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Review & Publish</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/reviewJob.css">
+
+</head>
+
+<body>
+
+{% include "employerHeader.html" %}
+
+<main class="main-content">
+
+    <!-- Page Header -->
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>Review & Publish</h1>
+
+            <p>
+                Please review all job information carefully before publishing.
+            </p>
+
+        </div>
+
+        <div class="header-buttons">
+
+            {% if is_edit %}
+
+                <a href="/edit-job/{{ job.job_id }}" class="back-btn">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Back
+                </a>
+
+                <form action="/update-job-confirm/{{ job.job_id }}" method="post">
+
+                    <button type="submit"
+                            class="publish-btn"
+                            onclick="return confirm('Are you sure you want to update this job posting?')">
+
+                        <i class="fa-solid fa-paper-plane"></i>
+                        Confirm Update
+
+                    </button>
+
+                </form>
+
+            {% else %}
+
+                <a href="/publish-job" class="back-btn">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Back
+                </a>
+
+                <form action="/publish-job-confirm" method="post">
+
+                    <button type="submit"
+                            class="publish-btn"
+                            onclick="return confirm('Are you sure you want to publish this job posting? Once published, the job will be visible to job seekers.')">
+
+                        <i class="fa-solid fa-paper-plane"></i>
+                        Publish Job
+
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- ===================================== -->
+
+    <!-- Job Information -->
+
+    <!-- ===================================== -->
+
+    <div class="preview-card">
+
+        <div class="preview-title">
+
+            <div>
+
+                <img src="/images/number-1.png">
+
+                <h2>Job Information</h2>
+
+            </div>
+
+        </div>
+
+        <div class="preview-grid">
+
+            <div>
+
+                <label>Job Title</label>
+
+                <p>{{ job.job_title }}</p>
+
+            </div>
+
+            <div>
+
+                <label>Job Category</label>
+
+                <p>{{ job.category }}</p>
+
+            </div>
+
+            <div>
+
+                <label>Employment Type</label>
+
+                <p>{{ job.employment_type }}</p>
+
+            </div>
+
+            <div>
+
+                <label>Job Position / Level</label>
+
+                <p>{{ job.position }}</p>
+
+            </div>
+
+            <div>
+
+                <label>Number of Vacancies</label>
+
+                <p>{{ job.vacancies }}</p>
+
+            </div>
+
+            <div>
+
+                <label>Work Location</label>
+
+                <p>{{ job.location }}</p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================== -->
+
+    <!-- Job Details -->
+
+    <!-- ===================================== -->
+
+    <div class="preview-card">
+
+        <div class="preview-title">
+
+            <div>
+
+                <img src="/images/number-2.png">
+
+                <h2>Job Details</h2>
+
+            </div>
+
+        </div>
+
+        <div class="preview-section">
+
+            <label>Job Description</label>
+
+            <p>{{ job.job_desc }}</p>
+
+        </div>
+
+        <div class="preview-section">
+
+            <label>Job Responsibilities</label>
+
+            <p style="white-space:pre-line;">
+                {{ job.job_responsibility }}
+            </p>
+
+        </div>
+
+        <div class="preview-section">
+
+            <label>Job Requirements</label>
+
+            <p style="white-space:pre-line;">
+                {{ job.job_req }}
+            </p>
+
+        </div>
+
+        <div class="preview-section">
+
+            <label>Additional Information</label>
+
+            <p>
+
+                {% if job.additional_info %}
+
+                    {{ job.additional_info }}
+
+                {% else %}
+
+                    -
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================== -->
+
+    <!-- Salary -->
+
+    <!-- ===================================== -->
+
+    <div class="preview-card">
+
+        <div class="preview-title">
+
+            <div>
+
+                <img src="/images/number-3.png">
+
+                <h2>Salary & Benefits</h2>
+
+            </div>
+
+        </div>
+
+        <div class="preview-grid">
+
+            <div>
+
+                <label>Salary Type</label>
+
+                <p>{{ job.salaryType }}</p>
+
+            </div>
+
+            <div>
+
+                <label>Salary</label>
+
+                <p>{{ job.salary }}</p>
+
+            </div>
+
+        </div>
+
+        <div class="preview-section">
+
+            <label>Benefits</label>
+
+            <div class="benefit-tags">
+
+                {% for benefit in job.benefits %}
+
+                    <span>{{ benefit }}</span>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</main>
+
+</body>
+
+</html>

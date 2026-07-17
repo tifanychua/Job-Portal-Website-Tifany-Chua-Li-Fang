@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ job.job_title }} — {{ job.companyName }} | JobConnect</title>
+<link rel="stylesheet" href="/static/css/jobs.css">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/css/job_information.css">
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+{% include "components/header.html" %}
+
+<div class="back-button-container" style="margin:24px 0 16px 40px; ">
+    <a
+        href="javascript:history.back()"
+        class="back-button"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Back
+    </a>
+</div>
+
+<!-- ============================== HEADER ============================== -->
+<div class="detail-header">
+  <div class="detail-header-card">
+    <div class="detail-header-left">
+      <div class="detail-logo">
+        {{ job.companyName[:1] }}
+      </div>
+      <div>
+        <div class="detail-title-row">
+          <h1>{{ job.job_title }}</h1>
+          <span class="badge-pill badge-{{ 'success' if job.status == 'Active' else 'muted' }}">{{ job.status }}</span>
+        </div>
+        <div class="detail-company-row">
+          {{ job.companyName }}
+          {% if job.company_verified %}<i class="fa-solid fa-circle-check verified-badge"></i>{% endif %}
+        </div>
+        <div class="detail-meta">
+          <span><i class="fa-solid fa-location-dot"></i> {{ job.location }}</span>
+          <span class="dot">•</span>
+          <span>{{ job.employment_type }}</span>
+          <span class="dot">•</span>
+          <span>Posted {{ job.created_at_display }}</span>
+        </div>
+        <div class="detail-tags">
+          <span class="tag">{{ job.category }}</span>
+          <span class="tag">{{ job.position }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-header-actions">
+
+<button class="btn btn-outline btn-save">
+    <i class="fa-regular fa-heart"></i> Save
+</button>
+
+
+{% if application_status == "Submitted" %}
+
+<button 
+    type="button"
+    class="btn btn-primary"
+    onclick="reviewApplication()">
+
+    Application Submitted
+
+</button>
+
+
+{% else %}
+
+
+<form action="/jobs/{{ job.id }}/apply" method="get">
+
+    <button 
+        type="submit" 
+        class="btn btn-primary">
+
+        Apply Now
+
+    </button>
+
+</form>
+
+
+{% endif %}
+
+
+</div>
+  </div>
+</div>
+
+
+<!-- ============================== BODY ============================== -->
+<div class="detail-body">
+
+  <!-- ---------- LEFT: main content ---------- -->
+  <main class="detail-main-card">
+    <div class="job-details-columns">
+      <div>
+        <div class="detail-section">
+          <h3>Job Description</h3>
+          {% if job.job_desc_lines %}
+          <ul>
+            {% for line in job.job_desc_lines %}<li>{{ line }}</li>{% endfor %}
+          </ul>
+          {% else %}
+          <p>No description provided.</p>
+          {% endif %}
+        </div>
+
+        <div class="detail-section">
+          <h3>Responsibilities</h3>
+          {% if job.job_responsibility_lines %}
+          <ul>
+            {% for line in job.job_responsibility_lines %}<li>{{ line }}</li>{% endfor %}
+          </ul>
+          {% else %}
+          <p>No responsibilities listed.</p>
+          {% endif %}
+        </div>
+
+        <div class="detail-section">
+          <h3>Requirements</h3>
+          {% if job.job_req_lines %}
+          <ul>
+            {% for line in job.job_req_lines %}<li>{{ line }}</li>{% endfor %}
+          </ul>
+          {% else %}
+          <p>No requirements listed.</p>
+          {% endif %}
+        </div>
+
+        {% if job.benefits or job.other_benefit %}
+        <div class="detail-section">
+          <h3>Benefits</h3>
+          <div class="skills-tags">
+            {% for benefit in job.benefits %}<span class="tag">{{ benefit }}</span>{% endfor %}
+            {% if job.other_benefit %}<span class="tag">{{ job.other_benefit }}</span>{% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        {% if job.additional_info %}
+        <div class="detail-section">
+          <h3>Additional Information</h3>
+          <p>{{ job.additional_info }}</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- ---------- Info box ---------- -->
+      <div class="info-box">
+        <div class="info-row">
+          <div class="info-icon"><i class="fa-solid fa-briefcase"></i></div>
+          <div><div class="info-label">Position</div><div class="info-value">{{ job.position }}</div></div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon"><i class="fa-regular fa-clock"></i></div>
+          <div><div class="info-label">Employment Type</div><div class="info-value">{{ job.employment_type }}</div></div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon"><i class="fa-regular fa-file-lines"></i></div>
+          <div><div class="info-label">Job Category</div><div class="info-value">{{ job.category }}</div></div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+          <div><div class="info-label">Salary Range</div><div class="info-value">{{ job.salary_display }}</div></div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon"><i class="fa-solid fa-users"></i></div>
+          <div><div class="info-label">Vacancies</div><div class="info-value">{{ job.vacancies }}</div></div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div><div class="info-label">Location</div><div class="info-value">{{ job.location }}</div></div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon"><i class="fa-regular fa-calendar"></i></div>
+          <div><div class="info-label">Posted On</div><div class="info-value">{{ job.created_at_display }}</div></div>
+        </div>
+        <div class="info-row">
+          <div class="info-icon"><i class="fa-solid fa-rotate"></i></div>
+          <div><div class="info-label">Last Updated</div><div class="info-value">{{ job.updated_at_display }}</div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ---------- RIGHT: sidebar ---------- -->
+  <aside>
+    <div class="detail-side-card">
+      <h4>About {{ job.companyName }}</h4>
+      <div class="summary-row"><span class="label"><i class="fa-solid fa-industry"></i> Industry</span><span class="value">{{ job.company_industry or "—" }}</span></div>
+      <div class="summary-row"><span class="label"><i class="fa-solid fa-location-dot"></i> Address</span><span class="value">{{ job.company_address or "—" }}</span></div>
+      {% if job.company_description %}
+      <p class="company-desc">{{ job.company_description }}</p>
+      {% endif %}
+    </div>
+
+    <div class="detail-side-card">
+      <h4>Company website</h4>
+      <div class="share-icons">
+        <a href="{{ job.company_website }}" class="share-icon"><i class="fa-solid fa-link"></i></a>
+      </div>
+    </div>
+
+    <div class="detail-side-card">
+      <h4>Similar Jobs</h4>
+      {% for sim in similar_jobs %}
+      <a href="/jobs/{{ sim.id }}" class="similar-job-item">
+        <div class="similar-logo">
+          {{ sim.companyName[:1] }}
+        </div>
+        <div class="similar-job-info">
+          <div class="job-title">{{ sim.job_title }}</div>
+          <div class="job-company">{{ sim.companyName }}</div>
+          <div class="job-meta"><i class="fa-solid fa-location-dot"></i> {{ sim.location }}</div>
+        </div>
+      </a>
+      {% else %}
+      <p class="text-small" style="color:var(--color-text-secondary);">No similar jobs found.</p>
+      {% endfor %}
+      <a href="/jobs/{{ job.id }}" class="view-more-link">View More Jobs <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </aside>
+
+</div>
+<script>
+
+function reviewApplication(){
+
+    const confirmReview = confirm(
+        "You already submitted an application for this job. Would you like to review it?"
+    );
+
+
+    if(confirmReview){
+
+        window.location.href =
+        "/application/{{ application_id }}";
+
+    }
+
+}
+
+</script>
+</body>
+</html>

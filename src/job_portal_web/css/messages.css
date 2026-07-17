@@ -1,0 +1,127 @@
+*{
+    box-sizing:border-box;
+}
+
+
+body{
+
+    font-family:'Poppins',sans-serif;
+
+}
+
+
+
+.messages-container{
+
+    width:80%;
+
+    margin:40px auto;
+
+}
+
+
+
+.page-title{
+
+    margin-bottom:30px;
+
+}
+
+
+.page-title h1{
+
+    font-size:32px;
+
+}
+
+
+
+.conversation-card{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:20px;
+
+}
+
+
+
+.conversation{
+
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+    padding:20px;
+
+    border-bottom:1px solid #eee;
+
+    cursor:pointer;
+
+}
+
+
+
+.conversation:hover{
+
+    background:#f7f7f7;
+
+}
+
+
+
+.conversation img{
+
+
+    width:55px;
+
+    height:55px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+}
+
+
+
+.conversation-info{
+
+    flex:1;
+
+}
+
+
+
+.conversation-info h3{
+
+    margin:0;
+
+    font-size:18px;
+
+}
+
+
+
+.conversation-info p{
+
+    color:#777;
+
+    margin-top:5px;
+
+}
+
+
+
+.conversation span{
+
+    color:#888;
+
+    font-size:13px;
+
+}

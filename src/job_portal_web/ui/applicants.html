@@ -30,120 +30,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 <body>
 
 
-
-<header>
-
-
-<div class="logo">
-
-<i class="fa-solid fa-location-dot"></i>
-
-<span>
-JobConnect
-</span>
-
-</div>
-
-
-
-
-<nav>
-
-<a href="#">
-Home
-</a>
-
-
-<a href="#">
-Jobs
-</a>
-
-
-<a href="#">
-Companies
-</a>
-
-
-<a href="/schedule_list">
-Interviews
-</a>
-
-
-<a href="#">
-Career Advice
-</a>
-
-
-<a href="#">
-About Us
-</a>
-
-
-</nav>
-
-
-
-
-
-<div class="nav-right">
-
-
-<i class="fa-solid fa-globe"></i>
-
-<span>
-EN
-</span>
-
-
-<i class="fa-regular fa-heart"></i>
-
-
-<div class="notification">
-
-<i class="fa-regular fa-bell"></i>
-
-<span class="badge">
-3
-</span>
-
-
-</div>
-
-
-
-
-<div class="profile">
-
-
-<img src="/static/images/avatar.jpg">
-
-
-<div>
-
-<h4>
-Pai Wen
-</h4>
-
-<small>
-Employer
-</small>
-
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-</header>
-
-
-
-
-
+{% include "components/header.html" %}
 
 
 
@@ -153,147 +40,7 @@ Employer
 
 <!-- LEFT SIDEBAR -->
 
-
-<aside>
-
-
-<h5>
-JOB EMPLOYER
-</h5>
-
-
-
-<ul>
-
-
-<li>
-
-<i class="fa-solid fa-table-columns"></i>
-
-Dashboard
-
-</li>
-
-
-
-
-<li>
-
-<i class="fa-solid fa-briefcase"></i>
-
-My Jobs
-
-</li>
-
-
-
-
-
-<li class="active">
-
-
-<i class="fa-solid fa-users"></i>
-
-Applicants
-
-
-</li>
-
-
-
-
-
-
-<li>
-
-<a href="/schedule_list">
-
-<i class="fa-solid fa-calendar-days"></i>
-
-Interviews
-
-</a>
-
-
-</li>
-
-
-
-
-
-
-<li>
-
-<i class="fa-solid fa-building"></i>
-
-Company Profile
-
-</li>
-
-
-
-
-
-<li>
-
-<i class="fa-solid fa-gear"></i>
-
-Settings
-
-</li>
-
-
-
-
-
-<li>
-
-<i class="fa-solid fa-right-from-bracket"></i>
-
-Logout
-
-</li>
-
-
-
-</ul>
-
-
-
-
-
-
-<div class="progress-card">
-
-
-<h4>
-Hiring Progress
-</h4>
-
-
-<div class="circle">
-80%
-</div>
-
-
-<p>
-12 / 15 positions filled
-</p>
-
-
-<a href="#">
-View Hiring Report →
-</a>
-
-
-</div>
-
-
-
-</aside>
-
-
-
+{% include "components/sidebar.html" %}
 
 
 
@@ -324,14 +71,13 @@ Select a candidate to schedule an interview.
 
 
 
-
-
 <section class="table-card">
 
 
 <h3>
 Applicants Ready For Interview
 </h3>
+
 
 
 
@@ -348,11 +94,7 @@ Loading applicants...
 </section>
 
 
-
-
 </main>
-
-
 
 
 
@@ -362,30 +104,7 @@ Loading applicants...
 
 
 
-
-
-<footer>
-
-
-About Us &nbsp;&nbsp;
-
-Privacy Policy &nbsp;&nbsp;
-
-Terms of Use &nbsp;&nbsp;
-
-Help Center
-
-
-<br><br>
-
-
-© 2026 JobConnect
-
-
-</footer>
-
-
-
+{% include "components/footer.html" %}
 
 
 
@@ -394,22 +113,23 @@ Help Center
 <script>
 
 
-fetch(
-"/api/applicants/shortlisted"
-)
+fetch("/api/applicants/shortlisted")
+
 
 
 .then(response => response.json())
+
 
 
 .then(data => {
 
 
 
-let container =
-document.getElementById(
+let container = document.getElementById(
 "candidateList"
 );
+
+
 
 
 
@@ -433,7 +153,9 @@ return;
 
 
 
+
 let html = "";
+
 
 
 
@@ -442,7 +164,14 @@ data.forEach(candidate => {
 
 
 
+
 let skills = "";
+
+
+
+
+
+if(candidate.skills && candidate.skills.length > 0){
 
 
 
@@ -458,8 +187,6 @@ skills +=
 
 ${skill.name}
 
-(${skill.category})
-
 </span>
 
 `;
@@ -470,15 +197,31 @@ ${skill.name}
 
 
 
+}
+else{
+
+
+skills = "No skills provided";
+
+
+}
+
+
+
+
+
 
 
 html +=
 
 
 
+
 `
 
 <div class="candidate-card">
+
+
 
 
 
@@ -490,7 +233,10 @@ html +=
 
 
 
+
+
 <div class="candidate-info">
+
 
 
 <h2>
@@ -498,6 +244,7 @@ html +=
 ${candidate.name}
 
 </h2>
+
 
 
 
@@ -509,46 +256,25 @@ ${candidate.position}
 
 
 
-
-<div class="rating">
-
-
-★★★★★
-
-
-<span>
-
-Match Score
-
-<strong>
-
-${candidate.matchScore}%
-
-</strong>
-
-</span>
-
-
-
 </div>
 
-
-
-</div>
 
 
 
 
 <span class="status">
 
-Shortlisted
+${candidate.status}
 
 </span>
 
 
 
 
+
 </div>
+
+
 
 
 
@@ -557,6 +283,9 @@ Shortlisted
 
 
 <div class="candidate-details">
+
+
+
 
 
 
@@ -570,6 +299,7 @@ Email
 </p>
 
 
+
 <span>
 
 ${candidate.email}
@@ -577,7 +307,12 @@ ${candidate.email}
 </span>
 
 
+
 </div>
+
+
+
+
 
 
 
@@ -593,14 +328,20 @@ Phone
 </p>
 
 
+
 <span>
 
-${candidate.phone}
+${candidate.phoneNumber || "-"}
 
 </span>
 
 
+
 </div>
+
+
+
+
 
 
 
@@ -616,6 +357,7 @@ Skills
 </p>
 
 
+
 <span>
 
 ${skills}
@@ -623,12 +365,47 @@ ${skills}
 </span>
 
 
+
+</div>
+
+
+
+
+
+
+
+
+
+<div>
+
+<i class="fa-solid fa-file"></i>
+
+
+<p>
+Resume
+</p>
+
+
+
+<a href="/${candidate.resume_path}" target="_blank">
+
+View Resume
+
+</a>
+
+
+
 </div>
 
 
 
 
+
+
+
 </div>
+
+
 
 
 
@@ -639,11 +416,12 @@ ${skills}
 <a href="/interview_schedule?id=${candidate.id}">
 
 
+
 <button class="primary">
 
 
-<i class="fa-solid fa-calendar-check"></i>
 
+<i class="fa-solid fa-calendar-check"></i>
 
 Schedule Interview
 
@@ -651,7 +429,11 @@ Schedule Interview
 </button>
 
 
+
 </a>
+
+
+
 
 
 
@@ -676,20 +458,29 @@ container.innerHTML = html;
 
 
 
-.catch(error=>{
+
+
+.catch(error => {
+
 
 
 console.log(error);
+
 
 
 document.getElementById(
 "candidateList"
 ).innerHTML =
 
+
 `
+
 <p>
+
 Failed to load applicants.
+
 </p>
+
 
 `;
 
@@ -700,6 +491,8 @@ Failed to load applicants.
 
 
 </script>
+
+
 
 
 

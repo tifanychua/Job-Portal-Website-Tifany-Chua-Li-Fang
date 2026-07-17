@@ -3,6 +3,8 @@ __pycache__/
 .venv/
 .coverage
 coverage.xml
+.hypothesis/
 dist/
 .cache/
+src/job_portal_web/backend/firebase_key.json.hypothesis/
 src/job_portal_web/backend/firebase_key.json
