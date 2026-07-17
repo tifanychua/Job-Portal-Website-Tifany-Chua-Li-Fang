@@ -47,226 +47,140 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "ui"))
 @router.get("/applications", response_class=HTMLResponse)
 async def view_applications(request: Request):
 
-    # Temporary company ID
-    # Later retrieve from the employer login session
+    import time
+    start = time.time()
 
     company_id = "C000001"
 
     company = get_company()
 
     # ==================================================
-    # Retrieve Jobs Posted by Current Company
+    # Load all jobs ONCE
     # ==================================================
 
     jobs = []
+    jobs_map = {}
 
-    job_docs = db.collection("job_list").where("company_id", "==", company_id).stream()
-
-    for job_doc in job_docs:
+    for job_doc in db.collection("job_list").stream():
 
         job = job_doc.to_dict()
 
-        # Get and normalize the job status
-        job_status = str(job.get("status", "")).strip().lower()
+        jobs_map[job_doc.id] = job
 
-        # Do not display deleted jobs
-        if job_status == "deleted":
-            continue
+        if (
+            job.get("company_id") == company_id
+            and str(job.get("status", "")).strip().lower() != "deleted"
+        ):
+            jobs.append(
+                {
+                    "job_id": job_doc.id,
+                    "job_title": job.get("job_title", "Untitled Job"),
+                }
+            )
 
-        # Add non-deleted job to the dropdown
-        jobs.append({"job_id": job_doc.id, "job_title": job.get("job_title", "Untitled Job")})
+    # ==================================================
+    # Load all job seekers ONCE
+    # ==================================================
 
-    # Store applications that belong
-    # to the current employer
+    job_seekers = {}
+
+    for doc in db.collection("job_seeker").stream():
+        job_seekers[doc.id] = doc.to_dict()
+
+    # ==================================================
+    # Load all applications ONCE
+    # ==================================================
 
     applications = []
 
-    # ==================================================
-    # Retrieve All Application Documents
-    # ==================================================
-
-    application_docs = db.collection("application").stream()
-
-    for application_doc in application_docs:
-
-        # Convert Firestore document
-        # into a Python dictionary
+    for application_doc in db.collection("application").stream():
 
         application = application_doc.to_dict()
 
-        # ==================================================
-        # Do Not Display Cancelled Applications
-        # ==================================================
+        status = str(application.get("status", "")).strip().lower()
 
-        application_status = application.get("status", "").strip().lower()
-
-        if application_status == "cancelled":
-
+        if status == "cancelled":
             continue
-
-        # ==================================================
-        # Get Job ID from Application
-        # ==================================================
 
         job_id = application.get("job_id")
 
-        # Skip application if job_id
-        # does not exist
-
         if not job_id:
-
             continue
 
-        # ==================================================
-        # Retrieve Related Job
-        # ==================================================
+        # Lookup job from memory
+        job = jobs_map.get(job_id)
 
-        job_doc = db.collection("job_list").document(job_id).get()
-
-        # Skip application if its
-        # related job cannot be found
-
-        if not job_doc.exists:
-
+        if not job:
             continue
 
-        # Convert job document
-        # into a Python dictionary
-
-        job = job_doc.to_dict()
-
-        # ==================================================
-        # Check Company
-        # ==================================================
-
-        job_company_id = job.get("company_id")
-
-        # Do not display applications
-        # belonging to another company
-
-        if job_company_id != company_id:
-
+        if job.get("company_id") != company_id:
             continue
-
-        # ==================================================
-        # Add Application Information
-        # ==================================================
-
-        # Use the actual Firestore document ID
 
         application["application_id"] = application_doc.id
+        application["status"] = status.title()
+        application["job_title"] = job.get("job_title", "Unknown Position")
 
-        # Store normalized status
-        # Example: "new" becomes "New"
-
-        application["status"] = application_status.title()
-
-        # ==================================================
-        # Add Job Information
-        # ==================================================
-
-        application["job_title"] = job.get("job_title") or "Unknown Position"
-
-        # ==================================================
-        # Default Applicant Information
-        # ==================================================
-
+        # Default applicant info
         application["applicant_name"] = "Unknown Applicant"
-
         application["applicant_email"] = "No email provided"
-
         application["experience"] = "Not provided"
-
         application["skills"] = []
 
-        # ==================================================
-        # Get Job Seeker ID
-        # ==================================================
+        # Lookup job seeker from memory
+        job_seeker = job_seekers.get(application.get("job_seeker_id"))
 
-        job_seeker_id = application.get("job_seeker_id")
+        if job_seeker:
 
-        # ==================================================
-        # Retrieve Job Seeker Information
-        # ==================================================
+            application["applicant_name"] = (
+                job_seeker.get("name") or "Unknown Applicant"
+            )
 
-        if job_seeker_id:
+            application["applicant_email"] = (
+                job_seeker.get("email") or "No email provided"
+            )
 
-            job_seeker_doc = db.collection("job_seeker").document(job_seeker_id).get()
+            application["experience"] = (
+                job_seeker.get("experience") or "Not provided"
+            )
 
-            # Check whether the
-            # job seeker exists
-
-            if job_seeker_doc.exists:
-
-                job_seeker = job_seeker_doc.to_dict()
-
-                # Applicant name
-
-                application["applicant_name"] = job_seeker.get("name") or "Unknown Applicant"
-
-                # Applicant email
-
-                application["applicant_email"] = job_seeker.get("email") or "No email provided"
-
-                # Applicant experience
-
-                application["experience"] = job_seeker.get("experience") or "Not provided"
-
-                # Applicant skills
-
-                application["skills"] = job_seeker.get("skills") or []
-
-        # ==================================================
-        # Add Completed Application
-        # ==================================================
+            application["skills"] = (
+                job_seeker.get("skills") or []
+            )
 
         applications.append(application)
 
     # ==================================================
-    # Calculate Application Statistics
+    # Statistics
     # ==================================================
 
-    # Total displayed applications
     total_count = len(applications)
 
-    # Count New applications
     new_count = sum(
-        1
-        for application in applications
-        if str(application.get("status", "")).strip().lower() == "submitted"
+        1 for a in applications
+        if a["status"].lower() == "submitted"
     )
 
-    # Count Reviewed applications
     reviewed_count = sum(
-        1
-        for application in applications
-        if str(application.get("status", "")).strip().lower() == "reviewed"
+        1 for a in applications
+        if a["status"].lower() == "reviewed"
     )
 
-    # Count Shortlisted applications
     shortlisted_count = sum(
-        1
-        for application in applications
-        if str(application.get("status", "")).strip().lower() == "shortlisted"
+        1 for a in applications
+        if a["status"].lower() == "shortlisted"
     )
 
-    # Count Offered applications
     offered_count = sum(
-        1
-        for application in applications
-        if str(application.get("status", "")).strip().lower() == "offered"
+        1 for a in applications
+        if a["status"].lower() == "offered"
     )
 
-    # Count Rejected applications
     rejected_count = sum(
-        1
-        for application in applications
-        if str(application.get("status", "")).strip().lower() == "rejected"
+        1 for a in applications
+        if a["status"].lower() == "rejected"
     )
 
-    # ==================================================
-    # Display Application Page
-    # ==================================================
+    print("Route time:", time.time() - start)
 
     return templates.TemplateResponse(
         request=request,

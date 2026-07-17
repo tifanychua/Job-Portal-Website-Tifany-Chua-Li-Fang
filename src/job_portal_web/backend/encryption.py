@@ -1,9 +1,10 @@
 from cryptography.fernet import Fernet
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
-
+env_path = Path(__file__).parent / ".env"
+load_dotenv(env_path)
 
 SECRET_KEY = os.getenv("MESSAGE_ENCRYPTION_KEY")
 
