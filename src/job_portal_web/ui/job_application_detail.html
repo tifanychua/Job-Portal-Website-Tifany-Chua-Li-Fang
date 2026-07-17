@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Applications | JobConnect</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/css/job_application_detail.css">
+<link rel="stylesheet" href="/static/css/job_information.css">
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+{% include "components/header.html" %}
+
+<!-- ============================== BREADCRUMB ============================== -->
+<div class="back-button-container" style="margin:24px 0 16px 40px; ">
+    <a
+        href="javascript:history.back()"
+        class="back-button"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Back
+    </a>
+</div>
+
+<div class="applications-body">
+
+    {% if application %}
+
+<div class="application-card">
+
+    <!-- ================= HEADER ================= -->
+
+<div class="detail-header">
+
+<div class="detail-header-card">
+
+
+<div class="detail-header-left">
+
+
+<div class="detail-logo">
+    {{ application.job.companyName[:1] }}
+</div>
+
+
+<div>
+
+<div class="detail-title-row">
+
+<h1>
+{{ application.job.job_title }}
+</h1>
+
+
+<span class="badge-pill badge-{{ application.status_color }}">
+    {{ application.status_label }}
+</span>
+
+
+</div>
+
+
+<div class="detail-company-row">
+
+{{ application.job.companyName }}
+
+{% if application.job.company_verified %}
+<i class="fa-solid fa-circle-check verified-badge"></i>
+{% endif %}
+
+</div>
+
+
+
+<div class="detail-meta">
+
+<span>
+<i class="fa-solid fa-location-dot"></i>
+{{ application.job.location }}
+</span>
+
+
+<span class="dot">•</span>
+
+
+<span>
+<i class="fa-regular fa-clock"></i>
+{{ application.job.employment_type }}
+</span>
+
+
+<span class="dot">•</span>
+
+
+<span>
+<i class="fa-regular fa-calendar"></i>
+Applied {{ application.applied_on }}
+</span>
+
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<div class="detail-header-actions">
+
+
+    <a
+    href="/jobs/{{application.job.id}}"
+    class="btn btn-outline">
+
+    View Job
+
+    </a>
+
+
+
+{% if application.status == "Submitted" %}
+
+    <form
+    action="/application/{{ application.id }}/cancel"
+    method="post"
+    onsubmit="return confirm('Are you sure you want to cancel this application?');">
+
+    <button
+    type="submit"
+    class="btn btn-danger">
+
+    <i class="fa-solid fa-ban"></i>
+    Cancell Application
+
+    </button>
+
+
+    </form>
+
+{% endif %}
+
+
+
+</div>
+
+
+</div>
+
+</div>
+
+
+
+
+
+<!-- ================= BODY ================= -->
+
+<div class="detail-body">
+
+
+<main class="detail-main-card">
+
+
+<!-- Resume -->
+
+<div class="application-section">
+
+
+<h3>
+<i class="fa-regular fa-file-lines"></i>
+Resume / CV
+</h3>
+
+
+
+<div class="resume-box">
+
+
+{% if application.resume_name %}
+
+<div class="resume-name">
+
+{{application.resume_name}}
+
+{% if application.resume_url %}
+
+<a
+href="{{ application.resume_url }}"
+target="_blank"
+class="btn btn-outline btn-sm">
+
+<i class="fa-solid fa-file-pdf"></i>
+View Resume
+
+</a>
+
+{% endif %}
+
+
+{% else %}
+
+<p>
+No resume uploaded.
+</p>
+
+
+{% endif %}
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- Cover Letter -->
+
+{% if application.cover_letter %}
+
+
+<div class="application-section">
+
+
+<h3>
+Cover Letter
+</h3>
+
+
+<div class="text-box">
+
+{{ application.cover_letter }}
+
+</div>
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+
+
+<!-- Additional Questions -->
+
+
+{% if application.answer_summary %}
+
+
+<div class="application-section">
+
+
+<h3>
+Additional Questions
+</h3>
+
+
+
+{% for qa in application.answer_summary %}
+
+
+<div class="question-box">
+
+
+<div class="question">
+
+{{qa.label}}
+
+</div>
+
+
+<div class="answer">
+
+{{qa.value}}
+
+</div>
+
+
+</div>
+
+
+
+{% endfor %}
+
+
+
+</div>
+
+
+
+{% endif %}
+
+
+
+
+
+</main>
+
+
+
+
+
+
+
+<!-- ================= SIDEBAR ================= -->
+
+
+<aside>
+
+
+<div class="detail-side-card">
+
+
+<h4>
+Application Summary
+</h4>
+
+
+
+<div class="summary-row">
+
+<span class="label">
+
+Status
+
+</span>
+
+
+<span class="value">
+
+{{application.status}}
+
+</span>
+
+
+</div>
+
+
+
+<div class="summary-row">
+
+<span class="label">
+
+Applied Date
+
+</span>
+
+
+<span class="value">
+
+{{application.applied_on}}
+
+</span>
+
+
+</div>
+
+
+
+<div class="summary-row">
+
+<span class="label">
+
+Position
+
+</span>
+
+
+<span class="value">
+
+{{application.job.position}}
+
+</span>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<div class="detail-side-card">
+
+
+<h4>
+Job Information
+</h4>
+
+
+
+<div class="summary-row">
+
+<span class="label">
+Category
+</span>
+
+
+<span class="value">
+{{application.job.category}}
+</span>
+
+
+</div>
+
+
+
+<div class="summary-row">
+
+<span class="label">
+Salary
+</span>
+
+
+<span class="value">
+{{application.job.salary_display}}
+</span>
+
+
+</div>
+
+
+
+<div class="summary-row">
+
+<span class="label">
+Location
+</span>
+
+
+<span class="value">
+{{application.job.location}}
+</span>
+
+
+</div>
+
+
+
+</div>
+
+
+{% else %}
+
+<div class="empty-state">
+
+    <h3>
+        Application not found
+    </h3>
+
+</div>
+
+
+{% endif %}
+
+
+</div> <!-- applications-body -->
+
+
+</body>
+</html>

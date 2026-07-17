@@ -1,0 +1,364 @@
+.main-content{
+
+    margin-left:200px;
+    margin-top:85px;
+
+    padding:35px;
+
+    background:#f8fafc;
+
+    min-height:100vh;
+}
+
+/* Header */
+
+.page-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:30px;
+}
+
+.page-header h1{
+
+    font-size:28px;
+    font-weight:700;
+
+    color:#1f2937;
+
+    margin-bottom:8px;
+}
+
+.page-header p{
+
+    color:#6b7280;
+    font-size:15px;
+}
+
+/* Button */
+
+.post-btn{
+
+    background:#2563EB;
+
+    color:white;
+
+    text-decoration:none;
+
+    padding:13px 24px;
+
+    border-radius:8px;
+
+    font-size:14px;
+    font-weight:600;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.post-btn:hover{
+
+    background:#1d4ed8;
+}
+
+/* =========================
+   Toolbar
+========================= */
+
+.job-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+
+    margin-top: 30px;
+    margin-bottom: 25px;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Left side: tabs */
+.job-tabs {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-shrink: 0;
+}
+
+.job-tab {
+    appearance: none;
+    border: none;
+    background: transparent;
+
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+
+    padding: 0 0 12px 0;
+
+    cursor: pointer;
+
+    border-bottom: 2px solid transparent;
+}
+
+.job-tab:hover {
+    color: #2563eb;
+}
+
+.job-tab.active {
+    color: #2563eb;
+    border-bottom: 2px solid #2563eb;
+}
+
+
+/* Right side: Search + Filter */
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    margin-left: auto;
+    padding-bottom: 12px;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+
+    width: 340px;
+    height: 40px;
+
+    border: 1px solid #e9edf3;
+    background: #fcfcfd;
+
+    border-radius: 8px;
+
+    padding: 0 14px;
+    gap: 10px;
+
+    box-sizing: border-box;
+}
+
+.search-box i {
+    color: #9ca3af;
+    font-size: 15px;
+}
+
+.search-box input {
+    width: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    font-size: 14px;
+}
+
+.filter-btn {
+    height: 40px;
+    padding: 0 20px;
+
+    border: 1px solid #e9edf3;
+    background: #fcfcfd;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+
+/* =========================
+   Job Table
+========================= */
+
+.job-table-container {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #e6eaf0;
+    border-radius: 10px;
+    overflow: visible;
+}
+
+.job-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.job-table th {
+    padding: 16px 18px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    background: #fafbfc;
+    border-bottom: 1px solid #e6eaf0;
+}
+
+.job-table td {
+    padding: 16px 18px;
+    font-size: 14px;
+    color: #334155;
+    border-bottom: 1px solid #edf0f4;
+    vertical-align: middle;
+}
+
+.job-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.job-table tbody tr:hover {
+    background: #fafcff;
+}
+
+
+/* =========================
+   Job Title
+========================= */
+
+.job-title-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.job-title-cell strong {
+    color: #172554;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.job-title-cell span {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.job-title-cell span i {
+    margin-right: 4px;
+    color: #94a3b8;
+}
+
+
+/* =========================
+   Status
+========================= */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active {
+    color: #16a34a;
+    background: #dcfce7;
+}
+
+.status-draft {
+    color: #d97706;
+    background: #fef3c7;
+}
+
+.status-closed {
+    color: #dc2626;
+    background: #fee2e2;
+}
+
+.status-expired {
+    color: #64748b;
+    background: #e2e8f0;
+}
+
+
+/* =========================
+   Action Menu
+========================= */
+
+.action-cell {
+    position: relative;
+}
+
+.action-menu-btn {
+    width: 36px;
+    height: 32px;
+    border: 1px solid #dbe2ea;
+    background: #ffffff;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #64748b;
+}
+
+.action-menu-btn:hover {
+    background: #f8fafc;
+    color: #2563eb;
+}
+
+.action-dropdown {
+    display: none;
+    position: absolute;
+    right: 15px;
+    top: 50px;
+    min-width: 140px;
+    padding: 6px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+}
+
+.action-dropdown.show {
+    display: block;
+}
+
+.action-dropdown a,
+.action-dropdown button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 5px;
+    background: none;
+    color: #334155;
+    font-size: 13px;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: left;
+}
+
+.action-dropdown a:hover {
+    background: #f1f5f9;
+}
+
+.action-dropdown .delete-action {
+    color: #dc2626;
+}
+
+.action-dropdown .delete-action:hover {
+    background: #fef2f2;
+}
+
+
+/* =========================
+   Empty Table
+========================= */
+
+.no-jobs {
+    padding: 50px !important;
+    text-align: center;
+    color: #94a3b8 !important;
+}

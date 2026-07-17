@@ -1,0 +1,430 @@
+
+/* ================= MAIN CONTAINER ================= */
+.applications-body {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 40px 60px;
+}
+/* ================= PAGE HEADER ================= */
+.application-page-header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+.application-page-header h1 {
+    margin:0 0 8px;
+    font-size:30px;
+    font-weight:700;
+    color:var(--color-text);
+}
+.application-page-header p {
+    margin:0;
+    color:var(--color-text-secondary);
+    font-size:15px;
+}
+.application-total {
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    background:var(--color-primary);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:22px;
+    font-weight:700;
+}
+/* ================= FILTER BUTTONS ================= */
+.application-filter {
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:32px;
+}
+
+
+.filter-btn {
+
+    display:flex;
+    align-items:center;
+
+    gap:12px;
+
+    padding:14px 20px;
+
+    min-width:150px;
+
+    background:var(--color-card-bg);
+
+    border:1px solid var(--color-border);
+
+    border-radius:14px;
+
+    text-decoration:none;
+
+    color:var(--color-text);
+
+    transition:.25s ease;
+
+    position:relative;
+
+}
+
+
+
+.filter-btn:hover {
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+
+
+/* icon */
+
+.filter-icon {
+
+    width:38px;
+    height:38px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:12px;
+
+    background:var(--color-bg);
+
+    font-size:16px;
+
+}
+
+
+
+/* content */
+
+.filter-content {
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+}
+
+
+
+.filter-label {
+
+    font-size:14px;
+
+    font-weight:700;
+
+}
+
+
+
+.filter-count {
+
+    font-size:12px;
+
+    color:#777;
+
+}
+
+
+
+/* active */
+
+.filter-btn.active {
+
+    border-color:var(--color-primary);
+
+    background:rgba(37,99,235,.08);
+
+}
+
+
+
+.filter-btn.active::after {
+
+    content:"";
+
+    position:absolute;
+
+    bottom:-1px;
+
+    left:20px;
+
+    right:20px;
+
+    height:3px;
+
+    background:var(--color-primary);
+
+    border-radius:10px;
+
+}
+
+
+
+/* status colors */
+
+
+.filter-submitted .filter-icon {
+
+    color:#2563eb;
+
+    background:#dbeafe;
+
+}
+
+
+
+.filter-shortlisted .filter-icon {
+
+    color:#ca8a04;
+
+    background:#fef3c7;
+
+}
+
+
+
+.filter-offered .filter-icon {
+
+    color:#16a34a;
+
+    background:#dcfce7;
+
+}
+
+
+
+.filter-rejected .filter-icon {
+
+    color:#dc2626;
+
+    background:#fee2e2;
+
+}
+
+
+
+.filter-cancelled .filter-icon {
+
+    color:#6b7280;
+
+    background:#f3f4f6;
+
+}
+
+
+
+.filter-all .filter-icon {
+
+    color:#7c3aed;
+
+    background:#ede9fe;
+
+}
+/* ================= APPLICATION CARD ================= */
+.application-list {
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+.application-card {
+    background:var(--color-card-bg);
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-lg);
+    padding:24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:24px;
+    transition:.2s ease;
+    cursor:pointer;
+}
+
+.application-card-link {
+    text-decoration:none;
+    color:inherit;
+    display:block;
+}
+
+.application-card-link:hover .application-card {
+    transform:translateY(-3px);
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+.application-card-link:hover h2 {
+    color:var(--color-primary);
+}
+/* ================= LEFT CONTENT ================= */
+.application-left {
+    display:flex;
+    align-items:flex-start;
+    gap:18px;
+    flex:1;
+}
+.application-logo {
+    width:60px;
+    height:60px;
+    border-radius:14px;
+    background:var(--color-primary);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:24px;
+    font-weight:700;
+    flex-shrink:0;
+}
+.application-content {
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+.application-title-row {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+.application-title-row h2 {
+    margin:0;
+    font-size:18px;
+    font-weight:700;
+    color:var(--color-text);
+}
+.company-row {
+    font-size:15px;
+    font-weight:600;
+    color:var(--color-text-secondary);
+}
+.verified-badge {
+    color:#2563EB;
+    margin-left:5px;
+}
+.application-meta {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    font-size:14px;
+    color:var(--color-text-secondary);
+}
+.application-meta i {
+    margin-right:5px;
+}
+.dot {
+    color:#94A3B8;
+}
+.resume-row {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--color-text-secondary);
+}
+/* ================= RIGHT BUTTON ================= */
+.application-right {
+    width:150px;
+}
+.application-right .btn {
+    width:100%;
+    justify-content:center;
+}
+/* ================= STATUS BADGE ================= */
+.badge-pill {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:5px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+}
+.badge-blue {
+    background:#DBEAFE;
+    color:#2563EB;
+}
+.badge-orange {
+    background:#FFEDD5;
+    color:#EA580C;
+}
+.badge-yellow {
+    background:#FFEDD5;
+    color:#ffea00;
+}
+.badge-green {
+    background:#DCFCE7;
+    color:#16A34A;
+}
+.badge-red {
+    background:#FEE2E2;
+    color:#DC2626;
+}
+.badge-grey {
+    background:#F1F5F9;
+    color:#64748B;
+}
+/* ================= EMPTY STATE ================= */
+.empty-state {
+    background:var(--color-card-bg);
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-lg);
+    padding:70px 20px;
+    text-align:center;
+}
+.empty-icon {
+    font-size:45px;
+    color:var(--color-text-secondary);
+    margin-bottom:20px;
+}
+.empty-state h2 {
+    margin:0 0 10px;
+    font-size:20px;
+    color:var(--color-text);
+}
+.empty-state p {
+    color:var(--color-text-secondary);
+    margin-bottom:25px;
+}
+/* ================= RESPONSIVE ================= */
+@media(max-width:900px){
+    .application-card {
+        flex-direction:column;
+        align-items:flex-start;
+    }
+    .application-right {
+        width:100%;
+    }
+}
+@media(max-width:600px){
+    .applications-body {
+        padding:24px 16px 50px;
+    }
+    .application-page-header {
+        flex-direction:column;
+        align-items:flex-start;
+        gap:20px;
+    }
+    .application-left {
+        flex-direction:column;
+    }
+    .application-meta {
+        flex-direction:column;
+        align-items:flex-start;
+        gap:6px;
+    }
+    .dot {
+        display:none;
+    }
+}

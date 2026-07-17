@@ -1,0 +1,705 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f8fafc;
+    font-family: Arial, sans-serif;
+}
+
+
+/* =========================
+   Main Content
+========================= */
+
+.main-content {
+    margin-left: 200px;
+    margin-top: 85px;
+    padding: 35px;
+    min-height: 100vh;
+    background: #f8fafc;
+}
+
+
+/* =========================
+   Page Header
+========================= */
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-header h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #172554;
+}
+
+.page-header p {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+
+/* =========================
+   Application Statistics
+========================= */
+
+.application-stats {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.stat-card {
+    min-height: 105px;
+    padding: 20px 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.stat-top {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.total-icon {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.new-icon {
+    background: #dbeafe;
+    color: #3b82f6;
+}
+
+.reviewing-icon {
+    background: #ffedd5;
+    color: #f97316;
+}
+
+.shortlisted-icon {
+    background: #d1fae5;
+    color: #10b981;
+}
+
+.interview-icon {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.offered-icon {
+    background: #cffafe;
+    color: #0891b2;
+}
+
+.stat-number {
+    color: #172554;
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    color: #64748b;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+
+/* =========================
+   Job Selection and Search
+========================= */
+
+.application-toolbar {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.job-select-group {
+    width: 310px;
+    flex-shrink: 0;
+}
+
+.job-select-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #172554;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.job-select-group select {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid #dbe2ea;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #172554;
+    font-size: 13px;
+    outline: none;
+}
+
+.application-search {
+    position: relative;
+    flex: 1;
+}
+
+.application-search i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    font-size: 14px;
+}
+
+.application-search input {
+    width: 100%;
+    height: 44px;
+    padding: 0 15px 0 42px;
+    border: 1px solid #dbe2ea;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #172554;
+    font-size: 13px;
+    outline: none;
+}
+
+.application-search input:focus,
+.job-select-group select:focus,
+.filter-group select:focus {
+    border-color: #2563eb;
+}
+
+
+/* =========================
+   Filters
+========================= */
+
+.filter-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.filter-group {
+    width: 190px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #172554;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.filter-group select {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #dbe2ea;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 13px;
+    outline: none;
+}
+
+.clear-filter-btn {
+    height: 42px;
+    padding: 0 18px;
+    border: 1px solid #dbe2ea;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #172554;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.clear-filter-btn i {
+    margin-right: 7px;
+}
+
+.clear-filter-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+/* ==================================
+   Application Table
+================================== */
+
+.application-table-container {
+    margin-top: 20px;
+    background: #ffffff;
+    border: 1px solid #e5eaf2;
+    border-radius: 12px;
+    overflow: visible;
+}
+
+.application-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.application-table thead {
+    background: #f8faff;
+}
+
+.application-table th {
+    padding: 16px;
+    color: #263765;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    border-bottom: 1px solid #e5eaf2;
+}
+
+.application-table td {
+    padding: 16px;
+    color: #34436a;
+    font-size: 13px;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.application-table tbody tr:hover {
+    background: #fafbff;
+}
+
+
+/* Applicant */
+
+.applicant-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.applicant-avatar {
+    width: 42px;
+    height: 42px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    flex-shrink: 0;
+
+    color: #ffffff;
+    background: #3157d5;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    border-radius: 50%;
+}
+
+.applicant-name {
+    color: #182d64;
+    font-weight: 600;
+}
+
+.applicant-email {
+    margin-top: 4px;
+
+    color: #8993aa;
+
+    font-size: 11px;
+}
+
+
+/* Position */
+
+.position-name {
+    color: #263d76;
+    font-weight: 500;
+}
+
+
+/* Skills */
+
+.skill-list {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.skill-tag,
+.skill-more {
+    padding: 5px 9px;
+
+    color: #3e5183;
+    background: #f1f4fa;
+
+    font-size: 11px;
+
+    border-radius: 5px;
+}
+
+
+/* Date */
+
+.application-date {
+    color: #304574;
+    font-weight: 500;
+}
+
+.application-time {
+    margin-top: 4px;
+
+    color: #73809e;
+
+    font-size: 11px;
+}
+
+
+/* Status */
+
+.application-status {
+    display: inline-block;
+
+    padding: 6px 11px;
+
+    font-size: 11px;
+    font-weight: 500;
+
+    border-radius: 6px;
+}
+
+.status-submitted {
+    color: #3170df;
+    background: #e8f1ff;
+}
+
+
+.status-shortlisted {
+    color: #168b68;
+    background: #dcf7ed;
+}
+
+.status-offered {
+    color: #168aa6;
+    background: #dcf6fb;
+}
+
+.status-rejected {
+    color: #dc4c5b;
+    background: #ffe7e9;
+}
+
+.rejected-icon {
+    color: #dc3545;
+
+    background-color: #ffe7e9;
+}
+
+
+/* Actions */
+
+.application-actions {
+    display: flex;
+    gap: 7px;
+}
+
+.action-button {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: #30477c;
+    background: #ffffff;
+
+    border: 1px solid #dfe5ef;
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    text-decoration: none;
+}
+
+.action-button:hover {
+    color: #ffffff;
+    background: #3157d5;
+    border-color: #3157d5;
+}
+
+
+/* Empty Application */
+
+.no-applications {
+    padding: 60px !important;
+
+    color: #8b96ac;
+
+    text-align: center;
+}
+
+.no-applications i {
+    margin-bottom: 10px;
+
+    font-size: 30px;
+}
+
+/* ==========================================
+   Status Dropdown Container
+========================================== */
+
+.status-menu-container {
+    position: relative;
+    display: inline-block;
+}
+
+
+/* ==========================================
+   Status Dropdown
+========================================== */
+
+.status-dropdown {
+    position: absolute;
+
+    top: calc(100% + 8px);
+    right: 0;
+
+    width: 120px;
+
+    padding: 6px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #dce4f0;
+    border-radius: 10px;
+
+    box-shadow:
+        0 8px 24px
+        rgba(15, 42, 90, 0.14);
+
+    display: none;
+
+    z-index: 1000;
+}
+
+
+/* Display dropdown */
+
+.status-dropdown.show {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+/* ==========================================
+   Status Option
+========================================== */
+
+.status-option {
+    width: 100%;
+
+    padding: 3px;
+
+    background: transparent;
+
+    border: none;
+    border-radius: 7px;
+
+    text-align: left;
+
+    cursor: pointer;
+    text-align: center;
+}
+
+
+/* Hover effect */
+
+.status-option:hover {
+    background-color: #f5f8fd;
+}
+
+
+/* ==========================================
+   Status Badge
+========================================== */
+
+.status-badge {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 90px;
+
+    padding: 6px 12px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    text-align: center;
+}
+
+
+/* New */
+
+.status-new,
+.status-submitted {
+    color: #2563eb;
+
+    background-color: #e8f1ff;
+}
+
+
+/* Shortlisted */
+
+.status-shortlisted {
+    color: #059669;
+
+    background-color: #d8f8e9;
+}
+
+
+/* Offered */
+
+.status-offered {
+    color: #0891b2;
+
+    background-color: #d9f7fb;
+}
+
+
+/* Rejected */
+
+.status-rejected {
+    color: #dc3545;
+
+    background-color: #ffe5e8;
+}
+
+.status-reviewed {
+    color: #ea580c;
+    background-color: #ffedd5;
+}
+
+.reviewed-icon {
+    color: #f97316;
+    background-color: #ffedd5;
+}
+
+/* ========================================== */
+/* Application Actions */
+/* ========================================== */
+
+.application-actions {
+
+    display: grid;
+
+    /* Always reserve four action spaces */
+
+    grid-template-columns:
+        repeat(4, 42px);
+
+    align-items: center;
+
+    gap: 10px;
+
+}
+
+
+/* All action buttons use the same size */
+
+.action-button {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #dbe3ef;
+
+    border-radius: 9px;
+
+    background-color: #ffffff;
+
+}
+
+
+/* Disabled interview button */
+
+.disabled-action-button {
+
+    color: #b8c2d1;
+
+    background-color: #f8fafc;
+
+    border-color: #e5eaf1;
+
+    cursor: not-allowed;
+
+    opacity: 0.65;
+
+}
+
+
+/* Active interview button */
+
+.interview-button {
+
+    color: #059669;
+
+    background-color: #ecfdf5;
+
+    border-color: #86efac;
+
+}
+
+
+.interview-button:hover {
+
+    color: #047857;
+
+    background-color: #d1fae5;
+
+}
