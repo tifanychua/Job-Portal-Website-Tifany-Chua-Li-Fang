@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>View All Applications</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/application.css">
+</head>
+
+<body>
+
+    {% include "employerHeader.html" %}
+
+    <main class="main-content">
+
+        <!-- ============================= -->
+        <!-- Page Header -->
+        <!-- ============================= -->
+
+        <div class="page-header">
+
+            <h1>Applications</h1>
+
+            <p>
+                Manage and review job applications received for your posted jobs.
+            </p>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- Application Summary Cards -->
+        <!-- ============================= -->
+
+        <div class="application-stats">
+
+            <!-- Total Applications -->
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-icon total-icon">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-number">
+                            {{ total_count }}
+                        </div>
+
+                        <div class="stat-label">
+                            Total Applications
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- New Applications -->
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-icon new-icon">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-number">
+                            {{ new_count }}
+                        </div>
+
+                        <div class="stat-label">
+                            New
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Reviewed Applications -->
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-icon reviewed-icon">
+
+                        <i class="fa-regular fa-eye"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <div class="stat-number">
+
+                            {{ reviewed_count }}
+
+                        </div>
+
+
+                        <div class="stat-label">
+
+                            Reviewed
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Shortlisted Applications -->
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-icon shortlisted-icon">
+                        <i class="fa-regular fa-bookmark"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-number">
+                            {{ shortlisted_count }}
+                        </div>
+
+                        <div class="stat-label">
+                            Shortlisted
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Offered Applications -->
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-icon offered-icon">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-number">
+                            {{ offered_count }}
+                        </div>
+
+                        <div class="stat-label">
+                            Offered
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Rejected Applications -->
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div class="stat-icon rejected-icon">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+
+                    <div>
+                        <div class="stat-number">
+                            {{ rejected_count }}
+                        </div>
+
+                        <div class="stat-label">
+                            Rejected
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- Job Selection and Search -->
+        <!-- ============================= -->
+
+        <div class="application-toolbar">
+
+            <div class="job-select-group">
+
+                <label>Select Job</label>
+
+                <select id="jobSelect" name="job_id">
+
+                    <!-- Display applications from all jobs -->
+                    <option value="all">
+                        All Jobs
+                    </option>
+
+
+                    <!-- Retrieve employer jobs from Firestore -->
+
+                    {% for job in jobs %}
+
+                        <option value="{{ job.job_id }}">
+
+                            {{ job.job_title }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <div class="application-search">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    id="applicationSearch"
+                    placeholder="Search by name, skills, or email...">
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================= -->
+        <!-- Filters -->
+        <!-- ============================= -->
+
+        <div class="filter-container">
+
+            <div class="filter-group">
+
+                <label>Filter by Status</label>
+
+                <select id="statusFilter">
+                    <option value="all">All Status</option>
+                    <option value="new">New</option>
+                    <option value="reviewed">Reviewed</option>
+                    <option value="shortlisted">Shortlisted</option>
+                    <option value="offered">Offered</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label>Experience Level</label>
+
+                <select id="experienceFilter">
+                    <option value="all">All Experience</option>
+                    <option value="entry">Entry Level</option>
+                    <option value="1-2">1 - 2 Years</option>
+                    <option value="3-5">3 - 5 Years</option>
+                    <option value="5+">5+ Years</option>
+                </select>
+
+            </div>
+
+
+            <div class="filter-group">
+
+                <label>Application Date</label>
+
+                <select id="dateFilter">
+                    <option value="all">All Date</option>
+                    <option value="today">Today</option>
+                    <option value="7days">Last 7 Days</option>
+                    <option value="30days">Last 30 Days</option>
+                </select>
+
+            </div>
+
+
+            <button type="button" class="clear-filter-btn" id="clearFilterButton">
+                <i class="fa-solid fa-rotate-left"></i>
+                Clear Filters
+            </button>
+
+        </div>
+
+        <!-- ============================= -->
+        <!-- Application Table -->
+        <!-- ============================= -->
+
+        <div class="application-table-container">
+
+            <table class="application-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Applicant</th>
+
+                        <th>Applied Position</th>
+
+                        <th>Experience</th>
+
+                        <th>Key Skills</th>
+
+                        <th>Applied Date</th>
+
+                        <th>Status</th>
+
+                        <th>Actions</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="applicationTableBody">
+
+                    {% for application in applications %}
+
+                    <tr
+                        data-job-id="{{ application.job_id }}"
+
+                        data-status="{{ application.status | lower }}"
+
+                        data-experience="{{ application.experience | lower }}"
+
+                        data-application-date="
+                            {% if application.created_at %}
+                                {{ application.created_at.strftime('%Y-%m-%d') }}
+                            {% endif %}
+                        "
+
+                        data-search="
+                            {{ application.applicant_name | lower }}
+                            {{ application.applicant_email | lower }}
+                            {{ application.job_title | lower }}
+                            {{ application.skills | join(' ') | lower }}
+                        "
+                    >
+
+                        <!-- Applicant -->
+                        <td>
+
+                            <div class="applicant-info">
+
+                                <div class="applicant-avatar">
+
+                                    {{ application.applicant_name[0] | upper }}
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="applicant-name">
+
+                                        {{ application.applicant_name }}
+
+                                    </div>
+
+
+                                    <div class="applicant-email">
+
+                                        {{ application.applicant_email }}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Applied Position -->
+                        <td>
+
+                            <span class="position-name">
+
+                                {{ application.job_title }}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- Experience -->
+                        <td>
+
+                            {{ application.experience }}
+
+                        </td>
+
+
+                        <!-- Key Skills -->
+                        <td>
+
+                            <div class="skill-list">
+
+                                {% if application.skills %}
+
+                                    {% for skill in application.skills[:2] %}
+
+                                        <span class="skill-tag">
+
+                                            {{ skill }}
+
+                                        </span>
+
+                                    {% endfor %}
+
+
+                                    {% if application.skills | length > 2 %}
+
+                                        <span class="skill-more">
+
+                                            +{{ application.skills | length - 2 }}
+
+                                        </span>
+
+                                    {% endif %}
+
+                                {% else %}
+
+                                    <span class="no-data">
+
+                                        No skills
+
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Applied Date -->
+                        <td>
+
+                            {% if application.created_at %}
+
+                                <div class="application-date">
+
+                                    {{ application.created_at.strftime(
+                                        "%d %b %Y"
+                                    ) }}
+
+                                </div>
+
+
+                                <div class="application-time">
+
+                                    {{ application.created_at.strftime(
+                                        "%I:%M %p"
+                                    ) }}
+
+                                </div>
+
+                            {% else %}
+
+                                Not available
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Status -->
+                        <td>
+
+                            {% set status =
+                                application.status | lower
+                            %}
+
+                            <span class="
+                                application-status
+                                status-{{ status }}
+                            ">
+
+                                {% if status == "submitted" %}
+
+                                    New
+
+                                {% else %}
+
+                                    {{ application.status }}
+
+                                {% endif %}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- Actions -->
+                        <td>
+
+                            <div class="application-actions">
+
+
+                                <!-- Resume -->
+
+                                <a
+                                    href="/application/resume/{{ application.application_id }}"
+                                    class="action-button"
+                                    title="View Resume"
+                                    target="_blank"
+                                >
+                                    <i class="fa-regular fa-file"></i>
+                                </a>
+
+
+                                <!-- View Application -->
+
+                                <a
+                                    href="/application/
+                                    {{ application.application_id }}"
+
+                                    class="action-button"
+
+                                    title="View Application"
+                                >
+
+                                    <i class="
+                                        fa-regular
+                                        fa-eye
+                                    "></i>
+
+                                </a>
+
+                                <!-- Interview Management -->
+
+                                {% if status == "shortlisted" %}
+
+                                <!-- Enabled for shortlisted applications -->
+
+                                <a
+                                    href="/interview-management/{{ application.application_id }}"
+
+                                    class="
+                                        action-button
+                                        interview-button
+                                    "
+
+                                    title="Manage Interview"
+                                >
+
+                                    <i class="fa-regular fa-calendar-check"></i>
+
+                                </a>
+
+
+                                {% else %}
+
+
+                                <!-- Disabled placeholder -->
+
+                                <button
+                                    type="button"
+
+                                    class="
+                                        action-button
+                                        disabled-action-button
+                                    "
+
+                                    title="Available after applicant is shortlisted"
+
+                                    disabled
+                                >
+
+                                    <i class="fa-regular fa-calendar-check"></i>
+
+                                </button>
+
+
+                                {% endif %}
+
+
+                                <!-- More / Change Status -->
+
+                                {% if status != "offered"
+                                    and status != "rejected" %}
+
+                                <div class="status-menu-container">
+
+                                    <!-- Three-dot button -->
+
+                                    <button
+                                        type="button"
+                                        class="action-button status-menu-button"
+
+                                        onclick="toggleStatusMenu(
+                                            event,
+                                            '{{ application.application_id }}'
+                                        )"
+
+                                        title="Change Status"
+                                    >
+
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+
+                                    </button>
+
+
+                                    <!-- Status dropdown -->
+
+                                    <div
+                                        class="status-dropdown"
+
+                                        id="status-menu-{{ application.application_id }}"
+                                    >
+
+
+                                        <!-- Reviewed -->
+
+                                        <button
+                                            type="button"
+                                            class="status-option"
+
+                                            onclick="updateApplicationStatus(
+                                                '{{ application.application_id }}',
+                                                'Reviewed'
+                                            )"
+                                        >
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-reviewed
+                                                "
+                                            >
+
+                                                Reviewed
+
+                                            </span>
+
+                                        </button>
+
+
+                                        <!-- Shortlisted -->
+
+                                        <button
+                                            type="button"
+                                            class="status-option"
+
+                                            onclick="updateApplicationStatus(
+                                                '{{ application.application_id }}',
+                                                'Shortlisted'
+                                            )"
+                                        >
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-shortlisted
+                                                "
+                                            >
+
+                                                Shortlisted
+
+                                            </span>
+
+                                        </button>
+
+
+                                        <!-- Offered -->
+
+                                        <button
+                                            type="button"
+                                            class="status-option"
+
+                                            onclick="updateApplicationStatus(
+                                                '{{ application.application_id }}',
+                                                'Offered'
+                                            )"
+                                        >
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-offered
+                                                "
+                                            >
+
+                                                Offered
+
+                                            </span>
+
+                                        </button>
+
+
+                                        <!-- Rejected -->
+
+                                        <button
+                                            type="button"
+                                            class="status-option"
+
+                                            onclick="updateApplicationStatus(
+                                                '{{ application.application_id }}',
+                                                'Rejected'
+                                            )"
+                                        >
+
+                                            <span
+                                                class="
+                                                    status-badge
+                                                    status-rejected
+                                                "
+                                            >
+
+                                                Rejected
+
+                                            </span>
+
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+
+                                {% else %}
+
+
+                                <!-- Final status cannot be changed -->
+
+                                <button
+                                    type="button"
+
+                                    class="
+                                        action-button
+                                        status-locked-button
+                                    "
+
+                                    title="Final status cannot be changed"
+
+                                    disabled
+                                >
+
+                                    <i class="fa-solid fa-lock"></i>
+
+                                </button>
+
+
+                                {% endif %}
+
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+
+                    {% else %}
+
+
+                    <tr>
+
+                <td
+                    colspan="7"
+
+                    class="no-applications"
+                >
+
+                    <i class="
+                        fa-regular
+                        fa-folder-open
+                    "></i>
+
+
+                    <p>
+
+                        No applications received yet.
+
+                    </p>
+
+                </td>
+
+            </tr>
+
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+    </main>
+
+    <script>
+
+        // ==================================================
+        // Get Filter Elements
+        // ==================================================
+
+        const jobSelect =
+            document.getElementById(
+                "jobSelect"
+            );
+
+
+        const applicationSearch =
+            document.getElementById(
+                "applicationSearch"
+            );
+
+
+        const statusFilter =
+            document.getElementById(
+                "statusFilter"
+            );
+
+
+        const experienceFilter =
+            document.getElementById(
+                "experienceFilter"
+            );
+
+
+        const dateFilter =
+            document.getElementById(
+                "dateFilter"
+            );
+
+
+        const clearFilterButton =
+            document.getElementById(
+                "clearFilterButton"
+            );
+
+
+        // ==================================================
+        // Filter Applications
+        // ==================================================
+
+        function filterApplications() {
+
+
+            // ==============================================
+            // Get Selected Filter Values
+            // ==============================================
+
+            const selectedJobId =
+                jobSelect.value;
+
+
+            const searchKeyword =
+                applicationSearch
+                    .value
+                    .trim()
+                    .toLowerCase();
+
+
+            const selectedStatus =
+                statusFilter.value;
+
+
+            const selectedExperience =
+                experienceFilter.value;
+
+
+            const selectedDate =
+                dateFilter.value;
+
+
+            // ==============================================
+            // Get Application Rows
+            // ==============================================
+
+            const applicationRows =
+                document.querySelectorAll(
+                    "#applicationTableBody " +
+                    "tr[data-job-id]"
+                );
+
+
+            // ==============================================
+            // Check Every Application
+            // ==============================================
+
+            applicationRows.forEach(
+                function (row) {
+
+
+                    // Application information
+
+                    const applicationJobId =
+                        row.dataset.jobId;
+
+
+                    let applicationStatus =
+                        row.dataset.status
+                            .trim()
+                            .toLowerCase();
+
+
+                    const applicationExperience =
+                        row.dataset.experience
+                            .trim()
+                            .toLowerCase();
+
+
+                    const applicationDate =
+                        row.dataset.applicationDate
+                            .trim();
+
+
+                    const searchableInformation =
+                        row.dataset.search
+                            .trim()
+                            .toLowerCase();
+
+
+                    // ======================================
+                    // Convert Submitted to New
+                    // ======================================
+
+                    if (
+                        applicationStatus
+                        ===
+                        "submitted"
+                    ) {
+
+                        applicationStatus =
+                            "new";
+
+                    }
+
+
+                    // ======================================
+                    // Check Selected Job
+                    // ======================================
+
+                    const matchesJob =
+
+                        selectedJobId === "all"
+
+                        ||
+
+                        applicationJobId
+                        ===
+                        selectedJobId;
+
+
+                    // ======================================
+                    // Check Search Keyword
+                    // ======================================
+
+                    const matchesSearch =
+
+                        searchKeyword === ""
+
+                        ||
+
+                        searchableInformation
+                            .includes(
+                                searchKeyword
+                            );
+
+
+                    // ======================================
+                    // Check Status
+                    // ======================================
+
+                    const matchesStatus =
+
+                        selectedStatus === "all"
+
+                        ||
+
+                        applicationStatus
+                        ===
+                        selectedStatus;
+
+
+                    // ======================================
+                    // Check Experience
+                    // ======================================
+
+                    let matchesExperience = false;
+
+
+                    if (
+                        selectedExperience
+                        ===
+                        "all"
+                    ) {
+
+                        matchesExperience = true;
+
+                    }
+
+
+                    else if (
+                        selectedExperience
+                        ===
+                        "entry"
+                    ) {
+
+                        matchesExperience =
+
+                            applicationExperience
+                                .includes(
+                                    "entry"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "fresh"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "0 year"
+                                );
+
+                    }
+
+
+                    else if (
+                        selectedExperience
+                        ===
+                        "1-2"
+                    ) {
+
+                        matchesExperience =
+
+                            applicationExperience
+                                .includes(
+                                    "1"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "2"
+                                );
+
+                    }
+
+
+                    else if (
+                        selectedExperience
+                        ===
+                        "3-5"
+                    ) {
+
+                        matchesExperience =
+
+                            applicationExperience
+                                .includes(
+                                    "3"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "4"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "5"
+                                );
+
+                    }
+
+
+                    else if (
+                        selectedExperience
+                        ===
+                        "5+"
+                    ) {
+
+                        matchesExperience =
+
+                            applicationExperience
+                                .includes(
+                                    "5+"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "6"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "7"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "8"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "9"
+                                )
+
+                            ||
+
+                            applicationExperience
+                                .includes(
+                                    "10"
+                                );
+
+                    }
+
+
+                    // ======================================
+                    // Check Application Date
+                    // ======================================
+
+                    let matchesDate = true;
+
+
+                    if (
+                        selectedDate !== "all"
+                    ) {
+
+
+                        // Current date
+
+                        const today =
+                            new Date();
+
+
+                        today.setHours(
+                            0,
+                            0,
+                            0,
+                            0
+                        );
+
+
+                        // Application date
+
+                        const appliedDate =
+                            new Date(
+                                applicationDate
+                            );
+
+
+                        appliedDate.setHours(
+                            0,
+                            0,
+                            0,
+                            0
+                        );
+
+
+                        // Calculate difference
+
+                        const timeDifference =
+
+                            today
+
+                            -
+
+                            appliedDate;
+
+
+                        const dayDifference =
+
+                            timeDifference
+
+                            /
+
+                            (
+                                1000
+                                *
+                                60
+                                *
+                                60
+                                *
+                                24
+                            );
+
+
+                        // Today
+
+                        if (
+                            selectedDate
+                            ===
+                            "today"
+                        ) {
+
+                            matchesDate =
+
+                                dayDifference
+                                ===
+                                0;
+
+                        }
+
+
+                        // Last 7 Days
+
+                        else if (
+                            selectedDate
+                            ===
+                            "7days"
+                        ) {
+
+                            matchesDate =
+
+                                dayDifference
+                                >=
+                                0
+
+                                &&
+
+                                dayDifference
+                                <=
+                                7;
+
+                        }
+
+
+                        // Last 30 Days
+
+                        else if (
+                            selectedDate
+                            ===
+                            "30days"
+                        ) {
+
+                            matchesDate =
+
+                                dayDifference
+                                >=
+                                0
+
+                                &&
+
+                                dayDifference
+                                <=
+                                30;
+
+                        }
+
+                    }
+
+
+                    // ======================================
+                    // Display or Hide Application
+                    // ======================================
+
+                    if (
+
+                        matchesJob
+
+                        &&
+
+                        matchesSearch
+
+                        &&
+
+                        matchesStatus
+
+                        &&
+
+                        matchesExperience
+
+                        &&
+
+                        matchesDate
+
+                    ) {
+
+                        row.style.display = "";
+
+                    }
+
+
+                    else {
+
+                        row.style.display =
+                            "none";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        // ==================================================
+        // Run Filter When Value Changes
+        // ==================================================
+
+        jobSelect.addEventListener(
+            "change",
+            filterApplications
+        );
+
+
+        applicationSearch.addEventListener(
+            "input",
+            filterApplications
+        );
+
+
+        statusFilter.addEventListener(
+            "change",
+            filterApplications
+        );
+
+
+        experienceFilter.addEventListener(
+            "change",
+            filterApplications
+        );
+
+
+        dateFilter.addEventListener(
+            "change",
+            filterApplications
+        );
+
+
+        // ==================================================
+        // Clear All Filters
+        // ==================================================
+
+        clearFilterButton.addEventListener(
+            "click",
+            function () {
+
+
+                // Reset selected job
+
+                jobSelect.value =
+                    "all";
+
+
+                // Clear search keyword
+
+                applicationSearch.value =
+                    "";
+
+
+                // Reset status
+
+                statusFilter.value =
+                    "all";
+
+
+                // Reset experience
+
+                experienceFilter.value =
+                    "all";
+
+
+                // Reset date
+
+                dateFilter.value =
+                    "all";
+
+
+                // Display all applications
+
+                filterApplications();
+
+            }
+        );
+
+        // ==========================================
+        // Open or Close Status Menu
+        // ==========================================
+
+        function toggleStatusMenu(
+            event,
+            applicationId
+        ) {
+
+            // Prevent document click from
+            // immediately closing the menu
+
+            event.stopPropagation();
+
+
+            const selectedMenu =
+                document.getElementById(
+                    "status-menu-" +
+                    applicationId
+                );
+
+
+            // Close other open menus
+
+            document
+                .querySelectorAll(
+                    ".status-dropdown"
+                )
+                .forEach(
+                    function (menu) {
+
+                        if (
+                            menu !== selectedMenu
+                        ) {
+
+                            menu.classList.remove(
+                                "show"
+                            );
+
+                        }
+
+                    }
+                );
+
+
+            // Open or close selected menu
+
+            selectedMenu.classList.toggle(
+                "show"
+            );
+
+        }
+
+
+        // ==========================================
+        // Close Menu When Clicking Outside
+        // ==========================================
+
+        document.addEventListener(
+            "click",
+            function () {
+
+                document
+                    .querySelectorAll(
+                        ".status-dropdown"
+                    )
+                    .forEach(
+                        function (menu) {
+
+                            menu.classList.remove(
+                                "show"
+                            );
+
+                        }
+                    );
+
+            }
+        );
+
+
+        // ==========================================
+        // Update Application Status
+        // ==========================================
+
+        async function updateApplicationStatus(
+            applicationId,
+            newStatus
+        ) {
+
+            // Convert Submitted into New
+            // for the confirmation message
+
+            const displayStatus =
+
+                newStatus === "Submitted"
+
+                ?
+
+                "New"
+
+                :
+
+                newStatus;
+
+
+            // Ask employer for confirmation
+
+            const isConfirmed = confirm(
+
+                "Are you sure you want to change " +
+                "this application status to \"" +
+                displayStatus +
+                "\"?"
+
+            );
+
+
+            // Stop if employer clicks Cancel
+
+            if (!isConfirmed) {
+
+                return;
+
+            }
+
+
+            // Continue updating if employer clicks OK
+
+            try {
+
+                const response = await fetch(
+
+                    "/application/" +
+                    applicationId +
+                    "/status",
+
+                    {
+                        method: "PUT",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json"
+
+                        },
+
+                        body: JSON.stringify({
+
+                            status: newStatus
+
+                        })
+
+                    }
+
+                );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    alert(
+
+                        result.detail
+
+                        ||
+
+                        "Unable to update status."
+
+                    );
+
+                    return;
+
+                }
+
+
+                // Find the selected application row
+
+                const statusMenu = document.getElementById(
+                    "status-menu-" + applicationId
+                );
+
+
+                const applicationRow =
+                    statusMenu.closest("tr");
+
+
+                // Find the status badge in this row
+
+                const statusBadge =
+                    applicationRow.querySelector(
+                        ".application-status"
+                    );
+
+
+                // Update displayed status
+
+                statusBadge.textContent =
+                    displayStatus;
+
+
+                // Remove the previous status colour
+
+                statusBadge.classList.remove(
+                    "status-submitted",
+                    "status-new",
+                    "status-reviewed",
+                    "status-shortlisted",
+                    "status-offered",
+                    "status-rejected"
+                );
+
+
+                // Add the new status colour
+
+                statusBadge.classList.add(
+                    "status-" +
+                    displayStatus.toLowerCase()
+                );
+
+
+                // Update the row status for filtering
+
+                applicationRow.dataset.status =
+                    newStatus.toLowerCase();
+
+
+                // Close the status dropdown
+
+                statusMenu.classList.remove(
+                    "show"
+                );
+
+                // Display successful update message
+
+                alert(
+
+                    "Application status successfully changed to \"" +
+
+                    displayStatus +
+
+                    "\"."
+
+                );
+
+            }
+
+
+            catch (error) {
+
+                console.error(
+
+                    "Status update error:",
+
+                    error
+
+                );
+
+
+                alert(
+
+                    "Something went wrong while " +
+
+                    "updating the application status."
+
+                );
+
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
