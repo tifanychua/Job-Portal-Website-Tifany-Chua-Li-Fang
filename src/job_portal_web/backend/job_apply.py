@@ -6,8 +6,8 @@ from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 
-from database import db, bucket
-from job_information import (
+from .database import db, bucket
+from .job_information import (
     _find_company,
     _normalize_job,
     _attach_company_fields,

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
 from google.cloud.firestore_v1.base_query import FieldFilter
 
-from database import db
+from .database import db
 from collections import Counter
 
 import os

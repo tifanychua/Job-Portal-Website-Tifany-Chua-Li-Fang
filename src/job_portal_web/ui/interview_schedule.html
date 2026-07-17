@@ -8,7 +8,8 @@
 
 <title>JobConnect - Schedule Interview</title>
 
-<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/css/employerInterview.css">
+<link rel="stylesheet" href="/css/employerHeader.css">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -25,8 +26,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 <body>
 
 
-{% include "components/header.html" %}
-
+    {% include "employerHeader.html" %}
 
 
 <div class="interview-container">
@@ -55,7 +55,7 @@ Arrange an interview with shortlisted candidate.
 
 
 
-<a class="back-btn" href="/shortlisted_applicants">
+<a class="back-btn" href="http://127.0.0.1:8000/applications">
 
 <i class="fa-solid fa-arrow-left"></i>
 
@@ -496,11 +496,6 @@ Confirm Interview Schedule
 
 
 
-{% include "components/footer.html" %}
-
-
-
-
 
 <script>
 
@@ -515,10 +510,7 @@ window.location.search
 
 
 
-let candidateId = params.get("id");
-
-
-
+let applicationId = params.get("applicationId");
 
 window.onload = function(){
 
@@ -553,7 +545,7 @@ document.getElementById("date")
 
 
 fetch(
-"/api/applicants/shortlisted/" + candidateId
+"/api/applications/" + applicationId
 )
 
 
@@ -818,12 +810,10 @@ saveInterview();
 function saveInterview(){
 
 
-
 let interviewData = {
 
 
-candidateId: candidateData.id,
-
+candidateId: applicationId,
 
 companyId:"C000001",
 

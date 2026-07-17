@@ -1,16 +1,28 @@
-import os
+from pathlib import Path
 
 import firebase_admin
+
 from firebase_admin import credentials, firestore, storage
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# ==================================================
+# Firebase Key Location
+# ==================================================
+
+BASE_DIR = Path(__file__).resolve().parent
+
+KEY_PATH = BASE_DIR / "firebase_key.json"
 
 
-firebase_key_path = os.path.join(BASE_DIR, "firebase_key.json")
+# ==================================================
+# Firebase Credentials
+# ==================================================
+
+cred = credentials.Certificate(str(KEY_PATH))
 
 
-cred = credentials.Certificate(firebase_key_path)
-
+# ==================================================
+# Initialize Firebase
+# ==================================================
 
 if not firebase_admin._apps:
 
@@ -19,7 +31,15 @@ if not firebase_admin._apps:
     )
 
 
+# ==================================================
+# Firestore Database
+# ==================================================
+
 db = firestore.client()
 
+
+# ==================================================
+# Firebase Storage Bucket
+# ==================================================
 
 bucket = storage.bucket()

@@ -3,10 +3,8 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 from pytest_bdd import scenarios, given, when, then
-from database import db
-
-from main import app
-
+from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # --------------------------------------------------
 # Test Client Fixture
@@ -49,7 +47,6 @@ def test_view_complete_job_information(client: TestClient):
     assert response.status_code == 200
 
 
-
 # --------------------------------------------------
 # 2. Acceptance Test
 # --------------------------------------------------
@@ -75,12 +72,7 @@ def test_view_required_job_information(client: TestClient):
 
         data = response.text
 
-        required_fields = [
-            "job",
-            "description",
-            "location",
-            "company"
-        ]
+        required_fields = ["job", "description", "location", "company"]
 
         missing_fields = []
 
@@ -89,13 +81,9 @@ def test_view_required_job_information(client: TestClient):
                 missing_fields.append(field)
 
         if len(missing_fields) == 0:
-            print(
-                "✅ SUCCESS: Job seeker views required job information"
-            )
+            print("✅ SUCCESS: Job seeker views required job information")
         else:
-            print(
-                f"❌ FAILED: Missing information {missing_fields}"
-            )
+            print(f"❌ FAILED: Missing information {missing_fields}")
 
         assert len(missing_fields) == 0
 
@@ -103,7 +91,6 @@ def test_view_required_job_information(client: TestClient):
         print("❌ FAILED: Job detail page cannot be opened")
 
     assert response.status_code == 200
-
 
 
 # --------------------------------------------------
@@ -161,7 +148,6 @@ def verify_complete_job_information(context):
     assert context.response.status_code == 200
 
 
-
 # --------------------------------------------------
 # Scenario 2:
 # Job seeker views required job information
@@ -192,12 +178,7 @@ def verify_required_job_information(context):
 
         data = context.response.text
 
-        required_fields = [
-            "job",
-            "description",
-            "location",
-            "company"
-        ]
+        required_fields = ["job", "description", "location", "company"]
 
         missing_fields = []
 
@@ -210,9 +191,7 @@ def verify_required_job_information(context):
                 "✅ SUCCESS: Job title, description, requirements, location and company information displayed"
             )
         else:
-            print(
-                f"❌ FAILED: Missing information {missing_fields}"
-            )
+            print(f"❌ FAILED: Missing information {missing_fields}")
 
         assert len(missing_fields) == 0
 

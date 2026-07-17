@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Applications | JobConnect</title>
+  <link rel="stylesheet" href="/static/css/job_application.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+  {% include "components/header.html" %}
+  <div class="applications-body">
+    <!-- ================= PAGE HEADER ================= -->
+    <div class="application-page-header">
+      <div>
+        <h1>
+          My Applications
+        </h1>
+        <p>
+          Track and manage your submitted job applications.
+        </p>
+      </div>
+    </div>
+    <!-- ================= FILTER TABS ================= -->
+    <div class="application-filter">
+
+      <a href="/application?status=all" class="filter-btn {% if active_filter == 'all' %}active{% endif %}">
+
+        <span class="filter-icon all">
+          <i class="fa-solid fa-layer-group"></i>
+        </span>
+
+        <span class="filter-content">
+          <span class="filter-label">
+            All
+          </span>
+
+          <span class="filter-count">
+            {{ total_count }}
+          </span>
+        </span>
+
+      </a>
+
+
+      {% for tab in filter_tabs %}
+
+      {% if tab != "all" %}
+
+      <a href="/application?status={{ tab|capitalize }}" 
+        class="filter-btn filter-{{ tab }}
+        {% if active_filter|lower == tab %}active{% endif %}">
+
+
+        <span class="filter-icon">
+
+          {% if tab == "submitted" %}
+          <i class="fa-regular fa-paper-plane"></i>
+
+          {% elif tab == "reviewed" %}
+          <i class="fa-solid fa-award"></i>
+
+          {% elif tab == "shortlisted" %}
+          <i class="fa-regular fa-star"></i>
+
+          {% elif tab == "offered" %}
+          <i class="fa-solid fa-award"></i>
+
+          {% elif tab == "rejected" %}
+          <i class="fa-solid fa-xmark"></i>
+
+          {% elif tab == "cancelled" %}
+          <i class="fa-solid fa-ban"></i>
+
+          {% endif %}
+
+        </span>
+
+
+        <span class="filter-content">
+
+          <span class="filter-label">
+            {{ tab|capitalize }}
+          </span>
+
+
+          <span class="filter-count">
+
+            {% for key,value in counts.items() %}
+            {% if key|lower == tab %}
+            {{ value }}
+            {% endif %}
+            {% endfor %}
+
+          </span>
+
+        </span>
+
+
+      </a>
+
+      {% endif %}
+
+      {% endfor %}
+
+    </div>
+    <!-- ================= APPLICATION LIST ================= -->
+    {% if application %}
+    <div class="application-list">
+
+      {% for app in application %}
+
+      <a href="/application/{{ app.id }}" class="application-card-link">
+
+        <div class="application-card">
+
+          <!-- LEFT CONTENT -->
+          <div class="application-left">
+
+            <div class="application-logo">
+              {{ app.job.companyName[:1] }}
+            </div>
+
+
+            <div class="application-content">
+
+              <div class="application-title-row">
+
+                <h2>
+                  {{ app.job.job_title }}
+                </h2>
+
+                <span class="badge-pill badge-{{ app.status_color }}">
+                  {{ app.status_label }}
+                </span>
+
+              </div>
+
+
+              <div class="company-row">
+
+                {{ app.job.companyName }}
+
+                {% if app.job.company_verified %}
+                <i class="fa-solid fa-circle-check verified-badge"></i>
+                {% endif %}
+
+              </div>
+
+
+              <div class="application-meta">
+
+                <span>
+                  <i class="fa-solid fa-location-dot"></i>
+                  {{ app.job.location }}
+                </span>
+
+
+                <span class="dot">
+                  •
+                </span>
+
+
+                <span>
+                  <i class="fa-regular fa-clock"></i>
+                  {{ app.job.employment_type }}
+                </span>
+
+
+                <span class="dot">
+                  •
+                </span>
+
+
+                <span>
+                  <i class="fa-regular fa-calendar"></i>
+                  Applied {{ app.applied_on }}
+                </span>
+
+
+              </div>
+
+
+              {% if app.resume_name %}
+              <div class="resume-row">
+
+                <i class="fa-regular fa-file-lines"></i>
+
+                {{ app.resume_name }}
+
+              </div>
+              {% endif %}
+
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </a>
+
+
+      {% endfor %}
+
+    </div>
+    {% else %}
+    <!-- EMPTY STATE -->
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="fa-regular fa-folder-open"></i>
+      </div>
+      <h2>
+        No Applications Found
+      </h2>
+      <p>
+        You have not submitted any job applications yet.
+      </p>
+      <a href="/jobs" class="btn btn-primary">
+        Browse Jobs
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</body>
+
+</html>

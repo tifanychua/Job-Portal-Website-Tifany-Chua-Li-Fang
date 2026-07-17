@@ -52,13 +52,11 @@ def get_skills(skill_ids):
 def get_job_seeker(job_seeker_id):
 
     if not job_seeker_id:
-
         return None
 
     seeker_doc = db.collection("job_seeker").document(job_seeker_id).get()
 
     if not seeker_doc.exists:
-
         return None
 
     seeker = seeker_doc.to_dict()
@@ -88,7 +86,7 @@ def get_shortlisted_candidates():
 
         application = doc.to_dict()
 
-        application["id"] = doc.id
+        application["applicationId"] = doc.id
 
         # Get job seeker information
 
@@ -97,7 +95,6 @@ def get_shortlisted_candidates():
         seeker = get_job_seeker(job_seeker_id)
 
         if seeker:
-
             application.update(seeker)
 
         # Answers
@@ -126,24 +123,25 @@ def get_shortlisted_candidates():
 
 
 # =================================
-# GET SINGLE SHORTLISTED APPLICANT
+# GET SINGLE APPLICATION
+# Used for Schedule Interview Page
 # =================================
 
 
-@router.get("/api/applicants/shortlisted/{id}")
-def get_single_candidate(id: str):
+@router.get("/api/applications/{application_id}")
+def get_application(application_id: str):
 
-    doc = db.collection("application").document(id).get()
+    doc = db.collection("application").document(application_id).get()
 
     if not doc.exists:
 
-        return {"error": "Applicant not found"}
+        return {"error": "Application not found"}
 
     application = doc.to_dict()
 
-    application["id"] = id
+    application["applicationId"] = application_id
 
-    # Get job seeker
+    # Get job seeker information
 
     job_seeker_id = application.get("job_seeker_id")
 
@@ -163,15 +161,11 @@ def get_single_candidate(id: str):
 
     application["relocate"] = answers.get("relocate")
 
-    # ===========================
     # Resume
-    # ===========================
 
     application["resume_filename"] = application.get("resume_filename")
 
     application["resume_path"] = application.get("resume_path")
-
-    # Generate Firebase URL here
 
     application["resume_url"] = get_resume_url(application.get("resume_path"))
 

@@ -2,8 +2,7 @@ from fastapi.testclient import TestClient
 from pytest_bdd import scenarios, given, when, then
 import pytest
 
-from main import app
-
+from job_portal_web.backend.main import app
 
 # --------------------------------------------------
 # Test Client Fixture
@@ -16,7 +15,6 @@ def client():
     Shared FastAPI test client.
     """
     return TestClient(app)
-
 
 
 # --------------------------------------------------
@@ -35,45 +33,27 @@ def test_view_application_status_list(client: TestClient):
 
     response = client.get("/application")
 
-
     if response.status_code == 200:
 
         page = response.text
 
-        statuses = [
-            "Submitted",
-            "Cancelled",
-            "Shortlisted",
-            "Rejected",
-            "Offered"
-        ]
+        statuses = ["Submitted", "Cancelled", "Shortlisted", "Rejected", "Offered"]
 
         if any(status in page for status in statuses):
 
-            print(
-                "✅ SUCCESS: Job seeker views application statuses"
-            )
+            print("✅ SUCCESS: Job seeker views application statuses")
 
         else:
 
-            print(
-                "❌ FAILED: Application statuses not found"
-            )
+            print("❌ FAILED: Application statuses not found")
 
     else:
 
-        print(
-            "❌ FAILED: Unable to open application status page"
-        )
-
+        print("❌ FAILED: Unable to open application status page")
 
     assert response.status_code == 200
 
-    assert any(
-        status in response.text
-        for status in statuses
-    )
-
+    assert any(status in response.text for status in statuses)
 
 
 # --------------------------------------------------
@@ -90,54 +70,31 @@ def test_view_updated_application_status(client: TestClient):
     Then the updated application status should be displayed
     """
 
-
     application_id = "J000001"
 
-
-    response = client.get(
-        f"/application/{application_id}"
-    )
-
+    response = client.get(f"/application/{application_id}")
 
     if response.status_code == 200:
 
         page = response.text
 
-        statuses = [
-            "Shortlisted",
-            "Rejected",
-            "Offered",
-            "Cancelled",
-            "Submitted"
-        ]
-
+        statuses = ["Shortlisted", "Rejected", "Offered", "Cancelled", "Submitted"]
 
         if any(status in page for status in statuses):
 
-            print(
-                "✅ SUCCESS: Job seeker views updated application status"
-            )
+            print("✅ SUCCESS: Job seeker views updated application status")
 
         else:
 
-            print(
-                "❌ FAILED: Updated status not found"
-            )
+            print("❌ FAILED: Updated status not found")
 
     else:
 
-        print(
-            "❌ FAILED: Unable to retrieve application details"
-        )
-
+        print("❌ FAILED: Unable to retrieve application details")
 
     assert response.status_code == 200
 
-    assert any(
-        status in response.text
-        for status in statuses
-    )
-
+    assert any(status in response.text for status in statuses)
 
 
 # --------------------------------------------------
@@ -145,7 +102,6 @@ def test_view_updated_application_status(client: TestClient):
 # --------------------------------------------------
 
 scenarios("features/viewApplicationStatus.feature")
-
 
 
 # --------------------------------------------------
@@ -161,12 +117,10 @@ class Context:
         self.application_id = "J000001"
 
 
-
 @pytest.fixture
 def context():
 
     return Context()
-
 
 
 # --------------------------------------------------
@@ -181,14 +135,10 @@ def submitted_applications():
     pass
 
 
-
 @when("the job seeker opens the application status page")
 def open_status_page(client, context):
 
-    context.response = client.get(
-        "/application"
-    )
-
+    context.response = client.get("/application")
 
 
 @then("the system should display the current status of each application")
@@ -196,29 +146,13 @@ def verify_status_list(context):
 
     assert context.response.status_code == 200
 
-
     page = context.response.text
 
+    statuses = ["Submitted", "Cancelled", "Shortlisted", "Rejected", "Offered"]
 
-    statuses = [
-        "Submitted",
-        "Cancelled",
-        "Shortlisted",
-        "Rejected",
-        "Offered"
-    ]
+    assert any(status in page for status in statuses)
 
-
-    assert any(
-        status in page
-        for status in statuses
-    )
-
-
-    print(
-        "✅ SUCCESS: Application statuses displayed"
-    )
-
+    print("✅ SUCCESS: Application statuses displayed")
 
 
 # --------------------------------------------------
@@ -233,14 +167,10 @@ def updated_status():
     pass
 
 
-
 @when("the job seeker views the application details")
 def open_application_detail(client, context):
 
-    context.response = client.get(
-        f"/application/{context.application_id}"
-    )
-
+    context.response = client.get(f"/application/{context.application_id}")
 
 
 @then("the updated application status should be displayed")
@@ -248,25 +178,10 @@ def verify_updated_status(context):
 
     assert context.response.status_code == 200
 
-
     page = context.response.text
 
+    statuses = ["Shortlisted", "Rejected", "Offered", "Cancelled", "Submitted"]
 
-    statuses = [
-        "Shortlisted",
-        "Rejected",
-        "Offered",
-        "Cancelled",
-        "Submitted"
-    ]
+    assert any(status in page for status in statuses)
 
-
-    assert any(
-        status in page
-        for status in statuses
-    )
-
-
-    print(
-        "✅ SUCCESS: Updated application status displayed"
-    )
+    print("✅ SUCCESS: Updated application status displayed")

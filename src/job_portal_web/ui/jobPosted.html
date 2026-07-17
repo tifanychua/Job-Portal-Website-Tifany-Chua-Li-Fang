@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employer Dashboard</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/postJob.css">
+</head>
+<body>
+    {% include "employerHeader.html" %}
+    <main class="main-content">
+
+        <div class="page-header">
+
+            <div>
+                <h1>All Posted Jobs</h1>
+                <p>View and manage all the jobs you have posted.</p>
+            </div>
+
+            <a href="/publish-job" class="post-btn">
+                <i class="fa-solid fa-plus"></i>
+                Post a New Job
+            </a>
+
+        </div>
+
+        <!-- Tabs + Search Toolbar -->
+        <div class="job-toolbar">
+
+            <!-- Left side: Tabs -->
+            <div class="job-tabs">
+
+                <button class="job-tab active" data-status="all">
+                    All Jobs (<span id="allCount">{{ jobs | length }}</span>)
+                </button>
+
+                <button class="job-tab" data-status="active">
+                    Active (<span id="activeCount">0</span>)
+                </button>
+
+                <button class="job-tab" data-status="draft">
+                    Draft (<span id="draftCount">0</span>)
+                </button>
+
+                <button class="job-tab" data-status="closed">
+                    Closed (<span id="closedCount">0</span>)
+                </button>
+
+                <button class="job-tab" data-status="expired">
+                    Expired (<span id="expiredCount">0</span>)
+                </button>
+
+            </div>
+
+
+            <!-- Right side: Search + Filter -->
+            <div class="toolbar">
+
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="jobSearch" placeholder="Search jobs...">
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Job Table -->
+        <div class="job-table-container">
+
+            <table class="job-table">
+
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll">
+                        </th>
+                        <th>Job Title</th>
+                        <th>Job Type</th>
+                        <th>Applications</th>
+                        <th>Status</th>
+                        <th>Posted On</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for job in jobs %}
+
+                    <tr class="job-row" data-status="{{ job.status | lower }}">
+
+                        <!-- Checkbox -->
+                        <td>
+                            <input type="checkbox" class="job-checkbox" value="{{ job.job_id }}">
+                        </td>
+
+                        <!-- Job Title -->
+                        <td>
+                            <div class="job-title-cell">
+                                <strong>{{ job.job_title }}</strong>
+
+                                <span>
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    {{ job.location }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- Job Type -->
+                        <td>
+                            {{ job.employment_type }}
+                        </td>
+
+                        <!-- Applications -->
+                        <td>
+                            {{ job.application_count | default(0) }}
+                        </td>
+
+                        <!-- Status -->
+                        <td>
+                            <span class="status-badge status-{{ job.status | lower }}">
+                                {{ job.status }}
+                            </span>
+                        </td>
+
+                        <!-- Posted Date -->
+                        <td>
+                            {% if job.created_at %}
+                                {{ job.created_at.strftime('%d %b %Y') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="action-cell">
+
+                            <button
+                                type="button"
+                                class="action-menu-btn"
+                                onclick="toggleActionMenu(event, '{{ job.job_id }}')">
+
+                                <i class="fa-solid fa-ellipsis"></i>
+
+                            </button>
+
+                            <div
+                                class="action-dropdown"
+                                id="action-{{ job.job_id }}">
+
+                                <a href="/edit-job/{{ job.job_id }}">
+                                    <i class="fa-solid fa-pen"></i>
+                                    Edit
+                                </a>
+
+                                <button
+                                    type="button"
+                                    class="delete-action"
+                                    onclick="openDeleteModal('{{ job.job_id }}', '{{ job.job_title }}')">
+
+                                    <i class="fa-solid fa-trash"></i>
+                                    Delete
+
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% else %}
+
+                    <tr>
+                        <td colspan="7" class="no-jobs">
+                            No jobs have been posted yet.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </main>
+    
+<script>
+
+    // ==========================================
+    // Action Dropdown Menu
+    // ==========================================
+
+    function toggleActionMenu(event, jobId) {
+
+        event.stopPropagation();
+
+        // Close all other dropdowns
+        document.querySelectorAll(".action-dropdown").forEach(menu => {
+
+            if (menu.id !== "action-" + jobId) {
+                menu.classList.remove("show");
+            }
+
+        });
+
+        const currentMenu = document.getElementById("action-" + jobId);
+
+        currentMenu.classList.toggle("show");
+    }
+
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function () {
+
+        document.querySelectorAll(".action-dropdown").forEach(menu => {
+            menu.classList.remove("show");
+        });
+
+    });
+
+
+    // ==========================================
+    // Delete Job Confirmation
+    // ==========================================
+
+    function openDeleteModal(jobId, jobTitle) {
+
+        const confirmed = confirm(
+            'Delete Job Posting\n\n' +
+            'Are you sure you want to delete "' + jobTitle + '"?\n' +
+            'This action cannot be undone. The job posting and all associated data will be permanently removed.'
+        );
+
+        if (confirmed) {
+            window.location.href = "/delete-job/" + jobId;
+        }
+    }
+
+
+    // ==========================================
+    // Page Loaded
+    // ==========================================
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const selectAll = document.getElementById("selectAll");
+
+        const jobCheckboxes =
+            document.querySelectorAll(".job-checkbox");
+
+        const jobRows =
+            document.querySelectorAll(".job-row");
+
+        const jobTabs =
+            document.querySelectorAll(".job-tab");
+
+        const jobSearch =
+            document.getElementById("jobSearch");
+
+
+        // Current selected status tab
+        let currentStatus = "all";
+
+
+        // ==========================================
+        // Count Jobs By Status
+        // ==========================================
+
+        const counts = {
+            active: 0,
+            draft: 0,
+            closed: 0,
+            expired: 0
+        };
+
+
+        jobRows.forEach(row => {
+
+            const status = row.dataset.status.toLowerCase();
+
+            if (counts.hasOwnProperty(status)) {
+                counts[status]++;
+            }
+
+        });
+
+
+        document.getElementById("activeCount").textContent =
+            counts.active;
+
+        document.getElementById("draftCount").textContent =
+            counts.draft;
+
+        document.getElementById("closedCount").textContent =
+            counts.closed;
+
+        document.getElementById("expiredCount").textContent =
+            counts.expired;
+
+
+        // ==========================================
+        // Main Filter Function
+        // Search + Status Filtering
+        // ==========================================
+
+        function filterJobs() {
+
+            const keyword =
+                jobSearch.value.toLowerCase().trim();
+
+
+            jobRows.forEach(row => {
+
+                const jobStatus =
+                    row.dataset.status.toLowerCase();
+
+
+                // Search all text inside the row
+                const rowText =
+                    row.textContent.toLowerCase();
+
+
+                // Check status
+                const matchesStatus =
+                    currentStatus === "all" ||
+                    jobStatus === currentStatus;
+
+
+                // Check search keyword
+                const matchesSearch =
+                    rowText.includes(keyword);
+
+
+                // Show only if both conditions match
+                if (matchesStatus && matchesSearch) {
+
+                    row.style.display = "";
+
+                } else {
+
+                    row.style.display = "none";
+
+                }
+
+            });
+
+
+            // Reset select-all after filtering
+            selectAll.checked = false;
+        }
+
+
+        // ==========================================
+        // Search While User Types
+        // ==========================================
+
+        jobSearch.addEventListener("input", function () {
+
+            filterJobs();
+
+        });
+
+
+        // ==========================================
+        // Filter When Clicking Status Tabs
+        // ==========================================
+
+        jobTabs.forEach(tab => {
+
+            tab.addEventListener("click", function () {
+
+                // Get selected status
+                currentStatus = this.dataset.status.toLowerCase();
+
+
+                // Remove active style from all tabs
+                jobTabs.forEach(item => {
+
+                    item.classList.remove("active");
+
+                });
+
+
+                // Add active style to clicked tab
+                this.classList.add("active");
+
+
+                // Run combined filter
+                filterJobs();
+
+            });
+
+        });
+
+
+        // ==========================================
+        // Select All Visible Jobs
+        // ==========================================
+
+        selectAll.addEventListener("change", function () {
+
+            jobRows.forEach(row => {
+
+                // Only select visible jobs
+                if (row.style.display !== "none") {
+
+                    const checkbox =
+                        row.querySelector(".job-checkbox");
+
+                    checkbox.checked = selectAll.checked;
+
+                }
+
+            });
+
+        });
+
+
+        // ==========================================
+        // Update Select All Checkbox
+        // ==========================================
+
+        jobCheckboxes.forEach(checkbox => {
+
+            checkbox.addEventListener("change", function () {
+
+                const visibleCheckboxes =
+                    Array.from(jobCheckboxes).filter(checkbox => {
+
+                        return checkbox
+                            .closest(".job-row")
+                            .style.display !== "none";
+
+                    });
+
+
+                selectAll.checked =
+
+                    visibleCheckboxes.length > 0 &&
+
+                    visibleCheckboxes.every(
+                        checkbox => checkbox.checked
+                    );
+
+            });
+
+        });
+
+    });
+
+</script>
+
+    <!-- ========================================== -->
+    <!-- Job Action Success Messages -->
+    <!-- ========================================== -->
+
+    {% set success =
+        request.query_params.get("success")
+    %}
+
+
+    {% if success == "posted" %}
+
+    <script>
+
+        alert(
+            "Job posting has been published successfully."
+        );
+
+    </script>
+
+
+    {% elif success == "draft" %}
+
+    <script>
+
+        alert(
+            "Job posting has been saved as a draft successfully."
+        );
+
+    </script>
+
+
+    {% elif success == "edited" %}
+
+    <script>
+
+        alert(
+            "Job posting has been updated successfully."
+        );
+
+    </script>
+
+
+    {% elif success == "deleted" %}
+
+    <script>
+
+        alert(
+            "Job posting has been deleted successfully."
+        );
+
+    </script>
+
+    {% endif %}
+
+</body>
+</html>

@@ -8,11 +8,6 @@ from .encryption import encrypt_message, decrypt_message
 router = APIRouter()
 
 
-# ==========================
-# Message Model
-# ==========================
-
-
 class Message(BaseModel):
 
     conversationId: str

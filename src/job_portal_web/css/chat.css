@@ -1,0 +1,239 @@
+/* Chat page content */
+
+.employer-chat{
+    margin-left:180px;
+    padding-top:65px;
+}
+
+
+.user-chat{
+    padding-top:80px;
+}
+
+
+.chat-page main{
+    padding:35px 40px;
+}
+
+
+.chat-card{
+
+    background:white;
+
+    border-radius:12px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+
+    overflow:hidden;
+
+}
+
+
+
+/* ==========================
+   Chat Header
+========================== */
+
+.chat-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:20px 25px;
+
+    border-bottom:1px solid #e5e7eb;
+
+}
+
+
+/* Avatar */
+
+.applicant-avatar {
+
+    width:45px;
+
+    height:45px;
+
+    min-width:45px;
+
+    max-width:45px;
+
+    min-height:45px;
+
+    max-height:45px;
+
+    border-radius:50%;
+
+    background:#3157d5;
+
+    color:white;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:18px;
+
+    font-weight:600;
+
+    text-transform:uppercase;
+
+    flex:none;
+
+}
+
+
+/* Receiver information */
+
+.chat-header .receiver-info{
+
+    flex:1;
+
+}
+
+
+.chat-header h2{
+
+    font-size:18px;
+
+    margin:0;
+
+}
+
+
+.chat-header p{
+
+    color:#6b7280;
+
+    font-size:13px;
+
+    margin:3px 0 0;
+
+}
+
+
+
+/* Status */
+
+.chat-header .status{
+
+    margin-left:auto;
+
+}
+
+
+
+/* ==========================
+   Chat Body
+========================== */
+
+
+.chat-body{
+
+    height:450px;
+
+    overflow-y:auto;
+
+    padding:25px;
+
+    background:#f8fafc;
+
+}
+
+
+
+/* ==========================
+   Messages
+========================== */
+
+
+.message-left,
+.message-right{
+
+    max-width:65%;
+
+    padding:12px 15px;
+
+    margin-bottom:15px;
+
+    border-radius:12px;
+
+    font-size:14px;
+
+}
+
+
+.message-left{
+
+    background:white;
+
+    border:1px solid #e5e7eb;
+
+}
+
+
+.message-right{
+
+    margin-left:auto;
+
+    background:#2563EB;
+
+    color:white;
+
+}
+
+
+
+/* ==========================
+   Footer
+========================== */
+
+
+.chat-footer{
+
+    display:flex;
+
+    gap:10px;
+
+    padding:18px 25px;
+
+    border-top:1px solid #e5e7eb;
+
+}
+
+
+
+.chat-footer input{
+
+    flex:1;
+
+    padding:12px;
+
+    border-radius:8px;
+
+    border:1px solid #d1d5db;
+
+}
+
+
+
+.primary{
+
+    background:#2563EB;
+
+    color:white;
+
+    border:none;
+
+    padding:10px 20px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+}

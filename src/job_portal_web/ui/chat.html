@@ -13,7 +13,18 @@ JobConnect - Messages
 </title>
 
 
+{% if user_type == "company" %}
+
+<link rel="stylesheet" href="/css/employerHeader.css">
+
+{% else %}
+
 <link rel="stylesheet" href="/static/style.css">
+
+{% endif %}
+
+
+<link rel="stylesheet" href="/css/chat.css">
 
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,119 +44,20 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 <body>
 
+{% if user_type == "company" %}
+
+{% include "employerHeader.html" %}
 
 
-<!-- HEADER -->
+{% else %}
 
-<header>
-
-
-<div class="logo">
-
-<i class="fa-solid fa-location-dot"></i>
-
-<span>
-JobConnect
-</span>
+{% include "components/header.html" %}
 
 
-</div>
+{% endif %}
 
-
-
-
-<nav>
-
-<a href="#">
-Home
-</a>
-
-<a href="#">
-Jobs
-</a>
-
-<a href="#">
-Companies
-</a>
-
-<a href="#">
-Interviews
-</a>
-
-<a href="#">
-Career Advice
-</a>
-
-<a href="#">
-About Us
-</a>
-
-
-</nav>
-
-
-
-
-<div class="nav-right">
-
-
-<i class="fa-solid fa-globe"></i>
-
-<span>
-EN
-</span>
-
-
-<i class="fa-regular fa-heart"></i>
-
-
-
-<div class="notification">
-
-<i class="fa-regular fa-bell"></i>
-
-<span class="badge">
-3
-</span>
-
-
-</div>
-
-
-
-
-
-<div class="profile">
-
-
-<img src="/static/images/avatar.jpg">
-
-
-<div>
-
-<h4>
-John Tan
-</h4>
-
-
-<small>
-Employer
-</small>
-
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-</header>
-
-<div class="container chat-page single-chat">
-
+<div class="container chat-page single-chat 
+{% if user_type == 'company' %} employer-chat {% else %} user-chat {% endif %}">
 
 <!-- MAIN CONTENT -->
 
@@ -155,16 +67,6 @@ Employer
 
 
 <div class="page-title">
-
-
-<h1>
-Messages
-</h1>
-
-
-<p>
-Communicate securely with applicants regarding job applications.
-</p>
 
 
 </div>
@@ -184,31 +86,31 @@ Communicate securely with applicants regarding job applications.
 <div class="chat-header">
 
 
-<img id="chatImage"
-src="/static/images/company.png">
+    <div id="chatAvatar" class="applicant-avatar">
+        U
+    </div>
 
 
-<div>
 
-<h2 id="chatName">
-Loading...
-</h2>
+    <div class="receiver-info">
 
+    <h2 id="chatName">
+        Loading...
+    </h2>
 
-<p id="chatPosition">
-Loading...
-</p>
-
+    <p id="chatPosition">
+        Loading...
+    </p>
 
 </div>
 
 
 
-<span class="status" id="chatStatus">
+    <span class="status" id="chatStatus">
 
-Shortlisted
+        Shortlisted
 
-</span>
+    </span>
 
 
 </div>
@@ -272,36 +174,11 @@ Send
 </div>
 
 
-<footer>
-
-
-About Us &nbsp;&nbsp;
-
-Privacy Policy &nbsp;&nbsp;
-
-Terms of Use &nbsp;&nbsp;
-
-Help Center
-
-
-<br><br>
-
-
-© 2026 JobConnect
-
-
-</footer>
-
-
-
-
-
 
 
 
 
 <script>
-
 
 
 const params =
@@ -310,39 +187,32 @@ window.location.search
 );
 
 
-
-
 const employerId =
-params.get(
-"employerId"
-);
-
+params.get("employerId");
 
 
 const jobSeekerId =
-params.get(
-"jobSeekerId"
-);
-
-
-
+params.get("jobSeekerId");
 
 
 // Current sender
 
 const senderId =
-params.get(
-"senderId"
-);
+params.get("senderId");
 
 
 const senderType =
-params.get(
-"senderType"
-);
+params.get("senderType");
+
 
 const conversationId =
 `${employerId}_${jobSeekerId}`;
+
+
+
+// ================================
+// Load Receiver Header Information
+// ================================
 
 async function loadChatHeader(){
 
@@ -354,129 +224,156 @@ async function loadChatHeader(){
     let data = await response.json();
 
 
+
+    // Get receiver first name
+
+    let firstName = "User";
+
+
+    if(data.name){
+
+        firstName = data.name
+            .trim()
+            .split(" ")[0];
+
+    }
+
+
+
+    // Display receiver first name
+
     document.getElementById(
         "chatName"
-    ).innerHTML = data.name;
+    ).innerHTML = firstName;
 
+
+
+    // Display position
 
     document.getElementById(
         "chatPosition"
-    ).innerHTML = data.position;
+    ).innerHTML =
+        data.position || "";
 
 
-    if(data.image){
 
-        document.getElementById(
-            "chatImage"
-        ).src =
-        "/static/images/" + data.image;
+    // Display first letter avatar
 
-    }
+    document.getElementById(
+        "chatAvatar"
+    ).innerHTML =
+        firstName
+        .charAt(0)
+        .toUpperCase();
+
 
 }
 
 
 loadChatHeader();
 
+
+
+
+// ================================
+// Load Messages
+// ================================
+
+
 async function loadMessages(){
 
 
-const response =
-await fetch(
-`/api/messages/${conversationId}`
-);
+    const response =
+    await fetch(
+        `/api/messages/${conversationId}`
+    );
 
 
 
-let messages =
-await response.json();
-
-
-messages.sort((a,b)=>{
-
-    return new Date(a.time) - new Date(b.time);
-
-});
+    let messages =
+    await response.json();
 
 
 
+    messages.sort((a,b)=>{
 
-const chatBody =
-document.getElementById(
-"chatBody"
-);
+        return new Date(a.time)
+        -
+        new Date(b.time);
 
-
-
-chatBody.innerHTML = "";
+    });
 
 
 
 
-messages.forEach(msg=>{
-
-
-const div =
-document.createElement(
-"div"
-);
+    const chatBody =
+    document.getElementById(
+        "chatBody"
+    );
 
 
 
-
-if(
-msg.senderId === senderId
-){
-
-
-div.className =
-"message-right";
-
-
-}
-
-else{
-
-
-div.className =
-"message-left";
-
-
-}
+    chatBody.innerHTML = "";
 
 
 
+    messages.forEach(msg=>{
 
 
-div.innerHTML = `
-
-
-<p>
-${msg.message}
-</p>
-
-
-<small>
-${formatTime(msg.time)}
-</small>
+        const div =
+        document.createElement(
+            "div"
+        );
 
 
 
-`;
+        if(msg.senderId === senderId){
+
+
+            div.className =
+            "message-right";
+
+
+        }
+
+        else{
+
+
+            div.className =
+            "message-left";
+
+
+        }
 
 
 
 
-chatBody.appendChild(div);
+
+        div.innerHTML = `
+
+            <p>
+                ${msg.message}
+            </p>
+
+
+            <small>
+                ${formatTime(msg.time)}
+            </small>
+
+        `;
 
 
 
-});
+        chatBody.appendChild(div);
 
 
 
-chatBody.scrollTop =
-chatBody.scrollHeight;
+    });
+
+
+
+    chatBody.scrollTop =
+    chatBody.scrollHeight;
 
 
 }
@@ -485,157 +382,143 @@ chatBody.scrollHeight;
 
 
 
-
-
-
+// ================================
+// Send Message
+// ================================
 
 
 async function sendMessage(){
 
 
-
-const input =
-document.getElementById(
-"messageInput"
-);
-
+    const input =
+    document.getElementById(
+        "messageInput"
+    );
 
 
 
-const text =
-input.value.trim();
+    const text =
+    input.value.trim();
 
 
 
+    if(text === ""){
 
-if(text === "")
-{
+        return;
 
-return;
-
-}
+    }
 
 
 
 
 
+    await fetch(
+        "/api/messages",
+        {
 
-await fetch(
-"/api/messages",
-{
-
-
-method:"POST",
+            method:"POST",
 
 
+            headers:{
 
-headers:{
+                "Content-Type":
+                "application/json"
 
-
-"Content-Type":
-"application/json"
-
-
-},
+            },
 
 
+            body:JSON.stringify({
+
+                conversationId:
+                conversationId,
 
 
-body:JSON.stringify({
+                senderId:
+                senderId,
 
 
-
-conversationId:
-conversationId,
-
+                senderType:
+                senderType,
 
 
-senderId:
-senderId,
+                message:
+                text
 
+            })
 
-
-senderType:
-senderType,
+        }
+    );
 
 
 
-message:
-text
+    input.value = "";
 
 
-
-})
-
-
-}
-
-);
-
-
-
-
-
-
-input.value = "";
-
-
-
-loadMessages();
-
+    loadMessages();
 
 
 }
 
 
+
+
+
+// Enter button send message
 
 document
-
 .getElementById(
-"messageInput"
+    "messageInput"
 )
-
 .addEventListener(
-
-"keypress",
-
-function(e){
+    "keypress",
+    function(e){
 
 
-
-if(e.key==="Enter"){
-
-
-sendMessage();
+        if(e.key === "Enter"){
 
 
-}
+            sendMessage();
 
 
+        }
 
 
-}
-
+    }
 );
 
 
 
 
 
-
-
 loadMessages();
+
+
+
+
+// ================================
+// Format Time
+// ================================
+
 
 function formatTime(time){
 
-    const date = new Date(time);
 
-    return date.toLocaleTimeString([], {
-        hour:"2-digit",
-        minute:"2-digit"
-    });
+    const date =
+    new Date(time);
+
+
+
+    return date.toLocaleTimeString(
+        [],
+        {
+            hour:"2-digit",
+            minute:"2-digit"
+        }
+    );
+
 
 }
+
 
 </script>
 

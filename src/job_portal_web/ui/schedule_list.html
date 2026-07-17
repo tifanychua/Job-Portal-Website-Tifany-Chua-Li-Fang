@@ -8,12 +8,12 @@
 
 <title>JobConnect - Scheduled Interviews</title>
 
-<link rel="stylesheet" href="/static/style.css">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="/css/employerHeader.css">
+<link rel="stylesheet" href="/css/schedule_list.css">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
@@ -22,7 +22,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
 
 
 <body>
-{% include "components/header.html" %}
+    {% include "employerHeader.html" %}
 
 <div class="schedule-page">
 
@@ -116,7 +116,7 @@ Total Candidates
 </div>
 </div>
 
-<hr>
+<br>
 
 <div class="filter-section">
 
@@ -275,7 +275,6 @@ Action
 </main>
 
 </div>
-{% include "components/footer.html" %}
 
 
 <script>
@@ -556,29 +555,44 @@ table.innerHTML += `
 
 <div class="candidate-mini">
 
-<img src="/static/images/avatar.jpg">
+${
+    interview.profileImage
+
+    ?
+
+    `
+    <img 
+        src="/images/${interview.profileImage}"
+        class="candidate-avatar"
+    >
+    `
+
+    :
+
+    `
+    <div class="candidate-avatar avatar-letter">
+        ${(interview.candidateName || "U").charAt(0).toUpperCase()}
+    </div>
+    `
+}
+
 
 <div>
+
 <strong>
-
 ${interview.candidateName || "-"}
-
 </strong>
 
 <p>
-
 ${interview.position || "-"}
-
 </p>
+
 </div>
+
 </div>
+
 </td>
 
-<td>
-
-${interview.position || "-"}
-
-</td>
 
 <td>
 

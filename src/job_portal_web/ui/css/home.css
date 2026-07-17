@@ -1,0 +1,230 @@
+
+.home-hero {
+  background: linear-gradient(135deg, #EEF2FF 0%, #F8FAFC 60%);
+  padding: 48px 40px 0;
+  overflow: hidden;
+}
+.home-hero-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+.home-hero h1 {
+  color: var(--color-secondary);
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+.home-hero p {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  max-width: 480px;
+  margin-bottom: 0;
+}
+
+.hero-illustration{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.floating-stat {
+  position: absolute;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-hover);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.floating-stat .stat-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.floating-stat .stat-icon.jobs { background: var(--color-primary); }
+.floating-stat .stat-icon.companies { background: var(--color-secondary); }
+.floating-stat .stat-number { font-weight: 700; font-size: 14px; color: var(--color-text); }
+.floating-stat .stat-label { color: var(--color-text-secondary); font-size: 12px; }
+.stat-top-left { top: 40px; left: 0; }
+.stat-mid-right { top: 40%; right: 0; }
+
+/* ---------- Search card (overlapping hero) ---------- */
+.home-search-card {
+  max-width: 1400px;
+  margin: 32px auto 0;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 24px 40px;
+  position: relative;
+  z-index: 2;
+}
+.home-search-card .search-bar { margin-bottom: 16px; }
+
+.popular-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+.popular-inline .label { color: var(--color-text); font-weight: 500; }
+.popular-inline a {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.popular-inline a:hover { text-decoration: underline; }
+
+/* ---------- Categories bar ---------- */
+.categories-section { padding: 24px 40px 0; }
+.categories-bar {
+  max-width: 1400px;
+  margin: 0 auto;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  flex: 1;
+  text-align: center;
+}
+.category-item:hover { background: var(--color-bg); }
+.category-item .cat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: var(--color-text-secondary);
+}
+.category-item.active { color: var(--color-primary); }
+.category-item.active .cat-icon { background: #EFF6FF; color: var(--color-primary); }
+.category-item.active::after {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--color-primary);
+  margin-top: 2px;
+}
+
+/* ---------- Section headers ---------- */
+.home-section { max-width: 1400px; margin: 0 auto; padding: 32px 40px; }
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.section-header-text h2 { font-size: 20px; font-weight: 600; color: var(--color-text); }
+.section-header-text p { font-size: 14px; color: var(--color-text-secondary); margin-top: 2px; }
+.section-link { font-size: 14px; font-weight: 500; color: var(--color-primary); white-space: nowrap; }
+.section-link i { font-size: 12px; margin-left: 4px; }
+
+/* ---------- Featured jobs grid ---------- */
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.featured-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.featured-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+
+.featured-card-link{
+    text-decoration:none;
+    color:inherit;
+    display:block;
+}
+.featured-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.featured-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+}
+.featured-card .job-title { font-size: 15px; font-weight: 600; color: var(--color-text); display: block; margin-bottom: 2px; }
+.featured-card .job-company { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 10px; }
+.featured-card .job-meta { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 8px; }
+.featured-card .job-salary { font-size: 14px; font-weight: 600; color: var(--color-primary); }
+.featured-card .bookmark-btn { color: var(--color-text-secondary); font-size: 15px; }
+
+/* ---------- Top companies ---------- */
+.companies-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 16px;
+}
+.company-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  height: 64px;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.company-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  .home-hero-inner { grid-template-columns: 1fr; }
+  .hero-illustration { display: none; }
+  .featured-grid { grid-template-columns: repeat(2, 1fr); }
+  .companies-grid { grid-template-columns: repeat(4, 1fr); }
+  .categories-bar { overflow-x: auto; }
+}
+@media (max-width: 700px) {
+  .home-hero, .categories-section, .home-section { padding-left: 16px; padding-right: 16px; }
+  .home-search-card { padding: 16px; margin-left: 16px; margin-right: 16px; }
+  .featured-grid { grid-template-columns: 1fr; }
+  .companies-grid { grid-template-columns: repeat(2, 1fr); }
+}

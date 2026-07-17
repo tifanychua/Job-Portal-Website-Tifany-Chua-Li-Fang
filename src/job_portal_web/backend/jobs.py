@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 from google.cloud.firestore_v1.base_query import FieldFilter
 from typing import List
 
-from database import db
+from .database import db
 from collections import Counter
 
 import math
@@ -112,17 +112,14 @@ def _attach_company_info(job):
 
     job.setdefault("company_name", "Unknown")
 
-    job.setdefault("company_logo", "image/default.jpg")
+    # only filename
+    job.setdefault("company_logo", "default.jpg")
 
     company = _find_company(job.get("company_id"))
 
     if company:
 
         job["company_name"] = company.get("companyName", "Unknown")
-
-        # ==========================
-        # Gallery Image
-        # ==========================
 
         gallery_docs = (
             db.collection("gallery")

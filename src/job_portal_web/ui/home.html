@@ -1,11 +1,189 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Home</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobConnect — Find Your Dream Job</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/css/home.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <h1>Welcome to Job Portal</h1>
 
-    <a href="/login">Login</a>
+{% include "components/header.html" %}
+
+<!-- ============================== HERO ============================== -->
+<section class="home-hero">
+  <div class="home-hero-inner">
+    <div class="hero-copy">
+      <h1 class="text-section-title">Find Your Dream Job<br>Build Your Better Future</h1>
+      <p class="text-normal">Discover thousands of job opportunities with all the information you need. It's your future. Come find it.</p>
+    </div>
+
+    <div class="hero-illustration">
+      <div class="floating-stat stat-top-left">
+        <div class="stat-icon jobs"><i class="fa-solid fa-briefcase"></i></div>
+        <div>
+          <div class="stat-number">{{ total_jobs }}</div>
+          <div class="stat-label">Jobs Available</div>
+        </div>
+      </div>
+      <div class="floating-stat stat-mid-right">
+        <div class="stat-icon companies"><i class="fa-solid fa-building"></i></div>
+        <div>
+          <div class="stat-number">{{ total_companies }}</div>
+          <div class="stat-label">Companies</div>
+        </div>
+      </div>
+
+      <img
+    src="/image/home.png"
+    alt="Hero Illustration"
+    class="hero-image" style="width:350px; height:auto">
+    </div>
+  </div>
+
+  <!-- Search card overlaps the hero bottom -->
+  <div class="home-search-card">
+    <form class="search-bar" method="get" action="/jobs">
+      <div class="search-field">
+        <i class="fa-solid fa-magnifying-glass icon"></i>
+        <input type="text" name="q" placeholder="Job title, keywords, or company">
+      </div>
+      <div class="search-field select-field">
+        <select name="category">
+          <option value="">
+              All Categories
+          </option>
+          {% for category in categories %}
+              <option value="{{ category }}">
+                  {{ category }}
+              </option>
+          {% endfor %}
+
+      </select>
+      </div>
+      <button type="submit" class="btn-search text-button">Search Jobs</button>
+    </form>
+
+    <div class="popular-inline">
+      <span class="label">Top Categories:</span>
+      {% for term in categories %}
+      <a href="/jobs?q={{ term|urlencode }}">{{ term }}</a>{% if not loop.last %}<span style="color:var(--color-border);">•</span>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================== FEATURED JOBS ============================== -->
+<section class="home-section">
+  <div class="section-header">
+    <div class="section-header-text">
+      <h2>Featured Jobs</h2>
+      <p>Hand-picked top opportunities just for you</p>
+    </div>
+    <a href="/jobs" class="section-link">View all jobs <i class="fa-solid fa-arrow-right"></i></a>
+  </div>
+
+  <div class="featured-grid">
+
+{% for job in featured_jobs %}
+
+<a href="/jobs/{{ job.id }}" class="featured-card-link">
+
+<div class="featured-card">
+
+    <div class="featured-card-top">
+        <div class="featured-logo">
+          {% if job.company_logo %}
+              <img
+                  src="/image/{{ job.company_logo }}"
+                  alt="{{ job.company_name }}"
+                  width="50"
+                  height="50"
+              >
+          {% else %}
+              <div class="company-logo-placeholder">
+                  {{ job.company_name[:1] }}
+              </div>
+          {% endif %}
+      </div>
+
+        <button class="bookmark-btn" type="button">
+            <i class="fa-regular fa-heart"></i>
+        </button>
+    </div>
+
+
+    <div class="job-title">
+        {{ job.job_title }}
+    </div>
+
+
+    <div class="job-company">
+        {{ job.company_name }}
+    </div>
+
+
+    <div class="job-meta">
+        <i class="fa-solid fa-location-dot"></i>
+        {{ job.location }}
+    </div>
+
+
+    <span class="badge-pill">
+        {{ job.employment_type }}
+    </span>
+
+
+    <div class="job-salary">
+        {{ job.salary_text }}
+    </div>
+
+</div>
+
+</a>
+
+{% endfor %}
+</div>
+</section>
+
+<!-- ============================== TOP COMPANIES ============================== -->
+<section class="home-section">
+  <div class="section-header">
+    <div class="section-header-text">
+      <h2>Top Companies Hiring</h2>
+      <p>Explore opportunities from top companies</p>
+    </div>
+    <a href="#" class="section-link">View all companies <i class="fa-solid fa-arrow-right"></i></a>
+  </div>
+
+  <div class="companies-grid">
+
+
+{% for co in top_companies %}
+
+<div class="company-card">
+
+    <img 
+    src="/image/default.jpg"
+    alt="{{ co.companyName }}"
+    width="40"
+    height="40">
+
+    <p style="margin-left: 10px;">
+        {{ co.companyName }}
+    </p>
+
+</div>
+
+{% endfor %}
+
+
+</div>
+</section>
+
 </body>
 </html>

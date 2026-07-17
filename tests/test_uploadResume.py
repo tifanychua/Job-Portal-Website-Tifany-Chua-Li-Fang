@@ -2,8 +2,7 @@ from fastapi.testclient import TestClient
 from pytest_bdd import scenarios, given, when, then
 import pytest
 
-from main import app
-
+from job_portal_web.backend.main import app
 
 # --------------------------------------------------
 # Test Client Fixture
@@ -16,7 +15,6 @@ def client():
     Shared FastAPI test client.
     """
     return TestClient(app)
-
 
 
 # --------------------------------------------------
@@ -37,28 +35,14 @@ def test_upload_resume_success(client: TestClient):
 
     response = client.post(
         f"/jobs/{job_id}/apply",
-        data={
-            "cover_letter": "I am interested in this position."
-        },
-        files={
-            "resume": (
-                "resume.pdf",
-                b"test resume content",
-                "application/pdf"
-            )
-        },
+        data={"cover_letter": "I am interested in this position."},
+        files={"resume": ("resume.pdf", b"test resume content", "application/pdf")},
     )
 
-
     if response.status_code == 200:
-        print(
-            "✅ SUCCESS: Job seeker uploads a resume successfully"
-        )
+        print("✅ SUCCESS: Job seeker uploads a resume successfully")
     else:
-        print(
-            "❌ FAILED: Resume upload failed"
-        )
-
+        print("❌ FAILED: Resume upload failed")
 
     assert response.status_code == 200
 
@@ -66,7 +50,6 @@ def test_upload_resume_success(client: TestClient):
 
     assert data["success"] is True
     assert "application_id" in data
-
 
 
 # --------------------------------------------------
@@ -85,49 +68,28 @@ def test_resume_information_saved(client: TestClient):
 
     job_id = "0ZWvjQqV3DMLANrbIRUs"
 
-
     upload_response = client.post(
         f"/jobs/{job_id}/apply",
-        data={
-            "cover_letter": "Test cover letter"
-        },
-        files={
-            "resume": (
-                "resume.pdf",
-                b"test resume content",
-                "application/pdf"
-            )
-        },
+        data={"cover_letter": "Test cover letter"},
+        files={"resume": ("resume.pdf", b"test resume content", "application/pdf")},
     )
-
 
     assert upload_response.status_code == 200
 
-
     application_id = upload_response.json()["application_id"]
 
-
-    response = client.get(
-        f"/application/{application_id}"
-    )
-
+    response = client.get(f"/application/{application_id}")
 
     if response.status_code == 200 and "resume" in response.text.lower():
 
-        print(
-            "✅ SUCCESS: Uploaded resume information is saved"
-        )
+        print("✅ SUCCESS: Uploaded resume information is saved")
 
     else:
 
-        print(
-            "❌ FAILED: Resume information not saved"
-        )
-
+        print("❌ FAILED: Resume information not saved")
 
     assert response.status_code == 200
     assert "resume" in response.text.lower()
-
 
 
 # --------------------------------------------------
@@ -135,7 +97,6 @@ def test_resume_information_saved(client: TestClient):
 # --------------------------------------------------
 
 scenarios("features/uploadResume.feature")
-
 
 
 # --------------------------------------------------
@@ -154,12 +115,10 @@ class Context:
         self.application_id = None
 
 
-
 @pytest.fixture
 def context():
 
     return Context()
-
 
 
 # ==================================================
@@ -171,12 +130,9 @@ def context():
 @given("the job seeker is on the resume upload page")
 def resume_upload_page(client, context):
 
-    context.response = client.get(
-        f"/jobs/{context.job_id}/apply"
-    )
+    context.response = client.get(f"/jobs/{context.job_id}/apply")
 
     assert context.response.status_code == 200
-
 
 
 @when("the job seeker selects and uploads a resume file")
@@ -184,18 +140,9 @@ def upload_resume(client, context):
 
     context.response = client.post(
         f"/jobs/{context.job_id}/apply",
-        data={
-            "cover_letter": "I am interested in this position."
-        },
-        files={
-            "resume": (
-                "resume.pdf",
-                b"test resume content",
-                "application/pdf"
-            )
-        },
+        data={"cover_letter": "I am interested in this position."},
+        files={"resume": ("resume.pdf", b"test resume content", "application/pdf")},
     )
-
 
 
 @then("the resume should be uploaded successfully")
@@ -209,14 +156,9 @@ def verify_upload(context):
 
     assert "application_id" in data
 
-
     context.application_id = data["application_id"]
 
-
-    print(
-        "✅ SUCCESS: Resume uploaded successfully"
-    )
-
+    print("✅ SUCCESS: Resume uploaded successfully")
 
 
 # ==================================================
@@ -230,35 +172,21 @@ def uploaded_resume(client, context):
 
     response = client.post(
         f"/jobs/{context.job_id}/apply",
-        data={
-            "cover_letter": "Test cover letter"
-        },
-        files={
-            "resume": (
-                "resume.pdf",
-                b"test resume content",
-                "application/pdf"
-            )
-        },
+        data={"cover_letter": "Test cover letter"},
+        files={"resume": ("resume.pdf", b"test resume content", "application/pdf")},
     )
 
-
     assert response.status_code == 200
-
 
     data = response.json()
 
     context.application_id = data["application_id"]
 
 
-
 @when("the upload process is completed")
 def process_upload(client, context):
 
-    context.response = client.get(
-        f"/application/{context.application_id}"
-    )
-
+    context.response = client.get(f"/application/{context.application_id}")
 
 
 @then("the resume information should be saved in the database")
@@ -266,12 +194,8 @@ def verify_database(context):
 
     assert context.response.status_code == 200
 
-
     page = context.response.text.lower()
 
     assert "resume" in page
 
-
-    print(
-        "✅ SUCCESS: Resume information saved in database"
-    )
+    print("✅ SUCCESS: Resume information saved in database")
