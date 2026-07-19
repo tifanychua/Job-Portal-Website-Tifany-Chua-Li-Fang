@@ -63,11 +63,6 @@ Back to Shortlisted Candidates
 
 </a>
 
-
-
-
-
-
 <section class="candidate-card">
 
 
@@ -805,9 +800,31 @@ saveInterview();
 }
 
 
+function showLoading(message){
 
+    document.getElementById("loadingText").innerHTML = message;
+
+    document.getElementById("loadingOverlay").style.display="flex";
+
+    document.querySelector(".primary").disabled = true;
+
+}
+
+
+function hideLoading(){
+
+    document.getElementById("loadingOverlay").style.display="none";
+
+    document.querySelector(".primary").disabled = false;
+
+}
 
 function saveInterview(){
+
+
+showLoading(
+    "Scheduling interview..."
+);
 
 
 let interviewData = {
@@ -891,6 +908,9 @@ body:JSON.stringify(interviewData)
 .then(data=>{
 
 
+hideLoading();
+
+
 alert(
 data.message || "Interview scheduled successfully"
 );
@@ -903,6 +923,9 @@ window.location.href="/schedule_list";
 
 
 .catch(error=>{
+
+
+hideLoading();
 
 
 console.log(error);
@@ -1001,6 +1024,15 @@ link.disabled=false;
 
 </script>
 
+<div id="loadingOverlay" class="loading-overlay">
+
+    <div class="loader"></div>
+
+    <p id="loadingText">
+        Scheduling interview...
+    </p>
+
+</div>
 
 </body>
 

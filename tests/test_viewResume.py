@@ -24,7 +24,7 @@ def client():
 # Test Application
 # ==================================================
 
-APPLICATION_ID = "0A3aaiDL702tynWjBwrY"
+APPLICATION_ID = "xW0TdL2Rh7YfUkiaK3By"
 
 
 # ==================================================

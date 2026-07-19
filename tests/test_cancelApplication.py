@@ -54,6 +54,33 @@ def test_cancel_application_saved(client):
     assert "Cancelled" in response.text
 
 
+def test_cancel_already_cancelled_application(client: TestClient):
+    """
+    Negative Acceptance Test:
+    Job seeker tries to cancel an already cancelled application
+
+    Given the application status is already cancelled
+    When the job seeker cancels the application again
+    Then the system should reject the cancellation request
+    """
+
+    application_id = "03RQnLKUga2wcRc9fmPE"
+
+    response = client.post(f"/application/{application_id}/cancel")
+
+    if response.status_code in [400, 409]:
+
+        print("✅ SUCCESS: System rejected cancellation of already cancelled application")
+
+    else:
+
+        print(
+            "❌ FAILED: System allowed duplicate cancellation", response.status_code, response.text
+        )
+
+    assert response.status_code in [400, 409]
+
+
 # --------------------------------------------------
 # BDD Feature Loading
 # --------------------------------------------------

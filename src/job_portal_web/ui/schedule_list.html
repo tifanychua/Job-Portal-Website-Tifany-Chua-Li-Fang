@@ -277,6 +277,8 @@ Action
 </div>
 
 
+
+
 <script>
 
 
@@ -284,7 +286,66 @@ let interviewList = [];
 
 let currentInterviewId = "";
 
+
+
+function showLoading(message){
+
+
+    document.getElementById(
+        "loadingText"
+    ).innerHTML = message;
+
+
+
+    document.getElementById(
+        "loadingOverlay"
+    ).style.display="flex";
+
+
+}
+
+
+
+function hideLoading(){
+
+
+    document.getElementById(
+        "loadingOverlay"
+    ).style.display="none";
+
+
+}
+
 function loadInterviews(){
+
+
+let table = document.getElementById(
+"interviewTable"
+);
+
+
+
+table.innerHTML = `
+
+<tr>
+
+<td colspan="8" class="loading-row">
+
+
+<div class="table-loader"></div>
+
+
+<p>
+Loading interviews...
+</p>
+
+
+</td>
+
+</tr>
+
+`;
+
 
 
 fetch("/api/interviews")
@@ -294,8 +355,6 @@ fetch("/api/interviews")
 
 
 .then(data=>{
-
-
 data.forEach(interview=>{
 
 
@@ -684,13 +743,33 @@ Cancel
 function cancelInterview(id){
 
 
-
 if(confirm(
-
 "Are you sure you want to cancel this interview?"
-
 )){
 
+
+document.getElementById(
+"interviewTable"
+).innerHTML = `
+
+<tr>
+
+<td colspan="8" class="loading-row">
+
+
+<div class="table-loader"></div>
+
+
+<p>
+Cancelling interview...
+</p>
+
+
+</td>
+
+</tr>
+
+`;
 
 
 fetch(
@@ -707,8 +786,13 @@ method:"PUT"
 
 .then(response=>response.json())
 .then(data=>{
+
+
 alert(data.message);
+
+
 loadInterviews();
+
 
 });
 
@@ -719,67 +803,95 @@ loadInterviews();
 
 function openReschedule(id){
 
-currentInterviewId = id;
-
-fetch(
-
-"/api/interviews/"+id
-
-)
-
-.then(response=>response.json())
-
-.then(data=>{
-document.getElementById(
-"rescheduleStage"
-).value = data.stage;
-
-document.getElementById(
-"rescheduleDate"
-).value = data.date;
-
-document.getElementById(
-"rescheduleTime"
-).value = data.time;
-
-document.getElementById(
-"rescheduleDuration"
-).value = data.duration;
-
-document.getElementById(
-"rescheduleInterviewer"
-).value = data.interviewer;
-
-document.getElementById(
-"rescheduleMeetingLink"
-).value = data.meetingLink || "";
-
-document.getElementById(
-"rescheduleNotes"
-).value = data.notes || "";
-
-let radio = document.querySelector(
-
-'input[name="rescheduleType"][value="'+data.interviewType+'"]'
-
-);
-
-if(radio){
-
-radio.checked = true;
-
-}
-
-toggleRescheduleLink();
-
-document.getElementById(
-"rescheduleModal"
-).style.display="block";
+    currentInterviewId = id;
 
 
+    // OPEN MODAL FIRST
+    document.getElementById(
+        "rescheduleModal"
+    ).style.display="block";
 
-});
 
+    // show loading inside modal fields
+    console.log(
+        "Loading interview:",
+        id
+    );
+
+
+    fetch(
+        "/api/interviews/"+id
+    )
+
+    .then(response=>response.json())
+
+    .then(data=>{
+
+
+        document.getElementById(
+            "rescheduleStage"
+        ).value = data.stage || "";
+
+
+        document.getElementById(
+            "rescheduleDate"
+        ).value = data.date || "";
+
+
+        document.getElementById(
+            "rescheduleTime"
+        ).value = data.time || "";
+
+
+        document.getElementById(
+            "rescheduleDuration"
+        ).value = data.duration || "";
+
+
+        document.getElementById(
+            "rescheduleInterviewer"
+        ).value = data.interviewer || "";
+
+
+        document.getElementById(
+            "rescheduleMeetingLink"
+        ).value = data.meetingLink || "";
+
+
+        document.getElementById(
+            "rescheduleNotes"
+        ).value = data.notes || "";
+
+
+
+        let radio = document.querySelector(
+            'input[name="rescheduleType"][value="'+data.interviewType+'"]'
+        );
+
+
+        if(radio){
+            radio.checked = true;
+        }
+
+
+        toggleRescheduleLink();
+
+
+    })
+
+
+    .catch(error=>{
+
+
+        console.log(error);
+
+
+        alert(
+            "Failed to load interview details"
+        );
+
+
+    });
 
 
 }
@@ -849,6 +961,32 @@ document.getElementById(
 
 
 function updateInterview(){
+
+
+document.getElementById(
+"interviewTable"
+).innerHTML = `
+
+<tr>
+
+<td colspan="8" class="loading-row">
+
+
+<div class="table-loader"></div>
+
+
+<p>
+Updating interview...
+</p>
+
+
+</td>
+
+</tr>
+
+`;
+
+
 let data = {
 stage:
 document.getElementById(
@@ -909,6 +1047,7 @@ body:JSON.stringify(data)
 
 .then(response=>response.json())
 .then(data=>{
+
 alert(data.message);
 closeReschedule();
 loadInterviews();
@@ -1216,6 +1355,8 @@ loadInterviews();
 
 
 </div>
+
+
 
 </body>
 

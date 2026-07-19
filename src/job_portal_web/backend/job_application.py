@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from datetime import timedelta
@@ -212,6 +212,8 @@ def withdraw_application(application_id: str):
         return RedirectResponse("/application", status_code=302)
 
     data = doc.to_dict()
+    if data.get("status") == "Cancelled":
+        raise HTTPException(status_code=409, detail="Application already cancelled")
 
     if data.get("status") == "Submitted":
 

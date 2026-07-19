@@ -202,6 +202,23 @@
 .form-message-success { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
 .form-message-error { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
 
+
+.form-message-loading{
+
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+    border:1px solid #BFDBFE;
+
+}
+
+.form-message i{
+
+    margin-right:8px;
+
+}
+
 /* ---------- Actions ---------- */
 .apply-actions {
   display: flex;
@@ -299,7 +316,21 @@
 
 }
 
+.resume-message {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+}
 
+
+.resume-message-error {
+
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+
+}
 /* ---------- Responsive ---------- */
 @media (max-width: 1100px) {
   .apply-body { grid-template-columns: 1fr; }

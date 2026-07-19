@@ -524,3 +524,67 @@ td button:last-child{
     text-transform: uppercase;
 
 }
+
+/* ==============================
+   Table Loading
+============================== */
+
+.loading-row{
+
+    text-align:center;
+
+    padding:40px;
+
+    color:#6b7280;
+
+}
+
+
+.table-loader{
+
+    width:35px;
+
+    height:35px;
+
+    border:4px solid #ddd;
+
+    border-top:4px solid #2563eb;
+
+    border-radius:50%;
+
+    animation:spin 1s linear infinite;
+
+    margin:auto;
+
+}
+
+
+
+.loading-row p{
+
+    margin-top:15px;
+
+    font-size:14px;
+
+}
+
+
+
+@keyframes spin{
+
+    from{
+
+        transform:rotate(0deg);
+
+    }
+
+
+    to{
+
+        transform:rotate(360deg);
+
+    }
+
+}
+
+

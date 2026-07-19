@@ -94,7 +94,7 @@
     </button>
 
 </div>
-
+<div id="resume-message" class="resume-message" style="display:none;"></div>
         <div id="resume-drop-zone" class="resume-drop-zone">
           <label class="btn btn-outline btn-upload">
             <i class="fa-solid fa-upload"></i> Upload New File
@@ -204,7 +204,7 @@
   const charCountValue = document.getElementById("char-count-value");
 
   const messageBox = document.getElementById("form-message");
-
+  const resumeMessageBox = document.getElementById("resume-message");
   const jobId = "{{ job.id }}";
 
 
@@ -227,6 +227,7 @@
 
 
   let uploadedResumeURL = null;
+  const MAX_RESUME_SIZE_MB = 5;
 
 
 
@@ -234,22 +235,57 @@
   // Show Message
   // ==============================
 
-  function showMessage(text, isError) {
+function showMessage(text, type = "success") {
 
-    messageBox.textContent = text;
+    let icon = "";
+
+    if (type === "loading") {
+
+        icon = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+    } else if (type === "success") {
+
+        icon = '<i class="fa-solid fa-circle-check"></i>';
+
+    } else {
+
+        icon = '<i class="fa-solid fa-circle-xmark"></i>';
+
+    }
+
+    messageBox.innerHTML = `${icon} ${text}`;
 
     messageBox.style.display = "block";
 
-    messageBox.className =
-        "form-message " +
-        (
-          isError
-          ? "form-message-error"
-          : "form-message-success"
-        );
-  }
+    messageBox.className = "form-message";
 
+    if(type === "loading"){
 
+        messageBox.classList.add("form-message-loading");
+
+    }else if(type === "success"){
+
+        messageBox.classList.add("form-message-success");
+
+    }else{
+
+        messageBox.classList.add("form-message-error");
+
+    }
+
+}
+
+function showResumeMessage(text, type="error"){
+
+    resumeMessageBox.innerHTML =
+        `<i class="fa-solid fa-circle-xmark"></i> ${text}`;
+
+    resumeMessageBox.style.display = "block";
+
+    resumeMessageBox.className =
+        "resume-message resume-message-error";
+
+}
 
   // ==============================
   // Display Selected File
@@ -294,14 +330,33 @@
 
       if(resumeInput.files.length){
 
-        showFile(
-          resumeInput.files[0]
-        );
+        const file = resumeInput.files[0];
+
+
+        if(file.size > MAX_RESUME_SIZE_MB * 1024 * 1024){
+
+            showResumeMessage(
+              `Resume size must be under ${MAX_RESUME_SIZE_MB}MB.`,
+            );
+
+
+            resumeInput.value = "";
+
+            fileRow.style.display = "none";
+
+            uploadedResumeURL = null;
+
+            return;
+
+        }
+
+        resumeMessageBox.style.display = "none";
+        showFile(file);
 
       }
 
     }
-  );
+);
 
 
 
@@ -389,18 +444,30 @@
       if(e.dataTransfer.files.length){
 
 
+        const file = e.dataTransfer.files[0];
+
+
+        if(file.size > MAX_RESUME_SIZE_MB * 1024 * 1024){
+
+            showResumeMessage(
+              `Resume size must be under ${MAX_RESUME_SIZE_MB}MB.`,
+            );
+
+            return;
+
+        }
+
+
         resumeInput.files =
             e.dataTransfer.files;
 
-
-        showFile(
-          e.dataTransfer.files[0]
-        );
+        resumeMessageBox.style.display = "none";
+        showFile(file);
 
       }
 
     }
-  );
+);
 
 
 
@@ -503,7 +570,7 @@
 
         showMessage(
           "Please upload your resume before continuing.",
-          true
+          "error"
         );
 
         return;
@@ -515,6 +582,10 @@
     const formData =
         new FormData(form);
 
+    showMessage(
+    "Submitting your application...",
+    "loading"
+    );
     try {
 
 
@@ -537,7 +608,7 @@
       if(data.success){
         showMessage(
             data.message,
-            false
+            "success"
         );
 
         setTimeout(function(){
@@ -551,7 +622,7 @@
         showMessage(
           data.message ||
           "Something went wrong. Please try again.",
-          true
+          "error"
         );
       }
     }
@@ -559,7 +630,7 @@
       console.error(error);
       showMessage(
         "Network error — please try again.",
-        true
+        "error"
       );
     }
   }

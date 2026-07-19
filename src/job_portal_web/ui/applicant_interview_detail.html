@@ -174,11 +174,10 @@ Additional Notes
 
 
 <button
+id="acceptBtn"
 class="applicant-accept-btn"
 onclick="acceptInterview()">
-
 Accept
-
 </button>
 
 
@@ -434,28 +433,64 @@ document.querySelector(
 
 });
 
+function showLoading(message){
+
+    document.getElementById(
+        "loadingText"
+    ).innerHTML = message;
+
+
+    document.getElementById(
+        "loadingOverlay"
+    ).style.display="flex";
+
+
+    document.querySelectorAll(
+        "button"
+    ).forEach(btn=>{
+        btn.disabled=true;
+    });
+
+}
 
 
 
+function hideLoading(){
+
+    document.getElementById(
+        "loadingOverlay"
+    ).style.display="none";
 
 
+    document.querySelectorAll(
+        "button"
+    ).forEach(btn=>{
+        btn.disabled=false;
+    });
 
-
+}
 
 
 function acceptInterview(){
+
+showLoading(
+    "Accepting interview..."
+);
 
 
 fetch(
 "/api/interviews/"+interviewId+"/accept",
 {
-method:"PUT"
+    method:"PUT"
 }
 
 )
 
-
 .then(()=>{
+
+
+hideLoading();
+
 
 alert(
 "Interview accepted"
@@ -463,6 +498,22 @@ alert(
 
 
 location.reload();
+
+
+})
+
+.catch(error=>{
+
+
+hideLoading();
+
+
+alert(
+"Failed to accept interview"
+);
+
+
+console.log(error);
 
 
 });
@@ -480,6 +531,9 @@ location.reload();
 
 function declineInterview(){
 
+showLoading(
+    "Declining interview..."
+);
 
 fetch(
 "/api/interviews/"+interviewId+"/decline",
@@ -493,6 +547,9 @@ method:"PUT"
 .then(()=>{
 
 
+hideLoading();
+
+
 alert(
 "Interview declined"
 );
@@ -500,6 +557,17 @@ alert(
 
 location.reload();
 
+
+})
+.catch(error=>{
+
+hideLoading();
+
+alert(
+"Failed to decline interview"
+);
+
+console.log(error);
 
 });
 
@@ -551,8 +619,6 @@ document.getElementById(
 
 function submitReschedule(){
 
-
-
 let requestedDate =
 document.getElementById(
 "requestedDate"
@@ -596,11 +662,9 @@ return;
 
 }
 
-
-
-
-
-
+showLoading(
+    "Sending reschedule request..."
+);
 
 fetch(
 "/api/interviews/"+interviewId+"/reschedule-request",
@@ -652,18 +716,34 @@ reason
 .then(()=>{
 
 
+hideLoading();
+
+
 alert(
 "Reschedule request sent"
 );
 
 
-
 closeRescheduleModal();
-
 
 
 location.reload();
 
+
+})
+
+.catch(error=>{
+
+
+hideLoading();
+
+
+alert(
+"Failed to send request"
+);
+
+
+console.log(error);
 
 
 });
@@ -675,11 +755,15 @@ location.reload();
 
 
 </script>
+<div id="loadingOverlay" class="loading-overlay">
 
+    <div class="loader"></div>
 
+    <p id="loadingText">
+        Processing...
+    </p>
 
-
-
+</div>
 </body>
 
 </html>
