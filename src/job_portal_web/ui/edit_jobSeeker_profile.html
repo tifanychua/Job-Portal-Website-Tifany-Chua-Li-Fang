@@ -61,19 +61,7 @@
                         class="tab-btn active"
                         data-tab="personal">
 
-                        <i class="fa-regular fa-user"></i>
-
                         Personal Information
-
-                    </button>
-
-                    <button
-                        class="tab-btn"
-                        data-tab="language">
-
-                        <i class="fa-solid fa-language"></i>
-
-                        Languages
 
                     </button>
 
@@ -81,15 +69,13 @@
                         class="tab-btn"
                         data-tab="about">
 
-                        <i class="fa-regular fa-file-lines"></i>
-
                         About Me
 
                     </button>
 
                 </div>
 
-                <form id="editProfileForm">
+                <form id="editProfileForm" action="/edit-profile" method="post" enctype="multipart/form-data">
 
                     <!-- ==========================================
                             PERSONAL INFORMATION
@@ -115,7 +101,7 @@
                                     type="text"
                                     id="full_name"
                                     name="full_name"
-                                    placeholder="John Tan">
+                                    value="{{ applicant.name }}">
 
                             </div>
 
@@ -130,7 +116,8 @@
                                 <input
                                     type="date"
                                     id="date_of_birth"
-                                    name="date_of_birth">
+                                    name="date_of_birth"
+                                    value="{{ applicant.date_of_birth }}">
 
                             </div>
 
@@ -148,18 +135,23 @@
 
                                 </label>
 
-                                <select
-                                    id="gender"
-                                    name="gender">
+                                <select id="gender" name="gender">
+                                    <option value="">Select Gender</option>
 
-                                    <option value="">
-                                        Select Gender
+                                    <option value="Male"
+                                        {% if applicant.gender == "Male" %}selected{% endif %}>
+                                        Male
                                     </option>
 
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                    <option>Prefer not to say</option>
+                                    <option value="Female"
+                                        {% if applicant.gender == "Female" %}selected{% endif %}>
+                                        Female
+                                    </option>
 
+                                    <option value="Prefer not to say"
+                                        {% if applicant.gender == "Prefer not to say" %}selected{% endif %}>
+                                        Prefer not to say
+                                    </option>
                                 </select>
 
                             </div>
@@ -172,22 +164,21 @@
 
                                 </label>
 
-                                <select
-                                    id="nationality"
-                                    name="nationality">
-
-                                    <option>
+                                <select id="nationality" name="nationality">
+                                    <option value="Malaysian"
+                                        {% if applicant.nationality == "Malaysian" %}selected{% endif %}>
                                         Malaysian
                                     </option>
 
-                                    <option>
+                                    <option value="Singaporean"
+                                        {% if applicant.nationality == "Singaporean" %}selected{% endif %}>
                                         Singaporean
                                     </option>
 
-                                    <option>
+                                    <option value="Indonesian"
+                                        {% if applicant.nationality == "Indonesian" %}selected{% endif %}>
                                         Indonesian
                                     </option>
-
                                 </select>
 
                             </div>
@@ -210,7 +201,7 @@
                                     type="email"
                                     id="email"
                                     name="email"
-                                    placeholder="john@email.com">
+                                    value="{{ applicant.email }}">
 
                             </div>
 
@@ -226,7 +217,7 @@
                                     type="tel"
                                     id="phone"
                                     name="phone"
-                                    placeholder="+60 12-3456789">
+                                    value="{{ applicant.phone }}">
 
                             </div>
 
@@ -246,7 +237,8 @@
                                 type="text"
                                 id="location"
                                 name="location"
-                                placeholder="Kuala Lumpur, Malaysia">
+                                placeholder="Kuala Lumpur, Malaysia"
+                                value="{{ applicant.location }}">
 
                         </div>
 
@@ -266,7 +258,8 @@
                                     type="text"
                                     id="current_position"
                                     name="current_position"
-                                    placeholder="Software Engineer">
+                                    placeholder="Software Engineer"
+                                    value="{{ applicant.position }}">
 
                             </div>
 
@@ -278,27 +271,30 @@
 
                                 </label>
 
-                                <select
-                                    id="experience_level"
-                                    name="experience_level">
+                                <select id="experience_level" name="experience_level">
 
-                                    <option>
+                                    <option value="Fresh Graduate"
+                                        {% if applicant.experience == "Fresh Graduate" %}selected{% endif %}>
                                         Fresh Graduate
                                     </option>
 
-                                    <option>
+                                    <option value="1–2 Years"
+                                        {% if applicant.experience == "1–2 Years" %}selected{% endif %}>
                                         1–2 Years
                                     </option>
 
-                                    <option>
+                                    <option value="3–5 Years"
+                                        {% if applicant.experience == "3–5 Years" %}selected{% endif %}>
                                         3–5 Years
                                     </option>
 
-                                    <option>
+                                    <option value="6–10 Years"
+                                        {% if applicant.experience == "6–10 Years" %}selected{% endif %}>
                                         6–10 Years
                                     </option>
 
-                                    <option>
+                                    <option value="10+ Years"
+                                        {% if applicant.experience == "10+ Years" %}selected{% endif %}>
                                         10+ Years
                                     </option>
 
@@ -322,52 +318,8 @@
                                 type="text"
                                 id="current_company"
                                 name="current_company"
-                                placeholder="ABC Technology Sdn. Bhd.">
-
-                        </div>
-
-                    </div>
-
-                    <!-- ==========================================
-                            LANGUAGES
-                    =========================================== -->
-
-                    <div
-                        class="tab-content"
-                        id="language">
-
-                        <div class="language-page">
-
-                            <div class="language-header">
-
-                                <div>
-
-                                    <h3>Languages</h3>
-
-                                    <p>
-                                        Add the languages you can communicate in and specify your proficiency level.
-                                    </p>
-
-                                </div>
-
-                                <button
-                                    type="button"
-                                    id="openLanguageModal"
-                                    class="add-language">
-
-                                    <i class="fa-solid fa-plus"></i>
-
-                                    Add Language
-
-                                </button>
-
-                            </div>
-
-                            <div id="languageContainer">
-
-                                <!-- Empty state will be inserted by JavaScript -->
-
-                            </div>
+                                placeholder="ABC Technology Sdn. Bhd."
+                                value="{{ applicant.company }}">
 
                         </div>
 
@@ -393,7 +345,8 @@
                                 id="about_me"
                                 name="about_me"
                                 rows="12"
-                                placeholder="Introduce yourself, describe your background, work experience, skills, achievements, strengths and career goals."></textarea>
+                                placeholder="Introduce yourself, describe your background, work experience, skills, achievements, strengths and career goals."
+                                rows="12">{{ applicant.about }}</textarea>
 
                         </div>
 
@@ -407,7 +360,8 @@
 
                         <button
                             type="reset"
-                            class="btn-cancel">
+                            class="btn-cancel"
+                            onclick="window.location.href='/profile'">
 
                             Cancel
 
@@ -435,20 +389,21 @@
 
                 <div class="photo-card">
 
-                    <h3>
-
-                        Profile Photo
-
-                    </h3>
+                    <h3>Profile Photo</h3>
 
                     <div class="photo-container">
 
-                        <img
-                            id="profilePreview"
-                            src="/images/user.png"
-                            alt="Profile Photo">
-
-                        <!-- Camera Button -->
+                        {% if applicant.image %}
+                            <img
+                                id="profilePreview"
+                                src="{{ applicant.image }}"
+                                alt="Profile Photo">
+                        {% else %}
+                            <img
+                                id="profilePreview"
+                                src="/images/user.png"
+                                alt="Profile Photo">
+                        {% endif %}
 
                         <button
                             type="button"
@@ -464,6 +419,8 @@
                     <input
                         type="file"
                         id="profile_photo"
+                        name="profile_photo"
+                        form="editProfileForm"
                         accept="image/*"
                         hidden>
 
@@ -503,89 +460,6 @@
                 class="close-modal">
 
                 <i class="fa-solid fa-xmark"></i>
-
-            </button>
-
-        </div>
-
-        <!-- Body -->
-
-        <div class="modal-body">
-
-            <div class="form-group">
-
-                <label for="languageSelect">
-
-                    Language
-
-                </label>
-
-                <select id="languageSelect">
-
-                    <option value="">
-                        Select Language
-                    </option>
-
-                    <option>English</option>
-                    <option>Malay</option>
-                    <option>Chinese</option>
-                    <option>Tamil</option>
-                    <option>Japanese</option>
-                    <option>Korean</option>
-                    <option>French</option>
-                    <option>German</option>
-                    <option>Spanish</option>
-                    <option>Arabic</option>
-
-                </select>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="languageLevel">
-
-                    Proficiency
-
-                </label>
-
-                <select id="languageLevel">
-
-                    <option value="">
-                        Select Level
-                    </option>
-
-                    <option>Native</option>
-                    <option>Professional</option>
-                    <option>Advanced</option>
-                    <option>Intermediate</option>
-                    <option>Basic</option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-        <!-- Footer -->
-
-        <div class="modal-footer">
-
-            <button
-                type="button"
-                id="cancelLanguage"
-                class="btn-cancel">
-
-                Cancel
-
-            </button>
-
-            <button
-                type="button"
-                id="saveLanguage"
-                class="btn-save">
-
-                Save
 
             </button>
 
@@ -937,6 +811,19 @@ function registerLanguageEvents(){
     });
 
 }
+
+const aboutMe = document.getElementById("about_me");
+
+function autoResizeTextarea() {
+    aboutMe.style.height = "auto";
+    aboutMe.style.height = aboutMe.scrollHeight + "px";
+}
+
+// Resize when typing
+aboutMe.addEventListener("input", autoResizeTextarea);
+
+// Resize when page loads (for existing text)
+window.addEventListener("load", autoResizeTextarea);
 
 /* ======================================
         INITIALIZE

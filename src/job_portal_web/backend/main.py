@@ -12,7 +12,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from .interview import router as interview_router
 from .applicant import router as applicant_router
 from .chat import router as chat_router
-
+from job_portal_web.backend.routes.education import router as education_router
+from job_portal_web.backend.routes.experience import router as experience_router
+from .routes.skill import router as skill_router
 from .jobs import router as jobs_router
 from .homepage import router as home_router
 from .job_information import router as job_information_router
@@ -115,6 +117,9 @@ app.include_router(employer_application_router)
 # Job Seeker Profile
 app.include_router(jobSeekerProfile_router)
 app.include_router(editProfile_router)
+app.include_router(education_router)
+app.include_router(skill_router)
+app.include_router(experience_router)
 
 # ==============================
 # Page Routes

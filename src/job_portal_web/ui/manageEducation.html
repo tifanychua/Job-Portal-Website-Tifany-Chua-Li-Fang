@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Manage Education</title>
+
+    <link rel="stylesheet"
+          href="/css/base.css">
+
+    <link rel="stylesheet"
+          href="/css/manageEducation.css">
+
+    <link rel="stylesheet"
+          href="/static/style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<!-- ================= HERO ================= -->
+
+<section class="profile-hero">
+
+    <div class="profile-hero-inner">
+
+        <div class="profile-top">
+
+            <div>
+
+                <h1 class="profile-title">
+                    Manage Education
+                </h1>
+
+                <p class="profile-subtitle">
+                    Showcase your academic background to attract employers.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="addEducationBtn"
+                class="profile-primary-btn">
+
+                <i class="fa-solid fa-plus"></i>
+
+                Add Education
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= PAGE ================= -->
+
+<div class="education-page">
+
+    <div class="education-layout">
+
+        <!-- LEFT -->
+
+        <div class="education-content">
+
+            <div class="education-card-wrapper">
+
+                <div class="education-header">
+
+                    <div>
+
+                        <h2>
+                            Education History
+                        </h2>
+
+                        <p>
+                            Add all of your academic qualifications.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- Dynamic Card Container -->
+
+                <div id="educationContainer">
+
+                    {% if education_list %}
+
+                        {% for education in education_list %}
+
+                        <div class="education-card">
+
+                            <div class="education-icon">
+
+                                <i class="fa-solid fa-graduation-cap"></i>
+
+                            </div>
+
+                            <div class="education-body">
+
+                                <!-- Qualification + Course -->
+
+                                <h3 class="education-title">
+
+                                    {{ education.qualification }}
+
+                                    {% if education.field_of_study %}
+
+                                        in {{ education.field_of_study }}
+
+                                    {% endif %}
+
+                                </h3>
+
+                                <!-- Institution -->
+
+                                <p class="institution">
+
+                                    {{ education.institution }}
+
+                                </p>
+
+                                <!-- Date -->
+
+                                <div class="education-meta">
+
+                                    <span>
+
+                                        <i class="fa-regular fa-calendar"></i>
+
+                                        {{ education.start_date }}
+
+                                        -
+
+                                        {% if education.current_study %}
+
+                                            Present
+
+                                        {% else %}
+
+                                            {{ education.end_date }}
+
+                                        {% endif %}
+
+                                    </span>
+
+                                </div>
+
+                                <!-- Grade -->
+
+                                {% if education.grade %}
+
+                                <div class="education-grade">
+
+                                    <span class="grade-badge">
+
+                                        <i class="fa-solid fa-star"></i>
+
+                                        CGPA {{ education.grade }}
+
+                                    </span>
+
+                                </div>
+
+                                {% endif %}
+
+                                <!-- Description -->
+
+                                {% if education.description %}
+
+                                <p class="education-description">
+
+                                    {{ education.description }}
+
+                                </p>
+
+                                {% endif %}
+
+                            </div>
+
+                            <!-- Actions -->
+
+                            <div class="education-actions">
+
+                                <button
+                                    type="button"
+                                    class="icon-btn editBtn"
+                                    data-id="{{ education.id }}">
+
+                                    <i class="fa-solid fa-pen"></i>
+
+                                </button>
+
+                                <form
+                                    action="/delete-education/{{ education.id }}"
+                                    method="post">
+
+                                    <button
+                                        type="submit"
+                                        class="icon-btn deleteBtn"
+                                        onclick="return confirm('Delete this education record?')">
+
+                                        <i class="fa-solid fa-trash"></i>
+
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                        {% endfor %}
+
+                    {% else %}
+
+                    <div class="empty-state">
+
+                        <i class="fa-solid fa-graduation-cap"></i>
+
+                        <h3>No education added yet</h3>
+
+                        <p>
+                            Click <strong>Add Education</strong> to add your first education record.
+                        </p>
+
+                    </div>
+
+                    {% endif %}
+
+                    </div>
+
+        </div>
+        <!-- INFORMATION -->
+
+            <div class="education-info-card">
+
+                <div class="info-icon">
+
+                    <i class="fa-solid fa-lightbulb"></i>
+
+                </div>
+
+                <div>
+
+                    <h4>
+
+                        Tips
+
+                    </h4>
+
+                    <p>
+
+                        Include your degree,
+                        institution,
+                        graduation year,
+                        CGPA,
+                        achievements,
+                        certifications,
+                        exchange programmes,
+                        scholarships,
+                        and relevant coursework to help employers better understand your educational background.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+    </div>
+
+</div>
+
+<!-- ================= ADD / EDIT EDUCATION MODAL ================= -->
+
+<div class="modal-overlay" id="educationModal">
+
+    <div class="education-modal">
+
+        <form
+            id="educationForm"
+            action="/add-education"
+            method="post">
+
+            <input
+                type="hidden"
+                id="educationId"
+                name="education_id">
+
+            <!-- Header -->
+
+            <div class="modal-header">
+
+                <h2 id="modalTitle">
+
+                    Add Education
+
+                </h2>
+
+            </div>
+
+            <!-- Body -->
+
+            <div class="modal-body">
+
+                <!-- Error Message -->
+
+                <div
+                    id="educationError"
+                    class="form-error-message"
+                    style="display:none;">
+
+                    <i class="fa-solid fa-circle-xmark"></i>
+
+                    <span id="educationErrorText"></span>
+
+                </div>
+
+                <!-- Qualification -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Qualification
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select id="degree" name="degree">
+
+                        <option value="">
+                            Select Qualification
+                        </option>
+
+                        <option>SPM</option>
+                        <option>STPM</option>
+                        <option>Foundation</option>
+                        <option>Diploma</option>
+                        <option>Advanced Diploma</option>
+                        <option>Bachelor's Degree</option>
+                        <option>Master's Degree</option>
+                        <option>Doctor of Philosophy (PhD)</option>
+                        <option>Professional Certificate</option>
+
+                    </select>
+
+                </div>
+
+                <!-- Institution -->
+
+                <div class="form-group autocomplete-container">
+
+                    <label>
+
+                        Institution
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <div class="autocomplete-input">
+
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        <input
+                            type="text"
+                            id="institution"
+                            name="institution"
+                            placeholder="Search your university..."
+                            autocomplete="off">
+
+                    </div>
+
+                    <div
+                        id="institutionSuggestions"
+                        class="autocomplete-list">
+
+                    </div>
+
+                </div>
+
+                <!-- Field of Study -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Field of Study
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="fieldOfStudy" name="field_of_study"
+                        placeholder="Example: Computer Science">
+
+                </div>
+
+                <!-- Dates -->
+
+                <div class="date-grid">
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Start Date
+
+                        </label>
+
+                        <input
+                            type="month"
+                            id="startDate" name="start_date">
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            End Date
+
+                        </label>
+
+                        <input
+                            type="month"
+                            id="endDate" name="end_date">
+
+                    </div>
+
+                </div>
+
+                <!-- Current Study -->
+
+                <div class="checkbox-group">
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            id="currentStudy" name="current_study">
+
+                        I am currently studying here
+
+                    </label>
+
+                </div>
+
+                <!-- Grade -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Grade / Result
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="grade"
+                        name="grade"
+                        placeholder="Example: 3.85, 7A+, Pass">
+
+                </div>
+
+                <!-- Description -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Description
+
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="3"
+                        placeholder="Describe your academic achievements, awards, or relevant coursework."></textarea>
+
+                </div>
+
+            </div> <!-- modal-body -->
+
+            <!-- Footer -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    id="closeEducationModal">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-primary">
+
+                    Save Education
+
+                </button>
+
+            </div>
+        </form>
+
+        </div> <!-- education-modal -->
+
+</div> <!-- modal-overlay -->
+
+<script src="/js/manageEducation.js"></script>
+
+</body>
+</html>

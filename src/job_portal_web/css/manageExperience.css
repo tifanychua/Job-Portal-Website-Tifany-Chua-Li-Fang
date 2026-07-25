@@ -1,0 +1,280 @@
+/* ==========================================================
+   PAGE
+========================================================== */
+
+.experience-page{
+    max-width:1400px;
+    margin:40px auto;
+    padding:0 30px 50px;
+}
+
+/* ==========================================================
+   EXPERIENCE CARD
+========================================================== */
+
+.experience-card{
+
+    display:flex;
+
+    gap:18px;
+
+    align-items:flex-start;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:14px;
+
+    padding:22px;
+
+    background:#fff;
+
+    transition:.25s;
+
+    margin-bottom:18px;
+
+}
+
+.experience-card:hover{
+
+    border-color:#2563EB;
+
+    box-shadow:0 8px 25px rgba(37,99,235,.08);
+
+}
+
+/* ==========================================================
+   ICON
+========================================================== */
+
+.experience-icon{
+
+    width:60px;
+    height:60px;
+
+    border-radius:14px;
+
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:24px;
+
+    flex-shrink:0;
+
+}
+
+/* ==========================================================
+   BODY
+========================================================== */
+
+.experience-body{
+
+    flex:1;
+
+}
+
+.experience-title{
+
+    font-size:24px;
+
+    font-weight:700;
+
+    color:#111827;
+
+    margin-bottom:8px;
+
+}
+
+.company-name{
+
+    font-size:17px;
+
+    color:#4B5563;
+
+    margin-bottom:18px;
+
+}
+
+.experience-meta{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+    margin-bottom:16px;
+
+    color:#6B7280;
+
+    font-size:15px;
+
+}
+
+.experience-meta span{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+
+/* ==========================================================
+   BADGE
+========================================================== */
+
+.employment-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    margin-bottom:18px;
+
+}
+
+.employment-badge i{
+
+    color:#2563EB;
+
+}
+
+/* ==========================================================
+   DESCRIPTION
+========================================================== */
+
+.experience-description{
+
+    color:#4B5563;
+
+    line-height:1.8;
+
+    margin-top:12px;
+
+    white-space:pre-line;
+
+}
+
+/* ==========================================================
+   ACTIONS
+========================================================== */
+
+.experience-actions{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:12px;
+
+    margin-left:24px;
+
+    flex-shrink:0;
+
+}
+
+/* ==========================================================
+   EMPTY STATE
+========================================================== */
+
+.empty-state{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    min-height:280px;
+
+    padding:60px 40px;
+
+    border:2px dashed #D1D5DB;
+
+    border-radius:20px;
+
+    background:#fff;
+
+}
+
+.empty-state i{
+
+    font-size:56px;
+
+    color:#2563EB;
+
+    margin-bottom:24px;
+
+}
+
+.empty-state h3{
+
+    font-size:34px;
+
+    font-weight:700;
+
+    margin-bottom:16px;
+
+    color:#111827;
+
+}
+
+.empty-state p{
+
+    max-width:650px;
+
+    color:#6B7280;
+
+    line-height:1.8;
+
+    text-align:center;
+
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media(max-width:768px){
+
+    .experience-card{
+
+        flex-direction:column;
+
+    }
+
+    .experience-actions{
+
+        flex-direction:row;
+
+        margin-left:0;
+
+    }
+
+}
