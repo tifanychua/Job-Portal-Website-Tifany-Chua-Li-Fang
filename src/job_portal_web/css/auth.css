@@ -517,3 +517,12 @@
 .reset-password-rule i{
     width:16px;
 }
+
+
+button:disabled,
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #ccc;
+    color: #666;
+}
