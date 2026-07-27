@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+
+    <title>Company Registration Requests</title>
+
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <!-- Header Sidebar CSS -->
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+
+    <!-- Admin Page CSS -->
+    <link rel="stylesheet"
+          href="/css/adminCompany.css">
+
+
+</head>
+
+
+<body>
+
+
+{% include "adminHeader.html" %}
+
+
+
+<main class="main-content">
+
+
+    <!-- ============================= -->
+    <!-- PAGE HEADER -->
+    <!-- ============================= -->
+
+    <div class="page-header">
+
+
+        <div>
+
+            <h1>
+                Company Registration Requests
+            </h1>
+
+
+            <p>
+                Review pending company registrations before granting employer access.
+            </p>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- ============================= -->
+    <!-- SEARCH BAR -->
+    <!-- ============================= -->
+
+
+    <div class="toolbar">
+
+
+        <div class="search-box">
+
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+
+            <input 
+                type="text"
+                id="companySearch"
+                placeholder="Search company...">
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <!-- ============================= -->
+    <!-- COMPANY TABLE -->
+    <!-- ============================= -->
+
+
+    <div class="table-card">
+
+
+        <table id="companyTable">
+
+
+            <thead>
+
+
+                <tr>
+
+                    <th>
+                        Company
+                    </th>
+
+
+                    <th>
+                        Email
+                    </th>
+
+
+                    <th>
+                        Registration No.
+                    </th>
+
+
+                    <th>
+                        Industry
+                    </th>
+
+
+                    <th>
+                        Date Submitted
+                    </th>
+
+
+                    <th>
+                        Status
+                    </th>
+
+
+                    <th>
+                        Action
+                    </th>
+
+
+                </tr>
+
+
+            </thead>
+
+
+
+
+
+            <tbody>
+
+
+
+            {% if companies %}
+
+
+
+                {% for company in companies %}
+
+
+
+                <tr class="company-row">
+
+
+                    <!-- Company Name -->
+
+                    <td>
+
+                        {{ company.companyName }}
+
+                    </td>
+
+
+
+
+
+                    <!-- Email -->
+
+                    <td>
+
+                        {{ company.businessEmail }}
+
+                    </td>
+
+
+
+
+
+                    <!-- Registration Number -->
+
+                    <td>
+
+                        {{ company.registrationNumber }}
+
+                    </td>
+
+
+
+
+
+                    <!-- Industry -->
+
+                    <td>
+
+                        {{ company.industry }}
+
+                    </td>
+
+
+
+
+
+                    <!-- Submitted Date -->
+
+                    <td>
+
+
+                        {% if company.createdAt %}
+
+                            {{ company.createdAt.strftime("%d %b %Y") }}
+
+
+                        {% else %}
+
+                            -
+
+                        {% endif %}
+
+
+                    </td>
+
+
+
+
+
+                    <!-- Status -->
+
+                    <td>
+
+
+                        {% if company.status == "Pending" %}
+
+
+                            <span class="status pending">
+                                Pending
+                            </span>
+
+
+
+                        {% elif company.status == "Approved" %}
+
+
+                            <span class="status approved">
+                                Approved
+                            </span>
+
+
+
+                        {% elif company.status == "Rejected" %}
+
+
+                            <span class="status rejected">
+                                Rejected
+                            </span>
+
+
+
+                        {% endif %}
+
+
+                    </td>
+
+
+
+
+
+                    <!-- Action -->
+
+                    <td>
+
+
+                        <a href="/admin/company/{{ company.company_id }}"
+                           class="review-btn">
+
+
+                            <i class="fa-solid fa-eye"></i>
+
+
+                            Review
+
+
+                        </a>
+
+
+                    </td>
+
+
+
+                </tr>
+
+
+
+                {% endfor %}
+
+
+
+
+
+            {% else %}
+
+
+
+                <tr>
+
+
+                    <td colspan="7"
+                        style="text-align:center;padding:40px;">
+
+
+                        No company registration requests found.
+
+
+                    </td>
+
+
+                </tr>
+
+
+
+            {% endif %}
+
+
+
+            </tbody>
+
+
+
+        </table>
+
+
+
+    </div>
+
+
+
+
+</main>
+
+
+
+
+
+
+<!-- ============================= -->
+<!-- SEARCH SCRIPT -->
+<!-- ============================= -->
+
+
+<script>
+
+
+const searchInput = document.getElementById(
+    "companySearch"
+);
+
+
+searchInput.addEventListener(
+    "keyup",
+    function(){
+
+
+        let keyword = this.value.toLowerCase();
+
+
+
+        let rows = document.querySelectorAll(
+            ".company-row"
+        );
+
+
+
+        rows.forEach(
+            function(row){
+
+
+                let companyName =
+                    row.cells[0]
+                    .textContent
+                    .toLowerCase();
+
+
+
+                if(companyName.includes(keyword)){
+
+
+                    row.style.display = "";
+
+
+                }
+                else{
+
+
+                    row.style.display = "none";
+
+
+                }
+
+
+            }
+        );
+
+
+
+    }
+);
+
+
+</script>
+
+
+
+</body>
+
+</html>

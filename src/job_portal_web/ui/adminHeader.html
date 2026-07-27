@@ -1,0 +1,368 @@
+<header class="topbar">
+
+    <!-- Left -->
+    <div class="topbar-left">
+
+        <img src="/images/companyLogo.png"
+             class="logo"
+             alt="Company Logo">
+
+    </div>
+
+
+    <!-- Right -->
+    <div class="topbar-right">
+
+
+        <!-- Notification -->
+        <button class="icon-btn notification">
+
+            <i class="fa-regular fa-bell"></i>
+
+            <span class="badge">
+                3
+            </span>
+
+        </button>
+
+
+
+        <!-- Admin Profile -->
+        <div class="profile">
+
+            <img src="/images/user.png"
+                 alt="Admin">
+
+            <span class="company-name">
+
+                {{ admin.adminName if admin else "Administrator" }}
+
+            </span>
+
+        </div>
+
+
+    </div>
+
+
+</header>
+
+
+
+
+<!-- Sidebar -->
+
+<div class="sidebar">
+
+
+    <div class="sidebar-title">
+
+        ADMIN
+
+    </div>
+
+
+
+    <ul class="sidebar-menu">
+
+
+        <!-- Dashboard -->
+
+        <li>
+
+            <a href="/admin/dashboard"
+               class="{% if request.url.path == '/admin/dashboard' %}active{% endif %}">
+
+
+                <i class="fa-solid fa-chart-line"></i>
+
+                <span>
+                    Dashboard
+                </span>
+
+
+            </a>
+
+        </li>
+
+
+
+
+        <!-- Company Registration -->
+
+        <li>
+
+            <a href="/admin/company-requests"
+
+               class="
+               {% if
+                    request.url.path == '/admin/company-requests'
+                    or request.url.path.startswith('/admin/company/')
+               %}
+                    active
+               {% endif %}
+               ">
+
+
+                <i class="fa-solid fa-building-circle-check"></i>
+
+
+                <span>
+                    Company Verification
+                </span>
+
+
+            </a>
+
+
+        </li>
+
+
+
+
+
+        <!-- User Management -->
+
+        <li>
+
+
+            <a href="/admin/users"
+
+               class="
+               {% if
+                    request.url.path == '/admin/users'
+                    or request.url.path.startswith('/admin/user/')
+               %}
+                    active
+               {% endif %}
+               ">
+
+
+                <i class="fa-regular fa-user"></i>
+
+
+                <span>
+                    User Management
+                </span>
+
+
+            </a>
+
+
+        </li>
+
+
+
+
+
+        <!-- Employer Management -->
+
+        <li>
+
+
+            <a href="/admin/employers"
+
+               class="
+               {% if
+                    request.url.path == '/admin/employers'
+                    or request.url.path.startswith('/admin/employer/')
+               %}
+                    active
+               {% endif %}
+               ">
+
+
+                <i class="fa-regular fa-building"></i>
+
+
+                <span>
+                    Employer Management
+                </span>
+
+
+            </a>
+
+
+        </li>
+
+
+
+
+
+        <!-- Job Management -->
+
+        <li>
+
+
+            <a href="/admin/jobs"
+
+               class="
+               {% if
+                    request.url.path == '/admin/jobs'
+                    or request.url.path.startswith('/admin/job/')
+               %}
+                    active
+               {% endif %}
+               ">
+
+
+                <i class="fa-regular fa-folder-open"></i>
+
+
+                <span>
+                    Job Management
+                </span>
+
+
+            </a>
+
+
+        </li>
+
+
+
+
+
+
+        <!-- Applications -->
+
+        <li>
+
+
+            <a href="/admin/applications"
+
+               class="{% if request.url.path == '/admin/applications' %}active{% endif %}">
+
+
+                <i class="fa-regular fa-file-lines"></i>
+
+
+                <span>
+                    Applications
+                </span>
+
+
+            </a>
+
+
+        </li>
+
+
+
+
+
+        <!-- Interviews -->
+
+        <li>
+
+
+            <a href="/admin/interviews"
+
+               class="{% if request.url.path == '/admin/interviews' %}active{% endif %}">
+
+
+                <i class="fa-regular fa-calendar-check"></i>
+
+
+                <span>
+                    Interviews
+                </span>
+
+
+            </a>
+
+
+        </li>
+
+
+
+
+
+        <!-- Reports -->
+
+        <li>
+
+
+            <a href="/admin/reports"
+
+               class="
+               {% if
+                    request.url.path == '/admin/reports'
+                    or request.url.path.startswith('/admin/report/')
+               %}
+                    active
+               {% endif %}
+               ">
+
+
+                <i class="fa-regular fa-flag"></i>
+
+
+                <span>
+                    Reports
+                </span>
+
+
+            </a>
+
+
+        </li>
+
+
+
+
+
+        <!-- Analytics -->
+
+        <li>
+
+
+            <a href="/admin/analytics"
+
+               class="{% if request.url.path == '/admin/analytics' %}active{% endif %}">
+
+
+                <i class="fa-solid fa-chart-pie"></i>
+
+
+                <span>
+                    Analytics
+                </span>
+
+
+            </a>
+
+
+        </li>
+
+
+
+    </ul>
+
+
+
+
+    <!-- Logout -->
+
+    <div class="sidebar-bottom">
+
+
+        <a href="/logout">
+
+
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+
+
+            <span>
+                Log Out
+            </span>
+
+
+        </a>
+
+
+    </div>
+
+
+
+</div>

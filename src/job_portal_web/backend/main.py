@@ -22,6 +22,7 @@ from .job_application import router as job_application_router
 
 from .routes.employer import router as employer_router
 from .routes.employerApplication import router as employer_application_router
+from .routes.admin import router as admin_router
 from .database import db
 
 app = FastAPI()
@@ -112,6 +113,9 @@ app.include_router(employer_router)
 
 app.include_router(employer_application_router)
 
+# Admin
+
+app.include_router(admin_router)
 # Messages
 app.include_router(messages_router)
 
