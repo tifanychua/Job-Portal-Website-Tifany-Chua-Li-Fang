@@ -1,6 +1,4 @@
-
-
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Request, Form
@@ -9,9 +7,7 @@ from fastapi.templating import Jinja2Templates
 
 from .database import db
 from firebase_admin import auth, firestore
-from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 from pydantic import BaseModel
-from firebase_admin.exceptions import FirebaseError
 from urllib.parse import quote
 from .email_service import send_password_reset_email
 import os
@@ -33,14 +29,18 @@ ROLE_COLLECTION = {
     "employer": "company",
     "admin": "admin",
 }
+
+
 class LoginToken(BaseModel):
     token: str
+
 
 class JobSeekerRegisterRequest(BaseModel):
     token: str
     name: str
     phone: str
-   
+
+
 class EmployerRegisterRequest(BaseModel):
     token: str
 
@@ -71,8 +71,7 @@ class EmployerRegisterRequest(BaseModel):
     bestTimeToContact: str
     correspondenceAddress: str
 
-   
-    
+
 RESET_TOKEN_TTL_MINUTES = 30
 
 ROLE_LABEL = {
@@ -93,10 +92,7 @@ def _find_user_by_email(collection_name, email):
         return None, None
 
     matches = (
-        db.collection(collection_name)
-        .where("email", "==", email.strip().lower())
-        .limit(1)
-        .stream()
+        db.collection(collection_name).where("email", "==", email.strip().lower()).limit(1).stream()
     )
     for doc in matches:
         return doc.id, doc.to_dict()
@@ -136,10 +132,7 @@ def login_page(request: Request):
 
 
 @router.post("/firebase-login")
-async def firebase_login(
-    request: Request,
-    data: LoginToken
-):
+async def firebase_login(request: Request, data: LoginToken):
 
     try:
 
@@ -149,10 +142,7 @@ async def firebase_login(
 
     except Exception:
 
-        return JSONResponse(
-            {"error": "Invalid Token"},
-            status_code=401
-        )
+        return JSONResponse({"error": "Invalid Token"}, status_code=401)
 
     job = db.collection("job_seeker").document(uid).get()
 
@@ -162,9 +152,7 @@ async def firebase_login(
 
         request.session["applicant_id"] = uid
 
-        return {
-            "redirect": "/"
-        }
+        return {"redirect": "/"}
 
     company = db.collection("company").document(uid).get()
 
@@ -174,14 +162,9 @@ async def firebase_login(
 
         request.session["company_id"] = uid
 
-        return {
-            "redirect": "/manage-jobs"
-        }
+        return {"redirect": "/manage-jobs"}
 
-    return JSONResponse(
-        {"error": "User not found"},
-        status_code=401
-    )
+    return JSONResponse({"error": "User not found"}, status_code=401)
 
 
 @router.get("/logout")
@@ -212,9 +195,7 @@ def register_page(request: Request):
 
 
 @router.post("/firebase-register/job-seeker")
-async def firebase_register_job_seeker(
-    data: JobSeekerRegisterRequest
-):
+async def firebase_register_job_seeker(data: JobSeekerRegisterRequest):
 
     try:
 
@@ -223,41 +204,27 @@ async def firebase_register_job_seeker(
         uid = decoded["uid"]
         email = decoded["email"]
 
-        db.collection("job_seeker").document(uid).set({
-
-            "uid": uid,
-
-            "name": data.name,
-
-            "email": email,
-
-            "phone": data.phone,
-
-            "profileImage": "user.png",
-
-            "status": "Active",
-
-            "createdAt": firestore.SERVER_TIMESTAMP
-
-        })
-
-        return {
-            "success": True
-        }
-
-    except Exception as e:
-
-        return JSONResponse(
-            status_code=401,
-            content={
-                "error": str(e)
+        db.collection("job_seeker").document(uid).set(
+            {
+                "uid": uid,
+                "name": data.name,
+                "email": email,
+                "phone": data.phone,
+                "profileImage": "user.png",
+                "status": "Active",
+                "createdAt": firestore.SERVER_TIMESTAMP,
             }
         )
 
+        return {"success": True}
+
+    except Exception as e:
+
+        return JSONResponse(status_code=401, content={"error": str(e)})
+
+
 @router.post("/firebase-register/employer")
-async def firebase_register_employer(
-    data: EmployerRegisterRequest
-):
+async def firebase_register_employer(data: EmployerRegisterRequest):
 
     try:
 
@@ -268,86 +235,46 @@ async def firebase_register_employer(
         email = decoded["email"]
 
         company_data = {
-
             "uid": uid,
-
             "email": email,
-
             "companyName": data.companyName,
-
             "registrationNumber": data.registrationNumber,
-
             "businessEmail": data.businessEmail,
-
             "phone": data.phone,
-
             "industry": data.industry,
-
             "companySize": data.companySize,
-
             "companyWebsite": data.companyWebsite,
-
             "companyDescription": data.companyDescription,
-
             "address": data.address,
-
             "city": data.city,
-
             "state": data.state,
-
             "postalCode": data.postalCode,
-
             "country": data.country,
-
             "contactPerson": {
-
                 "fullName": data.contactFullName,
-
                 "jobTitle": data.contactJobTitle,
-
                 "department": data.contactDepartment,
-
                 "email": data.contactEmail,
-
                 "phone": data.contactPhone,
-
                 "altPhone": data.altPhone,
-
                 "preferredContactMethod": data.preferredContactMethod,
-
                 "bestTimeToContact": data.bestTimeToContact,
-
-                "correspondenceAddress": data.correspondenceAddress
-
+                "correspondenceAddress": data.correspondenceAddress,
             },
-
             "logo": "companyLogo.png",
-
             "status": "Pending",
-
             "createdAt": firestore.SERVER_TIMESTAMP,
-
         }
 
         db.collection("company").document(uid).set(company_data)
 
-        return {
-
-            "success": True
-
-        }
+        return {"success": True}
 
     except Exception as e:
 
-        return JSONResponse(
+        return JSONResponse(status_code=401, content={"error": str(e)})
 
-            status_code=401,
 
-            content={
-                "error": str(e)
-            }
-
-        )
 # ==============================
 # FORGOT PASSWORD  (job_seeker / employer only — NOT admin)
 # ==============================
@@ -389,36 +316,26 @@ async def forgot_password_submit(
 
         collection_name = ROLE_COLLECTION[role]
 
-        docs = (
-            db.collection(collection_name)
-            .where("email", "==", email)
-            .limit(1)
-            .stream()
-        )
+        docs = db.collection(collection_name).where("email", "==", email).limit(1).stream()
 
         for doc in docs:
             data = doc.to_dict()
-            display_name = (
-                data.get("name")
-                or data.get("companyName")
-                or "User"
-            )
+            display_name = data.get("name") or data.get("companyName") or "User"
             break
 
         await send_password_reset_email(
-        email=email,
-        name=display_name,
-        reset_link=reset_link,
-    )
+            email=email,
+            name=display_name,
+            reset_link=reset_link,
+        )
 
     except Exception as e:
-        print("Forgot Password Error:", e)
+        print("Forgot Password Error:", repr(e))
 
     return RedirectResponse(
         url=f"/forgot-password?sent=1&role={role}&email={quote(email)}",
         status_code=303,
     )
-
 
 
 # ==============================
@@ -436,8 +353,10 @@ def register_employer_page(request: Request):
         name="employer_registration.html",
         context={"error": error},
     )
+
+
 @router.get("/login/admin")
-def register_employer_page(request: Request):
+def register_admin_page(request: Request):
     error = request.query_params.get("error")
     return templates.TemplateResponse(
         request=request,
@@ -446,12 +365,8 @@ def register_employer_page(request: Request):
     )
 
 
-
 @router.post("/admin/firebase-login")
-async def admin_firebase_login(
-    request: Request,
-    data: LoginToken
-):
+async def admin_firebase_login(request: Request, data: LoginToken):
 
     try:
         decoded = auth.verify_id_token(data.token)
@@ -459,29 +374,20 @@ async def admin_firebase_login(
 
     except Exception:
 
-        return JSONResponse(
-            {"error": "Invalid Token"},
-            status_code=401
-        )
+        return JSONResponse({"error": "Invalid Token"}, status_code=401)
 
     admin = db.collection("admin").document(uid).get()
 
     if not admin.exists:
 
-        return JSONResponse(
-            {
-                "error": "Access denied."
-            },
-            status_code=403
-        )
+        return JSONResponse({"error": "Access denied."}, status_code=403)
 
     request.session["user_type"] = "admin"
     request.session["admin_id"] = uid
 
-    return {
-        "redirect": "/admin/dashboard"
-    }
-    
+    return {"redirect": "/admin/dashboard"}
+
+
 @router.get("/admin/dashboard")
 def admin_dashboard(request: Request):
 
@@ -494,9 +400,5 @@ def admin_dashboard(request: Request):
     admin_data = admin_doc.to_dict() if admin_doc.exists else {}
 
     return templates.TemplateResponse(
-        request=request,
-        name="admin_dashboard.html",
-        context={
-            "admin": admin_data
-        }
+        request=request, name="admin_dashboard.html", context={"admin": admin_data}
     )

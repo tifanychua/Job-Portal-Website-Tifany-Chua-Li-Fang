@@ -309,9 +309,9 @@ def browse_jobs(
     topCategories = get_top_categories()
 
     categories = get_categories()
-    
+
     user = None
-    
+
     if request.session.get("user_type") == "job_seeker":
 
         uid = request.session.get("applicant_id")

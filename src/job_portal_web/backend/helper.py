@@ -1,6 +1,7 @@
 from .database import db
 from fastapi import Request
 
+
 def get_company(request: Request):
 
     company_id = request.session.get("company_id")

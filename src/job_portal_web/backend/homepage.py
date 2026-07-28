@@ -138,11 +138,7 @@ def home(request: Request):
 
     companies = []
 
-    docs = (
-        db.collection("company")
-        .where(filter=FieldFilter("status", "==", "Active"))
-        .stream()
-    )
+    docs = db.collection("company").where(filter=FieldFilter("status", "==", "Active")).stream()
 
     for doc in docs:
 
@@ -155,11 +151,7 @@ def home(request: Request):
     categories = get_top_categories()
 
     total_jobs = len(
-        list(
-            db.collection("job_list")
-            .where(filter=FieldFilter("status", "==", "Active"))
-            .stream()
-        )
+        list(db.collection("job_list").where(filter=FieldFilter("status", "==", "Active")).stream())
     )
 
     # ===========================
@@ -169,8 +161,8 @@ def home(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="home.html",
-        context={      
-            "user": user,           
+        context={
+            "user": user,
             "featured_jobs": jobs,
             "top_companies": companies[:5],
             "categories": categories,

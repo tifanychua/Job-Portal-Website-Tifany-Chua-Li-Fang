@@ -148,7 +148,7 @@ def my_applications(request: Request, status: str = "all"):
         application = [a for a in application if a["status"] == status]
 
     total_count = sum(counts.values())
-    
+
     user = None
 
     if request.session.get("user_type") == "job_seeker":
@@ -207,7 +207,7 @@ def my_applications_detail(request: Request, application_id: str):
                 user = doc.to_dict()
 
     application = {
-        "user":user,
+        "user": user,
         "id": data["id"],
         "job": job,
         "status": current_status,

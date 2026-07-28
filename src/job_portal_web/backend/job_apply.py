@@ -234,7 +234,7 @@ async def job_apply_submit(
 
     return JSONResponse(
         content={
-            "user":user,
+            "user": user,
             "success": True,
             "message": "Application submitted successfully!",
             "application_id": application_ref.id,

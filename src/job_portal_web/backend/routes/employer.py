@@ -72,22 +72,15 @@ async def manage_jobs(request: Request):
     if company.get("status") != "Active":
         return templates.TemplateResponse(
             request=request,
-            name="companyPending.html",  
-            context={
-                "request": request,
-                "company": company
-            }
+            name="companyPending.html",
+            context={"request": request, "company": company},
         )
 
     company_id = company.get("companyId")
 
     jobs = []
 
-    job_docs = (
-        db.collection("job_list")
-        .where("company_id", "==", company_id)
-        .stream()
-    )
+    job_docs = db.collection("job_list").where("company_id", "==", company_id).stream()
 
     for doc in job_docs:
         job_data = doc.to_dict()

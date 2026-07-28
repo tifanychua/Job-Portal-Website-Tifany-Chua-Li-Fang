@@ -15,7 +15,5 @@ templates = Jinja2Templates(directory=str(UI_DIR))
 @router.get("/edit-profile", response_class=HTMLResponse)
 async def edit_profile(request: Request):
     return templates.TemplateResponse(
-        request=request,
-        name="edit_jobSeeker_profile.html",
-        context={}
+        request=request, name="edit_jobSeeker_profile.html", context={}
     )
