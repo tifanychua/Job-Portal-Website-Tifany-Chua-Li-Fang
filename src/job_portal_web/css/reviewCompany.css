@@ -559,7 +559,64 @@
 }
 
 
+/* ===================================
+          DEACTIVATE BUTTON
+=================================== */
 
+
+.deactivate-btn{
+
+
+    height:46px;
+
+
+    padding:0 26px;
+
+
+    border:none;
+
+
+    border-radius:8px;
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+    gap:10px;
+
+
+    font-size:14px;
+
+
+    font-weight:600;
+
+
+    cursor:pointer;
+
+
+    background:#F59E0B;
+
+
+    color:white;
+
+
+}
+
+
+
+.deactivate-btn:hover{
+
+
+    background:#D97706;
+
+
+}
 
 
 

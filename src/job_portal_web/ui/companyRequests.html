@@ -75,23 +75,80 @@
 
     <div class="toolbar">
 
+<div class="filter-box">
 
-        <div class="search-box">
-
-
-            <i class="fa-solid fa-magnifying-glass"></i>
+    <i class="fa-solid fa-filter"></i>
 
 
-            <input 
-                type="text"
-                id="companySearch"
-                placeholder="Search company...">
+    <select id="statusFilter"
+            onchange="filterStatus()">
 
 
-        </div>
+        <option value="Pending"
+        {% if current_status == "Pending" %}
+        selected
+        {% endif %}>
+            Pending
+        </option>
+
+
+        <option value="Active"
+        {% if current_status == "Active" %}
+        selected
+        {% endif %}>
+            Active
+        </option>
+
+
+        <option value="Rejected"
+        {% if current_status == "Rejected" %}
+        selected
+        {% endif %}>
+            Rejected
+        </option>
+
+
+        <option value="Deactivated"
+        {% if current_status == "Deactivated" %}
+        selected
+        {% endif %}>
+            Deactivated
+        </option>
+
+
+        <option value="All"
+        {% if current_status == "All" %}
+        selected
+        {% endif %}>
+            All Companies
+        </option>
+
+
+    </select>
+
+
+</div>
+
+
+
+
+
+    <div class="search-box">
+
+
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+
+        <input 
+            type="text"
+            id="companySearch"
+            placeholder="Search company...">
 
 
     </div>
+
+
+</div>
 
 
 
@@ -257,12 +314,20 @@
 
 
 
-                        {% elif company.status == "Approved" %}
+                        {% elif company.status == "Active" %}
 
 
-                            <span class="status approved">
-                                Approved
-                            </span>
+<span class="status approved">
+    Active
+</span>
+
+
+{% elif company.status == "Deactivated" %}
+
+
+<span class="status deactivated">
+    Deactivated
+</span>
 
 
 
@@ -423,6 +488,18 @@ searchInput.addEventListener(
 
     }
 );
+
+function filterStatus(){
+
+    let status = document.getElementById(
+        "statusFilter"
+    ).value;
+
+
+    window.location.href =
+        "/admin/company-requests?status=" + status;
+
+}
 
 
 </script>

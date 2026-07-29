@@ -138,3 +138,102 @@ JobConnect Team
     fm = FastMail(conf)
 
     await fm.send_message(message)
+
+
+async def send_interview_rescheduled_email(
+    email,
+    name,
+    interview,
+    company_address,
+):
+
+    location_text = ""
+
+    if interview.interviewType == "online":
+
+        location_text = f"""
+Meeting Link:
+{interview.meetingLink}
+"""
+
+    elif interview.interviewType == "physical":
+
+        location_text = f"""
+Company Address:
+{company_address}
+"""
+
+    message = MessageSchema(
+        subject="Interview Rescheduled - JobConnect",
+        recipients=[email],
+        body=f"""
+
+Dear {name},
+
+Your interview has been rescheduled by the employer.
+
+Interview Stage:
+{interview.stage}
+
+New Interview Date:
+{interview.date}
+
+New Interview Time:
+{interview.time}
+
+Duration:
+{interview.duration}
+
+Interview Type:
+{interview.interviewType}
+
+{location_text}
+
+Please attend the interview according to the updated schedule.
+
+Regards,
+
+JobConnect Team
+
+""",
+        subtype=MessageType.plain,
+    )
+
+    fm = FastMail(conf)
+
+    await fm.send_message(message)
+
+
+async def send_interview_cancelled_email(
+    email,
+    name,
+    position,
+):
+
+    message = MessageSchema(
+        subject="Interview Cancelled - JobConnect",
+        recipients=[email],
+        body=f"""
+
+Dear {name},
+
+We regret to inform you that your scheduled interview has been cancelled by the employer.
+
+Position:
+{position}
+
+We sincerely apologize for any inconvenience caused.
+
+You may continue applying for other opportunities through JobConnect.
+
+Regards,
+
+JobConnect Team
+
+""",
+        subtype=MessageType.plain,
+    )
+
+    fm = FastMail(conf)
+
+    await fm.send_message(message)

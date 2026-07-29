@@ -1,8 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, field_validator
-
 from .database import db
-from .email_service import send_interview_email, send_employer_interview_notification
+from typing import Optional
+from .email_service import (
+    send_interview_email,
+    send_employer_interview_notification,
+    send_interview_cancelled_email,
+    send_interview_rescheduled_email,
+)
 
 router = APIRouter()
 
@@ -155,7 +160,7 @@ def get_interview(interview_id: str):
 
 
 @router.put("/api/interviews/{interview_id}/cancel")
-def cancel_interview(interview_id: str):
+async def cancel_interview(interview_id: str):
 
     interview_ref = db.collection("interviews").document(interview_id)
 
@@ -165,9 +170,55 @@ def cancel_interview(interview_id: str):
 
         raise HTTPException(status_code=404, detail="Interview not found")
 
+    interview = doc.to_dict()
+
+    # Update interview status
     interview_ref.update({"status": "Cancelled"})
 
-    return {"message": "Interview cancelled successfully!"}
+    print("Interview cancelled:", interview_id)
+
+    try:
+
+        # Get application
+        application_doc = db.collection("application").document(interview.get("candidateId")).get()
+
+        print("Application exists:", application_doc.exists)
+
+        if application_doc.exists:
+
+            application = application_doc.to_dict()
+
+            print("Application data:", application)
+
+            job_seeker_id = application.get("job_seeker_id") or application.get("jobSeekerId")
+
+            print("Job seeker ID:", job_seeker_id)
+
+            if job_seeker_id:
+
+                seeker_doc = db.collection("job_seeker").document(job_seeker_id).get()
+
+                print("Seeker exists:", seeker_doc.exists)
+
+                if seeker_doc.exists:
+
+                    seeker = seeker_doc.to_dict()
+
+                    print("Seeker data:", seeker)
+
+                    print("Sending cancel email to:", seeker.get("email"))
+
+                    await send_interview_cancelled_email(
+                        seeker.get("email"), seeker.get("name"), interview.get("position")
+                    )
+
+                    print("Cancel email sent successfully")
+
+    except Exception as e:
+
+        print("Cancel email error:", e)
+
+    return {"message": "Interview cancelled and email sent"}
 
 
 # ==================================================
@@ -203,7 +254,7 @@ class InterviewUpdate(BaseModel):
 
 
 @router.put("/api/interviews/{interview_id}")
-def update_interview(interview_id: str, interview: InterviewUpdate):
+async def update_interview(interview_id: str, interview: InterviewUpdate):
 
     interview_ref = db.collection("interviews").document(interview_id)
 
@@ -213,14 +264,69 @@ def update_interview(interview_id: str, interview: InterviewUpdate):
 
         raise HTTPException(status_code=404, detail="Interview not found")
 
+    old_interview = doc.to_dict()
+
+    # Update Firestore
     interview_ref.update(interview.model_dump())
 
+    # Merge old + new data
+    updated_interview = {**old_interview, **interview.model_dump()}
+
+    try:
+
+        # Find application
+        application_doc = (
+            db.collection("application").document(updated_interview.get("candidateId")).get()
+        )
+
+        print("Application exists:", application_doc.exists)
+
+        if application_doc.exists:
+
+            application = application_doc.to_dict()
+
+            job_seeker_id = application.get("job_seeker_id") or application.get("jobSeekerId")
+
+            print("Job seeker ID:", job_seeker_id)
+
+            if job_seeker_id:
+
+                seeker_doc = db.collection("job_seeker").document(job_seeker_id).get()
+
+                print("Seeker exists:", seeker_doc.exists)
+
+                if seeker_doc.exists:
+
+                    seeker = seeker_doc.to_dict()
+
+                    company_address = ""
+
+                    company_doc = (
+                        db.collection("company").document(updated_interview.get("companyId")).get()
+                    )
+
+                    if company_doc.exists:
+
+                        company = company_doc.to_dict()
+
+                        company_address = company.get("address", "")
+
+                    print("Sending reschedule email to:", seeker.get("email"))
+
+                    await send_interview_rescheduled_email(
+                        seeker.get("email"),
+                        seeker.get("name"),
+                        Interview(**updated_interview),
+                        company_address,
+                    )
+
+                    print("Reschedule email sent")
+
+    except Exception as e:
+
+        print("Reschedule email error:", e)
+
     return {"message": "Interview rescheduled successfully!"}
-
-
-# ==================================================
-# APPLICANT VIEW
-# ==================================================
 
 
 @router.get("/api/applicant/interviews")
@@ -394,3 +500,167 @@ async def notify_employer(interview_id, status, reason=None):
         interview.get("requestedDate"),
         interview.get("requestedTime"),
     )
+
+
+# ==================================================
+# EMPLOYER VIEW INTERVIEW RECORDS WITH STATUS FILTER
+# ==================================================
+
+
+@router.get("/employer/interviews")
+def get_employer_interviews(status: Optional[str] = None):
+
+    result = []
+
+    docs = db.collection("interviews").stream()
+
+    for doc in docs:
+
+        data = doc.to_dict()
+
+        data["id"] = doc.id
+
+        # Filter by status
+
+        if status:
+
+            if data.get("status") != status:
+
+                continue
+
+        result.append(data)
+
+    if status and len(result) == 0:
+
+        return {"message": "No interview records found", "data": []}
+
+    return result
+
+
+# ==================================================
+# EMPLOYER SEARCH INTERVIEW RECORDS
+# ==================================================
+
+
+@router.get("/employer/interviews/search")
+def search_employer_interviews(keyword: str = ""):
+
+    result = []
+
+    docs = db.collection("interviews").stream()
+
+    keyword = keyword.lower().strip()
+
+    for doc in docs:
+
+        data = doc.to_dict()
+
+        data["id"] = doc.id
+
+        # If keyword exists, search relevant fields
+
+        if keyword:
+
+            searchable_fields = [
+                data.get("candidateName", ""),
+                data.get("position", ""),
+                data.get("status", ""),
+                data.get("candidateId", ""),
+            ]
+
+            matched = any(keyword in str(field).lower() for field in searchable_fields)
+
+            if not matched:
+
+                continue
+
+        result.append(data)
+
+    if keyword and len(result) == 0:
+
+        return {"message": "No interview records found", "data": []}
+
+    return result
+
+
+
+# ==================================================
+# JOB SEEKER FILTER INTERVIEW RECORDS BY STATUS
+# ==================================================
+
+
+@router.get("/api/applicant/interviews/filter")
+def filter_applicant_interviews(application_id: str, status: Optional[str] = None):
+
+    result = []
+
+    docs = db.collection("interviews").where("candidateId", "==", application_id).stream()
+
+    for doc in docs:
+
+        data = doc.to_dict()
+
+        data["id"] = doc.id
+
+        if status:
+
+            if data.get("status") != status:
+
+                continue
+
+        result.append(data)
+
+    if status and len(result) == 0:
+
+        return {"message": "No interview records found", "data": []}
+
+    return result
+
+
+# ==================================================
+# JOB SEEKER SEARCH INTERVIEW RECORDS
+# ==================================================
+
+
+@router.get("/api/applicant/interviews/search")
+def search_applicant_interviews(application_id: str, keyword: str = ""):
+
+    result = []
+
+    docs = db.collection("interviews").where("candidateId", "==", application_id).stream()
+
+    keyword = keyword.lower().strip()
+
+    for doc in docs:
+
+        data = doc.to_dict()
+
+        data["id"] = doc.id
+
+        # Search all relevant fields
+
+        if keyword:
+
+            searchable_fields = [
+                data.get("candidateName", ""),
+                data.get("position", ""),
+                data.get("status", ""),
+                data.get("interviewer", ""),
+                data.get("stage", ""),
+            ]
+
+            matched = any(keyword in str(field).lower() for field in searchable_fields)
+
+            if not matched:
+
+                continue
+
+        result.append(data)
+
+    # No result
+
+    if keyword and len(result) == 0:
+
+        return {"message": "No interview records found", "data": []}
+
+    return result

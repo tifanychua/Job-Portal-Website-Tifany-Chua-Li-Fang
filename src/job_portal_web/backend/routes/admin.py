@@ -15,8 +15,13 @@ templates = Jinja2Templates(directory="src/job_portal_web/ui")
 # ==================================
 
 
+# ==================================
+# Company Management
+# ==================================
+
+
 @router.get("/admin/company-requests")
-def company_requests(request: Request):
+def company_requests(request: Request, status: str = "Pending"):
 
     companies = []
 
@@ -30,16 +35,23 @@ def company_requests(request: Request):
         # Add document ID
         company["company_id"] = doc.id
 
-        # Only display Pending companies
+        # Filter status
+        if status != "All":
 
-        if company.get("status") == "Pending":
+            if company.get("status") != status:
 
-            companies.append(company)
+                continue
+
+        companies.append(company)
 
     return templates.TemplateResponse(
         request=request,
         name="companyRequests.html",
-        context={"companies": companies, "active_page": "company-verification"},
+        context={
+            "companies": companies,
+            "active_page": "company-verification",
+            "current_status": status,
+        },
     )
 
 
@@ -78,7 +90,7 @@ def approve_company(company_id: str):
 
     company_ref = db.collection("company").document(company_id)
 
-    company_ref.update({"status": "Approved"})
+    company_ref.update({"status": "Active"})
 
     return RedirectResponse(url="/admin/company-requests", status_code=303)
 
@@ -96,3 +108,18 @@ def reject_company(company_id: str):
     company_ref.update({"status": "Rejected"})
 
     return RedirectResponse(url="/admin/company-requests", status_code=303)
+
+
+# ==================================
+# Deactivate Company
+# ==================================
+
+
+@router.post("/admin/company/{company_id}/deactivate")
+def deactivate_company(company_id: str):
+
+    company_ref = db.collection("company").document(company_id)
+
+    company_ref.update({"status": "Deactivated"})
+
+    return RedirectResponse(url="/admin/company-requests?status=Active", status_code=303)

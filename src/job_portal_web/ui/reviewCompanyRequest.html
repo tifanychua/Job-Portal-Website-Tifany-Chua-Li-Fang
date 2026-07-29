@@ -514,53 +514,96 @@
 <!-- ====================================== -->
 
 
+<!-- ====================================== -->
+<!-- Bottom Buttons -->
+<!-- ====================================== -->
+
+
 <div class="bottom-buttons">
 
 
-
-<form action="/admin/company/{{ company.company_id }}/reject"
-      method="post">
+{% if company.status == "Pending" %}
 
 
-    <button class="reject-btn"
-            type="submit"
-            onclick="return confirm('Reject this registration?')">
+    <!-- Reject Button -->
+
+    <form action="/admin/company/{{ company.company_id }}/reject"
+          method="post">
 
 
-        <i class="fa-solid fa-xmark"></i>
+        <button class="reject-btn"
+                type="submit"
+                onclick="return confirm('Reject this registration?')">
 
 
-        Reject
+            <i class="fa-solid fa-xmark"></i>
 
 
-    </button>
+            Reject
 
 
-</form>
+        </button>
+
+
+    </form>
 
 
 
 
 
-<form action="/admin/company/{{ company.company_id }}/approve"
-      method="post">
+    <!-- Approve Button -->
+
+    <form action="/admin/company/{{ company.company_id }}/approve"
+          method="post">
 
 
-    <button class="approve-btn"
-            type="submit"
-            onclick="return confirm('Approve this registration?')">
+        <button class="approve-btn"
+                type="submit"
+                onclick="return confirm('Approve this company?')">
 
 
-        <i class="fa-solid fa-check"></i>
+            <i class="fa-solid fa-check"></i>
 
 
-        Approve Company
+            Approve Company
 
 
-    </button>
+        </button>
 
 
-</form>
+    </form>
+
+
+
+{% elif company.status == "Active" %}
+
+
+
+    <!-- Deactivate Button -->
+
+    <form action="/admin/company/{{ company.company_id }}/deactivate"
+          method="post">
+
+
+        <button class="reject-btn"
+                type="submit"
+                onclick="return confirm('Deactivate this company?')">
+
+
+            <i class="fa-solid fa-ban"></i>
+
+
+            Deactivate Company
+
+
+        </button>
+
+
+    </form>
+
+
+
+{% endif %}
 
 
 

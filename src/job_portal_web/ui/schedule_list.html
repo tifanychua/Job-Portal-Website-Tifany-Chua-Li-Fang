@@ -396,32 +396,43 @@ console.log(error);
 }
 
 function updateSummary(data){
+
 let today = new Date();
+
+
 let upcoming = data.filter(interview=>{
 
 
-
 let interviewDate = new Date(
-interview.date + "T" + interview.time
+    interview.date + "T" + interview.time
 );
 
 
 
 return (
 
-interviewDate >= today &&
-interview.status !== "Cancelled" &&
-interview.status !== "Completed"&&
-interview.status !== "Declined"
+    interviewDate >= today &&
+
+    interview.applicantResponse === "Accepted" &&
+
+    interview.status !== "Cancelled" &&
+
+    interview.status !== "Completed"
 
 );
+
+
 });
+
+
 
 document.getElementById(
 "totalInterview"
 ).innerHTML =
 
 upcoming.length + " Scheduled";
+
+
 
 let candidates = new Set(
 
@@ -443,10 +454,7 @@ candidates.size + " Candidates";
 
 
 
-
-
 if(upcoming.length > 0){
-
 
 
 upcoming.sort((a,b)=>{
@@ -493,7 +501,6 @@ next.date
 next.time;
 
 
-
 }
 
 else{
@@ -507,7 +514,6 @@ document.getElementById(
 
 
 }
-
 
 
 }
