@@ -19,3 +19,9 @@ Feature: Employer Login
     Given the employer has logged in successfully
     When the employer accesses the platform
     Then the system should allow access to job posting, applicant management, and recruitment features
+
+  Scenario: Login with rejected or deactivated company account
+    Given the employer account status is "Rejected" or "Deactive"
+    When the employer attempts to log in with valid credentials
+    Then the system should block the login
+    And display an account status error message

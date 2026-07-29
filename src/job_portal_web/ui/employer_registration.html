@@ -131,7 +131,7 @@
                 <option value="+62">🇮🇩 +62</option>
                 <option value="+1">🇺🇸 +1</option>
               </select>
-              <input class="form-input" type="tel" id="phone" name="phone" placeholder="Enter phone number" required>
+              <input type="tel" id="phone"name="phone"placeholder="Enter your phone number" required>
             </div>
           </div>
 
@@ -195,13 +195,6 @@
               </div>
             </div>
           </div>
-
-          <div class="form-group full-width">
-            <label>Company Description<span class="required">*</span></label>
-            <textarea class="form-textarea" id="companyDescription" name="companyDescription" maxlength="500" placeholder="Tell us about your company..." required oninput="updateCharCount(this, 'descCount')"></textarea>
-            <div class="char-counter"><span id="descCount">0</span> / 500</div>
-          </div>
-
           <div class="form-group">
             <label>Country<span class="required">*</span></label>
             <select class="form-select" id="country" name="country" required>
@@ -211,6 +204,13 @@
               <option>Others</option>
             </select>
           </div>
+          <div class="form-group full-width">
+            <label>Company Description<span class="required">*</span></label>
+            <textarea class="form-textarea" id="companyDescription" name="companyDescription" maxlength="500" placeholder="Tell us about your company..." required oninput="updateCharCount(this, 'descCount')"></textarea>
+            <div class="char-counter"><span id="descCount">0</span> / 500</div>
+          </div>
+
+          
         </div>
       </div>
 
@@ -506,7 +506,25 @@ function nextStep() {
 
     if (!validateCurrentStep()) return;
 
+     if (currentStep === 1) {
+
+        if (!validateStep1()) return;
+
+    }
+
+    if (currentStep === 2) {
+
+        if (!validateStep2()) return;
+
+    }
+
     if (currentStep === 3) {
+
+        if (!validateStep3()) return;
+
+    }
+
+  /*  if (currentStep === 3) {
 
         const password = document.getElementById("wizardPassword").value;
         const confirmPassword = document.getElementById("wizardConfirmPassword").value;
@@ -530,7 +548,7 @@ function nextStep() {
             alert("Passwords do not match.");
             return; 
         }
-    }
+    }*/
     goToStep(currentStep +1);
     
 }
@@ -557,7 +575,7 @@ function nextStep() {
   function populateReview() {
     console.log("populateReview called");
     console.log(fieldVal("companyName"));
-console.log(fieldVal("registrationNumber"));
+    console.log(fieldVal("registrationNumber"));
     setReview('companyName', fieldVal('companyName'));
     setReview('registrationNumber', fieldVal('registrationNumber'));
     setReview('industry', fieldVal('industry'));
@@ -577,21 +595,7 @@ console.log(fieldVal("registrationNumber"));
     setReview('accountEmail', fieldVal('accountEmail'));
   }
 
-  function showToast(message) {
-    var toast = document.getElementById('toast');
-    document.getElementById('toastMsg').textContent = message;
-    toast.classList.add('show');
-    setTimeout(function () { toast.classList.remove('show'); }, 2500);
-  }
 
-  function saveDraft() {
-    var form = document.getElementById('employerForm');
-    var data = new FormData(form);
-    fetch('/register/employer/draft', { method: 'POST', body: data })
-      .then(function (r) { return r.json(); })
-      .then(function () { showToast('Draft saved. You can continue later.'); })
-      .catch(function () { showToast('Could not save draft — check your connection.'); });
-  }
 </script>
 
 </body>

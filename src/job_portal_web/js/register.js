@@ -46,6 +46,16 @@ form.addEventListener("submit", async (e) => {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    if (name.length < 2) {
+        alert("Name must contain at least 2 characters.");
+        return;
+    }
+
+    if (name.length > 100) {
+        alert("Name is too long.");
+        return;
+    }
+
     // Required
     if (email === "") {
         alert("Email address is required.");
@@ -80,6 +90,13 @@ form.addEventListener("submit", async (e) => {
 
     if (password !== confirmPassword) {
         alert("Passwords do not match.");
+        return;
+    }
+
+    const phoneRegex = /^\d{9,10}$/;
+
+    if (phone !== "" && !phoneRegex.test(phone)) {
+        alert("Phone number must contain 9 or 10 digits.");
         return;
     }
 

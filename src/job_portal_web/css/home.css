@@ -200,19 +200,43 @@
   gap: 16px;
 }
 .company-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 18px;
+
   background: var(--color-card-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 20px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
   font-weight: 700;
   font-size: 16px;
-  height: 64px;
+
+  min-height: 64px;
+  width: fit-content;
+
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 .company-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+.company-name{
+    margin: 0;
+    white-space: nowrap;
+}
+.company-logo-placeholder{
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 22px;
+    flex-shrink: 0;
+    background: #EFF6FF;
+    color: var(--color-primary);
+}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1100px) {

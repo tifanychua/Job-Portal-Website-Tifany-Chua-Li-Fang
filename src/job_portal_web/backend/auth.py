@@ -157,12 +157,27 @@ async def firebase_login(request: Request, data: LoginToken):
     company = db.collection("company").document(uid).get()
 
     if company.exists:
+        company_data = company.to_dict()
+        status = company_data.get("status")
 
-        request.session["user_type"] = "employer"
-
-        request.session["company_id"] = uid
-
-        return {"redirect": "/manage-jobs"}
+        if status in ["Pending", "Active"]:
+            request.session["user_type"] = "employer"
+            request.session["company_id"] = uid
+            return {"redirect": "/manage-jobs"}
+        elif status == "Rejected":
+            return JSONResponse(
+                {"error": "Your company registration has been rejected."},
+                status_code=403,
+            )
+        elif status == "Deactive":
+            return JSONResponse(
+                {"error": "Your company account has been deactivated."},
+                status_code=403,
+            )
+        else:
+            return JSONResponse(
+                {"error": "Your company account is not allowed to login."}, status_code=403
+            )
 
     return JSONResponse({"error": "User not found"}, status_code=401)
 

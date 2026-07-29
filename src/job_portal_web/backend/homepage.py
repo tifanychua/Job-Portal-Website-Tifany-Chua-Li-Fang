@@ -40,7 +40,7 @@ def get_top_categories(limit=5):
 
 def _attach_company_info(job):
 
-    job.setdefault("company_logo", "company/default.png")
+    job.setdefault("company_logo", "default.jpg")
 
     company_id = job.get("company_id")
 
@@ -50,7 +50,7 @@ def _attach_company_info(job):
 
         company = company_doc.to_dict()
         job["company_name"] = company.get("companyName", "Unknown")
-        job["company_logo"] = company.get("logo")
+        job["company_logo"] = company.get("logo", "default.jpg")
 
         # ===== LOCATION =====
         job["location"] = job.get("location", "Unknown")

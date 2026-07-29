@@ -34,62 +34,150 @@ function toggleRule(id, valid) {
     }
 
 }
-form.addEventListener("submit", async (e) => {
 
-    e.preventDefault();
+function validateStep1() {
 
-    const accountEmail = document.getElementById("accountEmail").value.trim();
-    const password = document.getElementById("wizardPassword").value;
-    const confirmPassword = document.getElementById("wizardConfirmPassword").value;
+    const companyName = document.getElementById("companyName").value.trim();
+    const businessEmail = document.getElementById("businessEmail").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const registrationNumber = document.getElementById("registrationNumber").value.trim();
+    const postalCode = document.getElementById("postalCode").value.trim();
+    const companyWebsite = document.getElementById("companyWebsite").value.trim();
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\d{9,10}$/;
+    const postalRegex = /^\d{5}$/;
 
-    // Required
-    if (accountEmail === "") {
-        alert("Account email is required.");
-        return;
+    if (companyName.length < 2 || companyName.length > 100) {
+        alert("Company name must be between 2 and 100 characters.");
+        return false;
     }
 
-    // Maximum length
-    if (accountEmail.length > 254) {
-        alert("Account email is too long.");
-        return;
+    if (!emailRegex.test(businessEmail)) {
+        alert("Please enter a valid business email.");
+        return false;
     }
 
-    // Email format
-    if (!emailRegex.test(accountEmail)) {
-        alert("Please enter a valid account email address.");
-        return;
+    if (!phoneRegex.test(phone)) {
+        alert("Company phone number must contain 9 or 10 digits.");
+        return false;
     }
+
+    if (!postalRegex.test(postalCode)) {
+        alert("Postal code must contain 5 digits.");
+        return false;
+    }
+
+    if (registrationNumber.length !== 12) {
+        alert("Please enter a valid company registration number.");
+        return false;
+    }
+
+    if (companyWebsite !== "") {
+        try {
+            new URL(companyWebsite);
+        } catch {
+            alert("Please enter a valid website URL.");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function validateStep2() {
+
+    const contactFullName =
+        document.getElementById("contactFullName").value.trim();
+
+    const contactEmail =
+        document.getElementById("contactEmail").value.trim();
+
+    const contactPhone =
+        document.getElementById("contactPhone").value.trim();
+
+    const altPhone =
+        document.getElementById("altPhone").value.trim();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^\d{9,10}$/;
+
+    if (contactFullName.length < 2 || contactFullName.length > 100) {
+        alert("Contact person's name must be between 2 and 100 characters.");
+        return false;
+    }
+
+    if (!emailRegex.test(contactEmail)) {
+        alert("Please enter a valid contact email.");
+        return false;
+    }
+
+    if (!phoneRegex.test(contactPhone)) {
+        alert("Contact phone number must contain 9 or 10 digits.");
+        return false;
+    }
+
+    if (altPhone !== "" && !phoneRegex.test(altPhone)) {
+        alert("Alternative phone number must contain 9 or 10 digits.");
+        return false;
+    }
+
+    return true;
+}
+
+function validateStep3() {
+
+    const accountEmail =
+        document.getElementById("accountEmail").value.trim();
+
+    const password =
+        document.getElementById("wizardPassword").value;
+
+    const confirmPassword =
+        document.getElementById("wizardConfirmPassword").value;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     const passwordRegex =
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
-        if (!passwordRegex.test(password)) {
-            alert(
-                "Password must contain:\n" +
-                "- At least 8 characters\n" +
-                "- At least one uppercase letter\n" +
-                "- At least one lowercase letter\n" +
-                "- At least one number\n" +
-                "- At least one special character"
-            );
-            return;
-        }
+    if (!emailRegex.test(accountEmail)) {
+        alert("Please enter a valid account email.");
+        return false;
+    }
+
+    if (!passwordRegex.test(password)) {
+        alert("Password does not meet the security requirements.");
+        return false;
+    }
 
     if (password !== confirmPassword) {
         alert("Passwords do not match.");
-        return;
+        return false;
     }
+
+    return true;
+}
+
+form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const accountEmail =
+        document.getElementById("accountEmail").value.trim();
+
+    const password =
+        document.getElementById("wizardPassword").value;
 
     try {
 
-        // Create Firebase Authentication Account
-        const credential = await createUserWithEmailAndPassword(
-            auth,
-            accountEmail,
-            password
-        );
+        // Create Firebase Authentication account
+        const credential =
+            await createUserWithEmailAndPassword(
+                auth,
+                accountEmail,
+                password
+            );
 
         await updateProfile(credential.user, {
             displayName: document.getElementById("companyName").value
@@ -99,36 +187,48 @@ form.addEventListener("submit", async (e) => {
 
         const employerData = {
 
-            token: token,
+            token,
 
-            companyName: document.getElementById("companyName").value,
+            companyName:
+                document.getElementById("companyName").value,
 
-            registrationNumber: document.getElementById("registrationNumber").value,
+            registrationNumber:
+                document.getElementById("registrationNumber").value,
 
-            businessEmail: document.getElementById("businessEmail").value,
+            businessEmail:
+                document.getElementById("businessEmail").value,
 
             phone:
                 document.getElementById("phoneCode").value +
                 " " +
                 document.getElementById("phone").value,
 
-            industry: document.getElementById("industry").value,
+            industry:
+                document.getElementById("industry").value,
 
-            companySize: document.getElementById("companySize").value,
+            companySize:
+                document.getElementById("companySize").value,
 
-            companyWebsite: document.getElementById("companyWebsite").value,
+            companyWebsite:
+                document.getElementById("companyWebsite").value,
 
-            companyDescription: document.getElementById("companyDescription").value,
+            companyDescription:
+                document.getElementById("companyDescription").value,
 
-            address: document.getElementById("companyAddress").value,
+            address:
+                document.getElementById("companyAddress").value,
 
-            city: document.getElementById("city").value,
+            city:
+                document.getElementById("city").value,
 
-            state: document.getElementById("state").value,
+            state:
+                document.getElementById("state").value,
 
-            postalCode: document.getElementById("postalCode").value,
+            postalCode:
+                document.getElementById("postalCode").value,
 
-            country: document.getElementById("country").value,
+            country:
+                document.getElementById("country").value,
 
             contactFullName:
                 document.getElementById("contactFullName").value,
@@ -199,3 +299,7 @@ form.addEventListener("submit", async (e) => {
     }
 
 });
+
+window.validateStep1 = validateStep1;
+window.validateStep2 = validateStep2;
+window.validateStep3 = validateStep3;

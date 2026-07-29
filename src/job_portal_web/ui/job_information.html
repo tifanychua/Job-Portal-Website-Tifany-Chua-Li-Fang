@@ -28,9 +28,20 @@
 <div class="detail-header">
   <div class="detail-header-card">
     <div class="detail-header-left">
-      <div class="detail-logo">
-        {{ job.companyName[:1] }}
-      </div>
+      <div class="job-logo">
+        {% if job.company_logo and job.company_logo != "default.jpg" %}
+            <img
+                src="/image/{{ job.company_logo }}"
+                alt="{{ job.companyName }}"
+                loading="lazy"
+            >
+        {% else %}
+            <div class="detail-logo">
+                {{ job.companyName[:1] | upper }}
+            </div>
+        {% endif %}
+
+    </div>
       <div>
         <div class="detail-title-row">
           <h1>{{ job.job_title }}</h1>
@@ -216,8 +227,19 @@
       {% for sim in similar_jobs %}
       <a href="/jobs/{{ sim.id }}" class="similar-job-item">
         <div class="similar-logo">
-          {{ sim.companyName[:1] }}
-        </div>
+          {% if sim.company_logo and sim.company_logo != "default.jpg" %}
+              <img
+                  src="/image/{{ sim.company_logo }}"
+                  alt="{{ sim.companyName }}"
+                  loading="lazy"
+              >
+          {% else %}
+              <div class="similar-logo-placeholder">
+                  {{ sim.companyName[:1] | upper }}
+              </div>
+          {% endif %}
+
+      </div>
         <div class="similar-job-info">
           <div class="job-title">{{ sim.job_title }}</div>
           <div class="job-company">{{ sim.companyName }}</div>

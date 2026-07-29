@@ -30,12 +30,13 @@ def context():
     return Context()
 
 
-def mock_company_login(db_mock):
+def mock_company_login(db_mock, status="Active"):
     job_doc = MagicMock()
     job_doc.exists = False
 
     company_doc = MagicMock()
     company_doc.exists = True
+    company_doc.to_dict.return_value = {"status": status}
 
     def collection_side_effect(name):
         collection = MagicMock()
@@ -103,6 +104,30 @@ def test_employer_not_found(mock_db, mock_verify, client):
 def test_employer_empty_token(client):
     response = client.post("/firebase-login", json={})
     assert response.status_code == 422
+
+
+@patch("job_portal_web.backend.auth.auth.verify_id_token")
+@patch("job_portal_web.backend.auth.db")
+def test_employer_rejected_account(mock_db, mock_verify, client):
+    mock_verify.return_value = {"uid": "company123"}
+    mock_company_login(mock_db, "Rejected")
+
+    response = client.post("/firebase-login", json={"token": "valid_token"})
+
+    assert response.status_code == 403
+    assert response.json()["error"] == "Your company registration has been rejected."
+
+
+@patch("job_portal_web.backend.auth.auth.verify_id_token")
+@patch("job_portal_web.backend.auth.db")
+def test_employer_deactive_account(mock_db, mock_verify, client):
+    mock_verify.return_value = {"uid": "company123"}
+    mock_company_login(mock_db, "Deactive")
+
+    response = client.post("/firebase-login", json={"token": "valid_token"})
+
+    assert response.status_code == 403
+    assert response.json()["error"] == "Your company account has been deactivated."
 
 
 @given("the employer has a registered company account")
@@ -177,7 +202,7 @@ def access_platform(client, context):
 
     context.dashboard_response = client.get("/manage-jobs", cookies=cookies)
 
-    context.post_job_response = context.dashboard_response  # 临时方案
+    context.post_job_response = context.dashboard_response
     context.manage_applications_response = context.dashboard_response
     context.recruitment_response = context.dashboard_response
 
@@ -205,3 +230,34 @@ def test_employer_cannot_access_job_seeker_features(client):
 
         assert login_response.status_code == 200
         assert login_response.json()["redirect"] == "/manage-jobs"
+
+
+@given('the employer account status is "Rejected" or "Deactive"')
+def rejected_or_deactive():
+    pass
+
+
+@when("the employer attempts to log in with valid credentials")
+def blocked_login(client, context):
+    with (
+        patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
+        patch("job_portal_web.backend.auth.db") as db,
+    ):
+        verify.return_value = {"uid": "company123"}
+
+        mock_company_login(db, "Rejected")
+
+        context.response = client.post(
+            "/firebase-login",
+            json={"token": "valid_token"},
+        )
+
+
+@then("the system should block the login")
+def block_login(context):
+    assert context.response.status_code == 403
+
+
+@then("display an account status error message")
+def account_status_error(context):
+    assert context.response.json()["error"] == "Your company registration has been rejected."
