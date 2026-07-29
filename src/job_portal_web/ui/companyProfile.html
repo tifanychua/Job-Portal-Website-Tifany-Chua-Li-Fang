@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Company Profile</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/companyProfile.css">
+
+</head>
+
+<body>
+
+    {% include "employerHeader.html" %}
+
+    <main class="main-content">
+
+        <!-- ===================================== -->
+        <!-- Page Header -->
+        <!-- ===================================== -->
+
+        <div class="page-header">
+
+            <div class="page-title">
+
+                <h1>Company Profile</h1>
+
+                <p>
+                    Manage your company information and showcase your organization
+                    to attract top talents.
+                </p>
+
+            </div>
+
+            <div class="header-actions">
+
+                <a href="/edit-company-profile"
+                class="primary-btn">
+
+                    <i class="fa-solid fa-pen"></i>
+
+                    Edit Profile
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <!-- ===================================== -->
+        <!-- OVERVIEW TAB -->
+        <!-- ===================================== -->
+
+        <div class="tab-content active"
+            id="overview">
+
+            <!-- ===================================== -->
+            <!-- Company Hero Card -->
+            <!-- ===================================== -->
+
+            <section class="company-card">
+
+                <!-- ===================== -->
+                <!-- Logo -->
+                <!-- ===================== -->
+
+                <div class="company-logo-section">
+
+                    {% if company.logo %}
+
+                    <img src="{{ company.logo }}"
+                        class="company-logo">
+
+                    {% else %}
+
+                    <img src="/images/companyLogo.png"
+                        class="company-logo">
+
+                    {% endif %}
+
+                </div>
+
+
+
+                <!-- ===================== -->
+                <!-- Company Info -->
+                <!-- ===================== -->
+
+                <div class="company-information">
+
+                    <div class="company-name-row">
+
+                        <h2>
+
+                            {{ company.companyName }}
+
+                        </h2>
+
+                        {% if company.status == "Verified" %}
+
+                        <span class="verified-badge">
+
+                            <i class="fa-solid fa-circle-check"></i>
+
+                            Verified
+
+                        </span>
+
+                        {% elif company.status == "Pending" %}
+
+                        <span class="pending-badge">
+
+                            <i class="fa-solid fa-clock"></i>
+
+                            Pending
+
+                        </span>
+
+                        {% elif company.status == "Rejected" %}
+
+                        <span class="rejected-badge">
+
+                            <i class="fa-solid fa-circle-xmark"></i>
+
+                            Rejected
+
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div class="company-contact-grid">
+
+                        <div class="contact-box">
+
+                            <i class="fa-solid fa-location-dot"></i>
+
+                            <span>
+
+                                {{ company.address }}
+
+                                {% if company.address_line2 %}
+                                , {{ company.address_line2 }}
+                                {% endif %}
+
+                                , {{ company.city }}
+
+                                , {{ company.state }}
+
+                                {{ company.postalCode }}
+
+                                , {{ company.country }}
+
+                            </span>
+
+                        </div>
+
+                        <div class="contact-box">
+
+                            <i class="fa-solid fa-globe"></i>
+
+                            <span>
+
+                                {{ company.companyWebsite }}
+
+                            </span>
+
+                        </div>
+
+                        <div class="contact-box">
+
+                            <i class="fa-solid fa-envelope"></i>
+
+                            <span>
+
+                                {{ company.businessEmail }}
+
+                            </span>
+
+                        </div>
+
+                        <div class="contact-box">
+
+                            <i class="fa-solid fa-phone"></i>
+
+                            <span>
+
+                                {{ company.phone }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+        <!-- ===================================== -->
+        <!-- About Company + Company Information -->
+        <!-- ===================================== -->
+
+        <div class="overview-grid">
+
+            <!-- ================================ -->
+            <!-- About Company -->
+            <!-- ================================ -->
+
+            <section class="profile-card">
+
+                <div class="section-header">
+
+                    <h3>
+
+                        About Company
+
+                    </h3>
+
+                </div>
+
+                <div class="about-content">
+
+                    {% if company.companyDescription %}
+
+                    <p>
+
+                        {{ company.companyDescription }}
+
+                    </p>
+
+                    {% else %}
+
+                    <p class="empty-text">
+
+                        No company description has been added yet.
+
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+            </section>
+
+
+
+            <!-- ================================ -->
+            <!-- Company Information -->
+            <!-- ================================ -->
+
+            <section class="profile-card">
+
+                <div class="section-header">
+
+                    <h3>
+
+                        Company Information
+
+                    </h3>
+
+                </div>
+
+                <div class="company-info-list">
+
+                    <div class="info-row">
+
+                        <div class="info-icon">
+
+                            <i class="fa-regular fa-calendar"></i>
+
+                        </div>
+
+                        <div>
+
+                            <label>
+
+                                Founded
+
+                            </label>
+
+                            <span>
+
+                                {{ company.foundedYear }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="info-row">
+
+                        <div class="info-icon">
+
+                            <i class="fa-regular fa-building"></i>
+
+                        </div>
+
+                        <div>
+
+                            <label>
+
+                                Company Type
+
+                            </label>
+
+                            <span>
+
+                                {{ company.companyType }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="info-row">
+
+                        <div class="info-icon">
+
+                            <i class="fa-solid fa-layer-group"></i>
+
+                        </div>
+
+                        <div>
+
+                            <label>
+
+                                Industry
+
+                            </label>
+
+                            <span>
+
+                                {{ company.industry_name }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="info-row">
+
+                        <div class="info-icon">
+
+                            <i class="fa-solid fa-users"></i>
+
+                        </div>
+
+                        <div>
+
+                            <label>
+
+                                Company Size
+
+                            </label>
+
+                            <span>
+
+                                {{ company.companySize }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="info-row">
+
+                        <div class="info-icon">
+
+                            <i class="fa-solid fa-earth-asia"></i>
+
+                        </div>
+
+                        <div>
+
+                            <label>
+
+                                Website
+
+                            </label>
+
+                            <span>
+
+                                {{ company.companyWebsite }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="info-row">
+
+                        <div class="info-icon">
+
+                            <i class="fa-solid fa-briefcase"></i>
+
+                        </div>
+
+                        <div>
+
+                            <label>
+
+                                Specialties
+
+                            </label>
+
+                            <span>
+
+                                {{ company.specialty_category_name }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+
+        <!-- ===================================== -->
+        <!-- Company Gallery -->
+        <!-- ===================================== -->
+
+        <section class="profile-card gallery-section">
+
+            <div class="section-header">
+
+                <h3>
+
+                    Company Gallery
+
+                </h3>
+
+                <a href="/manage-gallery">
+
+                    Manage Gallery
+
+                </a>
+
+            </div>
+
+            <div class="gallery-grid">
+
+                {% if gallery %}
+
+                    {% for image in gallery[:4] %}
+
+                    <div class="gallery-item">
+
+                        <img src="{{ image.image_url }}"
+                             alt="Gallery">
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="gallery-item">
+
+                        <img src="/images/gallery1.jpg">
+
+                    </div>
+
+                    <div class="gallery-item">
+
+                        <img src="/images/gallery2.jpg">
+
+                    </div>
+
+                    <div class="gallery-item">
+
+                        <img src="/images/gallery3.jpg">
+
+                    </div>
+
+                    <div class="gallery-item more-photo">
+
+                        <img src="/images/gallery4.jpg">
+
+                        <div class="overlay">
+
+                            <span>
+
+                                +8
+
+                            </span>
+
+                            <small>
+
+                                More Photos
+
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- ===================================== -->
+    <!-- Company Details Tab -->
+    <!-- ===================================== -->
+
+    <div class="tab-content"
+         id="details"
+         style="display:none;">
+
+        <section class="profile-card">
+
+            <h2>
+
+                Company Details
+
+            </h2>
+
+            <p>
+
+                Company Details content goes here.
+
+            </p>
+
+        </section>
+
+    </div>
+    
+        <!-- ===================================== -->
+    <!-- About Us Tab -->
+    <!-- ===================================== -->
+
+    <div class="tab-content"
+         id="about"
+         style="display:none;">
+
+        <section class="profile-card">
+
+            <div class="section-header">
+
+                <h3>
+
+                    About Company
+
+                </h3>
+
+                <a href="/edit-company-profile#about">
+
+                    Edit
+
+                </a>
+
+            </div>
+
+            {% if company.about %}
+
+            <p class="about-company">
+
+                {{ company.companyDescription }}
+
+            </p>
+
+            {% else %}
+
+            <div class="empty-state">
+
+                <i class="fa-regular fa-file-lines"></i>
+
+                <p>
+
+                    No company description available.
+
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </section>
+
+    </div>
+
+
+
+    <!-- ===================================== -->
+    <!-- Gallery Tab -->
+    <!-- ===================================== -->
+
+    <div class="tab-content"
+         id="gallery"
+         style="display:none;">
+
+        <section class="profile-card">
+
+            <div class="section-header">
+
+                <h3>
+
+                    Company Gallery
+
+                </h3>
+
+                <a href="/manage-gallery">
+
+                    Manage Gallery
+
+                </a>
+
+            </div>
+
+            <div class="gallery-grid">
+
+                {% if gallery %}
+
+                    {% for image in gallery %}
+
+                    <div class="gallery-item">
+
+                        <img src="{{ image.image_url }}"
+                             alt="Gallery">
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="gallery-item">
+
+                        <img src="/images/gallery1.jpg">
+
+                    </div>
+
+                    <div class="gallery-item">
+
+                        <img src="/images/gallery2.jpg">
+
+                    </div>
+
+                    <div class="gallery-item">
+
+                        <img src="/images/gallery3.jpg">
+
+                    </div>
+
+                    <div class="gallery-item">
+
+                        <img src="/images/gallery4.jpg">
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+
+    <!-- ===================================== -->
+    <!-- Social Links Tab -->
+    <!-- ===================================== -->
+
+    <div class="tab-content"
+         id="social"
+         style="display:none;">
+
+        <section class="profile-card">
+
+            <div class="section-header">
+
+                <h3>
+
+                    Social Links
+
+                </h3>
+
+                <a href="/edit-company-profile#social">
+
+                    Edit
+
+                </a>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+
+    <!-- ===================================== -->
+    <!-- Team Tab -->
+    <!-- ===================================== -->
+
+    <div class="tab-content"
+         id="team"
+         style="display:none;">
+
+        <section class="profile-card">
+
+            <div class="section-header">
+
+                <h3>
+
+                    Our Team
+
+                </h3>
+
+                <a href="/manage-team">
+
+                    Manage Team
+
+                </a>
+
+            </div>
+
+            <div class="team-grid">
+
+                {% if team_members %}
+
+                    {% for member in team_members %}
+
+                    <div class="team-card">
+
+                        {% if member.photo %}
+
+                        <img src="{{ member.photo }}"
+                             class="team-avatar">
+
+                        {% else %}
+
+                        <img src="/images/user.png"
+                             class="team-avatar">
+
+                        {% endif %}
+
+                        <h4>
+
+                            {{ member.name }}
+
+                        </h4>
+
+                        <span>
+
+                            {{ member.position }}
+
+                        </span>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <i class="fa-solid fa-users"></i>
+
+                        <p>
+
+                            No team members available.
+
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+
+    <!-- ===================================== -->
+    <!-- Documents Tab -->
+    <!-- ===================================== -->
+
+    <div class="tab-content"
+         id="documents"
+         style="display:none;">
+
+        <section class="profile-card">
+
+            <div class="section-header">
+
+                <h3>
+
+                    Company Documents
+
+                </h3>
+
+                <a href="/manage-documents">
+
+                    Manage Documents
+
+                </a>
+
+            </div>
+
+            <div class="document-list">
+
+                {% if documents %}
+
+                    {% for document in documents %}
+
+                    <div class="document-card">
+
+                        <div class="document-icon">
+
+                            <i class="fa-solid fa-file-lines"></i>
+
+                        </div>
+
+                        <div class="document-info">
+
+                            <h4>
+
+                                {{ document.document_name }}
+
+                            </h4>
+
+                            <span>
+
+                                {{ document.document_type }}
+
+                            </span>
+
+                        </div>
+
+                        <a href="{{ document.file_url }}"
+                           class="download-btn">
+
+                            <i class="fa-solid fa-download"></i>
+
+                        </a>
+
+                    </div>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <div class="empty-state">
+
+                        <i class="fa-regular fa-folder-open"></i>
+
+                        <p>
+
+                            No documents uploaded.
+
+                        </p>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+</main>
+
+</body>
+
+</html>
