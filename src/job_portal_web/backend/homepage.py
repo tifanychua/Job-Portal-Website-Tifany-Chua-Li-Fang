@@ -48,15 +48,24 @@ def _attach_company_info(job):
 
         company_doc = db.collection("company").document(company_id).get()
 
-        company = company_doc.to_dict()
-        job["company_name"] = company.get("companyName", "Unknown")
-        job["company_logo"] = company.get("logo")
+        if company_doc.exists:
 
-        # ===== LOCATION =====
-        job["location"] = job.get("location", "Unknown")
+            company = company_doc.to_dict()
 
-    # ===== SALARY =====
+            job["company_name"] = company.get("companyName", "Unknown")
+            job["company_logo"] = company.get("logo", "company/default.png")
 
+        else:
+
+            job["company_name"] = "Unknown Company"
+
+    else:
+
+        job["company_name"] = "Unknown Company"
+
+    job["location"] = job.get("location", "Unknown")
+
+    # Salary
     salary_display = job.get("salary_display")
 
     if salary_display:
@@ -69,19 +78,12 @@ def _attach_company_info(job):
         max_salary = job.get("maxSalary")
 
         if min_salary and max_salary:
-
             job["salary_text"] = f"RM {min_salary} - RM {max_salary}"
-
         elif min_salary:
-
             job["salary_text"] = f"RM {min_salary}"
-
         elif max_salary:
-
             job["salary_text"] = f"RM {max_salary}"
-
         else:
-
             job["salary_text"] = "Negotiable"
 
     return job

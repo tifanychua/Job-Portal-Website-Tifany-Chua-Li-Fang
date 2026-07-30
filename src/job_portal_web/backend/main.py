@@ -14,8 +14,10 @@ from .applicant import router as applicant_router
 from .chat import router as chat_router
 from job_portal_web.backend.routes.education import router as education_router
 from job_portal_web.backend.routes.experience import router as experience_router
+from .routes.companyProfile import router as companyProfile_router
 from .routes.skill import router as skill_router
 from .jobs import router as jobs_router
+from .routes.editCompanyProfile import router as editCompanyProfile_router
 from .homepage import router as home_router
 from .job_information import router as job_information_router
 from .job_apply import router as job_apply_router
@@ -113,6 +115,8 @@ app.include_router(job_application_router)
 app.include_router(employer_router)
 
 app.include_router(employer_application_router)
+app.include_router(companyProfile_router)
+app.include_router(editCompanyProfile_router)
 
 # Job Seeker Profile
 app.include_router(jobSeekerProfile_router)

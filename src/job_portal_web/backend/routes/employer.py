@@ -103,13 +103,16 @@ async def publish_job(request: Request):
     company = get_company()
 
     # Get job categories from Firebase
-    category_docs = db.collection("job_category").stream()
+    industry_docs = db.collection("industries").stream()
 
     categories = []
 
-    for doc in category_docs:
-        category_data = doc.to_dict()
-        categories.append(category_data)
+    for doc in industry_docs:
+        industry = doc.to_dict()
+
+        categories.append({
+            "industry_name": industry["industry_name"]
+        })
 
     return templates.TemplateResponse(
         request=request,
@@ -280,12 +283,16 @@ async def edit_job(request: Request, job_id: str):
     # Temporarily add Firestore document ID for HTML
     job["job_id"] = job_id
 
-    category_docs = db.collection("job_category").stream()
+    industry_docs = db.collection("industries").stream()
 
     categories = []
 
-    for doc in category_docs:
-        categories.append(doc.to_dict())
+    for doc in industry_docs:
+        industry = doc.to_dict()
+
+        categories.append({
+            "industry_name": industry["industry_name"]
+        })
 
     return templates.TemplateResponse(
         request=request,

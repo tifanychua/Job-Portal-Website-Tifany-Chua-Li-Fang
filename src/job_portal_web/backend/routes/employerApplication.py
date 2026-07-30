@@ -233,9 +233,11 @@ async def view_resume(application_id: str):
 # Update Application Status
 # ==================================================
 
-
 @router.put("/application/{application_id}/status")
-async def update_application_status(application_id: str, status_data: ApplicationStatusUpdate):
+async def update_application_status(
+    application_id: str,
+    status_data: ApplicationStatusUpdate
+):
 
     # ==================================================
     # Normalize Received Status
@@ -248,12 +250,9 @@ async def update_application_status(application_id: str, status_data: Applicatio
     # ==================================================
 
     status_mapping = {
-        # New application
         "new": "Submitted",
         "submitted": "Submitted",
-        # Reviewed application
         "reviewed": "Reviewed",
-        # Other statuses
         "shortlisted": "Shortlisted",
         "offered": "Offered",
         "rejected": "Rejected",
@@ -266,10 +265,9 @@ async def update_application_status(application_id: str, status_data: Applicatio
     if received_status not in status_mapping:
 
         raise HTTPException(
-            status_code=400, detail=("Invalid application status: " + status_data.status)
+            status_code=400,
+            detail=f"Invalid application status: {status_data.status}"
         )
-
-    # Get the correct Firestore value
 
     firestore_status = status_mapping[received_status]
 
@@ -281,29 +279,64 @@ async def update_application_status(application_id: str, status_data: Applicatio
 
     application_doc = application_ref.get()
 
-    # ==================================================
-    # Check Whether Application Exists
-    # ==================================================
-
     if not application_doc.exists:
 
-        raise HTTPException(status_code=404, detail=("Application not found."))
+        raise HTTPException(
+            status_code=404,
+            detail="Application not found."
+        )
 
     # ==================================================
-    # Update Firestore Status and Time
+    # Get Current Status
+    # ==================================================
+
+    application = application_doc.to_dict()
+
+    current_status = application.get("status", "").strip().lower()
+
+    # ==================================================
+    # Final Status Cannot Be Changed
+    # ==================================================
+
+    if current_status in ["offered", "rejected"]:
+
+        raise HTTPException(
+            status_code=400,
+            detail=f'This application has already been "{application.get("status")}" and cannot be changed.'
+        )
+
+    # ==================================================
+    # Allowed Status Flow
+    # ==================================================
+
+    allowed_transitions = {
+        "submitted": ["reviewed", "rejected"],
+        "reviewed": ["shortlisted", "rejected"],
+        "shortlisted": ["offered", "rejected"],
+        "offered": [],
+        "rejected": [],
+    }
+
+    if received_status not in allowed_transitions.get(current_status, []):
+
+        raise HTTPException(
+            status_code=400,
+            detail=f'Cannot change status from "{application.get("status")}" to "{firestore_status}".'
+        )
+
+    # ==================================================
+    # Update Firestore
     # ==================================================
 
     application_ref.update(
         {
-            # Update application status
             "status": firestore_status,
-            # Store the current server date and time
             "updated_on": firestore.SERVER_TIMESTAMP,
         }
     )
 
     # ==================================================
-    # Return Successful Result
+    # Return Success
     # ==================================================
 
     return {
