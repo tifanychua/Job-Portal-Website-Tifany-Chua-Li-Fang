@@ -45,7 +45,11 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "ui"))
 
 
 @router.get("/applications", response_class=HTMLResponse)
-async def view_applications(request: Request):
+async def view_applications(
+    request: Request,
+    status: str | None = None,
+    experience: str | None = None,
+):
 
     import time
 
@@ -98,10 +102,24 @@ async def view_applications(request: Request):
 
         application = application_doc.to_dict()
 
-        status = str(application.get("status", "")).strip().lower()
+        application_status = str(
+            application.get("status", "")
+        ).strip().lower()
 
-        if status == "cancelled":
+        # Skip cancelled applications
+        if application_status == "cancelled":
             continue
+
+        # Apply status filter
+        if status:
+
+            selected_status = status.strip().lower()
+
+            if selected_status == "new":
+                selected_status = "submitted"
+
+            if application_status != selected_status:
+                continue
 
         job_id = application.get("job_id")
 
@@ -118,7 +136,7 @@ async def view_applications(request: Request):
             continue
 
         application["application_id"] = application_doc.id
-        application["status"] = status.title()
+        application["status"] = application.get("status", "")
         application["job_title"] = job.get("job_title", "Unknown Position")
 
         # Default applicant info
@@ -140,6 +158,17 @@ async def view_applications(request: Request):
 
             application["skills"] = job_seeker.get("skills") or []
 
+        if experience:
+
+            applicant_experience = (
+                application.get("experience", "")
+                .strip()
+                .lower()
+            )
+
+            if experience.lower() not in applicant_experience:
+                continue
+
         applications.append(application)
 
     # ==================================================
@@ -160,6 +189,34 @@ async def view_applications(request: Request):
 
     print("Route time:", time.time() - start)
 
+    no_status_message = ""
+    no_experience_message = ""
+
+    if status and len(applications) == 0:
+        no_status_message = (
+            "No applicants found for this application status."
+        )
+
+    if experience and len(applications) == 0:
+        no_experience_message = (
+            "No applicants found for this experience level."
+        )
+
+        context={
+            "request": request,
+            "company": company,
+            "applications": applications,
+            "jobs": jobs,
+            "total_count": total_count,
+            "new_count": new_count,
+            "reviewed_count": reviewed_count,
+            "shortlisted_count": shortlisted_count,
+            "offered_count": offered_count,
+            "rejected_count": rejected_count,
+
+            "no_status_message": no_status_message,
+        },
+
     return templates.TemplateResponse(
         request=request,
         name="viewApplication.html",
@@ -174,6 +231,8 @@ async def view_applications(request: Request):
             "shortlisted_count": shortlisted_count,
             "offered_count": offered_count,
             "rejected_count": rejected_count,
+            "no_status_message": no_status_message,
+            "no_experience_message": no_experience_message,
         },
     )
 

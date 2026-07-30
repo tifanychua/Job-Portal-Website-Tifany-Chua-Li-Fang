@@ -50,8 +50,8 @@ async def manage_education(request: Request):
 @router.post("/add-education")
 async def add_education(
 
-    degree: str = Form(...),
-    institution: str = Form(...),
+    degree: str = Form(""),
+    institution: str = Form(""),
     field_of_study: str = Form(""),
     start_date: str = Form(""),
     end_date: str = Form(""),
@@ -62,6 +62,99 @@ async def add_education(
 ):
 
     applicant_id = "applicant001"
+
+    # ===========================================
+    # Trim
+    # ===========================================
+
+    degree = degree.strip()
+    institution = institution.strip()
+    field_of_study = field_of_study.strip()
+    grade = grade.strip()
+    description = description.strip()
+
+    # ===========================================
+    # Validation
+    # ===========================================
+
+    if degree == "":
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your qualification."
+            },
+            status_code=400
+        )
+
+    if institution == "":
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please enter your institution."
+            },
+            status_code=400
+        )
+
+    if start_date == "":
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your start date."
+            },
+            status_code=400
+        )
+
+    if not current_study:
+
+        if end_date == "":
+
+            return JSONResponse(
+                {
+                    "success": False,
+                    "message": "Please select your end date."
+                },
+                status_code=400
+            )
+
+        if end_date < start_date:
+
+            return JSONResponse(
+                {
+                    "success": False,
+                    "message": "Invalid study period."
+                },
+                status_code=400
+            )
+
+    # ===========================================
+    # Duplicate Check
+    # ===========================================
+
+    duplicate = (
+        db.collection("education")
+        .where("applicant_id", "==", applicant_id)
+        .where("qualification", "==", degree)
+        .where("institution", "==", institution)
+        .where("field_of_study", "==", field_of_study)
+        .stream()
+    )
+
+    if next(duplicate, None):
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "This education record already exists."
+            },
+            status_code=409
+        )
+
+    # ===========================================
+    # Save
+    # ===========================================
 
     db.collection("education").add({
 
@@ -77,11 +170,12 @@ async def add_education(
 
     })
 
-    return RedirectResponse(
-        url="/manage-education",
-        status_code=303
+    return JSONResponse(
+        {
+            "success": True,
+            "redirect": "/manage-education"
+        }
     )
-
 
 # ===========================================================
 # GET EDUCATION
@@ -115,10 +209,10 @@ async def get_education(education_id: str):
 @router.post("/update-education")
 async def update_education(
 
-    education_id: str = Form(...),
+    education_id: str = Form(""),
 
-    degree: str = Form(...),
-    institution: str = Form(...),
+    degree: str = Form(""),
+    institution: str = Form(""),
     field_of_study: str = Form(""),
     start_date: str = Form(""),
     end_date: str = Form(""),
@@ -127,6 +221,12 @@ async def update_education(
     description: str = Form("")
 
 ):
+
+    applicant_id = "applicant001"
+
+    # ===========================================
+    # Check Record Exists
+    # ===========================================
 
     doc_ref = db.collection("education").document(education_id)
 
@@ -139,6 +239,104 @@ async def update_education(
             },
             status_code=404
         )
+
+    # ===========================================
+    # Trim
+    # ===========================================
+
+    degree = degree.strip()
+    institution = institution.strip()
+    field_of_study = field_of_study.strip()
+    grade = grade.strip()
+    description = description.strip()
+
+    # ===========================================
+    # Validation
+    # ===========================================
+
+    if degree == "":
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your qualification."
+            },
+            status_code=400
+        )
+
+    if institution == "":
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please enter your institution."
+            },
+            status_code=400
+        )
+
+    if start_date == "":
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your start date."
+            },
+            status_code=400
+        )
+
+    if not current_study:
+
+        if end_date == "":
+
+            return JSONResponse(
+                {
+                    "success": False,
+                    "message": "Please select your end date."
+                },
+                status_code=400
+            )
+
+        if end_date < start_date:
+
+            return JSONResponse(
+                {
+                    "success": False,
+                    "message": "Invalid study period."
+                },
+                status_code=400
+            )
+
+    # ===========================================
+    # Duplicate Check
+    # Ignore Current Record
+    # ===========================================
+
+    duplicates = (
+
+        db.collection("education")
+        .where("applicant_id", "==", applicant_id)
+        .where("qualification", "==", degree)
+        .where("institution", "==", institution)
+        .where("field_of_study", "==", field_of_study)
+        .stream()
+
+    )
+
+    for doc in duplicates:
+
+        if doc.id != education_id:
+
+            return JSONResponse(
+                {
+                    "success": False,
+                    "message": "This education record already exists."
+                },
+                status_code=409
+            )
+
+    # ===========================================
+    # Update
+    # ===========================================
 
     doc_ref.update({
 
@@ -153,11 +351,12 @@ async def update_education(
 
     })
 
-    return RedirectResponse(
-        url="/manage-education",
-        status_code=303
+    return JSONResponse(
+        {
+            "success": True,
+            "redirect": "/manage-education"
+        }
     )
-
 
 # ===========================================================
 # DELETE EDUCATION

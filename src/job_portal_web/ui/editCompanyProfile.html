@@ -57,7 +57,12 @@
         enctype="multipart/form-data"
         novalidate>
 
-
+        {% if error %}
+        <div class="form-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ error }}
+        </div>
+        {% endif %}
 
     <!-- ===================================================== -->
     <!-- Basic Information -->
@@ -180,10 +185,9 @@
                         type="tel"
                         name="phone"
                         value="{{ company.phone }}"
-                        placeholder="0123456789"
+                        placeholder="+60 11-12345678"
                         required
-                        pattern="^01[0-9]{8,9}$"
-                        title="Enter a valid Malaysian phone number">
+                        pattern="^\+60\s\d{1,2}-\d{7,8}$">
 
                 </div>
 
@@ -670,36 +674,8 @@ const form = document.getElementById("companyForm");
 
 form.addEventListener("submit", function (e){
 
-    let valid = true;
-
-    document
-        .querySelectorAll("input, select, textarea")
-        .forEach(field=>{
-
-            field.classList.remove("error");
-
-            if(field.hasAttribute("required")){
-
-                if(
-                    field.value.trim()===""
-                ){
-
-                    field.classList.add("error");
-
-                    valid=false;
-
-                }
-
-            }
-
-        });
-
-    if(!valid){
-
-        e.preventDefault();
-
+    if (!form.checkValidity()) {
         return;
-
     }
 
     document
@@ -709,5 +685,6 @@ form.addEventListener("submit", function (e){
 });
 
 </script>
+
 
 </html>

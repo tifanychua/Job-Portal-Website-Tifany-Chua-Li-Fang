@@ -187,19 +187,34 @@ document.addEventListener("click", function (e) {
 
 const educationForm = document.getElementById("educationForm");
 
-educationForm.addEventListener("submit", function (e) {
+educationForm.addEventListener("submit", async function (e) {
+
+    e.preventDefault();
 
     hideError();
 
     const qualification = document.getElementById("degree").value;
-    const institution = document.getElementById("institution").value.trim();
-    const startDate = document.getElementById("startDate").value;
-    const endDate = document.getElementById("endDate").value;
-    const currentStudy = document.getElementById("currentStudy").checked;
+
+    const institution = document
+        .getElementById("institution")
+        .value.trim();
+
+    const startDate = document
+        .getElementById("startDate")
+        .value;
+
+    const endDate = document
+        .getElementById("endDate")
+        .value;
+
+    const currentStudy =
+        document.getElementById("currentStudy").checked;
+
+    // ===========================================
+    // Client Validation
+    // ===========================================
 
     if (qualification === "") {
-
-        e.preventDefault();
 
         showError("Please select your qualification.");
 
@@ -209,8 +224,6 @@ educationForm.addEventListener("submit", function (e) {
 
     if (institution === "") {
 
-        e.preventDefault();
-
         showError("Please enter your institution.");
 
         return;
@@ -218,8 +231,6 @@ educationForm.addEventListener("submit", function (e) {
     }
 
     if (startDate === "") {
-
-        e.preventDefault();
 
         showError("Please select your start date.");
 
@@ -229,11 +240,48 @@ educationForm.addEventListener("submit", function (e) {
 
     if (!currentStudy && endDate === "") {
 
-        e.preventDefault();
-
         showError("Please select your end date.");
 
         return;
+
+    }
+
+    if (!currentStudy && endDate < startDate) {
+
+        showError("Invalid study period.");
+
+        return;
+
+    }
+
+    // ===========================================
+    // Submit
+    // ===========================================
+
+    const formData = new FormData(educationForm);
+
+    const response = await fetch(
+
+        educationForm.action,
+
+        {
+            method: "POST",
+            body: formData
+        }
+
+    );
+
+    const result = await response.json();
+
+    if (result.success) {
+
+        window.location.href = result.redirect;
+
+    }
+
+    else {
+
+        showError(result.message);
 
     }
 

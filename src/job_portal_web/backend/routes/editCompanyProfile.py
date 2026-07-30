@@ -1,12 +1,14 @@
 from datetime import datetime
 from typing import Annotated
+import re
 
 from fastapi import (
     APIRouter,
     Request,
     Form,
     UploadFile,
-    File
+    File,
+    HTTPException
 )
 from fastapi.responses import (
     RedirectResponse,
@@ -122,9 +124,29 @@ async def get_industry_specialties(industry_id: str):
 # =====================================================
 # Update Company Profile
 # =====================================================
+def return_error(
+    request,
+    company_data,
+    industries,
+    categories,
+    message
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="editCompanyProfile.html",
+        context={
+            "company": company_data,
+            "industries": industries,
+            "categories": categories,
+            "error": message
+        },
+        status_code=400
+    )
 
 @router.post("/update-company-profile")
 async def update_company_profile(
+
+    request: Request,
 
     companyName: str = Form(...),
     registrationNumber: str = Form(...),
@@ -132,14 +154,14 @@ async def update_company_profile(
     phone: str = Form(...),
     companyWebsite: str = Form(""),
     foundedYear: int = Form(...),
-    companySize: str = Form(...),
+    companySize: str = Form(""),
+    country: str = Form(""),
     companyType: str = Form(...),
     address: str = Form(...),
     address_line2: str = Form(""),
     city: str = Form(...),
     state: str = Form(...),
     postalCode: str = Form(...),
-    country: str = Form(...),
     industry_id: str = Form(...),
     specialty_category_ids: list[str] = Form(...),
     companyDescription: str = Form(...),
@@ -147,21 +169,117 @@ async def update_company_profile(
 
 ):
 
+
     current_year = datetime.now().year
 
-    if foundedYear < 1800 or foundedYear > current_year:
-        raise ValueError("Invalid founded year.")
+    industries = [
+        doc.to_dict()
+        for doc in db.collection("industries")
+        .order_by("industry_name")
+        .stream()
+    ]
 
-    if len(postalCode) != 5 or not postalCode.isdigit():
-        raise ValueError("Postal code must contain exactly 5 digits.")
+    categories = []
+
+    docs = db.collection("skill_categories").stream()
+
+    for doc in docs:
+
+        category = doc.to_dict()
+
+        if category.get("industry_id") == industry_id:
+            categories.append(category)
+
+    categories.sort(
+        key=lambda x: x.get("category_name", "")
+    )
+
+    company = {
+        "companyName": companyName,
+        "registrationNumber": registrationNumber,
+        "businessEmail": businessEmail,
+        "phone": phone,
+        "companyWebsite": companyWebsite,
+        "foundedYear": foundedYear,
+        "companySize": companySize,
+        "companyType": companyType,
+        "address": address,
+        "address_line2": address_line2,
+        "city": city,
+        "state": state,
+        "postalCode": postalCode,
+        "country": country,
+        "industry_id": industry_id,
+        "specialty_category_ids": specialty_category_ids,
+        "companyDescription": companyDescription
+    }
+
+    if not companySize:
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Please select a company size."
+        )
+
+    if not country:
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Please select a country."
+        )
+
+    if foundedYear < 1800 or foundedYear > current_year:
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Invalid founded year."
+        )
+
+    if foundedYear < 1800 or foundedYear > current_year:
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Invalid founded year."
+        )
+
+    phone_pattern = r"^\+60\s\d{1,2}-\d{7,8}$"
+
+    if not re.match(phone_pattern, phone):
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Please enter a valid phone number. Example: +60 11-12345678."
+        )
 
     specialty_category_ids = list(dict.fromkeys(specialty_category_ids))
 
     if len(specialty_category_ids) == 0:
-        raise ValueError("Please select at least one company specialty.")
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Please select at least one company specialty."
+        )
 
     if len(specialty_category_ids) > 6:
-        raise ValueError("Maximum 6 company specialties allowed.")
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Maximum 6 company specialties allowed."
+        )
 
     company_data = {
         "companyName": companyName.strip(),
@@ -186,6 +304,21 @@ async def update_company_profile(
 
     if logo and logo.filename:
 
+        allowed_types = [
+            "image/png",
+            "image/jpeg",
+            "image/jpg"
+        ]
+
+        if logo.content_type not in allowed_types:
+            return return_error(
+                request,
+                company,
+                industries,
+                categories,
+                "Only PNG and JPG images are allowed."
+            )
+
         extension = logo.filename.rsplit(".", 1)[-1]
 
         filename = (
@@ -200,7 +333,6 @@ async def update_company_profile(
             content_type=logo.content_type
         )
 
-        # Make image publicly accessible
         blob.make_public()
 
         company_data["logo"] = blob.public_url

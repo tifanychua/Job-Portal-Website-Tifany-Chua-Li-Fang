@@ -77,6 +77,13 @@
 
                 <form id="editProfileForm" action="/edit-profile" method="post" enctype="multipart/form-data">
 
+                    {% if error %}
+                    <div class="error-message">
+                        {{ error }}
+                    </div>
+                    {% endif %}
+
+
                     <!-- ==========================================
                             PERSONAL INFORMATION
                     =========================================== -->
@@ -217,7 +224,11 @@
                                     type="tel"
                                     id="phone"
                                     name="phone"
-                                    value="{{ applicant.phone }}">
+                                    value="{{ applicant.phone }}"
+                                    placeholder="+60 11-12345678 or +65 8123 4567"
+                                    pattern="^(\+60\s\d{1,2}-\d{7,8}|\+65\s\d{4}\s\d{4})$"
+                                    title="Examples: +60 11-12345678 or +65 8123 4567"
+                                    required>
 
                             </div>
 
@@ -834,6 +845,13 @@ updateEmptyState();
 registerLanguageEvents();
 
 </script>
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Saving profile...</p>
+    </div>
+</div>
 
 </body>
 

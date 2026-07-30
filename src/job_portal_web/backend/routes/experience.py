@@ -22,7 +22,10 @@ templates = Jinja2Templates(directory=str(UI_DIR))
 @router.get("/manageExperience")
 async def manage_experience(request: Request):
 
-    applicant_id = "applicant001"
+    applicant_id = request.query_params.get(
+        "applicant_id",
+        "applicant001"
+    )
 
     experience_list = []
 
@@ -61,15 +64,11 @@ async def manage_experience(request: Request):
 @router.post("/add-experience")
 async def add_experience(
 
-    job_title: str = Form(...),
-
-    company_name: str = Form(...),
-
-    employment_type: str = Form(...),
-
-    location: str = Form(...),
-
-    start_date: str = Form(...),
+    job_title: str = Form(""),
+    company_name: str = Form(""),
+    employment_type: str = Form(""),
+    location: str = Form(""),
+    start_date: str = Form(""),
 
     end_date: str = Form(""),
 
@@ -82,6 +81,113 @@ async def add_experience(
     applicant_id = "applicant001"
 
     now = datetime.utcnow()
+
+    from fastapi.responses import JSONResponse
+
+    job_title = job_title.strip()
+    company_name = company_name.strip()
+    employment_type = employment_type.strip()
+    location = location.strip()
+    description = description.strip()
+
+    if not job_title:
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please enter your job title."
+            },
+            status_code=400
+        )
+
+    if not company_name:
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please enter your company name."
+            },
+            status_code=400
+        )
+
+    if not employment_type:
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your employment type."
+            },
+            status_code=400
+        )
+
+    if not location:
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please enter your location."
+            },
+            status_code=400
+        )
+
+    if not start_date:
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your start date."
+            },
+            status_code=400
+        )
+
+    is_currently_working = currently_working in ("on", "true", "True", "1")
+
+    if not is_currently_working and not end_date:
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your end date."
+            },
+            status_code=400
+        )
+
+    if (
+        not is_currently_working
+        and end_date
+        and end_date < start_date
+    ):
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Invalid employment period."
+            },
+            status_code=400
+        )
+
+    duplicate = (
+
+        db.collection("job_seeker_experience")
+
+        .where("applicant_id", "==", applicant_id)
+
+        .where("job_title", "==", job_title)
+
+        .where("company_name", "==", company_name)
+
+        .where("employment_type", "==", employment_type)
+
+        .where("location", "==", location)
+
+        .where("start_date", "==", start_date)
+
+        .where("end_date", "==", end_date)
+
+    )
+
+    if next(duplicate.stream(), None):
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "This experience record already exists."
+            },
+            status_code=409
+        )
 
     db.collection("job_seeker_experience").add({
 
@@ -99,7 +205,7 @@ async def add_experience(
 
         "end_date": end_date,
 
-        "currently_working": currently_working is not None,
+        "currently_working": is_currently_working,
 
         "description": description,
 
@@ -109,9 +215,13 @@ async def add_experience(
 
     })
 
-    return RedirectResponse(
-        "/manageExperience",
-        status_code=303
+    from fastapi.responses import JSONResponse
+
+    return JSONResponse(
+        {
+            "success": True,
+            "redirect": "/manage-experience"
+        }
     )
 
 
@@ -124,53 +234,181 @@ async def edit_experience(
 
     document_id: str,
 
-    job_title: str = Form(...),
-
-    company_name: str = Form(...),
-
-    employment_type: str = Form(...),
-
-    location: str = Form(...),
-
-    start_date: str = Form(...),
-
+    job_title: str = Form(""),
+    company_name: str = Form(""),
+    employment_type: str = Form(""),
+    location: str = Form(""),
+    start_date: str = Form(""),
     end_date: str = Form(""),
-
     currently_working: str = Form(None),
-
     description: str = Form(""),
 
 ):
 
-    db.collection("job_seeker_experience") \
-        .document(document_id) \
-        .update({
+    from fastapi.responses import JSONResponse
 
-            "job_title": job_title,
+    applicant_id = "applicant001"
 
-            "company_name": company_name,
+    doc_ref = db.collection("job_seeker_experience").document(document_id)
 
-            "employment_type": employment_type,
+    document = doc_ref.get()
 
-            "location": location,
+    if not document.exists:
 
-            "start_date": start_date,
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Experience not found."
+            },
+            status_code=404
+        )
 
-            "end_date": end_date,
+    job_title = job_title.strip()
+    company_name = company_name.strip()
+    employment_type = employment_type.strip()
+    location = location.strip()
+    description = description.strip()
 
-            "currently_working": currently_working is not None,
+    if not job_title:
 
-            "description": description,
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please enter your job title."
+            },
+            status_code=400
+        )
 
-            "updated_at": datetime.utcnow()
+    if not company_name:
 
-        })
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please enter your company name."
+            },
+            status_code=400
+        )
 
-    return RedirectResponse(
-        "/manageExperience",
-        status_code=303
+    if not employment_type:
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your employment type."
+            },
+            status_code=400
+        )
+
+    if not location:
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please enter your location."
+            },
+            status_code=400
+        )
+
+    if not start_date:
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your start date."
+            },
+            status_code=400
+        )
+
+    is_currently_working = (
+        currently_working in ("on", "true", "True", "1")
     )
 
+    if not is_currently_working and not end_date:
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Please select your end date."
+            },
+            status_code=400
+        )
+
+    if (
+        not is_currently_working
+        and end_date
+        and end_date < start_date
+    ):
+
+        return JSONResponse(
+            {
+                "success": False,
+                "message": "Invalid employment period."
+            },
+            status_code=400
+        )
+
+    duplicate = (
+
+        db.collection("job_seeker_experience")
+
+        .where("applicant_id", "==", applicant_id)
+
+        .where("job_title", "==", job_title)
+
+        .where("company_name", "==", company_name)
+
+        .where("employment_type", "==", employment_type)
+
+        .where("location", "==", location)
+
+        .where("start_date", "==", start_date)
+
+        .where("end_date", "==", end_date)
+
+        .stream()
+
+    )
+
+    for doc in duplicate:
+
+        if doc.id != document_id:
+
+            return JSONResponse(
+                {
+                    "success": False,
+                    "message": "This experience record already exists."
+                },
+                status_code=409
+            )
+
+    doc_ref.update({
+
+        "job_title": job_title,
+
+        "company_name": company_name,
+
+        "employment_type": employment_type,
+
+        "location": location,
+
+        "start_date": start_date,
+
+        "end_date": end_date,
+
+        "currently_working": is_currently_working,
+
+        "description": description,
+
+        "updated_at": datetime.utcnow()
+
+    })
+
+    return JSONResponse(
+        {
+            "success": True,
+            "redirect": "/manage-experience"
+        }
+    )
 
 # ======================================================
 # Delete Experience

@@ -200,17 +200,28 @@
 
             <div class="skill-list">
 
-                {% for skill in applicant.skills %}
-                    <span>{{ skill }}</span>
-                {% endfor %}
+                {% if applicant.skills %}
 
-                </div>
+                    {% for skill in applicant.skills %}
+                        <span>{{ skill }}</span>
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>No skills have been added</p>
+
+                {% endif %}
+
+            </div>
 
         </div>
 
-        <button class="profile-outline-btn"
+        <button
+            class="profile-outline-btn"
             onclick="window.location.href='/manageSkills'">
+
             Manage Skills
+
         </button>
 
     </div>
@@ -280,22 +291,8 @@
             </div>
 
             <div>
-
-                <label>Languages</label>
-                <p>English, Malay, Chinese</p>
-
                 <label>Nationality</label>
                 <p>{{ applicant.nationality }}</p>
-
-            </div>
-
-            <div>
-
-                <label>Expected Salary</label>
-                <p>RM7,000 - RM9,000</p>
-
-                <label>Notice Period</label>
-                <p>1 Month</p>
 
             </div>
 

@@ -22,6 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const endDate = document.getElementById("endDate");
 
+    const errorBox = document.getElementById("experienceError");
+    const errorText = document.getElementById("experienceErrorText");
+
+
 
     /* ======================================================
        Open Add Modal
@@ -33,6 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             form.reset();
 
+            errorBox.style.display = "none";
+            errorText.textContent = "";
+
             modalTitle.textContent = "Add Experience";
 
             form.action = "/add-experience";
@@ -42,6 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
             currentJob.checked = false;
 
             endDate.disabled = false;
+
+            errorBox.style.display = "none";
+            errorText.textContent = "";
 
             modal.style.display = "flex";
 
@@ -161,10 +171,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
             modalTitle.textContent = "Edit Experience";
 
+            errorBox.style.display = "none";
+            errorText.textContent = "";
+
             modal.style.display = "flex";
 
         });
 
     });
 
+    /* ======================================================
+   Submit Experience Form
+====================================================== */
+
+form.addEventListener("submit", async function (e) {
+
+    e.preventDefault();
+
+    errorBox.style.display = "none";
+    errorText.textContent = "";
+
+    try {
+
+        const response = await fetch(form.action, {
+
+            method: "POST",
+            body: new FormData(form)
+
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+
+            window.location.href = result.redirect;
+
+        } else {
+
+            errorText.textContent = result.message;
+            errorBox.style.display = "flex";
+
+        }
+
+    } catch (error) {
+
+        errorText.textContent =
+            "Something went wrong. Please try again.";
+
+        errorBox.style.display = "flex";
+
+    }
+
 });
+
+});
+

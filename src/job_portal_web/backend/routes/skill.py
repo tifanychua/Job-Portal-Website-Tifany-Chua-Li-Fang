@@ -1,7 +1,7 @@
 from pathlib import Path
 from datetime import datetime
 
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, HTTPException, Request, Form
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -186,11 +186,64 @@ async def add_skill(
     level: str = Form(...),
 ):
 
-    # Temporary applicant
     applicant_id = "applicant001"
 
     # ------------------------------------------
-    # Prevent duplicate skill
+    # Validate Industry
+    # ------------------------------------------
+
+    industry = (
+        db.collection("industries")
+        .where("industry_id", "==", industry_id)
+        .limit(1)
+        .stream()
+    )
+
+    if not list(industry):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid industry."
+        )
+
+    # ------------------------------------------
+    # Validate Category
+    # ------------------------------------------
+
+    category = (
+        db.collection("skill_categories")
+        .where("category_id", "==", category_id)
+        .where("industry_id", "==", industry_id)
+        .limit(1)
+        .stream()
+    )
+
+    if not list(category):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid Category"
+        )
+
+    # ------------------------------------------
+    # Validate Skill
+    # ------------------------------------------
+
+    skill = (
+        db.collection("skills")
+        .where("skill_id", "==", skill_id)
+        .where("category_id", "==", category_id)
+        .where("status", "==", "Active")
+        .limit(1)
+        .stream()
+    )
+
+    if not list(skill):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid Skill"
+        )
+
+    # ------------------------------------------
+    # Prevent Duplicate Skill
     # ------------------------------------------
 
     duplicate = (
@@ -201,15 +254,14 @@ async def add_skill(
         .stream()
     )
 
-    if any(True for _ in duplicate):
-
-        return RedirectResponse(
-            "/manageSkills",
-            status_code=303
+    if list(duplicate):
+        raise HTTPException(
+            status_code=400,
+            detail="Skill already added"
         )
 
     # ------------------------------------------
-    # Save
+    # Save Skill
     # ------------------------------------------
 
     now = datetime.utcnow()
@@ -217,17 +269,11 @@ async def add_skill(
     db.collection("job_seeker_skill").add({
 
         "applicant_id": applicant_id,
-
         "industry_id": industry_id,
-
         "category_id": category_id,
-
         "skill_id": skill_id,
-
         "level": level,
-
         "created_at": now,
-
         "updated_at": now
 
     })
@@ -305,9 +351,17 @@ async def edit_skill(
 @router.post("/delete-skill/{document_id}")
 async def delete_skill(document_id: str):
 
-    db.collection("job_seeker_skill") \
-        .document(document_id) \
-        .delete()
+    doc_ref = db.collection("job_seeker_skill").document(document_id)
+
+    doc = doc_ref.get()
+
+    if not doc.exists:
+        raise HTTPException(
+            status_code=404,
+            detail="Skill not found."
+        )
+
+    doc_ref.delete()
 
     return RedirectResponse(
         "/manageSkills",
