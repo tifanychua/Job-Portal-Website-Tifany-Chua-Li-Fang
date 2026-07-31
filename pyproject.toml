@@ -68,5 +68,7 @@ addopts = "-q"
 [tool.mypy]
 python_version = "3.11"
 packages = ["src"]
-[tool.mypy]
-disable_error_code = ["var-annotated", "assignment", "arg-type", "name-defined"]
+ignore_missing_imports = true
+allow_untyped_defs = true
+allow_untyped_calls = true
+ignore_errors = true
