@@ -223,7 +223,7 @@ def browse_jobs(
     # Popular Search
     # =====================================================
 
-    category_counter = Counter()
+    category_counter: Counter = Counter()
 
     for job in all_jobs:
 
