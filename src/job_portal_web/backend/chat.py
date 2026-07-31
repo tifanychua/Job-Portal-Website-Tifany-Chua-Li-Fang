@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 from fastapi import APIRouter
 from pydantic import BaseModel
-from datetime import datetime
 
 from .database import db
 from .encryption import encrypt_message, decrypt_message

@@ -97,7 +97,7 @@ def _get_resume_url(path):
 
 @router.get("/application", name="my_applications")
 def my_applications(request: Request, status: str = "all"):
-    applicant_id, _applicant = _get_current_job_seeker(request)
+    applicant_id, applicant = _get_current_job_seeker(request)
 
     if not applicant_id:
         return RedirectResponse(

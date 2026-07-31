@@ -71,7 +71,7 @@ def _get_screening_questions(job):
     return questions
 
 
-def _get_current_job_seeker(request: Request):
+def _get_currentjob_seeker(request: Request):
     job_seeker_id = request.session.get("applicant_id")
 
     if not job_seeker_id:
@@ -109,7 +109,7 @@ def job_apply_form(request: Request, job_id: str):
 
     job = _load_job(job_id)
 
-    _job_seeker_id, job_seeker = _get_current_job_seeker(request)
+    job_seeker_id, job_seeker = _get_currentjob_seeker(request)
 
     job_seeker = job_seeker or {
         "full_name": "Guest Applicant",
@@ -142,7 +142,7 @@ async def job_apply_submit(
 
     job = _load_job(job_id)
 
-    _job_seeker_id, job_seeker = _get_current_job_seeker(request)
+    job_seeker_id, job_seeker = _get_currentjob_seeker(request)
 
     # ==============================
     # Check Login
