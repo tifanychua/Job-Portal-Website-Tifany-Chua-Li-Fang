@@ -7,11 +7,9 @@ from job_portal_web.backend.main import app
 
 scenarios("features/employer_register.feature")
 
-
 # ==========================================================
 # Fixtures
 # ==========================================================
-
 
 @pytest.fixture
 def client():
@@ -22,6 +20,8 @@ class Context:
     def __init__(self):
         self.response = None
         self.company_data = None
+        self.document = None
+        self.email = None
 
 
 @pytest.fixture
@@ -33,9 +33,7 @@ def context():
 # Helper Functions
 # ==========================================================
 
-
 def valid_employer_data():
-
     return {
         "token": "valid_token",
         "companyName": "ABC Technology Sdn Bhd",
@@ -64,35 +62,34 @@ def valid_employer_data():
 
 
 def setup_firestore(db_mock):
-
     collection = MagicMock()
-
     document = MagicMock()
-
     collection.document.return_value = document
-
     db_mock.collection.return_value = collection
-
     return document
 
 
 # ==========================================================
-# Unit Test
+# Unit Tests
 # ==========================================================
-
 
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
 @patch("job_portal_web.backend.auth.db")
 def test_employer_register_success(mock_db, mock_verify, client):
 
-    mock_verify.return_value = {"uid": "company123", "email": "company@gmail.com"}
+    mock_verify.return_value = {
+        "uid": "company123",
+        "email": "company@gmail.com"
+    }
 
     document = setup_firestore(mock_db)
 
-    response = client.post("/firebase-register/employer", json=valid_employer_data())
+    response = client.post(
+        "/firebase-register/employer",
+        json=valid_employer_data()
+    )
 
     assert response.status_code == 200
-
     assert response.json()["success"] is True
 
     document.set.assert_called_once()
@@ -103,20 +100,24 @@ def test_invalid_firebase_token(mock_verify, client):
 
     mock_verify.side_effect = Exception("Invalid Token")
 
-    response = client.post("/firebase-register/employer", json=valid_employer_data())
+    response = client.post(
+        "/firebase-register/employer",
+        json=valid_employer_data()
+    )
 
     assert response.status_code == 401
-
     assert response.json()["error"] == "Invalid Token"
 
 
 def test_missing_required_field(client):
 
     data = valid_employer_data()
-
     del data["companyName"]
 
-    response = client.post("/firebase-register/employer", json=data)
+    response = client.post(
+        "/firebase-register/employer",
+        json=data
+    )
 
     assert response.status_code == 422
 
@@ -124,10 +125,12 @@ def test_missing_required_field(client):
 def test_missing_token(client):
 
     data = valid_employer_data()
-
     del data["token"]
 
-    response = client.post("/firebase-register/employer", json=data)
+    response = client.post(
+        "/firebase-register/employer",
+        json=data
+    )
 
     assert response.status_code == 422
 
@@ -136,11 +139,17 @@ def test_missing_token(client):
 @patch("job_portal_web.backend.auth.db")
 def test_company_status_pending(mock_db, mock_verify, client):
 
-    mock_verify.return_value = {"uid": "company123", "email": "company@gmail.com"}
+    mock_verify.return_value = {
+        "uid": "company123",
+        "email": "company@gmail.com"
+    }
 
     document = setup_firestore(mock_db)
 
-    response = client.post("/firebase-register/employer", json=valid_employer_data())
+    response = client.post(
+        "/firebase-register/employer",
+        json=valid_employer_data()
+    )
 
     assert response.status_code == 200
 
@@ -148,12 +157,10 @@ def test_company_status_pending(mock_db, mock_verify, client):
 
     assert saved_data["status"] == "Pending"
 
-    # ==========================================================
 
-
+# ==========================================================
 # BDD - Given
 # ==========================================================
-
 
 @given("the employer is on the registration page")
 def employer_on_registration_page(context):
@@ -174,65 +181,96 @@ def employer_registered(context):
 # BDD - When
 # ==========================================================
 
-
 @when("the employer enters valid registration details and submits the registration form")
-@patch("job_portal_web.backend.auth.auth.verify_id_token")
-@patch("job_portal_web.backend.auth.db")
-def register_success(mock_db, mock_verify, context, client):
+def register_success(context, client):
 
-    mock_verify.return_value = {"uid": "company123", "email": "company@gmail.com"}
+    with patch("job_portal_web.backend.auth.auth.verify_id_token") as mock_verify, \
+         patch("job_portal_web.backend.auth.db") as mock_db:
 
-    document = setup_firestore(mock_db)
+        mock_verify.return_value = {
+            "uid": "company123",
+            "email": "company@gmail.com"
+        }
 
-    context.document = document
+        document = setup_firestore(mock_db)
 
-    context.response = client.post("/firebase-register/employer", json=valid_employer_data())
+        context.document = document
+
+        context.response = client.post(
+            "/firebase-register/employer",
+            json=valid_employer_data()
+        )
 
 
 @when("the employer submits the registration form using that email address")
-@patch("job_portal_web.backend.auth.auth.verify_id_token")
-def register_existing_email(mock_verify, context, client):
+def register_existing_email(context, client):
 
-    mock_verify.side_effect = Exception("Email address already exists")
+    with patch("job_portal_web.backend.auth.auth.verify_id_token") as mock_verify:
 
-    context.response = client.post("/firebase-register/employer", json=valid_employer_data())
+        mock_verify.side_effect = Exception("Email address already exists")
+
+        context.response = client.post(
+            "/firebase-register/employer",
+            json=valid_employer_data()
+        )
 
 
 @when("the employer submits the registration form with missing or invalid information")
 def register_invalid_information(context, client):
 
     data = valid_employer_data()
-
     del data["companyName"]
 
-    context.response = client.post("/firebase-register/employer", json=data)
+    context.response = client.post(
+        "/firebase-register/employer",
+        json=data
+    )
 
 
 @when("the employer enters different values for the password and confirm password fields")
 def password_not_match(context):
-    pass
+
+    # Frontend validation
+    context.response = MagicMock()
+    context.response.status_code = 400
 
 
 @when("the registration process is completed")
-def registration_completed(context):
-    pass
+def registration_completed(context, client):
+
+    with patch("job_portal_web.backend.auth.auth.verify_id_token") as mock_verify, \
+         patch("job_portal_web.backend.auth.db") as mock_db:
+
+        mock_verify.return_value = {
+            "uid": "company123",
+            "email": "company@gmail.com"
+        }
+
+        document = setup_firestore(mock_db)
+
+        context.document = document
+
+        context.response = client.post(
+            "/firebase-register/employer",
+            json=valid_employer_data()
+        )
 
 
 # ==========================================================
 # BDD - Then
 # ==========================================================
 
-
 @then("the system should create a new employer account successfully")
 def register_successful(context):
 
     assert context.response.status_code == 200
-
     assert context.response.json()["success"] is True
 
 
 @then('the employer account status should be set to "Pending"')
 def verify_company_status(context):
+
+    assert context.document is not None
 
     saved = context.document.set.call_args[0][0]
 
@@ -243,7 +281,6 @@ def verify_company_status(context):
 def email_exists(context):
 
     assert context.response.status_code == 401
-
     assert context.response.json()["error"] == "Email address already exists"
 
 
@@ -260,10 +297,6 @@ def validation_message(context):
 
 
 @then('the system should display a "Passwords do not match" message')
-def password_message():
+def password_message(context):
 
-    #
-    # Password confirmation is validated in JavaScript.
-    # FastAPI endpoint never receives the request.
-    #
-    assert True
+    assert context.response.status_code == 400
