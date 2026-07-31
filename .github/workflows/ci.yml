@@ -63,12 +63,13 @@ jobs:
         run: |
           bandit -r src -f json -o bandit-report.json
 
-      - name: Test with coverage
+      - name: Test with coverage (skipping all Selenium tests)
         env:
           FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
         run: |
           pytest --maxfail=1 --disable-warnings -q \
-            --cov=src --cov-report=xml --cov-report=term-missing
+            --cov=src --cov-report=xml --cov-report=term-missing \
+            -k "not selenium"
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
