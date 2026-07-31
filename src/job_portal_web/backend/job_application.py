@@ -5,7 +5,7 @@ from datetime import timedelta
 from google.cloud.firestore_v1.base_query import FieldFilter
 from .database import db, bucket
 from .job_information import _find_company
-from .job_apply import UI_DIR, _get_current_job_seeker, _get_screening_questions
+from .job_apply import UI_DIR, _get_currentjob_seeker, _get_screening_questions
 
 router = APIRouter()
 
@@ -97,7 +97,7 @@ def _get_resume_url(path):
 
 @router.get("/application", name="my_applications")
 def my_applications(request: Request, status: str = "all"):
-    applicant_id, applicant = _get_current_job_seeker(request)
+    applicant_id, applicant = _get_currentjob_seeker(request)
 
     if not applicant_id:
         return RedirectResponse(

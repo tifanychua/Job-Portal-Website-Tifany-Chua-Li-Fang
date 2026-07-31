@@ -386,7 +386,7 @@ async def delete_job(request: Request, job_id: str):
     if os.getenv("PYTEST_CURRENT_TEST"):
         company_id = "C000001"  # Replace with the company_id of job rkhObcBjoHn8isSi9V3f
     else:
-        company_id = request.session.get("company_id")
+        company_id = request.session.get("company_id") or ""
 
     if not company_id:
         return RedirectResponse("/login", status_code=303)
