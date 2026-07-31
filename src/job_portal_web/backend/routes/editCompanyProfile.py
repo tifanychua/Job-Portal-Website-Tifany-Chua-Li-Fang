@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from datetime import datetime
 import re
 
@@ -81,7 +82,7 @@ async def edit_company_profile(request: Request):
 
     categories.sort(key=lambda x: x.get("category_name", ""))
 
-    current_year = datetime.now().year
+    current_year = datetime.now(timezone.utc).year
 
     return templates.TemplateResponse(
         request=request,
@@ -161,7 +162,7 @@ async def update_company_profile(
 ):
 
     company_id = get_current_company_id(request)
-    current_year = datetime.now().year
+    current_year = datetime.now(timezone.utc).year
 
     industries = [
         doc.to_dict() for doc in db.collection("industries").order_by("industry_name").stream()

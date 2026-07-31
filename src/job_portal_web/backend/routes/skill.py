@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from pathlib import Path
 from datetime import datetime
 import os
@@ -249,7 +250,7 @@ async def add_skill(
     # Save Skill
     # ------------------------------------------
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     db.collection("job_seeker_skill").add(
         {
@@ -325,7 +326,7 @@ async def edit_skill(
             "category_id": category_id,
             "skill_id": skill_id,
             "level": level,
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
         }
     )
 

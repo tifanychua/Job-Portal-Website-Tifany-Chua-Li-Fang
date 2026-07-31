@@ -109,7 +109,7 @@ def job_apply_form(request: Request, job_id: str):
 
     job = _load_job(job_id)
 
-    job_seeker_id, job_seeker = _get_current_job_seeker(request)
+    _job_seeker_id, job_seeker = _get_current_job_seeker(request)
 
     job_seeker = job_seeker or {
         "full_name": "Guest Applicant",
@@ -142,7 +142,7 @@ async def job_apply_submit(
 
     job = _load_job(job_id)
 
-    job_seeker_id, job_seeker = _get_current_job_seeker(request)
+    _job_seeker_id, job_seeker = _get_current_job_seeker(request)
 
     # ==============================
     # Check Login

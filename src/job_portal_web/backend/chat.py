@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from fastapi import APIRouter
 from pydantic import BaseModel
 from datetime import datetime
@@ -64,7 +65,7 @@ def send_message(message: Message):
         "senderId": message.senderId,
         "senderType": message.senderType,
         "message": encrypted_text,
-        "time": datetime.now().isoformat(),
+        "time": datetime.now(timezone.utc).isoformat(),
     }
 
     db.collection("messages").add(data)

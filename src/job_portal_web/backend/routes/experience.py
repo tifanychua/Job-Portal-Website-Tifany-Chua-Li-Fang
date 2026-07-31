@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from pathlib import Path
 from datetime import datetime
 import os
@@ -102,7 +103,7 @@ async def add_experience(
 
     applicant_id = get_current_applicant_id(request)
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     job_title = job_title.strip()
     company_name = company_name.strip()
@@ -307,7 +308,7 @@ async def edit_experience(
             "end_date": end_date,
             "currently_working": is_currently_working,
             "description": description,
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
         }
     )
 

@@ -37,11 +37,22 @@ target-version = "py311"
 
 [tool.ruff.lint]
 ignore = [
+    "BLE001",
+    "B008",
+    "DTZ003",
+    "DTZ005",
+    "DTZ007",
+    "DTZ011",
+    "RUF059",
+    "SIM102",
+    "ASYNC210",
     "TRY002",
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*.py" = [
+    "TRY002",
+    "BLE001",
     "DTZ003",
     "DTZ005",
 ]

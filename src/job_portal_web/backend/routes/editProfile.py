@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 from datetime import datetime, date
@@ -78,7 +79,7 @@ async def edit_profile(request: Request):
         name="edit_jobSeeker_profile.html",
         context={
             "seeker": seeker,
-            "today": date.today().isoformat(),
+            "today": datetime.now(timezone.utc).date().isoformat(),
         },
     )
 
@@ -123,14 +124,14 @@ async def update_profile(
 
         dob = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
 
-        if dob >= date.today():
+        if dob >= datetime.now(timezone.utc).date():
 
             return templates.TemplateResponse(
                 request=request,
                 name="edit_jobSeeker_profile.html",
                 context={
                     "seeker": seeker,
-                    "today": date.today().isoformat(),
+                    "today": datetime.now(timezone.utc).date().isoformat(),
                     "error": "Date of birth must be before today.",
                 },
                 status_code=400,
@@ -149,7 +150,7 @@ async def update_profile(
                 name="edit_jobSeeker_profile.html",
                 context={
                     "seeker": seeker,
-                    "today": date.today().isoformat(),
+                    "today": datetime.now(timezone.utc).date().isoformat(),
                     "error": "Please enter a valid email address.",
                 },
                 status_code=400,
@@ -169,7 +170,7 @@ async def update_profile(
                 name="edit_jobSeeker_profile.html",
                 context={
                     "seeker": seeker,
-                    "today": date.today().isoformat(),
+                    "today": datetime.now(timezone.utc).date().isoformat(),
                     "error": "Please enter a valid phone number.",
                 },
                 status_code=400,
