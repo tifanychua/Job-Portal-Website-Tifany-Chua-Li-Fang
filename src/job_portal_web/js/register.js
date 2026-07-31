@@ -7,6 +7,7 @@ import {
 
 const form = document.getElementById("registerForm");
 const passwordInput = document.getElementById("password");
+const registerBtn = document.getElementById("registerBtn");
 
 passwordInput.addEventListener("input", function () {
 
@@ -34,9 +35,31 @@ function toggleRule(id, valid) {
 
 }
 
+function setLoading(isLoading) {
+
+    if (isLoading) {
+
+        registerBtn.disabled = true;
+
+        registerBtn.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Creating...
+        `;
+
+    } else {
+
+        registerBtn.disabled = false;
+        registerBtn.innerHTML = "Create Account";
+
+    }
+
+}
+
 form.addEventListener("submit", async (e) => {
 
     e.preventDefault();
+
+    setLoading(true);
 
     const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
@@ -47,37 +70,40 @@ form.addEventListener("submit", async (e) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (name.length < 2) {
+        setLoading(false);
         alert("Name must contain at least 2 characters.");
         return;
     }
 
     if (name.length > 100) {
+        setLoading(false);
         alert("Name is too long.");
         return;
     }
 
-    // Required
     if (email === "") {
+        setLoading(false);
         alert("Email address is required.");
         return;
     }
 
-    // Maximum length (RFC standard)
     if (email.length > 254) {
+        setLoading(false);
         alert("Email address is too long.");
         return;
     }
 
-    // Email format
     if (!emailRegex.test(email)) {
+        setLoading(false);
         alert("Please enter a valid email address.");
         return;
     }
 
     const passwordRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=\[\]{}|\\:;"'<>,./~`])[A-Za-z\d@$!%*?&^#()_\-+=\[\]{}|\\:;"'<>,./~`]{8,}$/;
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=\[\]{}|\\:;"'<>,./~`])[A-Za-z\d@$!%*?&^#()_\-+=\[\]{}|\\:;"'<>,./~`]{8,}$/;
 
     if (!passwordRegex.test(password)) {
+        setLoading(false);
         alert(
             "Password must be at least 8 characters long and include:\n" +
             "• At least one uppercase letter\n" +
@@ -89,6 +115,7 @@ form.addEventListener("submit", async (e) => {
     }
 
     if (password !== confirmPassword) {
+        setLoading(false);
         alert("Passwords do not match.");
         return;
     }
@@ -96,28 +123,25 @@ form.addEventListener("submit", async (e) => {
     const phoneRegex = /^\d{9,10}$/;
 
     if (phone !== "" && !phoneRegex.test(phone)) {
+        setLoading(false);
         alert("Phone number must contain 9 or 10 digits.");
         return;
     }
 
     try {
 
-        // Create Firebase Authentication user
         const credential = await createUserWithEmailAndPassword(
             auth,
             email,
             password
         );
 
-        // Update Firebase display name
         await updateProfile(credential.user, {
             displayName: name
         });
 
-        // Get Firebase ID Token
         const token = await credential.user.getIdToken();
 
-        // Save profile to Firestore through FastAPI
         const response = await fetch("/firebase-register/job-seeker", {
             method: "POST",
             headers: {
@@ -130,24 +154,23 @@ form.addEventListener("submit", async (e) => {
             })
         });
 
-        console.log(response.status);
-
         const result = await response.json();
-
-        console.log(result);
 
         if (response.ok) {
 
-            window.location.href = "/login?registered=success&role=job_seeker";
+            window.location.href =
+                "/login?registered=success&role=job_seeker";
 
-        } else {
-
-            alert(JSON.stringify(result));
+            return;
 
         }
 
+        setLoading(false);
+        alert(JSON.stringify(result));
+
     } catch (error) {
 
+        setLoading(false);
         alert(error.message);
 
     }
