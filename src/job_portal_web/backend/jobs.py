@@ -106,7 +106,7 @@ def attach_company_information(jobs, company_cache, gallery_cache):
 
             job["company_name"] = company.get("companyName", "Unknown")
 
-            job["company_logo"] = gallery_cache.get(job.get("company_id"), "default.jpg")
+            job["company_logo"] = company.get("logo", "default.jpg")
 
             if not job.get("location"):
 

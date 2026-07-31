@@ -33,9 +33,12 @@
               All Categories
             </option>
 
-            {% for category in categories %}
-            <option value="{{ category }}">
-              {{ category }}
+            {% for c in categories %}
+            <option
+                value="{{ c }}"
+                {% if c == category %}selected{% endif %}
+            >
+                {{ c }}
             </option>
             {% endfor %}
 
@@ -53,16 +56,13 @@
     <aside class="filters-card">
       <div class="filters-header">
         <h3>Filters</h3>
-        <a href="/" class="clear-all">Clear All</a>
+       <a href="/jobs" class="clear-all">Clear All</a>
       </div>
 
       <div class="filter-group">
         <div class="filter-group-title">Location <i class="fa-solid fa-chevron-up"></i></div>
-        <div class="checkbox-row">
-          <label><input type="checkbox" checked> All Locations</label>
-        </div>
-        {% for loc in locations %}
-        <div class="checkbox-row">
+        {% for loc in locations[:10] %}
+       <div class="checkbox-row location-item" {% if loop.index > 3 %}style="display:none"{% endif %}>
           <label>
             <input type="checkbox" name="location" value="{{ loc.name }}" class="filter-checkbox" {% if loc.name in
               selected_locations %} checked {% endif %}>
@@ -74,16 +74,21 @@
           </span>
         </div>
         {% endfor %}
-        <div class="show-more">Show More <i class="fa-solid fa-chevron-down" style="font-size:10px;"></i></div>
+        {% if locations|length > 3 %}
+        <div
+            class="show-more"
+            data-target="location-item">
+            Show More
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        {% endif %}
       </div>
 
       <div class="filter-group">
         <div class="filter-group-title">Position <i class="fa-solid fa-chevron-up"></i></div>
-        <div class="checkbox-row">
-          <label><input type="checkbox" checked> All Types</label>
-        </div>
-        {% for jt in positions%}
-        <div class="checkbox-row">
+
+        {% for jt in positions[:10]%}
+        <div class="checkbox-row position-item" {% if loop.index > 3 %}style="display:none"{% endif %}>
           <label>
             <input type="checkbox" name="position" value="{{ jt.name }}" class="filter-checkbox" {% if jt.name in
               selected_positions %} checked {% endif %}>
@@ -97,15 +102,23 @@
 
         </div>
         {% endfor %}
+        {% if positions|length > 3 %}
+        <div
+            class="show-more"
+            data-target="position-item">
+
+            Show More
+            <i class="fa-solid fa-chevron-down"></i>
+
+        </div>
+        {% endif %}
       </div>
 
       <div class="filter-group">
-        <div class="filter-group-title">Experience Level <i class="fa-solid fa-chevron-up"></i></div>
-        <div class="checkbox-row">
-          <label><input type="checkbox" checked> All Levels</label>
-        </div>
-        {% for item in benefits %}
-        <div class="checkbox-row">
+        <div class="filter-group-title">Benefit<i class="fa-solid fa-chevron-up"></i></div>
+
+        {% for item in benefits[:10] %}
+        <div class="checkbox-row benefit-item" {% if loop.index > 3 %}style="display:none"{% endif %}>
           <label>
             <input type="checkbox" name="benefits" value="{{ item.name }}" class="filter-checkbox" {% if item.name in
               selected_benefits %} checked {% endif %}>
@@ -116,6 +129,16 @@
           </span>
         </div>
         {% endfor %}
+        {% if benefits|length > 3 %}
+        <div
+            class="show-more"
+            data-target="benefit-item">
+
+            Show More
+            <i class="fa-solid fa-chevron-down"></i>
+
+        </div>
+        {% endif %}
       </div>
     </aside>
 
@@ -135,8 +158,23 @@
 
 
             <!-- Company Logo -->
-            <div class="job-logo">
-            <img src="/image/{{ job.company_logo }}">            </div>
+           <div class="job-logo">
+
+            {% if job.company_logo and job.company_logo != "default.jpg" %}
+
+                <div class="logo-placeholder"><img src="{{ job.company_logo }}"
+                    alt="{{ job.company_name }}"
+                    loading="lazy"></div>
+
+            {% else %}
+
+                <div class="logo-placeholder">
+                    {{ job.company_name[:1] | upper }}
+                </div>
+
+            {% endif %}
+
+        </div>
 
             <div class="job-info">
               <div class="job-title-row">
@@ -167,7 +205,7 @@
             </div>
 
             <div class="job-side">
-              <button class="bookmark-btn">
+              <button type="button" class="bookmark-btn">
                 <i class="fa-regular fa-heart"></i>
               </button>
               <div class="job-posted">
@@ -228,69 +266,124 @@
         <h4>Popular Searches</h4>
         <ul class="popular-list">
           {% for term in topCategories %}
-          <li><i class="fa-solid fa-magnifying-glass icon"></i> {{ term }}</li>
+          <li><a href="/jobs?category={{term}}">{{term}}</a></li>
           {% endfor %}
         </ul>
-      </div>
-
-      <div class="side-card cta-card">
-        <h4>Let Employers Reach Out to You</h4>
-        <p>Publish your profile and wait for employers to discover and contact you.</p>
-        <a href="#" class="btn btn-outline btn-block text-button"
-          style="display:block; text-align:center; color: var(--color-primary); border-color: var(--color-primary);">Post
-          an Applicant</a>
       </div>
     </aside>
 
   </div>
-  <script>
+ <script>
 
-    document.querySelectorAll(".filter-checkbox")
-    .forEach(cb => {
+const checkboxes =
+document.querySelectorAll(".filter-checkbox");
 
-        cb.addEventListener("change", () => {
+checkboxes.forEach(box=>{
 
+    box.addEventListener("change",()=>{
 
-            let params = new URLSearchParams(
-                window.location.search
+        const params =
+        new URLSearchParams();
+
+        const keyword =
+        document.querySelector(
+            'input[name="q"]'
+        ).value;
+
+        const category =
+        document.getElementById(
+            "categoryFilter"
+        ).value;
+
+        if(keyword){
+
+            params.set(
+                "q",
+                keyword
             );
 
+        }
 
-            params.delete("page");
+        if(category){
 
+            params.set(
+                "category",
+                category
+            );
 
-            // remove old filters only
+        }
 
-            params.delete("location");
-            params.delete("position");
-            params.delete("benefits");
+        document
+        .querySelectorAll(
+            ".filter-checkbox:checked"
+        )
+        .forEach(item=>{
 
-
-
-            document
-            .querySelectorAll(".filter-checkbox:checked")
-            .forEach(item => {
-
-
-                params.append(
-                    item.name,
-                    item.value
-                );
-
-
-            });
-
-
-
-            window.location.href =
-                "/jobs?" + params.toString();
-
+            params.append(
+                item.name,
+                item.value
+            );
 
         });
 
+        window.location.href=
+        "/jobs?"+params.toString();
+
     });
 
-  </script>
+});
+document.querySelectorAll(".show-more").forEach(button => {
+
+    button.dataset.expanded = "false";
+
+    button.addEventListener("click", () => {
+
+        const target = button.dataset.target;
+
+        const items = document.querySelectorAll("." + target);
+
+        const expanded = button.dataset.expanded === "true";
+
+        if (!expanded) {
+
+            items.forEach((item, index) => {
+
+                if (index >= 3 && index < 10) {
+
+                    item.style.display = "";
+
+                }
+
+            });
+
+            button.innerHTML =
+                'Show Less <i class="fa-solid fa-chevron-up"></i>';
+
+            button.dataset.expanded = "true";
+
+        } else {
+
+            items.forEach((item, index) => {
+
+                if (index >= 3) {
+
+                    item.style.display = "none";
+
+                }
+
+            });
+
+            button.innerHTML =
+                'Show More <i class="fa-solid fa-chevron-down"></i>';
+
+            button.dataset.expanded = "false";
+
+        }
+
+    });
+
+});
+</script>
 </body>
 
 </html>

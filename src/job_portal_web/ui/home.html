@@ -101,7 +101,7 @@
     {% if job.company_logo and job.company_logo != "default.jpg" %}
 
         <img
-            src="/image/{{ job.company_logo }}"
+            src="{{ job.company_logo }}"
             alt="{{ job.company_name }}"
             width="50"
             height="50"
@@ -176,7 +176,7 @@
   {% if co.logo and co.logo != "default.jpg" %}
 
     <img
-        src="/image/{{ co.logo }}"
+        src="{{ co.logo }}"
         alt="{{ co.companyName }}"
         width="40"
         height="40"

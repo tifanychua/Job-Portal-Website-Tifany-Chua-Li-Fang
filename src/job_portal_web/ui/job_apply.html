@@ -39,7 +39,21 @@
 
     <!-- ---------- Job summary strip ---------- -->
     <div class="apply-job-summary">
-      <div class="apply-job-logo">{{ job.companyName[:1] }}</div>
+      {% if job.company_logo and job.company_logo != "default.jpg" %}
+
+      <div class="apply-job-logo"> <img
+            src="{{ job.company_logo }}"
+            alt="{{ job.companyName }}"
+            class="apply-job-logo"
+        ></div> 
+
+    {% else %}
+
+        <div class="apply-job-logo">
+            {{ job.companyName[:1] | upper }}
+        </div>
+
+    {% endif %}
       <div>
         <div class="apply-job-title-row">
           <span class="apply-job-title">{{ job.job_title }}</span>

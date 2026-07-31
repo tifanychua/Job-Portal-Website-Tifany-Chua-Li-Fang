@@ -165,9 +165,7 @@ def job_detail(request: Request, job_id: str):
     application_status = None
     application_id = None
 
-    # temporary applicant id
-    # replace with session login later
-    job_seeker_id = "J000001"
+    job_seeker_id = request.session.get("applicant_id")
 
     applications = (
         db.collection("application").where(filter=FieldFilter("job_id", "==", job_id)).stream()

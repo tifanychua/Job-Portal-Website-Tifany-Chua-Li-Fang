@@ -121,9 +121,20 @@
           <!-- LEFT CONTENT -->
           <div class="application-left">
 
-            <div class="application-logo">
-              {{ app.job.companyName[:1] }}
-            </div>
+            {% if app.job.company_logo and app.job.company_logo != "default.jpg" %}
+              <div class="application-logo"><img
+                  src="{{ app.job.company_logo }}"
+                  alt="{{ app.job.companyName }}"
+                  class="application-logo"
+              ></div>
+
+          {% else %}
+
+              <div class="application-logo">
+                  {{ app.job.companyName[:1] | upper }}
+              </div>
+
+          {% endif %}
 
 
             <div class="application-content">

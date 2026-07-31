@@ -31,7 +31,7 @@
       <div class="job-logo">
         {% if job.company_logo and job.company_logo != "default.jpg" %}
             <img
-                src="/image/{{ job.company_logo }}"
+                src="{{ job.company_logo }}"
                 alt="{{ job.companyName }}"
                 loading="lazy"
             >
@@ -229,7 +229,7 @@
         <div class="similar-logo">
           {% if sim.company_logo and sim.company_logo != "default.jpg" %}
               <img
-                  src="/image/{{ sim.company_logo }}"
+                  src="{{ sim.company_logo }}"
                   alt="{{ sim.companyName }}"
                   loading="lazy"
               >

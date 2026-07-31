@@ -71,25 +71,21 @@ def _get_screening_questions(job):
     return questions
 
 
-def _get_current_applicant(request: Request):
-    """Looks up the logged-in applicant's profile.
+def _get_current_job_seeker(request: Request):
+    job_seeker_id = request.session.get("applicant_id")
 
-    NOTE: this assumes an `applicant_id` is stored in the session (e.g. set at
-    login by your auth flow / applicant.py). Adjust this to match however
-    your project actually tracks the logged-in user.
-    """
-
-    applicant_id = request.session.get("applicant_id") if hasattr(request, "session") else None
-
-    if not applicant_id:
+    if not job_seeker_id:
         return None, None
 
-    applicant_doc = db.collection("applicant").document(applicant_id).get()
+    doc = db.collection("job_seeker").document(job_seeker_id).get()
 
-    if not applicant_doc.exists:
-        return applicant_id, None
+    if doc.exists:
+        print(doc.to_dict())
 
-    return applicant_id, applicant_doc.to_dict()
+    if not doc.exists:
+        return job_seeker_id, None
+
+    return job_seeker_id, doc.to_dict()
 
 
 def _load_job(job_id: str):
@@ -113,21 +109,24 @@ def job_apply_form(request: Request, job_id: str):
 
     job = _load_job(job_id)
 
-    applicant_id, applicant = _get_current_applicant(request)
+    job_seeker_id, job_seeker = _get_current_job_seeker(request)
 
-    applicant = applicant or {
+    job_seeker = job_seeker or {
         "full_name": "Guest Applicant",
         "headline": "Complete your profile to speed up applications",
         "photo": "",
     }
+    user = job_seeker
+    print(user)
 
     return templates.TemplateResponse(
         request=request,
         name="job_apply.html",
         context={
+            "user":user,
             "request": request,
             "job": job,
-            "applicant": applicant,
+            "job_seeker": job_seeker,  
             "questions": _get_screening_questions(job),
         },
     )
@@ -143,21 +142,21 @@ async def job_apply_submit(
 
     job = _load_job(job_id)
 
-    applicant_id, applicant = _get_current_applicant(request)
+    job_seeker_id, job_seeker = _get_current_job_seeker(request)
 
     # ==============================
     # Check Login
     # ==============================
 
-    if not applicant_id:
-        applicant_id = "J000001"
-        # return JSONResponse(
-        #     status_code=401,
-        #     content={
-        #         "success": False,
-        #         "message": "Please log in to apply for this job."
-        #     },
-        # )
+    if not job_seeker_id:
+        return JSONResponse(
+            status_code=401,
+            content={
+                "success": False,
+                "message": "Please log in to apply for this job."
+            },
+        )
+
 
     form_data = await request.form()
 
@@ -197,7 +196,7 @@ async def job_apply_submit(
                 },
             )
 
-        resume_name = f"{applicant_id}_" f"{job_id}_" f"{uuid.uuid4().hex[:8]}" f"{ext}"
+        resume_name = f"{job_seeker_id}_" f"{job_id}_" f"{uuid.uuid4().hex[:8]}" f"{ext}"
 
         blob = bucket.blob(f"resumes/{resume_name}")
 
@@ -210,7 +209,7 @@ async def job_apply_submit(
     application_ref.set(
         {
             "job_id": job_id,
-            "job_seeker_id": applicant_id,
+            "job_seeker_id": job_seeker_id,
             "resume_filename": resume_name,
             "resume_path": resume_path,
             "cover_letter": cover_letter,
@@ -220,19 +219,10 @@ async def job_apply_submit(
             "updated_on": datetime.now(timezone.utc),
         }
     )
-    user = None
-
-    if request.session.get("user_type") == "job_seeker":
-
-        uid = request.session.get("applicant_id")
-
-        if uid:
-
-            doc = db.collection("job_seeker").document(uid).get()
-
-            if doc.exists:
-                user = doc.to_dict()
-
+   
+    user = job_seeker
+                
+                
     return JSONResponse(
         content=jsonable_encoder(
             {
