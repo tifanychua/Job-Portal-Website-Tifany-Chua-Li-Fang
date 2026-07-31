@@ -23,7 +23,7 @@ def client():
 # Test Applicant
 # ==================================================
 
-APPLICANT_ID = "applicant001"
+APPLICANT_ID = "0YLcc18JszVqSXWn8DEDQ81o2vR2"
 
 NO_EXPERIENCE_APPLICANT = "RX5WofoFl6MBMPf8I1ae"
 

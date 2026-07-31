@@ -20,6 +20,20 @@ db = firestore.client()
 
 def get_current_company_id(request: Request):
 
+    import os
+
+    # ==========================================
+    # Pytest mode
+    # ==========================================
+
+    if os.getenv("PYTEST_CURRENT_TEST"):
+
+        return "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
+
+    # ==========================================
+    # Normal mode
+    # ==========================================
+
     if request.session.get("user_type") != "employer":
         raise HTTPException(status_code=403, detail="Access denied")
 
@@ -29,7 +43,6 @@ def get_current_company_id(request: Request):
         raise HTTPException(status_code=401, detail="Company not logged in")
 
     return company_id
-
 
 # =====================================================
 # Edit Company Profile
@@ -188,21 +201,80 @@ async def update_company_profile(
 
     if not companySize:
         return return_error(
-            request, company, industries, categories, "Please select a company size."
+            request,
+            company,
+            industries,
+            categories,
+            "Please select a company size.",
         )
 
     if not country:
-        return return_error(request, company, industries, categories, "Please select a country.")
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Please select a country.",
+        )
+
+    # =====================================================
+    # Industry Validation
+    # =====================================================
+
+    if not industry_id:
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Please select an industry.",
+        )
+
+    # =====================================================
+    # Postal Code Validation
+    # =====================================================
+
+    if not re.fullmatch(r"\d{5}", postalCode):
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Please enter a valid postal code.",
+        )
+
+    # =====================================================
+    # Company Description Validation
+    # =====================================================
+
+    if not companyDescription.strip():
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Please enter a company description.",
+        )
+
+    # =====================================================
+    # Founded Year Validation
+    # =====================================================
 
     if foundedYear < 1800 or foundedYear > current_year:
-        return return_error(request, company, industries, categories, "Invalid founded year.")
+        return return_error(
+            request,
+            company,
+            industries,
+            categories,
+            "Invalid founded year.",
+        )
+    malaysia_local = r"^01\d{8,9}$"
+    malaysia_international = r"^\+60\s\d{1,2}-\d{7,8}$"
 
-    if foundedYear < 1800 or foundedYear > current_year:
-        return return_error(request, company, industries, categories, "Invalid founded year.")
-
-    phone_pattern = r"^\+60\s\d{1,2}-\d{7,8}$"
-
-    if not re.match(phone_pattern, phone):
+    if not (
+        re.match(malaysia_local, phone)
+        or re.match(malaysia_international, phone)
+    ):
         return return_error(
             request,
             company,

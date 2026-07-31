@@ -31,7 +31,7 @@ def context():
 
 @pytest.fixture
 def applicant_id():
-    return "applicant001"
+    return "0YLcc18JszVqSXWn8DEDQ81o2vR2"
 
 
 def create_skill():
@@ -40,7 +40,7 @@ def create_skill():
 
     doc.set(
         {
-            "applicant_id": "applicant001",
+            "applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2",
             "industry_id": "IND001",
             "category_id": "CAT001",
             "skill_id": str(uuid4()),

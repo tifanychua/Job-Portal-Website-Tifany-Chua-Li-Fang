@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import os
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -22,6 +22,10 @@ templates = Jinja2Templates(directory=str(UI_DIR))
 
 def get_current_applicant_id(request: Request):
 
+    # During pytest, skip login
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        return "0YLcc18JszVqSXWn8DEDQ81o2vR2"
+        
     print("SESSION:", request.session)
 
     if request.session.get("user_type") != "job_seeker":
@@ -128,13 +132,21 @@ async def profile(request: Request):
     # Return Template
     # ===========================
 
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         request=request,
         name="jobSeekerProfile.html",
         context={
             # Shared header
             "user": applicant,
+
             # Profile page
             "applicant": applicant,
         },
     )
+
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
+

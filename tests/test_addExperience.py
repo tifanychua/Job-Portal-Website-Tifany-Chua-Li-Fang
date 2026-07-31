@@ -39,7 +39,7 @@ def create_test_experience():
 
     doc_ref.set(
         {
-            "applicant_id": "applicant001",
+            "applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2",
             "job_title": "Software Engineer",
             "company_name": "ABC Sdn Bhd",
             "employment_type": "Full-Time",
@@ -88,7 +88,7 @@ def test_successfully_add_experience():
 
     assert body["success"] is True
 
-    assert body["redirect"] == "/manage-experience"
+    assert body["redirect"] == "/manageExperience"
 
     docs = (
         db.collection("job_seeker_experience")
@@ -242,7 +242,7 @@ def duplicate_record(context):
 
     doc = db.collection("job_seeker_experience").document()
 
-    doc.set({"applicant_id": "applicant001", **context.form_data})
+    doc.set({"applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2", **context.form_data})
 
     context.experience_id = doc.id
 
@@ -382,7 +382,7 @@ def redirect(context):
 
     body = context.response.json()
 
-    assert body["redirect"] == "/manage-experience"
+    assert body["redirect"] == "/manageExperience"
 
 
 @then(parsers.parse('the system should display "{message}"'))

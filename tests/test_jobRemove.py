@@ -28,7 +28,7 @@ def client():
 
 def test_remove_job_success(client):
 
-    job_id = "dj9cf1SmQjOYhVm5b6SL"
+    job_id = "rkhObcBjoHn8isSi9V3f"
 
     response = client.get(f"/delete-job/{job_id}", follow_redirects=False)
 
@@ -45,7 +45,7 @@ def test_remove_job_success(client):
 
 def test_job_status_updated(client):
 
-    job_id = "dj9cf1SmQjOYhVm5b6SL"
+    job_id = "rkhObcBjoHn8isSi9V3f"
 
     client.get(f"/delete-job/{job_id}", follow_redirects=False)
 
@@ -68,7 +68,7 @@ def test_job_status_updated(client):
 
 def test_deleted_job_not_displayed(client):
 
-    job_id = "dj9cf1SmQjOYhVm5b6SL"
+    job_id = "rkhObcBjoHn8isSi9V3f"
 
     client.get(f"/delete-job/{job_id}", follow_redirects=False)
 
@@ -131,7 +131,7 @@ def context():
 @given("the employer has an existing job posting")
 def existing_job(context):
 
-    context.job_id = "dj9cf1SmQjOYhVm5b6SL"
+    context.job_id = "rkhObcBjoHn8isSi9V3f"
 
 
 @when("the employer selects the remove job posting option")
@@ -157,7 +157,7 @@ def verify_removed(context):
 @given("the employer has removed a job posting")
 def removed_job(client, context):
 
-    context.job_id = "dj9cf1SmQjOYhVm5b6SL"
+    context.job_id = "rkhObcBjoHn8isSi9V3f"
 
     client.get(f"/delete-job/{context.job_id}", follow_redirects=False)
 
@@ -191,7 +191,7 @@ def verify_status(context):
 @given("the employer has removed a job posting")
 def removed_job_again(client, context):
 
-    context.job_id = "dj9cf1SmQjOYhVm5b6SL"
+    context.job_id = "rkhObcBjoHn8isSi9V3f"
 
     client.get(f"/delete-job/{context.job_id}", follow_redirects=False)
 

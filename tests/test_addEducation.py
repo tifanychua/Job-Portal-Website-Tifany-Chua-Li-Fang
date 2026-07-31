@@ -39,7 +39,7 @@ def create_test_education():
 
     doc_ref.set(
         {
-            "applicant_id": "applicant001",
+            "applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2",
             "qualification": "Bachelor Degree",
             "institution": "Universiti Malaya",
             "field_of_study": "Computer Science",
@@ -218,7 +218,7 @@ def duplicate_record(context):
 
     doc.set(
         {
-            "applicant_id": "applicant001",
+            "applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2",
             "qualification": context.form_data["degree"],
             "institution": context.form_data["institution"],
             "field_of_study": context.form_data["field_of_study"],

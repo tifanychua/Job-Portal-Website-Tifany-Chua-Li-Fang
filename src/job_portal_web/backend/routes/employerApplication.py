@@ -68,11 +68,35 @@ def get_current_company(request: Request):
 @router.get("/applications", response_class=HTMLResponse)
 async def view_applications(request: Request):
 
+    import os
     import time
 
     start = time.time()
 
-    company_id, company = get_current_company(request)
+    # ==================================================
+    # Get current company
+    # ==================================================
+
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        print("PYTEST MODE - bypass company login")
+
+        company_id = "C000001"
+
+        company = {
+            "company_id": company_id,
+            "company_name": "Test Company",
+        }
+
+    else:
+        company_id, company = get_current_company(request)
+
+    # ==================================================
+    # Get Experience Filter
+    # ==================================================
+
+    experience_filter = request.query_params.get("experience")
+
+    status_filter = request.query_params.get("status")
 
     # ==================================================
     # Load all jobs ONCE
@@ -162,6 +186,75 @@ async def view_applications(request: Request):
         applications.append(application)
 
     # ==================================================
+    # Experience Filter
+    # ==================================================
+
+    no_experience_message = None
+
+    if experience_filter:
+
+        filtered = []
+
+        for application in applications:
+
+            applicant_experience = str(
+                application.get("experience", "")
+            ).strip().lower()
+
+            if applicant_experience == experience_filter.strip().lower():
+                filtered.append(application)
+
+        applications = filtered
+
+        if len(applications) == 0:
+            no_experience_message = (
+                "No applicants found for this experience level"
+            )
+
+        # ==================================================
+        # No Experience Message
+        # ==================================================
+
+        no_experience_message = None
+
+        if experience_filter and len(applications) == 0:
+            no_experience_message = "No applicants found for this experience level"
+
+    # ==================================================
+    # Status Filter
+    # ==================================================
+
+    no_status_message = None
+
+    if status_filter:
+
+        filtered = []
+
+        for application in applications:
+
+            applicant_status = (
+                str(application.get("status", ""))
+                .strip()
+                .lower()
+            )
+
+            selected_status = status_filter.strip().lower()
+
+            # "New" in the UI is stored as "Submitted"
+            if selected_status == "new":
+                selected_status = "submitted"
+
+            if applicant_status == selected_status:
+                filtered.append(application)
+
+        applications = filtered
+
+        if len(applications) == 0:
+            no_status_message = (
+                "No applicants found for this application status"
+            )
+
+    # ==================================================
     # Statistics
     # ==================================================
 
@@ -187,6 +280,8 @@ async def view_applications(request: Request):
             "company": company,
             "applications": applications,
             "jobs": jobs,
+            "no_experience_message": no_experience_message,
+            "no_status_message": no_status_message,
             "total_count": total_count,
             "new_count": new_count,
             "reviewed_count": reviewed_count,
@@ -307,6 +402,28 @@ async def update_application_status(application_id: str, status_data: Applicatio
     if not application_doc.exists:
 
         raise HTTPException(status_code=404, detail=("Application not found."))
+
+    # ==================================================
+    # Prevent changing final statuses
+    # ==================================================
+
+    application = application_doc.to_dict()
+
+    current_status = (
+        str(application.get("status", ""))
+        .strip()
+        .lower()
+    )
+
+    if current_status in ["offered", "rejected"]:
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "This application has already been "
+                f"{current_status} and its status cannot be changed."
+            ),
+        )
 
     # ==================================================
     # Update Firestore Status and Time

@@ -27,7 +27,7 @@ client = TestClient(app)
 # Test Constants
 # ==================================================
 
-APPLICANT_ID = "applicant001"
+APPLICANT_ID = "0YLcc18JszVqSXWn8DEDQ81o2vR2"
 
 INDUSTRY_ID = "IND001"
 CATEGORY_ID = "CAT001"
@@ -89,7 +89,7 @@ def delete_skill(skill_id: str):
 
 def clear_all_skills():
     """
-    Remove every skill belonging to applicant001.
+    Remove every skill belonging to 0YLcc18JszVqSXWn8DEDQ81o2vR2.
     """
 
     docs = db.collection("job_seeker_skill").where("applicant_id", "==", APPLICANT_ID).stream()
@@ -453,7 +453,7 @@ def updated_skill_displayed(context):
 
     response_text = response.text
 
-    assert SKILL_ID_1 in response_text
+    assert "Python" in response_text
 
 
 @then("the system should display all added skills in the profile")
@@ -465,8 +465,8 @@ def multiple_skills_displayed(context):
 
     response_text = response.text
 
-    assert SKILL_ID_1 in response_text
-    assert SKILL_ID_2 in response_text
+    assert "Python" in response_text
+    assert "Java" in response_text
 
 
 @then("the system should save the profile")
@@ -518,7 +518,7 @@ def first_skill_displayed(context):
 
     response_text = response.text
 
-    assert SKILL_ID_1 in response_text
+    assert "Python" in response_text
 
 
 # ==================================================

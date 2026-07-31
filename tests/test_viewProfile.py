@@ -13,7 +13,7 @@ scenarios("features/viewProfile.feature")
 
 client = TestClient(app)
 
-APPLICANT_ID = "applicant001"
+APPLICANT_ID = "0YLcc18JszVqSXWn8DEDQ81o2vR2"
 
 
 # ==================================================

@@ -351,5 +351,18 @@
 
 </div>
 
+<script>
+    // Refresh page when returning using the browser Back button
+    window.addEventListener("pageshow", function (event) {
+
+        if (
+            event.persisted ||
+            window.performance.getEntriesByType("navigation")[0]?.type === "back_forward"
+        ) {
+            window.location.reload();
+        }
+
+    });
+</script>
 </body>
 </html>

@@ -36,7 +36,7 @@ def applicant_page(context):
 
 @given("the employer applies an experience level filter")
 def experience_filter(context):
-    context["response"] = client.get("/applications", params={"experience": "10 years"})
+    context["response"] = client.get("/applications", params={"experience": "5+"})
 
 
 @given("the employer is viewing filtered applicants")

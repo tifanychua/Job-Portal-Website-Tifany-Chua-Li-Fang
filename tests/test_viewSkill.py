@@ -31,7 +31,7 @@ def context():
 
 @pytest.fixture
 def applicant_id():
-    return "applicant001"
+    return "0YLcc18JszVqSXWn8DEDQ81o2vR2"
 
 
 # ==========================================================
@@ -48,7 +48,7 @@ def create_skill(industry_id="IND001", category_id="CAT001", skill_id=None, leve
 
     doc.set(
         {
-            "applicant_id": "applicant001",
+            "applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2",
             "industry_id": industry_id,
             "category_id": category_id,
             "skill_id": skill_id,
@@ -96,7 +96,7 @@ def modified_skills(context):
 @given("the job seeker has not added any skills to the profile")
 def no_skills():
 
-    docs = db.collection("job_seeker_skill").where("applicant_id", "==", "applicant001").stream()
+    docs = db.collection("job_seeker_skill").where("applicant_id", "==", "0YLcc18JszVqSXWn8DEDQ81o2vR2").stream()
 
     for doc in docs:
         doc.reference.delete()

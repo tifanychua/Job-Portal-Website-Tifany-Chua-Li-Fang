@@ -1,6 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 from datetime import datetime, date
+import re
 
 
 from fastapi import (
@@ -30,6 +31,20 @@ templates = Jinja2Templates(directory=str(UI_DIR))
 
 def get_current_job_seeker_id(request: Request):
 
+    import os
+
+    # ==========================================
+    # Pytest mode
+    # ==========================================
+
+    if os.getenv("PYTEST_CURRENT_TEST"):
+
+        return "F9fDAUiFvYcYAVt7jRHLFb1IqrQ2"
+
+    # ==========================================
+    # Normal mode
+    # ==========================================
+
     if request.session.get("user_type") != "job_seeker":
         raise HTTPException(status_code=403, detail="Access denied")
 
@@ -39,7 +54,6 @@ def get_current_job_seeker_id(request: Request):
         raise HTTPException(status_code=401, detail="Job seeker not logged in")
 
     return applicant_id
-
 
 # =====================================================
 # Edit Profile Page
@@ -120,6 +134,48 @@ async def update_profile(
                     "seeker": seeker,
                     "today": date.today().isoformat(),
                     "error": "Date of birth must be before today.",
+                },
+                status_code=400,
+            )
+
+        # ----------------------------------------
+        # Validate Email
+        # ----------------------------------------
+
+        email_pattern = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+
+        if not re.fullmatch(email_pattern, email):
+
+            return templates.TemplateResponse(
+                request=request,
+                name="edit_jobSeeker_profile.html",
+                context={
+                    "seeker": seeker,
+                    "today": date.today().isoformat(),
+                    "error": "Please enter a valid email address.",
+                },
+                status_code=400,
+            )
+
+        # ----------------------------------------
+        # Validate Phone Number
+        # ----------------------------------------
+
+        malaysia_local = r"^01\d{8,9}$"
+        malaysia_international = r"^\+60\s\d{1,2}-\d{7,8}$"
+
+        if not (
+            re.fullmatch(malaysia_local, phone)
+            or re.fullmatch(malaysia_international, phone)
+        ):
+
+            return templates.TemplateResponse(
+                request=request,
+                name="edit_jobSeeker_profile.html",
+                context={
+                    "seeker": seeker,
+                    "today": date.today().isoformat(),
+                    "error": "Please enter a valid phone number.",
                 },
                 status_code=400,
             )

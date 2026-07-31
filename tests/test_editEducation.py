@@ -42,7 +42,7 @@ def create_test_education():
 
     doc.set(
         {
-            "applicant_id": "applicant001",
+            "applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2",
             "qualification": "Bachelor Degree",
             "institution": f"Taylor University {unique}",
             "field_of_study": "Software Engineering",
@@ -208,7 +208,7 @@ def duplicate_record(context):
 
     doc.set(
         {
-            "applicant_id": "applicant001",
+            "applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2",
             "qualification": "Master Degree",
             "institution": f"Taylor University {unique}",
             "field_of_study": "Software Engineering",

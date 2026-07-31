@@ -41,7 +41,7 @@ def create_test_experience():
 
     doc.set(
         {
-            "applicant_id": "applicant001",
+            "applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2",
             "job_title": "Software Engineer",
             "company_name": f"ABC Company {unique}",
             "employment_type": "Full-Time",
@@ -232,7 +232,7 @@ def duplicate_record(context):
 
     doc.set(
         {
-            "applicant_id": "applicant001",
+            "applicant_id": "0YLcc18JszVqSXWn8DEDQ81o2vR2",
             "job_title": "Senior Software Engineer",
             "company_name": f"ABC Company {unique}",
             "employment_type": "Full-Time",
@@ -375,7 +375,7 @@ def updated(context):
 @then("the system should redirect to the Manage Experience page")
 def redirect(context):
 
-    assert context.response.json()["redirect"] == "/manage-experience"
+    assert context.response.json()["redirect"] == "/manageExperience"
 
 
 @then(parsers.parse('the system should display "{message}"'))

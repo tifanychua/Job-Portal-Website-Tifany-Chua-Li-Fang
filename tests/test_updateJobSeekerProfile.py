@@ -69,7 +69,7 @@ def test_updated_profile_information_saved(client):
 
     client.post("/edit-profile", data=applicant_data(), follow_redirects=False)
 
-    applicant = db.collection("applicants").document("applicant001").get()
+    applicant = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get()
 
     assert applicant.exists
 
@@ -117,11 +117,11 @@ def test_upload_profile_photo_success(client):
 
     assert response.status_code == 303
 
-    applicant = db.collection("applicants").document("applicant001").get()
+    applicant = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get()
 
     assert applicant.exists
 
-    assert "image" in applicant.to_dict()
+    assert "profileImage" in applicant.to_dict()
 
     print("✅ Acceptance Test Passed: " "Profile photo uploaded.")
 
@@ -151,14 +151,14 @@ def test_view_updated_profile(client):
 
 def test_cancel_profile_update(client):
 
-    applicant_before = db.collection("applicants").document("applicant001").get().to_dict()
+    applicant_before = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get().to_dict()
 
     # Cancel button redirects to /profile
     response = client.get("/profile")
 
     assert response.status_code == 200
 
-    applicant_after = db.collection("applicants").document("applicant001").get().to_dict()
+    applicant_after = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get().to_dict()
 
     assert applicant_before == applicant_after
 
@@ -549,7 +549,7 @@ def updated_profile_displayed(client):
 @then("the system should store the updated information successfully")
 def information_saved():
 
-    applicant = db.collection("applicants").document("applicant001").get()
+    applicant = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get()
 
     assert applicant.exists
 
@@ -595,7 +595,7 @@ def changes_discarded(context):
 @then("keep the previous profile information unchanged")
 def previous_information():
 
-    applicant = db.collection("applicants").document("applicant001").get()
+    applicant = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get()
 
     assert applicant.exists
 

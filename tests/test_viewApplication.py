@@ -24,7 +24,7 @@ def client():
 # Test Company
 # ==================================================
 
-COMPANY_ID = "C000001"
+COMPANY_ID = "GtWDQjy7OZXUYcDjTJQymaKACqg1"
 
 
 # ==================================================
