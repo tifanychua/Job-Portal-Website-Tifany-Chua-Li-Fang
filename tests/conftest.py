@@ -41,7 +41,10 @@ def driver():
     options.add_argument("--remote-debugging-port=9222")
     options.add_argument("--headless=new")
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager(driver_version="150.0.7871.128").install()), options=options)
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager(driver_version="150.0.7871.128").install()),
+        options=options,
+    )
 
     driver.implicitly_wait(10)
 

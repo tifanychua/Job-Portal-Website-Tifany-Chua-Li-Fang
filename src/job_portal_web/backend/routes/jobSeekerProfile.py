@@ -25,7 +25,7 @@ def get_current_applicant_id(request: Request):
     # During pytest, skip login
     if os.getenv("PYTEST_CURRENT_TEST"):
         return "0YLcc18JszVqSXWn8DEDQ81o2vR2"
-        
+
     print("SESSION:", request.session)
 
     if request.session.get("user_type") != "job_seeker":
@@ -70,11 +70,7 @@ async def profile(request: Request):
     # Load Education
     # ===========================
 
-    education_docs = (
-        db.collection("education")
-        .where("applicant_id", "==", applicant_id)
-        .stream()
-    )
+    education_docs = db.collection("education").where("applicant_id", "==", applicant_id).stream()
 
     applicant["education"] = []
 
@@ -86,9 +82,7 @@ async def profile(request: Request):
     # ===========================
 
     experience_docs = (
-        db.collection("job_seeker_experience")
-        .where("applicant_id", "==", applicant_id)
-        .stream()
+        db.collection("job_seeker_experience").where("applicant_id", "==", applicant_id).stream()
     )
 
     applicant["experience_list"] = []
@@ -97,15 +91,13 @@ async def profile(request: Request):
         applicant["experience_list"].append(doc.to_dict())
 
     # ===========================
-# Load Skills
-# ===========================
+    # Load Skills
+    # ===========================
 
     applicant["skills"] = []
 
     skill_docs = (
-        db.collection("job_seeker_skill")
-        .where("applicant_id", "==", applicant_id)
-        .stream()
+        db.collection("job_seeker_skill").where("applicant_id", "==", applicant_id).stream()
     )
 
     for doc in skill_docs:
@@ -118,12 +110,7 @@ async def profile(request: Request):
             continue
 
         # Search using the skill_id field
-        docs = (
-            db.collection("skills")
-            .where("skill_id", "==", skill_id)
-            .limit(1)
-            .stream()
-        )
+        docs = db.collection("skills").where("skill_id", "==", skill_id).limit(1).stream()
 
         found = False
 
@@ -131,9 +118,7 @@ async def profile(request: Request):
 
             skill_data = skill_doc.to_dict()
 
-            applicant["skills"].append(
-                skill_data.get("skill_name", skill_id)
-            )
+            applicant["skills"].append(skill_data.get("skill_name", skill_id))
 
             found = True
 
@@ -154,7 +139,6 @@ async def profile(request: Request):
         context={
             # Shared header
             "user": applicant,
-
             # Profile page
             "applicant": applicant,
         },
@@ -165,4 +149,3 @@ async def profile(request: Request):
     response.headers["Expires"] = "0"
 
     return response
-

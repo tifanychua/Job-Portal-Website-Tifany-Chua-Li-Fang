@@ -6,7 +6,6 @@ from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore
-from datetime import datetime
 
 from job_portal_web.backend.database import bucket
 import uuid
@@ -43,6 +42,7 @@ def get_current_company_id(request: Request):
         raise HTTPException(status_code=401, detail="Company not logged in")
 
     return company_id
+
 
 # =====================================================
 # Edit Company Profile
@@ -93,6 +93,7 @@ async def edit_company_profile(request: Request):
             "current_year": current_year,
         },
     )
+
 
 # =====================================================
 # Get Specialties by Industry
@@ -271,10 +272,7 @@ async def update_company_profile(
     malaysia_local = r"^01\d{8,9}$"
     malaysia_international = r"^\+60\s\d{1,2}-\d{7,8}$"
 
-    if not (
-        re.match(malaysia_local, phone)
-        or re.match(malaysia_international, phone)
-    ):
+    if not (re.match(malaysia_local, phone) or re.match(malaysia_international, phone)):
         return return_error(
             request,
             company,

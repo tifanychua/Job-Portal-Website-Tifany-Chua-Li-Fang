@@ -123,10 +123,10 @@ def job_apply_form(request: Request, job_id: str):
         request=request,
         name="job_apply.html",
         context={
-            "user":user,
+            "user": user,
             "request": request,
             "job": job,
-            "job_seeker": job_seeker,  
+            "job_seeker": job_seeker,
             "questions": _get_screening_questions(job),
         },
     )
@@ -151,12 +151,8 @@ async def job_apply_submit(
     if not job_seeker_id:
         return JSONResponse(
             status_code=401,
-            content={
-                "success": False,
-                "message": "Please log in to apply for this job."
-            },
+            content={"success": False, "message": "Please log in to apply for this job."},
         )
-
 
     form_data = await request.form()
 
@@ -219,10 +215,9 @@ async def job_apply_submit(
             "updated_on": datetime.now(timezone.utc),
         }
     )
-   
+
     user = job_seeker
-                
-                
+
     return JSONResponse(
         content=jsonable_encoder(
             {

@@ -96,7 +96,11 @@ def modified_skills(context):
 @given("the job seeker has not added any skills to the profile")
 def no_skills():
 
-    docs = db.collection("job_seeker_skill").where("applicant_id", "==", "0YLcc18JszVqSXWn8DEDQ81o2vR2").stream()
+    docs = (
+        db.collection("job_seeker_skill")
+        .where("applicant_id", "==", "0YLcc18JszVqSXWn8DEDQ81o2vR2")
+        .stream()
+    )
 
     for doc in docs:
         doc.reference.delete()

@@ -185,6 +185,7 @@ async def edit_job(request: Request, job_id: str):
 # Review New Job
 # ==================================================
 
+
 @router.post("/review-job", response_class=HTMLResponse)
 async def review_job(
     request: Request,
@@ -252,6 +253,7 @@ async def review_job(
             "company": company,
         },
     )
+
 
 @router.post("/review-edit-job/{job_id}", response_class=HTMLResponse)
 async def review_edit_job(
@@ -342,6 +344,7 @@ async def review_edit_job(
         },
     )
 
+
 # ==================================================
 # Confirm Update Job
 # ==================================================
@@ -371,6 +374,7 @@ async def update_job_confirm(request: Request, job_id: str):
 
     return RedirectResponse("/manage-jobs?success=edited", status_code=303)
 
+
 # ==================================================
 # Delete Job
 # ==================================================
@@ -380,7 +384,7 @@ async def update_job_confirm(request: Request, job_id: str):
 async def delete_job(request: Request, job_id: str):
 
     if os.getenv("PYTEST_CURRENT_TEST"):
-        company_id = "C000001"      # Replace with the company_id of job rkhObcBjoHn8isSi9V3f
+        company_id = "C000001"  # Replace with the company_id of job rkhObcBjoHn8isSi9V3f
     else:
         company_id = request.session.get("company_id")
 

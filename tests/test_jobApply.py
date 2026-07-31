@@ -5,10 +5,10 @@ import pytest
 from job_portal_web.backend.main import app
 from job_portal_web.backend import job_apply
 
-
 # --------------------------------------------------
 # Fake Login
 # --------------------------------------------------
+
 
 @pytest.fixture(autouse=True)
 def fake_login(monkeypatch):
@@ -35,6 +35,7 @@ def fake_login(monkeypatch):
 # Test Client
 # --------------------------------------------------
 
+
 @pytest.fixture
 def client():
     return TestClient(app)
@@ -43,6 +44,7 @@ def client():
 # --------------------------------------------------
 # Acceptance Test 1
 # --------------------------------------------------
+
 
 def test_job_seeker_submit_application(client: TestClient):
 
@@ -70,6 +72,7 @@ def test_job_seeker_submit_application(client: TestClient):
 # --------------------------------------------------
 # Acceptance Test 2
 # --------------------------------------------------
+
 
 def test_view_saved_application_details(client: TestClient):
 
@@ -111,6 +114,7 @@ scenarios("features/jobApply.feature")
 # Context
 # --------------------------------------------------
 
+
 class Context:
 
     def __init__(self):
@@ -126,6 +130,7 @@ def context():
 # --------------------------------------------------
 # Scenario 1
 # --------------------------------------------------
+
 
 @given("the job seeker is viewing a job posting")
 def view_job():
@@ -171,6 +176,7 @@ def verify_application_created(context):
 # Scenario 2
 # --------------------------------------------------
 
+
 @given("the job seeker has submitted a job application")
 def submitted_application(client, context):
 
@@ -195,9 +201,7 @@ def submitted_application(client, context):
 @when("the application is processed")
 def process_application(client, context):
 
-    context.response = client.get(
-        f"/application/{context.application_id}"
-    )
+    context.response = client.get(f"/application/{context.application_id}")
 
 
 @then("the application details should be stored in the database")

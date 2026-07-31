@@ -38,10 +38,7 @@ def test_accept_applicant_success(client):
     doc = db.collection("application").document(APPLICATION_ID).get()
     print("BEFORE:", doc.to_dict())
 
-    response = client.put(
-        f"/application/{APPLICATION_ID}/status",
-        json={"status": "Offered"}
-    )
+    response = client.put(f"/application/{APPLICATION_ID}/status", json={"status": "Offered"})
 
     print("STATUS CODE:", response.status_code)
     print("RESPONSE:", response.json())
@@ -50,6 +47,8 @@ def test_accept_applicant_success(client):
     print("AFTER:", doc.to_dict())
 
     assert response.status_code == 200
+
+
 # ==================================================
 # Acceptance Test 2
 # Applicant status updated

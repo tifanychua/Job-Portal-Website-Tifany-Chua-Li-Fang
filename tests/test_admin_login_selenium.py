@@ -92,7 +92,6 @@ def redirect_dashboard(driver):
     assert "/admin/company-requests" in driver.current_url
 
 
-
 @then("the system should display an error message")
 def login_error(driver):
 

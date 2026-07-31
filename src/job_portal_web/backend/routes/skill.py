@@ -23,7 +23,7 @@ def get_current_applicant_id(request: Request):
     # During pytest, skip login
     if os.getenv("PYTEST_CURRENT_TEST"):
         return "0YLcc18JszVqSXWn8DEDQ81o2vR2"
-    
+
     if request.session.get("user_type") != "job_seeker":
 
         raise HTTPException(status_code=403, detail="Access denied")
@@ -36,6 +36,7 @@ def get_current_applicant_id(request: Request):
 
     return applicant_id
 
+
 def get_current_user(applicant_id):
 
     user_doc = db.collection("job_seeker").document(applicant_id).get()
@@ -44,6 +45,7 @@ def get_current_user(applicant_id):
         return user_doc.to_dict()
 
     return None
+
 
 def get_industry_name(industry_id):
 
@@ -103,13 +105,8 @@ async def manage_skills(request: Request):
         skill_list.append(data)
 
     return templates.TemplateResponse(
-    request=request,
-    name="manageSkill.html",
-    context={
-        "skills": skill_list,
-        "user": user
-    }
-)
+        request=request, name="manageSkill.html", context={"skills": skill_list, "user": user}
+    )
 
 
 @router.get("/api/industries")

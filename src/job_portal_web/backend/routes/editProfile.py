@@ -55,9 +55,11 @@ def get_current_job_seeker_id(request: Request):
 
     return applicant_id
 
+
 # =====================================================
 # Edit Profile Page
 # =====================================================
+
 
 @router.get("/edit-profile", response_class=HTMLResponse)
 async def edit_profile(request: Request):
@@ -77,8 +79,7 @@ async def edit_profile(request: Request):
         context={
             "seeker": seeker,
             "today": date.today().isoformat(),
-            },
-        
+        },
     )
 
 
@@ -86,11 +87,10 @@ async def edit_profile(request: Request):
 # Save Profile
 # =====================================================
 
+
 @router.post("/edit-profile")
 async def update_profile(
-
     request: Request,
-
     full_name: str = Form(...),
     date_of_birth: str = Form(""),
     gender: str = Form(""),
@@ -102,9 +102,7 @@ async def update_profile(
     experience_level: str = Form(""),
     current_company: str = Form(""),
     about_me: str = Form(""),
-
     profile_photo: UploadFile = File(None),
-
 ):
 
     applicant_id = get_current_job_seeker_id(request)
@@ -164,10 +162,7 @@ async def update_profile(
         malaysia_local = r"^01\d{8,9}$"
         malaysia_international = r"^\+60\s\d{1,2}-\d{7,8}$"
 
-        if not (
-            re.fullmatch(malaysia_local, phone)
-            or re.fullmatch(malaysia_international, phone)
-        ):
+        if not (re.fullmatch(malaysia_local, phone) or re.fullmatch(malaysia_international, phone)):
 
             return templates.TemplateResponse(
                 request=request,
@@ -179,7 +174,7 @@ async def update_profile(
                 },
                 status_code=400,
             )
-    
+
     # ----------------------------------------
     # Upload new profile image
     # ----------------------------------------

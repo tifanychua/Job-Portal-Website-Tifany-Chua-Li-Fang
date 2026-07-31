@@ -22,7 +22,6 @@ def get_company(request: Request):
     return company
 
 
-
 def get_current_user(request: Request):
 
     if request.session.get("user_type") != "job_seeker":

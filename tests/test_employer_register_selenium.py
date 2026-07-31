@@ -2,23 +2,69 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import uuid
+import time
+
+# ==========================================
+# Generate valid test data
+# ==========================================
 
 
-def fill_employer_registration_form(driver, base_url):
+def generate_test_email():
+    return f"company{uuid.uuid4().hex[:8]}@gmail.com"
+
+
+def generate_registration_number():
+    # 12 digits, start with non-zero
+    return "20" + uuid.uuid4().int.__str__()[:10]
+
+
+# ==========================================
+# Handle javascript alert
+# ==========================================
+
+
+def handle_alert(driver, timeout=3):
+
+    try:
+        alert = WebDriverWait(driver, timeout).until(EC.alert_is_present())
+
+        message = alert.text
+        alert.accept()
+
+        return message
+
+    except Exception:
+        return None
+
+
+# ==========================================
+# Fill registration wizard
+# ==========================================
+
+
+def fill_employer_registration_form(driver, base_url, email=None):
+
+    if email is None:
+        email = generate_test_email()
 
     driver.get(f"{base_url}/register?role=employer")
 
+    wait = WebDriverWait(driver, 10)
+
     # ==========================
-    # Step 1
+    # STEP 1
     # ==========================
 
-    driver.find_element(By.ID, "companyName").send_keys("ABC Technology")
+    wait.until(EC.visibility_of_element_located((By.ID, "companyName")))
 
-    driver.find_element(By.ID, "businessEmail").send_keys("company@gmail.com")
+    driver.find_element(By.ID, "companyName").send_keys("ABC Technology Sdn Bhd")
 
-    driver.find_element(By.ID, "registrationNumber").send_keys("202401234567")
+    driver.find_element(By.ID, "businessEmail").send_keys(email)
 
-    driver.find_element(By.ID, "phone").send_keys("123456789")
+    driver.find_element(By.ID, "registrationNumber").send_keys(generate_registration_number())
+
+    driver.find_element(By.ID, "phone").send_keys("0123456789")
 
     Select(driver.find_element(By.ID, "industry")).select_by_visible_text("Information Technology")
 
@@ -39,34 +85,45 @@ def fill_employer_registration_form(driver, base_url):
     driver.find_element(By.ID, "nextBtn").click()
 
     # ==========================
-    # Step 2
+    # STEP 2
     # ==========================
+
+    wait.until(EC.visibility_of_element_located((By.ID, "contactFullName")))
 
     driver.find_element(By.ID, "contactFullName").send_keys("John Tan")
 
-    driver.find_element(By.ID, "contactEmail").send_keys("john@gmail.com")
+    driver.find_element(By.ID, "contactEmail").send_keys(email)
 
     driver.find_element(By.ID, "contactJobTitle").send_keys("HR Manager")
 
     driver.find_element(By.ID, "contactDepartment").send_keys("Human Resource")
 
-    driver.find_element(By.ID, "contactPhone").send_keys("111111111")
+    driver.find_element(By.ID, "contactPhone").send_keys("0123456789")
 
     driver.find_element(By.ID, "correspondenceAddress").send_keys("Jalan Bukit Bintang")
 
     driver.find_element(By.ID, "nextBtn").click()
 
     # ==========================
-    # Step 3
+    # STEP 3
     # ==========================
 
-    driver.find_element(By.ID, "accountEmail").send_keys("company@gmail.com")
+    wait.until(EC.visibility_of_element_located((By.ID, "accountEmail")))
+
+    driver.find_element(By.ID, "accountEmail").send_keys(email)
 
     driver.find_element(By.ID, "wizardPassword").send_keys("Password123!")
 
     driver.find_element(By.ID, "wizardConfirmPassword").send_keys("Password123!")
 
     driver.find_element(By.ID, "nextBtn").click()
+
+    return email
+
+
+# ==========================================
+# Password mismatch
+# ==========================================
 
 
 def test_password_not_match(driver, base_url):
@@ -75,7 +132,7 @@ def test_password_not_match(driver, base_url):
 
     driver.execute_script("currentStep=3;goToStep(3);")
 
-    driver.find_element(By.ID, "accountEmail").send_keys("company@gmail.com")
+    driver.find_element(By.ID, "accountEmail").send_keys(generate_test_email())
 
     driver.find_element(By.ID, "wizardPassword").send_keys("Password123!")
 
@@ -85,20 +142,37 @@ def test_password_not_match(driver, base_url):
 
     alert = WebDriverWait(driver, 5).until(EC.alert_is_present())
 
-    assert alert.text == "Passwords do not match."
+    assert "Passwords do not match" in alert.text
 
     alert.accept()
+
+
+# ==========================================
+# Successful registration
+# ==========================================
 
 
 def test_successful_registration(driver, base_url):
 
     fill_employer_registration_form(driver, base_url)
 
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "submitBtn")))
+
     driver.find_element(By.ID, "submitBtn").click()
 
-    WebDriverWait(driver, 10).until(lambda d: "login" in d.current_url.lower())
+    alert = handle_alert(driver)
+
+    if alert:
+        assert False, alert
+
+    WebDriverWait(driver, 15).until(lambda d: "login" in d.current_url.lower())
 
     assert "login" in driver.current_url.lower()
+
+
+# ==========================================
+# Required field
+# ==========================================
 
 
 def test_company_name_required(driver, base_url):
@@ -112,17 +186,33 @@ def test_company_name_required(driver, base_url):
     assert field.get_attribute("validationMessage") != ""
 
 
+# ==========================================
+# Existing email
+# ==========================================
+
+
 def test_existing_email(driver, base_url):
 
-    fill_employer_registration_form(driver, base_url)
+    email = generate_test_email()
+
+    # First register
+    fill_employer_registration_form(driver, base_url, email)
+
+    driver.find_element(By.ID, "submitBtn").click()
+
+    time.sleep(3)
+
+    handle_alert(driver)
+
+    # Second register same email
+
+    fill_employer_registration_form(driver, base_url, email)
 
     driver.find_element(By.ID, "submitBtn").click()
 
     alert = WebDriverWait(driver, 10).until(EC.alert_is_present())
 
     message = alert.text.lower()
-
-    print(message)
 
     assert "already" in message or "email" in message or "in use" in message
 

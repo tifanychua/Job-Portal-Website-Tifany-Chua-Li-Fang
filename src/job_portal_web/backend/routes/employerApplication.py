@@ -198,9 +198,7 @@ async def view_applications(request: Request):
 
         for application in applications:
 
-            applicant_experience = str(
-                application.get("experience", "")
-            ).strip().lower()
+            applicant_experience = str(application.get("experience", "")).strip().lower()
 
             if applicant_experience == experience_filter.strip().lower():
                 filtered.append(application)
@@ -208,9 +206,7 @@ async def view_applications(request: Request):
         applications = filtered
 
         if len(applications) == 0:
-            no_experience_message = (
-                "No applicants found for this experience level"
-            )
+            no_experience_message = "No applicants found for this experience level"
 
         # ==================================================
         # No Experience Message
@@ -233,11 +229,7 @@ async def view_applications(request: Request):
 
         for application in applications:
 
-            applicant_status = (
-                str(application.get("status", ""))
-                .strip()
-                .lower()
-            )
+            applicant_status = str(application.get("status", "")).strip().lower()
 
             selected_status = status_filter.strip().lower()
 
@@ -251,9 +243,7 @@ async def view_applications(request: Request):
         applications = filtered
 
         if len(applications) == 0:
-            no_status_message = (
-                "No applicants found for this application status"
-            )
+            no_status_message = "No applicants found for this application status"
 
     # ==================================================
     # Statistics
@@ -404,25 +394,16 @@ async def update_application_status(application_id: str, status_data: Applicatio
 
         raise HTTPException(status_code=404, detail=("Application not found."))
 
-        
-
     # ==================================================
     # Prevent changing final statuses
     # ==================================================
 
     application = application_doc.to_dict()
 
-    current_status = (
-        str(application.get("status", ""))
-        .strip()
-        .lower()
-    )
+    current_status = str(application.get("status", "")).strip().lower()
 
     # During pytest, allow changing status repeatedly
-    if (
-        not os.getenv("PYTEST_CURRENT_TEST")
-        and current_status in ["offered", "rejected"]
-    ):
+    if not os.getenv("PYTEST_CURRENT_TEST") and current_status in ["offered", "rejected"]:
         raise HTTPException(
             status_code=400,
             detail=(

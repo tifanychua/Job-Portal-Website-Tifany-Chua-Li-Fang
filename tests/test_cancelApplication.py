@@ -5,7 +5,6 @@ import pytest
 from job_portal_web.backend.main import app
 from job_portal_web.backend import job_application
 
-
 # ==================================================
 # Fake Login
 # ==================================================
@@ -41,6 +40,7 @@ def fake_login(monkeypatch):
 # ==================================================
 # Fake Firestore
 # ==================================================
+
 
 class FakeSnapshot:
 
@@ -89,9 +89,7 @@ class FakeDocument:
 class FakeCollection:
 
     def __init__(self):
-        self.documents = {
-            APPLICATION_ID: FakeDocument()
-        }
+        self.documents = {APPLICATION_ID: FakeDocument()}
 
     def document(self, doc_id):
 
@@ -152,6 +150,7 @@ class FakeBucket:
 # Fixtures
 # ==================================================
 
+
 @pytest.fixture(autouse=True)
 def fake_firestore(monkeypatch):
 
@@ -166,10 +165,12 @@ def fake_firestore(monkeypatch):
         "bucket",
         FakeBucket(),
     )
-    
+
+
 # ==================================================
 # Fake Backend Helpers
 # ==================================================
+
 
 @pytest.fixture(autouse=True)
 def fake_backend(monkeypatch):
@@ -223,6 +224,7 @@ def fake_backend(monkeypatch):
 # Test Client Fixture
 # ==================================================
 
+
 @pytest.fixture
 def client():
     return TestClient(app)
@@ -232,15 +234,14 @@ def client():
 # Acceptance Tests
 # ==================================================
 
+
 def test_cancel_application_success(client):
     """
     Acceptance Test:
     Job seeker withdraws a submitted application.
     """
 
-    response = client.post(
-        f"/application/{APPLICATION_ID}/cancel"
-    )
+    response = client.post(f"/application/{APPLICATION_ID}/cancel")
 
     if response.status_code == 200:
         print("✅ SUCCESS: Application withdrawn successfully")
@@ -258,13 +259,9 @@ def test_cancel_application_saved(client):
     Withdrawn application status is saved.
     """
 
-    client.post(
-        f"/application/{APPLICATION_ID}/cancel"
-    )
+    client.post(f"/application/{APPLICATION_ID}/cancel")
 
-    response = client.get(
-        f"/application/{APPLICATION_ID}"
-    )
+    response = client.get(f"/application/{APPLICATION_ID}")
 
     if response.status_code == 200:
         print("✅ SUCCESS: Withdrawal saved")
@@ -282,13 +279,9 @@ def test_cancel_already_cancelled_application(client):
     Reject duplicate withdrawal.
     """
 
-    client.post(
-        f"/application/{APPLICATION_ID}/cancel"
-    )
+    client.post(f"/application/{APPLICATION_ID}/cancel")
 
-    response = client.post(
-        f"/application/{APPLICATION_ID}/cancel"
-    )
+    response = client.post(f"/application/{APPLICATION_ID}/cancel")
 
     if response.status_code == 409:
         print("✅ SUCCESS: Duplicate cancellation rejected")
@@ -297,8 +290,8 @@ def test_cancel_already_cancelled_application(client):
         print(response.text)
 
     assert response.status_code == 409
-    
-    
+
+
 # ==================================================
 # Load BDD Feature
 # ==================================================
@@ -309,6 +302,7 @@ scenarios("features/cancelApplication.feature")
 # ==================================================
 # BDD Context
 # ==================================================
+
 
 class Context:
 
@@ -329,6 +323,7 @@ def context():
 # Job seeker withdraws a submitted application
 # ==================================================
 
+
 @given("the job seeker has submitted a job application")
 def submitted_application():
     """
@@ -340,9 +335,7 @@ def submitted_application():
 @when("the job seeker selects the withdraw application option")
 def withdraw_application(client, context):
 
-    context.response = client.post(
-        f"/application/{context.application_id}/cancel"
-    )
+    context.response = client.post(f"/application/{context.application_id}/cancel")
 
 
 # ==================================================
@@ -350,24 +343,23 @@ def withdraw_application(client, context):
 # Save withdrawn application status
 # ==================================================
 
+
 @given("the job seeker has withdrawn an application")
 def withdrawn_application(client, context):
 
-    client.post(
-        f"/application/{context.application_id}/cancel"
-    )
+    client.post(f"/application/{context.application_id}/cancel")
 
 
 @when("the withdrawal request is processed")
 def process_request(client, context):
 
-    context.response = client.get(
-        f"/application/{context.application_id}"
-    )
-    
+    context.response = client.get(f"/application/{context.application_id}")
+
+
 # ==================================================
 # Scenario 1 Verification
 # ==================================================
+
 
 @then('the application status should be updated to "Cancelled"')
 def verify_cancelled(client, context):
@@ -384,6 +376,7 @@ def verify_cancelled(client, context):
 # ==================================================
 # Scenario 2 Verification
 # ==================================================
+
 
 @then("the updated application status should be saved in the database")
 def verify_database(context):
