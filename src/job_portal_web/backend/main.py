@@ -29,6 +29,8 @@ from job_portal_web.backend.routes.experience import router as experience_router
 from .routes.companyProfile import router as companyProfile_router
 from .routes.skill import router as skill_router
 from .routes.editCompanyProfile import router as editCompanyProfile_router
+import os
+
 
 # ==================================================
 # APP
@@ -41,7 +43,7 @@ app = FastAPI()
 # SESSION
 # ==================================================
 
-app.add_middleware(SessionMiddleware, secret_key="jobconnect-secret-key")
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "jobconnect-secret-key"))
 
 
 # ==================================================
@@ -282,10 +284,10 @@ def my_interviews_page(request: Request):
 
 @app.get("/my_interviews/detail/{interview_id}")
 async def interview_detail_page(request: Request, interview_id: str):
-    return templates.TemplateResponse(
-        request=request,
-        name="applicant_interview_detail.html",
-        context={"interview_id": interview_id},
+    return render_template(
+        request, 
+        "applicant_interview_detail.html", 
+        {"interview_id": interview_id}
     )
 
 
@@ -311,4 +313,4 @@ if __name__ == "__main__":
 
 @app.get("/login")
 def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return render_template(request, "login.html")
