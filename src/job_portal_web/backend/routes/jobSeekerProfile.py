@@ -59,6 +59,39 @@ async def profile(request: Request):
 
         applicant = doc.to_dict()
 
+        print("Applicant data:", applicant)
+        print("Image field:", applicant.get("image"))
+
+    # ===========================
+    # Load Education
+    # ===========================
+
+    education_docs = (
+        db.collection("education")
+        .where("applicant_id", "==", applicant_id)
+        .stream()
+    )
+
+    applicant["education"] = []
+
+    for doc in education_docs:
+        applicant["education"].append(doc.to_dict())
+
+    # ===========================
+    # Load Experience
+    # ===========================
+
+    experience_docs = (
+        db.collection("job_seeker_experience")
+        .where("applicant_id", "==", applicant_id)
+        .stream()
+    )
+
+    applicant["experience_list"] = []
+
+    for doc in experience_docs:
+        applicant["experience_list"].append(doc.to_dict())
+
     # ===========================
     # Load Skills
     # ===========================
@@ -66,14 +99,30 @@ async def profile(request: Request):
     applicant["skills"] = []
 
     skill_docs = (
-        db.collection("job_seeker_skill").where("applicant_id", "==", applicant_id).stream()
-    )
+    db.collection("job_seeker_skill")
+    .where("applicant_id", "==", applicant_id)
+    .stream()
+)
 
-    for skill_doc in skill_docs:
+    applicant["skills"] = []
 
-        skill = skill_doc.to_dict()
+    for doc in skill_docs:
 
-        applicant["skills"].append(skill.get("skill_id"))
+        data = doc.to_dict()
+
+        skill_id = data.get("skill_id")
+
+        if skill_id:
+
+            skill_doc = db.collection("skills").document(skill_id).get()
+
+            if skill_doc.exists:
+
+                skill_data = skill_doc.to_dict()
+
+                applicant["skills"].append(
+                    skill_data.get("skill_name", skill_id)
+                )
 
     # ===========================
     # Return Template

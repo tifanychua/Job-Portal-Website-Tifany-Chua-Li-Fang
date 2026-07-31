@@ -92,6 +92,18 @@ async def add_experience(
     location = location.strip()
     description = description.strip()
 
+    # ADD THIS HERE
+    print({
+        "job_title": job_title,
+        "company_name": company_name,
+        "employment_type": employment_type,
+        "location": location,
+        "start_date": start_date,
+        "end_date": end_date,
+        "currently_working": currently_working,
+        "description": description,
+    })
+
     if not job_title:
         return JSONResponse(
             {"success": False, "message": "Please enter your job title."}, status_code=400
@@ -162,7 +174,10 @@ async def add_experience(
         }
     )
 
-    return JSONResponse({"success": True, "redirect": "/manage-experience"})
+    return JSONResponse({
+        "success": True,
+        "redirect": "/manageExperience"
+    })
 
 
 # ======================================================
@@ -279,7 +294,7 @@ async def edit_experience(
         }
     )
 
-    return JSONResponse({"success": True, "redirect": "/manage-experience"})
+    return JSONResponse({"success": True, "redirect": "/manageExperience"})
 
 
 # ======================================================

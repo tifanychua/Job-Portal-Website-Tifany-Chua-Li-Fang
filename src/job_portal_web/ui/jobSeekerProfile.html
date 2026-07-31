@@ -64,14 +64,10 @@
         <div class="profile-left">
 
             <div class="profile-photo">
-                {% if applicant.image %}
-                    <img
-                        src="{{ applicant.image }}"
-                        alt="Profile">
+                {% if applicant.profileImage %}
+                    <img src="{{ applicant.profileImage }}" alt="Profile">
                 {% else %}
-                    <img
-                        src="/images/user.png"
-                        alt="Profile">
+                    <img src="/images/user.png" alt="Profile">
                 {% endif %}
             </div>
 
@@ -120,13 +116,34 @@
             </div>
 
             <div class="profile-info">
+
                 <label>Experience</label>
-                <p>{{ applicant.experience }}</p>
+
+                {% if applicant.experience_list %}
+
+                    <p>{{ applicant.experience_list[0].job_title }}</p>
+
+                {% else %}
+
+                    <p>Not added</p>
+
+                {% endif %}
+
             </div>
 
             <div class="profile-info">
                 <label>Education</label>
-                <p>Bachelor of Computer Science</p>
+
+                {% if applicant.education %}
+
+                    <p>{{ applicant.education[0].qualification }}</p>
+
+                {% else %}
+
+                    <p>Not added</p>
+
+                {% endif %}
+
             </div>
 
         </div>
@@ -163,11 +180,29 @@
 
         <div class="section-detail">
 
-            <h4>Bachelor of Computer Science</h4>
+            {% if applicant.education %}
 
-            <p>University of Malaya</p>
+                {% set edu = applicant.education[0] %}
 
-            <span>2017 - 2021</span>
+                <h4>{{ edu.qualification }}</h4>
+
+                <p>{{ edu.institution }}</p>
+
+                {% if edu.current_study %}
+
+                    <span>{{ edu.start_date }} - Present</span>
+
+                {% else %}
+
+                    <span>{{ edu.start_date }} - {{ edu.end_date }}</span>
+
+                {% endif %}
+
+            {% else %}
+
+                <p>No education added.</p>
+
+            {% endif %}
 
         </div>
 
@@ -246,11 +281,29 @@
 
         <div class="section-detail">
 
-            <h4>Software Engineer</h4>
+            {% if applicant.experience_list %}
 
-            <p>ABC Tech Solutions</p>
+                {% set exp = applicant.experience_list[0] %}
 
-            <span>Jan 2022 - Present</span>
+                <h4>{{ exp.job_title }}</h4>
+
+                <p>{{ exp.company }}</p>
+
+                {% if exp.currently_working %}
+
+                    <span>{{ exp.start_date }} - Present</span>
+
+                {% else %}
+
+                    <span>{{ exp.start_date }} - {{ exp.end_date }}</span>
+
+                {% endif %}
+
+            {% else %}
+
+                <p>No work experience added.</p>
+
+            {% endif %}
 
         </div>
 
@@ -271,10 +324,6 @@
         <div class="additional-header">
 
             <h3>Additional Information</h3>
-
-            <button class="profile-outline-btn">
-                Edit Information
-            </button>
 
         </div>
 

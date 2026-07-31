@@ -14,11 +14,17 @@
         </button>
 
         <div class="profile">
-            <img src="/images/user.png" alt="User">
+
+            {% if company and company.logo %}
+                <img src="{{ company.logo }}" alt="Company Logo">
+            {% else %}
+                <img src="/images/user.png" alt="User">
+            {% endif %}
 
             <span class="company-name">
-               {{ company.companyName if company else "Company" }}
+                {{ company.companyName if company else "Company" }}
             </span>
+
         </div>
 
     </div>

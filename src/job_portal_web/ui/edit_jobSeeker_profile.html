@@ -17,7 +17,7 @@
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
-    <link rel="stylesheet" href="/static/base.css">
+    <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/css/edit_jobSeeker_profile.css">
 
@@ -108,7 +108,7 @@
                                     type="text"
                                     id="full_name"
                                     name="full_name"
-                                    value="{{ applicant.name }}">
+                                    value="{{ seeker.name }}">
 
                             </div>
 
@@ -124,7 +124,7 @@
                                     type="date"
                                     id="date_of_birth"
                                     name="date_of_birth"
-                                    value="{{ applicant.date_of_birth }}">
+                                    value="{{ seeker.date_of_birth }}">
 
                             </div>
 
@@ -146,17 +146,17 @@
                                     <option value="">Select Gender</option>
 
                                     <option value="Male"
-                                        {% if applicant.gender == "Male" %}selected{% endif %}>
+                                        {% if seeker.gender == "Male" %}selected{% endif %}>
                                         Male
                                     </option>
 
                                     <option value="Female"
-                                        {% if applicant.gender == "Female" %}selected{% endif %}>
+                                        {% if seeker.gender == "Female" %}selected{% endif %}>
                                         Female
                                     </option>
 
                                     <option value="Prefer not to say"
-                                        {% if applicant.gender == "Prefer not to say" %}selected{% endif %}>
+                                        {% if seeker.gender == "Prefer not to say" %}selected{% endif %}>
                                         Prefer not to say
                                     </option>
                                 </select>
@@ -173,17 +173,17 @@
 
                                 <select id="nationality" name="nationality">
                                     <option value="Malaysian"
-                                        {% if applicant.nationality == "Malaysian" %}selected{% endif %}>
+                                        {% if seeker.nationality == "Malaysian" %}selected{% endif %}>
                                         Malaysian
                                     </option>
 
                                     <option value="Singaporean"
-                                        {% if applicant.nationality == "Singaporean" %}selected{% endif %}>
+                                        {% if seeker.nationality == "Singaporean" %}selected{% endif %}>
                                         Singaporean
                                     </option>
 
                                     <option value="Indonesian"
-                                        {% if applicant.nationality == "Indonesian" %}selected{% endif %}>
+                                        {% if seeker.nationality == "Indonesian" %}selected{% endif %}>
                                         Indonesian
                                     </option>
                                 </select>
@@ -208,7 +208,7 @@
                                     type="email"
                                     id="email"
                                     name="email"
-                                    value="{{ applicant.email }}">
+                                    value="{{ seeker.email }}">
 
                             </div>
 
@@ -224,7 +224,7 @@
                                     type="tel"
                                     id="phone"
                                     name="phone"
-                                    value="{{ applicant.phone }}"
+                                    value="{{ seeker.phone }}"
                                     placeholder="+60 11-12345678 or +65 8123 4567"
                                     pattern="^(\+60\s\d{1,2}-\d{7,8}|\+65\s\d{4}\s\d{4})$"
                                     title="Examples: +60 11-12345678 or +65 8123 4567"
@@ -249,7 +249,7 @@
                                 id="location"
                                 name="location"
                                 placeholder="Kuala Lumpur, Malaysia"
-                                value="{{ applicant.location }}">
+                                value="{{ seeker.location }}">
 
                         </div>
 
@@ -270,7 +270,7 @@
                                     id="current_position"
                                     name="current_position"
                                     placeholder="Software Engineer"
-                                    value="{{ applicant.position }}">
+                                    value="{{ seeker.position }}">
 
                             </div>
 
@@ -285,27 +285,27 @@
                                 <select id="experience_level" name="experience_level">
 
                                     <option value="Fresh Graduate"
-                                        {% if applicant.experience == "Fresh Graduate" %}selected{% endif %}>
+                                        {% if seeker.experience == "Fresh Graduate" %}selected{% endif %}>
                                         Fresh Graduate
                                     </option>
 
                                     <option value="1–2 Years"
-                                        {% if applicant.experience == "1–2 Years" %}selected{% endif %}>
+                                        {% if seeker.experience == "1–2 Years" %}selected{% endif %}>
                                         1–2 Years
                                     </option>
 
                                     <option value="3–5 Years"
-                                        {% if applicant.experience == "3–5 Years" %}selected{% endif %}>
+                                        {% if seeker.experience == "3–5 Years" %}selected{% endif %}>
                                         3–5 Years
                                     </option>
 
                                     <option value="6–10 Years"
-                                        {% if applicant.experience == "6–10 Years" %}selected{% endif %}>
+                                        {% if seeker.experience == "6–10 Years" %}selected{% endif %}>
                                         6–10 Years
                                     </option>
 
                                     <option value="10+ Years"
-                                        {% if applicant.experience == "10+ Years" %}selected{% endif %}>
+                                        {% if seeker.experience == "10+ Years" %}selected{% endif %}>
                                         10+ Years
                                     </option>
 
@@ -330,7 +330,7 @@
                                 id="current_company"
                                 name="current_company"
                                 placeholder="ABC Technology Sdn. Bhd."
-                                value="{{ applicant.company }}">
+                                value="{{ seeker.company }}">
 
                         </div>
 
@@ -357,7 +357,7 @@
                                 name="about_me"
                                 rows="12"
                                 placeholder="Introduce yourself, describe your background, work experience, skills, achievements, strengths and career goals."
-                                rows="12">{{ applicant.about }}</textarea>
+                                rows="12">{{ seeker.about }}</textarea>
 
                         </div>
 
@@ -404,10 +404,10 @@
 
                     <div class="photo-container">
 
-                        {% if applicant.image %}
+                        {% if seeker.profileImage %}
                             <img
                                 id="profilePreview"
-                                src="{{ applicant.image }}"
+                                src="{{ seeker.profileImage }}"
                                 alt="Profile Photo">
                         {% else %}
                             <img

@@ -33,9 +33,15 @@
 
             <a href="/profile" class="profile">
 
-                <img
-                    src="/images/{{ user.profileImage if user.profileImage else 'user.png' }}"
-                    alt="Profile">
+                {% if user.profileImage %}
+                    <img
+                        src="{{ user.profileImage }}"
+                        alt="Profile">
+                {% else %}
+                    <img
+                        src="/images/user.png"
+                        alt="Profile">
+                {% endif %}
 
                 <div class="profile-info">
                     <h4>{{ user.name }}</h4>
