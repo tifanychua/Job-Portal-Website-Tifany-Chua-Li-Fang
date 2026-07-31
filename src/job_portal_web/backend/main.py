@@ -279,6 +279,18 @@ def my_interviews_page(request: Request):
 
     return render_template(request, "applicant_interview.html", {"active_page": "interviews"})
 
+@app.get("/my_interviews/detail/{interview_id}")
+async def interview_detail_page(
+    request: Request,
+    interview_id: str
+):
+    return templates.TemplateResponse(
+        request=request,
+        name="applicant_interview_detail.html",
+        context={
+            "interview_id": interview_id
+        }
+    )
 
 @app.get("/schedule_list")
 def schedule_list_page(request: Request):

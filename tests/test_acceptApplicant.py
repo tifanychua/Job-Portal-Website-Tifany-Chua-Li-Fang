@@ -24,7 +24,7 @@ def client():
 # Test Application
 # ==================================================
 
-APPLICATION_ID = "BQ34ZV7QZ3OslJS3OB63"
+APPLICATION_ID = "30KaA8itsREKfs5BXpHH"
 
 
 # ==================================================
@@ -35,13 +35,21 @@ APPLICATION_ID = "BQ34ZV7QZ3OslJS3OB63"
 
 def test_accept_applicant_success(client):
 
-    response = client.put(f"/application/{APPLICATION_ID}/status", json={"status": "Offered"})
+    doc = db.collection("application").document(APPLICATION_ID).get()
+    print("BEFORE:", doc.to_dict())
+
+    response = client.put(
+        f"/application/{APPLICATION_ID}/status",
+        json={"status": "Offered"}
+    )
+
+    print("STATUS CODE:", response.status_code)
+    print("RESPONSE:", response.json())
+
+    doc = db.collection("application").document(APPLICATION_ID).get()
+    print("AFTER:", doc.to_dict())
 
     assert response.status_code == 200
-
-    print("✅ Acceptance Test Passed: Employer accepted the applicant successfully.")
-
-
 # ==================================================
 # Acceptance Test 2
 # Applicant status updated
