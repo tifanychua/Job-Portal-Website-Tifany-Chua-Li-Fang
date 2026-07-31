@@ -31,7 +31,6 @@ from .routes.skill import router as skill_router
 from .routes.editCompanyProfile import router as editCompanyProfile_router
 import os
 
-
 # ==================================================
 # APP
 # ==================================================
@@ -285,9 +284,7 @@ def my_interviews_page(request: Request):
 @app.get("/my_interviews/detail/{interview_id}")
 async def interview_detail_page(request: Request, interview_id: str):
     return render_template(
-        request, 
-        "applicant_interview_detail.html", 
-        {"interview_id": interview_id}
+        request, "applicant_interview_detail.html", {"interview_id": interview_id}
     )
 
 

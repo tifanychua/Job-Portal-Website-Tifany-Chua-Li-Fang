@@ -30,9 +30,10 @@ def fake_login(monkeypatch):
             },
         )
 
+    # FIXED: Changed from _get_currentjob_seeker to _get_currentjob_seeker
     monkeypatch.setattr(
         job_application,
-        "_get_current_job_seeker",
+        "_get_currentjob_seeker",
         fake_current_user,
     )
 
