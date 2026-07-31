@@ -103,7 +103,7 @@ def _normalize_job(job, job_id):
 
 def _attach_company_fields(job, company):
 
-    job.setdefault("company_logo", "image/default.jpg")
+    job.setdefault("company_logo", "default.jpg")
     job.setdefault("companyName", "Unknown")
     job.setdefault("company_verified", False)
     job["company_description"] = ""
@@ -115,7 +115,7 @@ def _attach_company_fields(job, company):
         return job
 
     job["companyName"] = company.get("companyName", "Unknown")
-    job["company_logo"] = company.get("logo", "image/default.jpg")
+    job["company_logo"] = company.get("logo", "default.jpg")
     job["company_verified"] = company.get("verified", False)
     job["company_description"] = company.get("description", "")
     job["company_address"] = company.get("address", "")
@@ -127,6 +127,19 @@ def _attach_company_fields(job, company):
 
 @router.get("/jobs/{job_id}", name="job_information")
 def job_detail(request: Request, job_id: str):
+    user = None
+
+    if request.session.get("user_type") == "job_seeker":
+
+        uid = request.session.get("applicant_id")
+
+        if uid:
+
+            doc = db.collection("job_seeker").document(uid).get()
+
+            if doc.exists:
+
+                user = doc.to_dict()
 
     job_doc = db.collection("job_list").document(job_id).get()
 
@@ -187,6 +200,7 @@ def job_detail(request: Request, job_id: str):
     if category:
 
         query = query.where(filter=FieldFilter("category", "==", category))
+        query = query.where(filter=FieldFilter("status", "==", "Active"))
 
     docs = query.limit(4).stream()
 
@@ -209,13 +223,13 @@ def job_detail(request: Request, job_id: str):
 
             sim["companyName"] = sim_company.get("companyName", "Unknown")
 
-            sim["company_logo"] = sim_company.get("logo", "image/default.png")
+            sim["company_logo"] = sim_company.get("logo", "default.jpg")
 
         else:
 
             sim["companyName"] = "Unknown"
 
-            sim["company_logo"] = "image/default.png"
+            sim["company_logo"] = "default.jpg"
 
         similar_jobs.append(sim)
 
@@ -226,6 +240,7 @@ def job_detail(request: Request, job_id: str):
         request=request,
         name="job_information.html",
         context={
+            "user": user,
             "request": request,
             "job": job,
             "similar_jobs": similar_jobs,

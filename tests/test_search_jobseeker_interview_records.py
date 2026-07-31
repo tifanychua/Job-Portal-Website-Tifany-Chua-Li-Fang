@@ -1,21 +1,30 @@
-from fastapi.testclient import TestClient
+import sys
+import base64
+import json
+
+from pathlib import Path
+
 import pytest
 
-from pytest_bdd import scenarios, given, when, then
+from fastapi.testclient import TestClient
 
+from itsdangerous import TimestampSigner
 from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+# ==================================================
+# IMPORT PROJECT
+# ==================================================
 
-# ==========================================
-# LOAD FEATURE
-# ==========================================
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-scenarios("features/search_jobseeker_interview_records.feature")
+sys.path.insert(0, str(PROJECT_ROOT))
 
 
-# ==========================================
+
+
+# ==================================================
 # CLIENT
-# ==========================================
+# ==================================================
 
 
 @pytest.fixture
@@ -24,30 +33,41 @@ def client():
     return TestClient(app)
 
 
-# ==========================================
-# CONTEXT
-# ==========================================
+# ==================================================
+# AUTHENTICATED CLIENT
+# ==================================================
 
 
 @pytest.fixture
-def context():
+def authenticated_client(client):
 
-    return {}
+    session_data = {"user_type": "employer", "company_id": "company123"}
+
+    encoded = base64.b64encode(json.dumps(session_data).encode())
+
+    signer = TimestampSigner("jobconnect-secret-key")
+
+    signed_session = signer.sign(encoded)
+
+    client.cookies.set("session", signed_session.decode())
+
+    return client
 
 
-# ==========================================
+# ==================================================
 # TEST DATA
-# ==========================================
+# ==================================================
 
-APPLICATION_ID = "APP001"
-
-
-TEST_IDS = ["TEST_JOBSEEKER_SEARCH_001", "TEST_JOBSEEKER_SEARCH_002", "TEST_JOBSEEKER_SEARCH_003"]
+TEST_INTERVIEW_IDS = [
+    "TEST_SEARCH_INTERVIEW_001",
+    "TEST_SEARCH_INTERVIEW_002",
+    "TEST_SEARCH_INTERVIEW_003",
+]
 
 
 def delete_test_data():
 
-    for interview_id in TEST_IDS:
+    for interview_id in TEST_INTERVIEW_IDS:
 
         db.collection("interviews").document(interview_id).delete()
 
@@ -62,133 +82,111 @@ def cleanup():
     delete_test_data()
 
 
-# ==========================================
-# CREATE RECORDS
-# ==========================================
+# ==================================================
+# CREATE DATA
+# ==================================================
 
 
 def create_interview_records():
 
     records = [
         {
-            "id": "TEST_JOBSEEKER_SEARCH_001",
-            "candidateId": APPLICATION_ID,
+            "candidateId": "candidate001",
             "candidateName": "John Tan",
             "position": "Software Developer",
+            "stage": "Interview",
             "status": "Scheduled",
+            "companyId": "company123",
         },
         {
-            "id": "TEST_JOBSEEKER_SEARCH_002",
-            "candidateId": APPLICATION_ID,
+            "candidateId": "candidate002",
             "candidateName": "Mary Lee",
             "position": "UI Designer",
+            "stage": "Interview",
             "status": "Completed",
+            "companyId": "company123",
         },
         {
-            "id": "TEST_JOBSEEKER_SEARCH_003",
-            "candidateId": APPLICATION_ID,
+            "candidateId": "candidate003",
             "candidateName": "Alex Wong",
             "position": "Backend Developer",
+            "stage": "Technical",
             "status": "Cancelled",
+            "companyId": "company123",
         },
     ]
 
-    for record in records:
+    for index, record in enumerate(records):
 
-        db.collection("interviews").document(record["id"]).set(record)
-
-
-# ==========================================
-# SCENARIO 1
-# Search keyword
-# ==========================================
+        db.collection("interviews").document(TEST_INTERVIEW_IDS[index]).set(record)
 
 
-@given("the job seeker has existing interview records")
-def existing_records(context):
-
-    create_interview_records()
-
-
-@when("the job seeker enters a relevant keyword in the search bar")
-def search_keyword(client, context):
-
-    context["response"] = client.get(
-        "/api/applicant/interviews/search" "?application_id=APP001" "&keyword=Software"
-    )
+# ==================================================
+# TEST 1
+# SEARCH MATCHING KEYWORD
+# ==================================================
 
 
-@then("the system should display interview records that match the keyword")
-def verify_search_result(context):
-
-    response = context["response"]
-
-    assert response.status_code == 200
-
-    assert "Software Developer" in response.text
-
-    assert "UI Designer" not in response.text
-
-
-# ==========================================
-# SCENARIO 2
-# No result
-# ==========================================
-
-
-@given("the job seeker enters a keyword that does not match any interview record")
-def no_matching_record(context):
+def test_search_interview_records_by_keyword(authenticated_client):
 
     create_interview_records()
 
-
-@when("the search is performed")
-def perform_search(client, context):
-
-    context["response"] = client.get(
-        "/api/applicant/interviews/search" "?application_id=APP001" "&keyword=Doctor"
+    response = authenticated_client.get(
+        "/employer/interviews/search", params={"keyword": "Software"}
     )
-
-
-@then('the system should display a "No interview records found" message')
-def verify_no_result(context):
-
-    response = context["response"]
 
     assert response.status_code == 200
 
-    assert "No interview records found" in response.text
+    data = response.json()
+
+    assert len(data) == 1
+
+    assert data[0]["candidateName"] == "John Tan"
 
 
-# ==========================================
-# SCENARIO 3
-# Clear search
-# ==========================================
+# ==================================================
+# TEST 2
+# SEARCH NO RESULT
+# ==================================================
 
 
-@given("the job seeker has performed an interview record search")
-def previous_search(context):
+def test_search_interview_records_with_no_matching_results(authenticated_client):
 
     create_interview_records()
 
-
-@when("the job seeker clears the search keyword")
-def clear_search(client, context):
-
-    context["response"] = client.get(
-        "/api/applicant/interviews/search" "?application_id=APP001" "&keyword="
-    )
-
-
-@then("the system should display all interview records again")
-def verify_all_records(context):
-
-    response = context["response"]
+    response = authenticated_client.get("/employer/interviews/search", params={"keyword": "Doctor"})
 
     assert response.status_code == 200
 
-    assert "John Tan" in response.text
+    data = response.json()
 
-    assert "Mary Lee" in response.text
+    assert data == []
 
-    assert "Alex Wong" in response.text
+
+# ==================================================
+# TEST 3
+# CLEAR SEARCH
+# ==================================================
+
+
+def test_clear_interview_search(authenticated_client):
+
+    create_interview_records()
+
+    response = authenticated_client.get(
+        "/employer/interviews/search",
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 3
+
+    names = [item["candidateName"] for item in data]
+
+    assert "John Tan" in names
+
+    assert "Mary Lee" in names
+
+    assert "Alex Wong" in names

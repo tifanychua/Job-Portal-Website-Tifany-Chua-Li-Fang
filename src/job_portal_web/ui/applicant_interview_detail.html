@@ -5,8 +5,12 @@
 
 <title>Interview Details</title>
 
+<link rel="stylesheet" href="/css/base.css">
+
 <link rel="stylesheet" href="/static/style.css">
 
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 
@@ -410,16 +414,18 @@ data.notes || "No additional notes";
 
 
 document.getElementById("status").innerHTML =
-data.status || "Pending";
+data.applicantResponse || data.status || "Pending";
 
 
-
+let responseStatus =
+data.applicantResponse;
 
 
 if(
-data.status === "Accepted" ||
-data.status === "Declined" ||
-data.status === "Reschedule Requested"
+responseStatus === "Accepted" ||
+responseStatus === "Declined" ||
+responseStatus === "Reschedule Requested" ||
+data.status === "Cancelled"
 ){
 
 document.querySelector(

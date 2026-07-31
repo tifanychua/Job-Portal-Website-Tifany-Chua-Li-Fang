@@ -3,6 +3,7 @@ import uuid
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 
@@ -219,12 +220,27 @@ async def job_apply_submit(
             "updated_on": datetime.now(timezone.utc),
         }
     )
+    user = None
+
+    if request.session.get("user_type") == "job_seeker":
+
+        uid = request.session.get("applicant_id")
+
+        if uid:
+
+            doc = db.collection("job_seeker").document(uid).get()
+
+            if doc.exists:
+                user = doc.to_dict()
 
     return JSONResponse(
-        content={
-            "success": True,
-            "message": "Application submitted successfully!",
-            "application_id": application_ref.id,
-            "redirect_url": f"/jobs/{job_id}",
-        }
+        content=jsonable_encoder(
+            {
+                "user": user,
+                "success": True,
+                "message": "Application submitted successfully!",
+                "application_id": application_ref.id,
+                "redirect_url": f"/jobs/{job_id}",
+            }
+        )
     )

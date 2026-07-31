@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 
@@ -119,6 +119,12 @@ def reject_company(company_id: str):
 def deactivate_company(company_id: str):
 
     company_ref = db.collection("company").document(company_id)
+
+    company_doc = company_ref.get()
+
+    if not company_doc.exists:
+
+        raise HTTPException(status_code=404, detail="Company not found")
 
     company_ref.update({"status": "Deactivated"})
 

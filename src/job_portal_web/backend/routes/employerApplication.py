@@ -38,6 +38,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "ui"))
 
+# ==================================================
+# Get Current Company
+# ==================================================
+
+
+def get_current_company(request: Request):
+
+    company_id = request.session.get("company_id")
+
+    if not company_id:
+
+        raise HTTPException(status_code=401, detail="Company not logged in")
+
+    company = get_company(request)
+
+    if not company:
+
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    return company_id, company
+
 
 # ==================================================
 # View All Applications
@@ -51,9 +72,7 @@ async def view_applications(request: Request):
 
     start = time.time()
 
-    company_id = "C000001"
-
-    company = get_company()
+    company_id, company = get_current_company(request)
 
     # ==================================================
     # Load all jobs ONCE

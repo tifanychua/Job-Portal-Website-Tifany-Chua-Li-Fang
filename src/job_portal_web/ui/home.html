@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JobConnect — Find Your Dream Job</title>
-<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/css/base.css">
 <link rel="stylesheet" href="/static/style.css">
-<link rel="stylesheet" href="/static/css/home.css">
+<link rel="stylesheet" href="/css/home.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
@@ -96,20 +96,26 @@
 <div class="featured-card">
 
     <div class="featured-card-top">
-        <div class="featured-logo">
-          {% if job.company_logo %}
-              <img
-                  src="/image/{{ job.company_logo }}"
-                  alt="{{ job.company_name }}"
-                  width="50"
-                  height="50"
-              >
-          {% else %}
-              <div class="company-logo-placeholder">
-                  {{ job.company_name[:1] }}
-              </div>
-          {% endif %}
-      </div>
+       <div class="featured-logo">
+
+    {% if job.company_logo and job.company_logo != "default.jpg" %}
+
+        <img
+            src="/image/{{ job.company_logo }}"
+            alt="{{ job.company_name }}"
+            width="50"
+            height="50"
+        >
+
+    {% else %}
+
+        <div class="company-logo-placeholder">
+            {{ job.company_name[:1] | upper }}
+        </div>
+
+    {% endif %}
+
+</div>
 
         <button class="bookmark-btn" type="button">
             <i class="fa-regular fa-heart"></i>
@@ -167,13 +173,23 @@
 
 <div class="company-card">
 
-    <img 
-    src="/image/default.jpg"
-    alt="{{ co.companyName }}"
-    width="40"
-    height="40">
+  {% if co.logo and co.logo != "default.jpg" %}
 
-    <p style="margin-left: 10px;">
+    <img
+        src="/image/{{ co.logo }}"
+        alt="{{ co.companyName }}"
+        width="40"
+        height="40"
+    >
+{% else %}
+
+    <div class="company-logo-placeholder">
+        {{ co.companyName[:1] | upper }}
+    </div>
+
+{% endif %}
+
+    <p class="company-name">
         {{ co.companyName }}
     </p>
 

@@ -348,46 +348,43 @@ Loading interviews...
 
 
 
-fetch("/api/interviews")
-
-
+fetch(
+    "/employer/interviews",
+    {
+        method:"GET",
+        credentials:"include"
+    }
+)
 .then(response=>response.json())
-
-
 .then(data=>{
-data.forEach(interview=>{
+
+    console.log("Employer interviews:", data);
 
 
-if(!interview.status){
+    data.forEach(interview=>{
 
-interview.status = "Scheduled";
+        if(!interview.status){
 
-}
+            interview.status = "Scheduled";
 
+        }
 
-});
-
-
-
-interviewList = data;
+    });
 
 
-
-updateSummary(data);
-
+    interviewList = data;
 
 
-filterInterviews();
+    updateSummary(data);
 
+
+    filterInterviews();
 
 
 })
-
 .catch(error=>{
 
-
-console.log(error);
-
+    console.error(error);
 
 });
 
@@ -811,94 +808,104 @@ function openReschedule(id){
 
     currentInterviewId = id;
 
+    console.log("Selected interview ID:", id);
 
-    // OPEN MODAL FIRST
+
     document.getElementById(
         "rescheduleModal"
     ).style.display="block";
 
 
-    // show loading inside modal fields
-    console.log(
-        "Loading interview:",
-        id
+    fetch(
+    "/api/interviews/" + id,
+    {
+        method:"GET",
+        credentials:"include"
+    }
+)
+.then(response => {
+
+    console.log("Response status:", response.status);
+
+    if(!response.ok){
+
+        throw new Error(
+            "Failed to load interview: " + response.status
+        );
+
+    }
+
+    return response.json();
+
+})
+.then(data=>{
+
+    console.log("Interview data:", data);
+
+
+    document.getElementById(
+        "rescheduleStage"
+    ).value = data.stage || "";
+
+
+    document.getElementById(
+        "rescheduleDate"
+    ).value = data.date || "";
+
+
+    document.getElementById(
+        "rescheduleTime"
+    ).value = data.time || "";
+
+
+    document.getElementById(
+        "rescheduleDuration"
+    ).value = data.duration || "";
+
+
+    document.getElementById(
+        "rescheduleInterviewer"
+    ).value = data.interviewer || "";
+
+
+    document.getElementById(
+        "rescheduleMeetingLink"
+    ).value = data.meetingLink || "";
+
+
+    document.getElementById(
+        "rescheduleNotes"
+    ).value = data.notes || "";
+
+
+
+    let radio = document.querySelector(
+        'input[name="rescheduleType"][value="' 
+        + data.interviewType + '"]'
     );
 
 
-    fetch(
-        "/api/interviews/"+id
-    )
-
-    .then(response=>response.json())
-
-    .then(data=>{
+    if(radio){
+        radio.checked = true;
+    }
 
 
-        document.getElementById(
-            "rescheduleStage"
-        ).value = data.stage || "";
+    toggleRescheduleLink();
 
 
-        document.getElementById(
-            "rescheduleDate"
-        ).value = data.date || "";
+})
+.catch(error=>{
 
+    console.error(
+        "Load interview error:",
+        error
+    );
 
-        document.getElementById(
-            "rescheduleTime"
-        ).value = data.time || "";
+    alert(
+        error.message
+    );
 
-
-        document.getElementById(
-            "rescheduleDuration"
-        ).value = data.duration || "";
-
-
-        document.getElementById(
-            "rescheduleInterviewer"
-        ).value = data.interviewer || "";
-
-
-        document.getElementById(
-            "rescheduleMeetingLink"
-        ).value = data.meetingLink || "";
-
-
-        document.getElementById(
-            "rescheduleNotes"
-        ).value = data.notes || "";
-
-
-
-        let radio = document.querySelector(
-            'input[name="rescheduleType"][value="'+data.interviewType+'"]'
-        );
-
-
-        if(radio){
-            radio.checked = true;
-        }
-
-
-        toggleRescheduleLink();
-
-
-    })
-
-
-    .catch(error=>{
-
-
-        console.log(error);
-
-
-        alert(
-            "Failed to load interview details"
-        );
-
-
-    });
-
+});
 
 }
 

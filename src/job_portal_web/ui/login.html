@@ -1,19 +1,135 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Login</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ role_label }} Login | JobConnect</title>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/auth.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script type="module" src="/js/login.js"></script>
 </head>
 <body>
-    <h1>Login Page</h1>
 
-    <form method="post" action="/login">
-        <input type="text" name="username" placeholder="Username" required>
-        <br><br>
-        <input type="password" name="password" placeholder="Password" required>
-        <br><br>
-        <button type="submit">Login</button>
-    </form>
+<div class="auth-split">
 
-    <p>Test account: admin / 123</p>
+  <!-- ============================== LEFT: illustration panel ============================== -->
+  <div class="auth-illustration-panel">
+    <div class="back-button-container" style="margin:10px 0 10px 0; ">
+    <a
+        href="javascript:history.back()"
+        class="back-button"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Back
+    </a>
+</div>
+    <h1>Find Your Dream Job<br>&amp; Build Your Career</h1>
+    <p>Explore thousands of job opportunities and take the next step in your career journey with us.</p>
+
+    <div class="auth-illustration-art">
+    <img
+        src="/image/login.png"
+        alt="JobConnect Login Illustration"
+        class="auth-illustration-image"
+    >
+</div>
+
+    <div class="auth-stats-row">
+      <div class="auth-stat"><div class="stat-number">10K+</div><div class="stat-label">Jobs Available</div></div>
+      <div class="auth-stat"><div class="stat-number">5K+</div><div class="stat-label">Companies</div></div>
+      <div class="auth-stat"><div class="stat-number">20K+</div><div class="stat-label">Candidates Hired</div></div>
+      <div class="auth-stat"><div class="stat-number">100%</div><div class="stat-label">Trusted Platform</div></div>
+    </div>
+  </div>
+
+  <!-- ============================== RIGHT: form panel ============================== -->
+  <div class="auth-form-panel">
+    <div class="auth-card">
+      <a href="/" class="auth-brand">
+        <i class="fa-solid fa-location-dot"></i>
+        Job<span class="brand-connect">Connect</span>
+      </a>
+
+      <div class="auth-title">Welcome Back</div>
+      <div class="auth-subtitle">Log in to continue</div>
+
+      {% if error == "invalid_credentials" %}
+      <div class="auth-alert auth-alert-error">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>Incorrect email or password.</span>
+      </div>
+      {% elif error == "invalid_role" %}
+      <div class="auth-alert auth-alert-error">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>Please select a valid account type.</span>
+      </div>
+      {% endif %}
+
+      {% if reset_success %}
+      <div class="auth-alert auth-alert-success">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Your password has been reset. Please log in with your new password.</span>
+      </div>
+      {% endif %}
+
+      {% if registered %}
+      <div class="auth-alert auth-alert-success">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Account created successfully! Please log in.</span>
+      </div>
+      {% endif %}
+
+      <form id="loginForm">
+        <input type="hidden" name="role" value="{{ role }}">
+
+        <div class="auth-form-group">
+          <label>Email Address</label>
+          <div class="auth-input-wrap">
+            <i class="fa-regular fa-envelope icon"></i>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+          </div>
+        </div>
+
+        <div class="auth-form-group">
+          <label>Password</label>
+          <div class="auth-input-wrap">
+            <i class="fa-solid fa-lock icon"></i>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            <i class="fa-regular fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
+          </div>
+        </div>
+
+        {% if role != "admin" %}
+        <div class="auth-row-between">
+
+          <a href="/forgot-password?role={{ role }}" class="auth-link">Forgot password?</a>
+        </div>
+        {% else %}
+        <div style="height: 8px;"></div>
+        {% endif %}
+
+        <button type="submit" class="btn-auth-submit text-button">Log In</button>
+      </form>
+
+      <div class="auth-footer-text">
+        Don't have an account? <a href="/register?role={{ role }}" class="auth-link">Register Now</a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function togglePassword(inputId, iconEl) {
+    var input = document.getElementById(inputId);
+    var isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    iconEl.classList.toggle('fa-eye');
+    iconEl.classList.toggle('fa-eye-slash');
+  }
+</script>
+
 </body>
 </html>

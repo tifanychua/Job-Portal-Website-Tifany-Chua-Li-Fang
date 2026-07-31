@@ -7,9 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>JobConnect - Schedule Interview</title>
+<link rel="stylesheet" href="/css/employerHeader.css">
 
 <link rel="stylesheet" href="/css/employerInterview.css">
-<link rel="stylesheet" href="/css/employerHeader.css">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -67,6 +67,12 @@ Back to Shortlisted Candidates
 
 
 <input type="hidden" id="candidateId">
+
+<input 
+    type="hidden" 
+    id="companyId"
+    value="{{ companyId }}"
+>
 
 
 
@@ -550,7 +556,10 @@ fetch(
 .then(data=>{
 
 
-candidateData=data;
+candidateData = data;
+
+document.getElementById("candidateId").value =
+data.job_seeker_id;
 
 
 
@@ -829,51 +838,43 @@ showLoading(
 
 let interviewData = {
 
+candidateId:
+document.getElementById("candidateId").value,
 
-candidateId: applicationId,
+companyId:
+document.getElementById("companyId").value,
 
-companyId:"C000001",
+candidateName:
+candidateData.name,
 
-
-candidateName:candidateData.name,
-
-
-position:candidateData.position,
-
+position:
+candidateData.position,
 
 stage:
 document.getElementById("stage").value,
 
-
 date:
 document.getElementById("date").value,
-
 
 time:
 document.getElementById("time").value,
 
-
 duration:
 document.getElementById("duration").value,
-
 
 interviewType:
 document.querySelector(
 'input[name="type"]:checked'
 ).value,
 
-
 interviewer:
 document.getElementById("interviewer").value,
-
 
 meetingLink:
 document.getElementById("meetingLink").value,
 
-
 notes:
 document.getElementById("notes").value
-
 
 };
 

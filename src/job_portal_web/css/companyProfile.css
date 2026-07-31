@@ -1,0 +1,1260 @@
+/* ==========================================================
+   COMPANY PROFILE
+========================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#F5F7FB;
+    font-family:'Segoe UI',sans-serif;
+    color:#1F2937;
+}
+
+/* ==========================================================
+   Main Container
+========================================================== */
+
+.main-content{
+
+    max-width:1450px;
+
+    margin-left:220px;
+
+    padding:100px 40px 60px;
+
+}
+
+/* ==========================================================
+   Header
+========================================================== */
+
+.page-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:32px;
+
+}
+
+.page-title h1{
+
+    font-size:34px;
+    font-weight:700;
+    color:#111827;
+
+}
+
+.page-title p{
+
+    margin-top:8px;
+    color:#6B7280;
+    font-size:15px;
+
+}
+
+.header-actions{
+
+    display:flex;
+    gap:14px;
+
+}
+
+.primary-btn,
+.secondary-btn{
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:13px 24px;
+
+    border-radius:10px;
+
+    font-weight:600;
+
+    text-decoration:none;
+
+    transition:.25s;
+
+}
+
+.primary-btn{
+
+    background:#2563EB;
+    color:white;
+
+}
+
+.primary-btn:hover{
+
+    background:#1D4ED8;
+
+}
+
+.secondary-btn{
+
+    background:white;
+
+    border:1px solid #D1D5DB;
+
+    color:#374151;
+
+}
+
+.secondary-btn:hover{
+
+    background:#F9FAFB;
+
+}
+
+/* ==========================================================
+   Tabs
+========================================================== */
+
+.profile-tabs{
+
+    display:flex;
+
+    gap:35px;
+
+    margin-bottom:35px;
+
+    border-bottom:1px solid #E5E7EB;
+
+}
+
+.profile-tabs button{
+
+    background:none;
+
+    border:none;
+
+    padding:18px 0;
+
+    cursor:pointer;
+
+    color:#6B7280;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    transition:.2s;
+
+    border-bottom:3px solid transparent;
+
+}
+
+.profile-tabs button:hover{
+
+    color:#2563EB;
+
+}
+
+.profile-tabs button.active{
+
+    color:#2563EB;
+
+    border-bottom:3px solid #2563EB;
+
+}
+
+/* ==========================================================
+   Tab Content
+========================================================== */
+
+.tab-content{
+
+    display:none;
+
+}
+
+.tab-content.active{
+
+    display:block;
+
+}
+
+/* ==========================================================
+   Company Hero Card
+========================================================== */
+
+.company-card{
+
+    background:white;
+
+    border-radius:20px;
+
+    padding:35px;
+
+    display:grid;
+
+    grid-template-columns:170px 1fr 320px;
+
+    gap:35px;
+
+    align-items:center;
+
+    box-shadow:0 5px 25px rgba(0,0,0,.05);
+
+    margin-bottom:30px;
+
+}
+
+/* ==========================================================
+   Logo
+========================================================== */
+
+.company-logo-section{
+
+    position:relative;
+
+}
+
+.company-logo{
+
+    width:140px;
+
+    height:140px;
+
+    object-fit:cover;
+
+    border-radius:20px;
+
+    border:1px solid #E5E7EB;
+
+    background:white;
+
+}
+
+.change-logo{
+
+    position:absolute;
+
+    right:5px;
+
+    bottom:5px;
+
+    width:38px;
+
+    height:38px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#2563EB;
+
+    color:white;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.change-logo:hover{
+
+    background:#1D4ED8;
+
+}
+
+/* ==========================================================
+   Company Information
+========================================================== */
+
+.company-information{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+}
+
+.company-name-row{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+}
+
+.company-name-row h2{
+
+    font-size:30px;
+
+    color:#111827;
+
+}
+
+.verified-badge{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    background:#DCFCE7;
+
+    color:#15803D;
+
+    padding:6px 14px;
+
+    border-radius:50px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+.company-meta{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    color:#6B7280;
+
+    font-size:15px;
+
+}
+
+.divider{
+
+    color:#CBD5E1;
+
+}
+
+/* ==========================================================
+   Contact
+========================================================== */
+
+.company-contact-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:18px;
+
+}
+
+.contact-box{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    font-size:15px;
+
+    color:#374151;
+
+}
+
+.contact-box i{
+
+    width:42px;
+
+    height:42px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    border-radius:10px;
+
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+    font-size:18px;
+
+}
+
+/* ==========================================================
+   Visibility Card
+========================================================== */
+
+.visibility-panel{
+
+    background:#F8FAFC;
+
+    border:1px solid #E2E8F0;
+
+    border-radius:18px;
+
+    padding:25px;
+
+}
+
+.visibility-title{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-bottom:15px;
+
+}
+
+.visibility-title i{
+
+    color:#2563EB;
+
+    font-size:20px;
+
+}
+
+.visibility-title h4{
+
+    font-size:18px;
+
+    color:#111827;
+
+}
+
+.visibility-panel p{
+
+    color:#6B7280;
+
+    line-height:1.7;
+
+    margin-bottom:25px;
+
+}
+
+.outline-btn{
+
+    width:100%;
+
+    padding:13px;
+
+    background:white;
+
+    color:#2563EB;
+
+    border:1px solid #2563EB;
+
+    border-radius:10px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.outline-btn:hover{
+
+    background:#2563EB;
+
+    color:white;
+
+}
+
+/* ==========================================================
+   Overview Layout
+========================================================== */
+
+.overview-grid{
+
+    display:grid;
+
+    grid-template-columns:1.2fr 0.9fr;
+
+    gap:24px;
+
+    margin-bottom:30px;
+
+}
+
+/* ==========================================================
+   Profile Card
+========================================================== */
+
+.profile-card{
+
+    background:#FFFFFF;
+
+    border-radius:18px;
+
+    padding:28px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.05);
+
+    border:1px solid #EEF2F7;
+
+}
+
+.profile-card+.profile-card{
+
+    margin-top:0;
+
+}
+
+/* ==========================================================
+   Section Header
+========================================================== */
+
+.section-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:24px;
+
+}
+
+.section-header h3{
+
+    font-size:22px;
+
+    color:#111827;
+
+    font-weight:700;
+
+}
+
+.section-header a{
+
+    color:#2563EB;
+
+    font-size:14px;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+}
+
+.section-header a:hover{
+
+    text-decoration:underline;
+
+}
+
+/* ==========================================================
+   About Company
+========================================================== */
+
+.about-content{
+
+    line-height:1.9;
+
+    color:#4B5563;
+
+    font-size:15px;
+
+}
+
+.about-company{
+
+    color:#4B5563;
+
+    line-height:1.9;
+
+    font-size:15px;
+
+}
+
+.empty-text{
+
+    color:#9CA3AF;
+
+    font-style:italic;
+
+}
+
+/* ==========================================================
+   Company Information
+========================================================== */
+
+.company-info-list{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+}
+
+.info-row{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    padding:14px 0;
+
+    border-bottom:1px solid #F1F5F9;
+
+}
+
+.info-row:last-child{
+
+    border-bottom:none;
+
+}
+
+.info-icon{
+
+    width:48px;
+
+    height:48px;
+
+    border-radius:12px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+    font-size:18px;
+
+    flex-shrink:0;
+
+}
+
+.info-row label{
+
+    display:block;
+
+    color:#9CA3AF;
+
+    font-size:13px;
+
+    margin-bottom:5px;
+
+}
+
+.info-row span{
+
+    color:#111827;
+
+    font-weight:600;
+
+    font-size:15px;
+
+}
+
+/* ==========================================================
+   Gallery
+========================================================== */
+
+.gallery-section{
+
+    margin-bottom:35px;
+
+}
+
+.gallery-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:18px;
+
+}
+
+.gallery-item{
+
+    position:relative;
+
+    overflow:hidden;
+
+    border-radius:14px;
+
+    height:210px;
+
+    background:#F3F4F6;
+
+}
+
+.gallery-item img{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:cover;
+
+    transition:.35s;
+
+}
+
+.gallery-item:hover img{
+
+    transform:scale(1.05);
+
+}
+
+/* ==========================================================
+   More Photos Overlay
+========================================================== */
+
+.more-photo .overlay{
+
+    position:absolute;
+
+    inset:0;
+
+    background:rgba(17,24,39,.65);
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    color:white;
+
+}
+
+.more-photo .overlay span{
+
+    font-size:34px;
+
+    font-weight:700;
+
+}
+
+.more-photo .overlay small{
+
+    margin-top:6px;
+
+    font-size:15px;
+
+    font-weight:500;
+
+}
+
+/* ==========================================================
+   Empty State
+========================================================== */
+
+.empty-state{
+
+    padding:60px 20px;
+
+    text-align:center;
+
+    color:#94A3B8;
+
+}
+
+.empty-state i{
+
+    font-size:55px;
+
+    margin-bottom:20px;
+
+    color:#CBD5E1;
+
+}
+
+.empty-state p{
+
+    font-size:15px;
+
+}
+
+/* ==========================================================
+   Social Links
+========================================================== */
+
+.social-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:20px;
+
+}
+
+.social-card{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    padding:22px;
+
+    border-radius:14px;
+
+    border:1px solid #E5E7EB;
+
+    background:white;
+
+    text-decoration:none;
+
+    color:#374151;
+
+    transition:.25s;
+
+}
+
+.social-card i{
+
+    font-size:28px;
+
+    color:#2563EB;
+
+}
+
+.social-card span{
+
+    font-size:16px;
+
+    font-weight:600;
+
+}
+
+.social-card:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 10px 25px rgba(37,99,235,.15);
+
+    border-color:#2563EB;
+
+}
+
+/* ==========================================================
+   Team
+========================================================== */
+
+.team-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+
+    gap:22px;
+
+}
+
+.team-card{
+
+    background:white;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:18px;
+
+    padding:28px;
+
+    text-align:center;
+
+    transition:.25s;
+
+}
+
+.team-card:hover{
+
+    transform:translateY(-4px);
+
+    box-shadow:0 10px 24px rgba(0,0,0,.08);
+
+}
+
+.team-avatar{
+
+    width:95px;
+
+    height:95px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    margin-bottom:18px;
+
+}
+
+.team-card h4{
+
+    color:#111827;
+
+    font-size:18px;
+
+    margin-bottom:8px;
+
+}
+
+.team-card span{
+
+    color:#6B7280;
+
+    font-size:14px;
+
+}
+
+/* ==========================================================
+   Documents
+========================================================== */
+
+.document-list{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+}
+
+.document-card{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:14px;
+
+    padding:20px;
+
+    transition:.25s;
+
+}
+
+.document-card:hover{
+
+    box-shadow:0 8px 18px rgba(0,0,0,.06);
+
+}
+
+.document-icon{
+
+    width:52px;
+
+    height:52px;
+
+    border-radius:12px;
+
+    background:#EFF6FF;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    color:#2563EB;
+
+    font-size:22px;
+
+}
+
+.document-info{
+
+    flex:1;
+
+    margin-left:20px;
+
+}
+
+.document-info h4{
+
+    font-size:16px;
+
+    color:#111827;
+
+    margin-bottom:4px;
+
+}
+
+.document-info span{
+
+    color:#6B7280;
+
+    font-size:14px;
+
+}
+
+.download-btn{
+
+    width:45px;
+
+    height:45px;
+
+    border-radius:10px;
+
+    background:#2563EB;
+
+    color:white;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-decoration:none;
+
+    transition:.25s;
+
+}
+
+.download-btn:hover{
+
+    background:#1D4ED8;
+
+}
+
+/* ==========================================================
+   Footer
+========================================================== */
+
+.footer{
+
+    text-align:center;
+
+    padding:25px;
+
+    color:#6B7280;
+
+    font-size:14px;
+
+    margin-top:40px;
+
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media(max-width:1200px){
+
+    .company-card{
+
+        grid-template-columns:1fr;
+
+        text-align:center;
+
+    }
+
+    .company-logo-section{
+
+        display:flex;
+
+        justify-content:center;
+
+    }
+
+    .company-contact-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .overview-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .main-content{
+
+        padding:20px;
+
+    }
+
+    .page-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:20px;
+
+    }
+
+    .header-actions{
+
+        width:100%;
+
+        flex-direction:column;
+
+    }
+
+    .primary-btn,
+
+    .secondary-btn{
+
+        justify-content:center;
+
+    }
+
+    .profile-tabs{
+
+        overflow-x:auto;
+
+        white-space:nowrap;
+
+        gap:25px;
+
+    }
+
+    .gallery-grid{
+
+        grid-template-columns:repeat(2,1fr);
+
+    }
+
+    .social-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+@media(max-width:480px){
+
+    .gallery-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .team-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .company-name-row{
+
+        flex-direction:column;
+
+        gap:10px;
+
+    }
+
+    .company-name-row h2{
+
+        font-size:24px;
+
+        text-align:center;
+
+    }
+
+}
+
+/* Verified */
+
+.verified-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    background:#DCFCE7;
+
+    color:#15803D;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+/* Pending */
+
+.pending-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    background:#FEF3C7;
+
+    color:#B45309;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+/* Rejected */
+
+.rejected-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    background:#FEE2E2;
+
+    color:#B91C1C;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Your Employer Account | JobConnect</title>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/employer_register.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script type="module" src="/js/employer_register.js"></script>
+</head>
+<body>
+
+<div class="wizard-page">
+
+  <!-- ============================== LEFT: sidebar ============================== -->
+  <div class="wizard-sidebar">
+    <div class="back-button-container" style="margin:10px 0 10px 0; ">
+    <a
+        href="javascript:history.back()"
+        class="back-button"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Back
+    </a>
+</div>
+    <div class="wizard-eyebrow">Join as Employer</div>
+    <h1>Create Your Employer Account</h1>
+    <p>Join JobConnect and connect with talented candidates. Post jobs, manage applications, and grow your business.</p>
+
+   <div class="wizard-art">
+    <img
+        src="/image/employer_register.png"
+        alt="Employer Registration"
+        class="wizard-image"
+    >
+</div>
+
+    <div class="wizard-benefits">
+      <h4>Why register as an employer?</h4>
+      <ul>
+        <li><i class="fa-solid fa-circle-check"></i> Post unlimited job vacancies</li>
+        <li><i class="fa-solid fa-circle-check"></i> Search and manage candidates</li>
+        <li><i class="fa-solid fa-circle-check"></i> Track applications in real-time</li>
+        <li><i class="fa-solid fa-circle-check"></i> Build your company profile</li>
+        <li><i class="fa-solid fa-circle-check"></i> Reach the right talent faster</li>
+      </ul>
+    </div>
+
+    <div class="wizard-sidebar-footer">
+      Already have an account? <a href="/login?role=employer" class="auth-link">Log In</a>
+    </div>
+    <div class="wizard-sidebar-footer">
+      Register as Job Seeker? <a href="/register?role=job_seeker" class="auth-link">Register</a>
+    </div>
+  </div>
+
+  <!-- ============================== RIGHT: wizard main ============================== -->
+  <div class="wizard-main">
+
+    <!-- ---------- Step indicator ---------- -->
+    <div class="step-indicator" id="stepIndicator">
+      <div class="step-indicator-item active" data-step="1">
+        <div class="step-circle">1</div>
+        <div class="step-label">Company Information</div>
+      </div>
+      <div class="step-line" data-line="1"></div>
+      <div class="step-indicator-item" data-step="2">
+        <div class="step-circle">2</div>
+        <div class="step-label">Contact Person</div>
+      </div>
+      <div class="step-line" data-line="2"></div>
+      <div class="step-indicator-item" data-step="3">
+        <div class="step-circle">3</div>
+        <div class="step-label">Account Details</div>
+      </div>
+      <div class="step-line" data-line="3"></div>
+      <div class="step-indicator-item" data-step="4">
+        <div class="step-circle">4</div>
+        <div class="step-label">Review &amp; Submit</div>
+      </div>
+    </div>
+
+    {% if error %}
+    <div class="auth-alert auth-alert-error" style="max-width:900px; margin:0 auto 20px;">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>
+        {% if error == "email_taken" %}An account with this email already exists.
+        {% elif error == "password_mismatch" %}Passwords do not match.
+        {% elif error == "password_too_short" %}Password must be at least 8 characters.
+        {% else %}Something went wrong. Please check your details and try again.
+        {% endif %}
+      </span>
+    </div>
+    {% endif %}
+
+    <form id="employerForm">
+
+      <!-- ========================================================
+           STEP 1 — Company Information
+           ======================================================== -->
+      <div class="wizard-step" id="step-1">
+        <div class="wizard-step-header">
+          <h2>Company Information</h2>
+          <p>Please provide your company details.</p>
+        </div>
+
+        <div class="wizard-form-grid">
+          <div class="form-group">
+            <label>Company Name<span class="required">*</span></label>
+            <input class="form-input" type="text" id="companyName" name="companyName" placeholder="Enter company name" required>
+          </div>
+          <div class="form-group">
+            <label>Business Email<span class="required">*</span></label>
+            <div class="form-input-with-icon">
+              <i class="fa-regular fa-envelope icon"></i>
+              <input type="email" id="businessEmail"name="businessEmail" placeholder="Enter business email" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Registration Number<span class="required">*</span></label>
+            <input class="form-input" type="text" id="registrationNumber" name="registrationNumber" placeholder="Enter company registration number" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number<span class="required">*</span></label>
+            <div class="phone-input-group">
+              <select class="phone-code-select" id="phoneCode" name="phoneCode">
+                <option value="+60" selected>🇲🇾 +60</option>
+                <option value="+65">🇸🇬 +65</option>
+                <option value="+62">🇮🇩 +62</option>
+                <option value="+1">🇺🇸 +1</option>
+              </select>
+              <input type="tel" id="phone"name="phone"placeholder="Enter your phone number" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Industry<span class="required">*</span></label>
+            <select class="form-select" id="industry" name="industry" required>
+              <option value="" disabled selected>Select industry</option>
+              <option>Information Technology</option>
+              <option>Finance &amp; Banking</option>
+              <option>Healthcare</option>
+              <option>Retail &amp; E-commerce</option>
+              <option>Manufacturing</option>
+              <option>Education</option>
+              <option>Hospitality</option>
+              <option>Others</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Company Address<span class="required">*</span></label>
+            <input class="form-input" type="text" id="companyAddress" name="companyAddress" placeholder="Enter company address" required>
+          </div>
+
+          <div class="form-group">
+            <label>Company Size<span class="required">*</span></label>
+            <select class="form-select" id="companySize" name="companySize" required>
+              <option value="" disabled selected>Select company size</option>
+              <option>1 - 10 employees</option>
+              <option>11 - 50 employees</option>
+              <option>51 - 200 employees</option>
+              <option>201 - 500 employees</option>
+              <option>500+ employees</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>City<span class="required">*</span></label>
+            <input class="form-input" type="text" id="city" name="city" placeholder="Enter city" required>
+          </div>
+
+          <div class="form-group">
+            <label>Company Website <span class="optional">(Optional)</span></label>
+            <input class="form-input" type="url" id="companyWebsite" name="companyWebsite" placeholder="https://www.yourcompany.com">
+          </div>
+          <div class="form-group">
+            <div style="display:flex; gap:16px;">
+              <div style="flex:1;">
+                <label>State<span class="required">*</span></label>
+                <select class="form-select" id="state" name="state" required>
+                  <option value="" disabled selected>Select state</option>
+                  <option>Kuala Lumpur</option>
+                  <option>Selangor</option>
+                  <option>Penang</option>
+                  <option>Johor</option>
+                  <option>Sabah</option>
+                  <option>Sarawak</option>
+                  <option>Others</option>
+                </select>
+              </div>
+              <div style="flex:1;">
+                <label>Postal Code<span class="required">*</span></label>
+                <input class="form-input" type="text" id="postalCode" name="postalCode" placeholder="Enter postal code" required>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Country<span class="required">*</span></label>
+            <select class="form-select" id="country" name="country" required>
+              <option value="Malaysia" selected>Malaysia</option>
+              <option>Singapore</option>
+              <option>Indonesia</option>
+              <option>Others</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label>Company Description<span class="required">*</span></label>
+            <textarea class="form-textarea" id="companyDescription" name="companyDescription" maxlength="500" placeholder="Tell us about your company..." required oninput="updateCharCount(this, 'descCount')"></textarea>
+            <div class="char-counter"><span id="descCount">0</span> / 500</div>
+          </div>
+
+          
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STEP 2 — Contact Person
+           ======================================================== -->
+      <div class="wizard-step" id="step-2" style="display:none;">
+        <div class="wizard-step-header">
+          <h2>Contact Person Information</h2>
+          <p>Provide the details of the primary contact person for your company.</p>
+        </div>
+
+        <div class="wizard-form-grid">
+          <div class="form-group">
+            <label>Full Name<span class="required">*</span></label>
+            <input class="form-input" type="text" id="contactFullName" name="contactFullName" placeholder="Enter full name" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address<span class="required">*</span></label>
+            <div class="form-input-with-icon">
+              <i class="fa-regular fa-envelope icon"></i>
+              <input type="email" id="contactEmail" name="contactEmail" placeholder="Enter email address" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Job Title / Position<span class="required">*</span></label>
+            <input class="form-input" type="text" id="contactJobTitle" name="contactJobTitle" placeholder="Enter job title or position" required>
+          </div>
+          <div class="form-group">
+            <label>Department <span class="optional">(Optional)</span></label>
+            <input class="form-input" type="text" id="contactDepartment" name="contactDepartment" placeholder="Enter department">
+          </div>
+
+          <div class="form-group">
+            <label>Phone Number<span class="required">*</span></label>
+            <div class="phone-input-group">
+              <select class="phone-code-select" id="contactPhoneCode" name="contactPhoneCode">
+                <option value="+60" selected>🇲🇾 +60</option>
+                <option value="+65">🇸🇬 +65</option>
+                <option value="+62">🇮🇩 +62</option>
+                <option value="+1">🇺🇸 +1</option>
+              </select>
+              <input class="form-input" type="tel" id="contactPhone" name="contactPhone" placeholder="Enter phone number" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Preferred Contact Method<span class="required">*</span></label>
+            <div class="radio-inline-group">
+              <label class="radio-inline"><input type="radio" name="preferredContactMethod" value="Email" checked> Email</label>
+              <label class="radio-inline"><input type="radio" name="preferredContactMethod" value="Phone"> Phone</label>
+              <label class="radio-inline"><input type="radio" name="preferredContactMethod" value="Both"> Both</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Alternative Phone <span class="optional">(Optional)</span></label>
+            <div class="phone-input-group">
+              <select class="phone-code-select" id="altPhoneCode" name="altPhoneCode">
+                <option value="+60" selected>🇲🇾 +60</option>
+                <option value="+65">🇸🇬 +65</option>
+                <option value="+62">🇮🇩 +62</option>
+                <option value="+1">🇺🇸 +1</option>
+              </select>
+              <input class="form-input" type="tel" id="altPhone" name="altPhone" placeholder="Enter alternative phone number">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Best Time to Contact <span class="optional">(Optional)</span></label>
+            <select class="form-select" id="bestTimeToContact" name="bestTimeToContact">
+              <option value="" selected>Select time range</option>
+              <option>Morning (9AM - 12PM)</option>
+              <option>Afternoon (12PM - 5PM)</option>
+              <option>Evening (5PM - 8PM)</option>
+              <option>Anytime</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label>Correspondence Address<span class="required">*</span></label>
+            <textarea class="form-textarea" id="correspondenceAddress" name="correspondenceAddress" maxlength="300" placeholder="Enter correspondence address" required oninput="updateCharCount(this, 'addrCount')"></textarea>
+            <div class="char-counter"><span id="addrCount">0</span> / 300</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STEP 3 — Account Details
+           ======================================================== -->
+      <div class="wizard-step" id="step-3" style="display:none;">
+        <div class="wizard-step-header">
+          <h2>Account Details</h2>
+          <p>Set up your account credentials.</p>
+        </div>
+
+        <div class="wizard-form-grid">
+          <div class="form-group">
+            <label>Account Email<span class="required">*</span></label>
+            <div class="form-input-with-icon">
+              <i class="fa-regular fa-envelope icon"></i>
+              <input type="email" id="accountEmail" name="accountEmail" placeholder="e.g. hr@techsolutions.com.my" required>
+            </div>
+            <div class="form-hint">This will be your username to log in.</div>
+          </div>
+          <div class="form-group">
+            <label>Password<span class="required">*</span></label>
+            <div class="form-input-with-icon">
+              <i class="fa-solid fa-lock icon"></i>
+              <input type="password" id="wizardPassword" name="password" placeholder="Enter password" minlength="8" required>
+              <i class="fa-regular fa-eye toggle-password" onclick="togglePassword('wizardPassword', this)"></i>
+            </div>
+            <div class="form-hint">
+                Password must contain:
+                <ul class="password-rules">
+                  <li id="rule-length">At least 8 characters</li>
+                  <li id="rule-uppercase">At least one uppercase letter (A–Z)</li>
+                  <li id="rule-lowercase">At least one lowercase letter (a–z)</li>
+                  <li id="rule-number">At least one number (0–9)</li>
+                  <li id="rule-special">At least one special character (!@#$%^&*)</li>
+                </ul>
+              </div>
+          </div>
+
+          <div class="form-group">
+            <label>Confirm Password<span class="required">*</span></label>
+            <div class="form-input-with-icon">
+              <i class="fa-solid fa-lock icon"></i>
+              <input type="password" id="wizardConfirmPassword" name="confirmPassword" placeholder="Re-enter password" minlength="8" required>
+              <i class="fa-regular fa-eye toggle-password" onclick="togglePassword('wizardConfirmPassword', this)"></i>
+            </div>
+            <div class="form-hint">Please re-enter your password.</div>
+          </div>
+
+          <div class="full-width">
+            <div class="security-banner">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>We take your security seriously. Your information is encrypted and safe with us.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================
+           STEP 4 — Review & Submit
+           ======================================================== -->
+      <div class="wizard-step" id="step-4" style="display:none;">
+        <div class="wizard-step-header">
+          <h2>Review &amp; Submit</h2>
+          <p>Please review your information before submitting your registration.</p>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="review-card-title"><i class="fa-regular fa-building"></i> Company Information</div>
+            <a href="#" class="review-edit-link" onclick="goToStep(1); return false;"><i class="fa-regular fa-pen-to-square"></i> Edit</a>
+          </div>
+          <div class="review-grid">
+            <div class="review-field"><div class="review-label">Company Name</div><div class="review-value" data-review="companyName">—</div></div>
+            <div class="review-field"><div class="review-label">Registration Number</div><div class="review-value" data-review="registrationNumber">—</div></div>
+            <div class="review-field"><div class="review-label">Industry</div><div class="review-value" data-review="industry">—</div></div>
+            <div class="review-field"><div class="review-label">Company Size</div><div class="review-value" data-review="companySize">—</div></div>
+            <div class="review-field"><div class="review-label">Company Email</div><div class="review-value" data-review="businessEmail">—</div></div>
+            <div class="review-field"><div class="review-label">Phone Number</div><div class="review-value" data-review="phoneFull">—</div></div>
+            <div class="review-field" style="grid-column: span 3;"><div class="review-label">Company Address</div><div class="review-value" data-review="fullAddress">—</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="review-card-title"><i class="fa-regular fa-id-card"></i> Contact Person Information</div>
+            <a href="#" class="review-edit-link" onclick="goToStep(2); return false;"><i class="fa-regular fa-pen-to-square"></i> Edit</a>
+          </div>
+          <div class="review-grid">
+            <div class="review-field"><div class="review-label">Full Name</div><div class="review-value" data-review="contactFullName">—</div></div>
+            <div class="review-field"><div class="review-label">Job Title / Position</div><div class="review-value" data-review="contactJobTitle">—</div></div>
+            <div class="review-field"><div class="review-label">Email Address</div><div class="review-value" data-review="contactEmail">—</div></div>
+            <div class="review-field"><div class="review-label">Phone Number</div><div class="review-value" data-review="contactPhoneFull">—</div></div>
+            <div class="review-field"><div class="review-label">Preferred Contact Method</div><div class="review-value" data-review="preferredContactMethod">—</div></div>
+            <div class="review-field"><div class="review-label">Best Time to Contact</div><div class="review-value" data-review="bestTimeToContact">—</div></div>
+            <div class="review-field" style="grid-column: span 3;"><div class="review-label">Correspondence Address</div><div class="review-value" data-review="correspondenceAddress">—</div></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <div class="review-card-title"><i class="fa-solid fa-shield-halved"></i> Account Details</div>
+            <a href="#" class="review-edit-link" onclick="goToStep(3); return false;"><i class="fa-regular fa-pen-to-square"></i> Edit</a>
+          </div>
+          <div class="review-grid">
+            <div class="review-field"><div class="review-label">Account Email</div><div class="review-value" data-review="accountEmail">—</div></div>
+          </div>
+        </div>
+
+        <div class="review-consent-banner">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>By submitting this registration, you agree to our <a href="#">Terms &amp; Conditions</a> and <a href="#">Privacy Policy</a>.</span>
+        </div>
+      </div>
+
+      <!-- ========================================================
+           Footer navigation
+           ======================================================== -->
+      <div class="wizard-footer-nav">
+        <div>
+          <button type="button" class="btn-wizard-back" id="backBtn" style="display:none;" onclick="prevStep()">
+            <i class="fa-solid fa-arrow-left"></i> Back
+          </button>
+        </div>
+        <div class="wizard-footer-nav-right">
+          <button type="button" class="btn-wizard-primary" id="nextBtn" onclick="nextStep()">
+            Continue <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <button type="submit" class="btn-wizard-primary" id="submitBtn" style="display:none;">
+            Submit Registration <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<div class="wizard-toast" id="toast"><i class="fa-solid fa-circle-check"></i> <span id="toastMsg">Draft saved</span></div>
+
+<script>
+  const preferredContactMethod =
+    document.querySelector(
+        'input[name="preferredContactMethod"]:checked'
+    ).value;
+  var currentStep = 1;
+  var totalSteps = 4;
+
+  function togglePassword(inputId, iconEl) {
+    var input = document.getElementById(inputId);
+    var isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    iconEl.classList.toggle('fa-eye');
+    iconEl.classList.toggle('fa-eye-slash');
+  }
+
+  function updateCharCount(el, counterId) {
+    document.getElementById(counterId).textContent = el.value.length;
+  }
+
+  function validateCurrentStep() {
+    var section = document.getElementById('step-' + currentStep);
+    var inputs = section.querySelectorAll('[required]');
+    var valid = true;
+    for (var i = 0; i < inputs.length; i++) {
+      if (!inputs[i].checkValidity()) {
+        inputs[i].reportValidity();
+        valid = false;
+        break;
+      }
+    }
+    if (valid && currentStep === 3) {
+      var pw = document.getElementById('wizardPassword').value;
+      var cpw = document.getElementById('wizardConfirmPassword').value;
+      if (pw !== cpw) {
+        alert('Passwords do not match.');
+        valid = false;
+      }
+    }
+    return valid;
+  }
+
+  function goToStep(n) {
+    document.getElementById('step-' + currentStep).style.display = 'none';
+    currentStep = n;
+    document.getElementById('step-' + currentStep).style.display = 'block';
+
+    document.querySelectorAll('.step-indicator-item').forEach(function (item) {
+      var s = parseInt(item.dataset.step, 10);
+      item.classList.remove('active', 'completed');
+      if (s < currentStep) item.classList.add('completed');
+      if (s === currentStep) item.classList.add('active');
+    });
+    document.querySelectorAll('.step-line').forEach(function (line) {
+      var l = parseInt(line.dataset.line, 10);
+      line.classList.toggle('completed', l < currentStep);
+    });
+
+    document.getElementById('backBtn').style.display = currentStep > 1 ? 'flex' : 'none';
+    document.getElementById('nextBtn').style.display = currentStep < totalSteps ? 'flex' : 'none';
+    document.getElementById('submitBtn').style.display = currentStep === totalSteps ? 'flex' : 'none';
+
+    if (currentStep === totalSteps) populateReview();
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+function nextStep() {
+
+    if (!validateCurrentStep()) return;
+
+     if (currentStep === 1) {
+
+        if (!validateStep1()) return;
+
+    }
+
+    if (currentStep === 2) {
+
+        if (!validateStep2()) return;
+
+    }
+
+    if (currentStep === 3) {
+
+        if (!validateStep3()) return;
+
+    }
+
+  /*  if (currentStep === 3) {
+
+        const password = document.getElementById("wizardPassword").value;
+        const confirmPassword = document.getElementById("wizardConfirmPassword").value;
+
+        const passwordRegex =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+        if (!passwordRegex.test(password)) {
+            alert(
+                "Password must contain:\n" +
+                "- At least 8 characters\n" +
+                "- At least one uppercase letter\n" +
+                "- At least one lowercase letter\n" +
+                "- At least one number\n" +
+                "- At least one special character"
+            );
+            return; 
+        }
+
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return; 
+        }
+    }*/
+    goToStep(currentStep +1);
+    
+}
+
+  function prevStep() {
+    goToStep(currentStep - 1);
+  }
+
+  function fieldVal(name) {
+    var el = document.querySelector('[name="' + name + '"]');
+    if (!el) return '';
+    if (el.type === 'radio') {
+      var checked = document.querySelector('[name="' + name + '"]:checked');
+      return checked ? checked.value : '';
+    }
+    return el.value || '';
+  }
+
+  function setReview(key, value) {
+    var el = document.querySelector('[data-review="' + key + '"]');
+    if (el) el.textContent = value && value.trim() !== '' ? value : '—';
+  }
+
+  function populateReview() {
+    console.log("populateReview called");
+    console.log(fieldVal("companyName"));
+    console.log(fieldVal("registrationNumber"));
+    setReview('companyName', fieldVal('companyName'));
+    setReview('registrationNumber', fieldVal('registrationNumber'));
+    setReview('industry', fieldVal('industry'));
+    setReview('companySize', fieldVal('companySize'));
+    setReview('businessEmail', fieldVal('businessEmail'));
+    setReview('phoneFull', fieldVal('phoneCode') + ' ' + fieldVal('phone'));
+    setReview('fullAddress', [fieldVal('companyAddress'), fieldVal('city'), fieldVal('state'), fieldVal('postalCode'), fieldVal('country')].filter(Boolean).join(', '));
+
+    setReview('contactFullName', fieldVal('contactFullName'));
+    setReview('contactJobTitle', fieldVal('contactJobTitle'));
+    setReview('contactEmail', fieldVal('contactEmail'));
+    setReview('contactPhoneFull', fieldVal('contactPhoneCode') + ' ' + fieldVal('contactPhone'));
+    setReview('preferredContactMethod', fieldVal('preferredContactMethod'));
+    setReview('bestTimeToContact', fieldVal('bestTimeToContact'));
+    setReview('correspondenceAddress', fieldVal('correspondenceAddress'));
+
+    setReview('accountEmail', fieldVal('accountEmail'));
+  }
+
+
+</script>
+
+</body>
+</html>

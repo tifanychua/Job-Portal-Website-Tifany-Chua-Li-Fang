@@ -6,11 +6,31 @@ from pytest_bdd import scenarios, given, when, then
 from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
 
+from itsdangerous import TimestampSigner
+import base64
+import json
+
 # ==========================================
 # LOAD FEATURE
 # ==========================================
 
 scenarios("features/filter_jobseeker_interview_records.feature")
+
+
+# ==========================================
+# CONSTANT
+# ==========================================
+
+APPLICATION_ID = "APP001"
+
+SECRET_KEY = "jobconnect-secret-key"
+
+
+TEST_INTERVIEW_IDS = [
+    "TEST_JOBSEEKER_FILTER_001",
+    "TEST_JOBSEEKER_FILTER_002",
+    "TEST_JOBSEEKER_FILTER_003",
+]
 
 
 # ==========================================
@@ -21,7 +41,11 @@ scenarios("features/filter_jobseeker_interview_records.feature")
 @pytest.fixture
 def client():
 
-    return TestClient(app)
+    client = TestClient(app)
+
+    mock_applicant_session(client)
+
+    return client
 
 
 # ==========================================
@@ -36,17 +60,8 @@ def context():
 
 
 # ==========================================
-# TEST DATA
+# CLEANUP
 # ==========================================
-
-APPLICATION_ID = "APP001"
-
-
-TEST_INTERVIEW_IDS = [
-    "TEST_JOBSEEKER_FILTER_001",
-    "TEST_JOBSEEKER_FILTER_002",
-    "TEST_JOBSEEKER_FILTER_003",
-]
 
 
 def delete_test_interviews():
@@ -67,7 +82,29 @@ def cleanup():
 
 
 # ==========================================
-# CREATE DATA
+# CREATE APPLICANT SESSION COOKIE
+# ==========================================
+
+
+def mock_applicant_session(client):
+
+    session_data = {"applicant_id": APPLICATION_ID}
+
+    json_data = json.dumps(session_data)
+
+    encoded = base64.b64encode(json_data.encode()).decode()
+
+    signer = TimestampSigner(SECRET_KEY)
+
+    signed_cookie = signer.sign(encoded.encode()).decode()
+
+    client.cookies.set("session", signed_cookie)
+
+    print("APPLICANT SESSION:", signed_cookie)
+
+
+# ==========================================
+# CREATE TEST DATA
 # ==========================================
 
 
@@ -108,7 +145,7 @@ def create_interview_records():
 
 
 @given("the job seeker has interview records with different statuses")
-def job_seeker_has_records(context):
+def job_seeker_has_records():
 
     create_interview_records()
 
@@ -117,7 +154,8 @@ def job_seeker_has_records(context):
 def select_status_filter(client, context):
 
     context["response"] = client.get(
-        "/api/applicant/interviews/filter" "?application_id=APP001" "&status=Scheduled"
+        "/api/applicant/interviews/filter",
+        params={"application_id": APPLICATION_ID, "status": "Scheduled"},
     )
 
 
@@ -128,11 +166,15 @@ def verify_filtered_records(context):
 
     assert response.status_code == 200
 
-    assert "Scheduled" in response.text
+    data = response.json()
 
-    assert "Accepted" not in response.text
+    assert isinstance(data, list)
 
-    assert "Cancelled" not in response.text
+    assert len(data) > 0
+
+    for item in data:
+
+        assert item["status"] == "Scheduled"
 
 
 # ==========================================
@@ -141,7 +183,7 @@ def verify_filtered_records(context):
 
 
 @given("the job seeker is viewing the interview records page")
-def view_interview_page(context):
+def view_interview_page():
 
     create_interview_records()
 
@@ -149,21 +191,29 @@ def view_interview_page(context):
 @when("the job seeker does not select any status filter")
 def no_status_filter(client, context):
 
-    context["response"] = client.get("/api/applicant/interviews/filter" "?application_id=APP001")
+    context["response"] = client.get(
+        "/api/applicant/interviews/filter", params={"application_id": APPLICATION_ID}
+    )
 
 
 @then("the system should display all interview records")
 def verify_all_records(context):
 
-    response = context["response"]
+    response = context["context"] if False else context["response"]
 
     assert response.status_code == 200
 
-    assert "Scheduled" in response.text
+    data = response.json()
 
-    assert "Accepted" in response.text
+    assert isinstance(data, list)
 
-    assert "Cancelled" in response.text
+    statuses = [item["status"] for item in data]
+
+    assert "Scheduled" in statuses
+
+    assert "Accepted" in statuses
+
+    assert "Cancelled" in statuses
 
 
 # ==========================================
@@ -172,7 +222,7 @@ def verify_all_records(context):
 
 
 @given("the job seeker applies a status filter")
-def apply_status_filter(context):
+def apply_status_filter():
 
     create_interview_records()
 
@@ -181,7 +231,8 @@ def apply_status_filter(context):
 def select_invalid_status(client, context):
 
     context["response"] = client.get(
-        "/api/applicant/interviews/filter" "?application_id=APP001" "&status=Completed"
+        "/api/applicant/interviews/filter",
+        params={"application_id": APPLICATION_ID, "status": "Completed"},
     )
 
 
@@ -192,4 +243,6 @@ def verify_no_records(context):
 
     assert response.status_code == 200
 
-    assert "No interview records found" in response.text
+    data = response.json()
+
+    assert data == []

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Manage Experience</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/manageExperience.css">
+    <link rel="stylesheet" href="/css/manageEducation.css">
+    <link rel="stylesheet" href="/static/style.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<!-- ==========================================================
+HERO
+========================================================== -->
+
+<section class="profile-hero">
+
+    <div class="profile-hero-inner">
+
+        <div class="profile-top">
+
+            <div>
+
+                <h1 class="profile-title">
+
+                    Manage Experience
+
+                </h1>
+
+                <p class="profile-subtitle">
+
+                    Showcase your professional experience to attract employers.
+
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="addExperienceBtn"
+                class="profile-primary-btn">
+
+                <i class="fa-solid fa-plus"></i>
+
+                Add Experience
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ==========================================================
+PAGE
+========================================================== -->
+
+<div class="education-page">
+
+    <div class="education-layout">
+
+        <div class="education-content">
+
+            <!-- ======================================================
+            EXPERIENCE CARD
+            ======================================================= -->
+
+            <div class="education-card-wrapper">
+
+                <div class="education-header">
+
+                    <div>
+
+                        <h2>
+
+                            Work Experience
+
+                        </h2>
+
+                        <p>
+
+                            Add your professional work experience.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div id="experienceContainer">
+
+                {% if experience_list %}
+
+                {% for experience in experience_list %}
+
+                    <div class="education-card">
+
+                        <!-- Icon -->
+
+                        <div class="education-icon">
+
+                            <i class="fa-solid fa-briefcase"></i>
+
+                        </div>
+
+                        <!-- Content -->
+
+                        <div class="education-body">
+
+                            <h3 class="education-title">
+
+                                {{ experience.job_title }}
+
+                            </h3>
+
+                            <p class="institution">
+
+                                {{ experience.company_name }}
+
+                            </p>
+
+                            <!-- Date -->
+
+                            <div class="education-meta">
+
+                                <span>
+
+                                    <i class="fa-regular fa-calendar"></i>
+
+                                    {{ experience.start_date }}
+
+                                    -
+
+                                    {% if experience.currently_working %}
+
+                                        Present
+
+                                    {% else %}
+
+                                        {{ experience.end_date }}
+
+                                    {% endif %}
+
+                                </span>
+
+                            </div>
+
+                            <!-- Employment Type -->
+
+                            <div class="education-grade">
+
+                                <span class="grade-badge">
+
+                                    <i class="fa-solid fa-briefcase"></i>
+
+                                    {{ experience.employment_type }}
+
+                                </span>
+
+                            </div>
+
+                            <!-- Location -->
+
+                            <div class="education-meta">
+
+                                <span>
+
+                                    <i class="fa-solid fa-location-dot"></i>
+
+                                    {{ experience.location }}
+
+                                </span>
+
+                            </div>
+
+                            <!-- Description -->
+
+                            {% if experience.description %}
+
+                            <p class="education-description">
+
+                                {{ experience.description }}
+
+                            </p>
+
+                            {% endif %}
+
+                        </div>
+
+                        <!-- Actions -->
+
+                        <div class="education-actions">
+
+                            <button
+                                type="button"
+                                class="icon-btn editBtn"
+
+                                data-id="{{ experience.id }}"
+
+                                data-job="{{ experience.job_title }}"
+
+                                data-company="{{ experience.company_name }}"
+
+                                data-type="{{ experience.employment_type }}"
+
+                                data-location="{{ experience.location }}"
+
+                                data-start="{{ experience.start_date }}"
+
+                                data-end="{{ experience.end_date }}"
+
+                                data-current="{{ experience.currently_working }}"
+
+                                data-description="{{ experience.description }}">
+
+                                <i class="fa-solid fa-pen"></i>
+
+                            </button>
+
+                            <form
+                                action="/delete-experience/{{ experience.id }}"
+                                method="post">
+
+                                <button
+                                    type="submit"
+                                    class="icon-btn"
+
+                                    onclick="return confirm('Delete this experience?')">
+
+                                    <i class="fa-solid fa-trash"></i>
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+                {% else %}
+
+                <!-- ======================================================
+                EMPTY STATE
+                ======================================================= -->
+
+                <div class="empty-state">
+
+                    <i class="fa-solid fa-briefcase"></i>
+
+                    <h3>
+
+                        No work experience yet
+
+                    </h3>
+
+                    <p>
+
+                        Click <strong>Add Experience</strong> to add your first work experience.
+
+                    </p>
+
+                </div>
+
+                {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- ======================================================
+            TIPS
+            ======================================================= -->
+
+            <div class="education-info-card">
+
+                <div class="info-icon">
+
+                    <i class="fa-solid fa-lightbulb"></i>
+
+                </div>
+
+                <div>
+
+                    <h4>
+
+                        Tips
+
+                    </h4>
+
+                    <p>
+
+                        Include your job title, company, employment period,
+                        responsibilities, achievements, technologies used,
+                        leadership experience and measurable results.
+                        Employers are more interested in accomplishments than
+                        job duties.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+ADD / EDIT EXPERIENCE MODAL
+========================================================== -->
+
+<div class="modal-overlay" id="experienceModal">
+
+    <div class="education-modal">
+
+        <form
+            id="experienceForm"
+            action="/add-experience"
+            method="post">
+
+            <input
+                type="hidden"
+                id="experienceId"
+                name="experience_id">
+
+            <!-- Header -->
+
+            <div class="modal-header">
+
+                <h2 id="modalTitle">
+
+                    Add Experience
+
+                </h2>
+
+            </div>
+
+            <!-- Body -->
+
+            <div class="modal-body">
+
+                <!-- Error -->
+
+                <div
+                    id="experienceError"
+                    class="form-error-message"
+                    style="display:none;">
+
+                    <i class="fa-solid fa-circle-xmark"></i>
+
+                    <span id="experienceErrorText"></span>
+
+                </div>
+
+                <!-- Job Title -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Job Title
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="jobTitle"
+                        name="job_title"
+                        placeholder="Example: Software Engineer"
+                        required>
+
+                </div>
+
+                <!-- Company -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Company Name
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="companyName"
+                        name="company_name"
+                        placeholder="Example: Microsoft"
+                        required>
+
+                </div>
+
+                <!-- Employment Type -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Employment Type
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select
+                        id="employmentType"
+                        name="employment_type"
+                        required>
+
+                        <option value="">Select Employment Type</option>
+
+                        <option>Full-Time</option>
+                        <option>Part-Time</option>
+                        <option>Internship</option>
+                        <option>Contract</option>
+                        <option>Freelance</option>
+                        <option>Temporary</option>
+                        <option>Volunteer</option>
+
+                    </select>
+
+                </div>
+
+                <!-- Location -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Location
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="Example: Kuala Lumpur"
+                        required>
+
+                </div>
+
+                <!-- Dates -->
+
+                <div class="date-grid">
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Start Date
+
+                            <span class="required">*</span>
+
+                        </label>
+
+                        <input
+                            type="month"
+                            id="startDate"
+                            name="start_date"
+                            required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            End Date
+
+                        </label>
+
+                        <input
+                            type="month"
+                            id="endDate"
+                            name="end_date">
+
+                    </div>
+
+                </div>
+
+                <!-- Current Job -->
+
+                <div class="checkbox-group">
+
+                    <label>
+
+                        <input
+                            type="checkbox"
+                            id="currentJob"
+                            name="currently_working">
+
+                        I currently work here
+
+                    </label>
+
+                </div>
+
+                <!-- Description -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Job Description
+
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="6"
+                        placeholder="Describe your responsibilities, achievements, technologies used and projects..."></textarea>
+
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    id="closeExperienceModal"
+                    class="btn-secondary">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-primary">
+
+                    Save Experience
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script src="static/js/manageExperience.js"></script>
+
+</body>
+</html>

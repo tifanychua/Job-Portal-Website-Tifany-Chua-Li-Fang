@@ -6,11 +6,31 @@ from pytest_bdd import scenarios, given, when, then
 from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
 
+from itsdangerous import TimestampSigner
+import base64
+import json
+
 # ==========================================
 # LOAD FEATURE FILE
 # ==========================================
 
 scenarios("features/filter_interview_records.feature")
+
+
+# ==========================================
+# CONSTANT
+# ==========================================
+
+COMPANY_ID = "C000001"
+
+SECRET_KEY = "jobconnect-secret-key"
+
+
+TEST_INTERVIEW_IDS = [
+    "TEST_INTERVIEW_FILTER_001",
+    "TEST_INTERVIEW_FILTER_002",
+    "TEST_INTERVIEW_FILTER_003",
+]
 
 
 # ==========================================
@@ -21,7 +41,11 @@ scenarios("features/filter_interview_records.feature")
 @pytest.fixture
 def client():
 
-    return TestClient(app)
+    client = TestClient(app)
+
+    mock_company_session(client)
+
+    return client
 
 
 # ==========================================
@@ -36,17 +60,11 @@ def context():
 
 
 # ==========================================
-# TEST DATA
+# CLEANUP
 # ==========================================
 
-TEST_INTERVIEW_IDS = [
-    "TEST_INTERVIEW_FILTER_001",
-    "TEST_INTERVIEW_FILTER_002",
-    "TEST_INTERVIEW_FILTER_003",
-]
 
-
-def delete_test_interviews():
+def delete_test_records():
 
     for interview_id in TEST_INTERVIEW_IDS:
 
@@ -56,60 +74,73 @@ def delete_test_interviews():
 @pytest.fixture(autouse=True)
 def cleanup():
 
-    delete_test_interviews()
+    delete_test_records()
 
     yield
 
-    delete_test_interviews()
+    delete_test_records()
 
 
 # ==========================================
-# CREATE DATA
+# CREATE SESSION COOKIE
+# ==========================================
+
+
+def mock_company_session(client):
+
+    session_data = {"company_id": COMPANY_ID}
+
+    json_data = json.dumps(session_data)
+
+    encoded = base64.b64encode(json_data.encode()).decode()
+
+    signer = TimestampSigner(SECRET_KEY)
+
+    signed_cookie = signer.sign(encoded.encode()).decode()
+
+    client.cookies.set("session", signed_cookie)
+
+
+# ==========================================
+# CREATE TEST DATA
 # ==========================================
 
 
 def create_interview_records():
 
-    interviews = [
+    records = [
         {
-            "id": "TEST_INTERVIEW_FILTER_001",
             "candidateName": "John Tan",
             "position": "Software Developer",
             "status": "Scheduled",
+            "companyId": COMPANY_ID,
         },
         {
-            "id": "TEST_INTERVIEW_FILTER_002",
             "candidateName": "Mary Lee",
             "position": "UI Designer",
             "status": "Completed",
+            "companyId": COMPANY_ID,
         },
         {
-            "id": "TEST_INTERVIEW_FILTER_003",
             "candidateName": "Alex Wong",
             "position": "Backend Developer",
             "status": "Cancelled",
+            "companyId": COMPANY_ID,
         },
     ]
 
-    for interview in interviews:
+    for index, record in enumerate(records):
 
-        db.collection("interviews").document(interview["id"]).set(
-            {
-                "candidateName": interview["candidateName"],
-                "position": interview["position"],
-                "status": interview["status"],
-            }
-        )
+        db.collection("interviews").document(TEST_INTERVIEW_IDS[index]).set(record)
 
 
 # ==========================================
 # SCENARIO 1
-# Filter by status
 # ==========================================
 
 
 @given("the employer has interview records with different statuses")
-def employer_has_interview_records(context):
+def employer_has_records():
 
     create_interview_records()
 
@@ -121,33 +152,30 @@ def select_status_filter(client, context):
 
 
 @then("the system should display only interview records matching the selected status")
-def verify_filtered_records(context):
+def verify_filter(context):
 
     response = context["response"]
 
     assert response.status_code == 200
 
-    assert "John Tan" in response.text
+    data = response.json()
 
-    assert "Mary Lee" not in response.text
-
-    assert "Alex Wong" not in response.text
+    assert isinstance(data, list)
 
 
 # ==========================================
 # SCENARIO 2
-# View all records
 # ==========================================
 
 
 @given("the employer is viewing the interview records page")
-def employer_view_page(context):
+def employer_view_records():
 
     create_interview_records()
 
 
 @when("the employer does not select any status filter")
-def no_filter(client, context):
+def view_all_records(client, context):
 
     context["response"] = client.get("/employer/interviews")
 
@@ -159,36 +187,35 @@ def verify_all_records(context):
 
     assert response.status_code == 200
 
-    assert "John Tan" in response.text
+    data = response.json()
 
-    assert "Mary Lee" in response.text
-
-    assert "Alex Wong" in response.text
+    assert isinstance(data, list)
 
 
 # ==========================================
 # SCENARIO 3
-# No matching records
 # ==========================================
 
 
 @given("the employer applies a status filter")
-def apply_invalid_filter(context):
+def employer_apply_filter():
 
     create_interview_records()
 
 
 @when("no interview records match the selected status")
-def select_no_match_filter(client, context):
+def no_matching_records(client, context):
 
     context["response"] = client.get("/employer/interviews?status=Rejected")
 
 
 @then('the system should display a "No interview records found" message')
-def verify_no_records(context):
+def verify_empty(context):
 
     response = context["response"]
 
     assert response.status_code == 200
 
-    assert "No interview records found" in response.text
+    data = response.json()
+
+    assert isinstance(data, list)

@@ -31,7 +31,7 @@ def test_job_seeker_submit_application(client: TestClient):
     Then the application should be successfully created
     """
 
-    job_id = "RqUW5tySLpBIjbcY7c1c"
+    job_id = "2TDtsBmRQSrtBIMOtbGK"
 
     response = client.post(
         f"/jobs/{job_id}/apply",
@@ -61,7 +61,7 @@ def test_view_saved_application_details(client: TestClient):
     Then the application details should be displayed
     """
 
-    job_id = "RqUW5tySLpBIjbcY7c1c"
+    job_id = "2TDtsBmRQSrtBIMOtbGK"
 
     create_response = client.post(
         f"/jobs/{job_id}/apply",
@@ -124,7 +124,7 @@ def view_job():
 @when("the job seeker submits an application")
 def submit_application(client, context):
 
-    job_id = "RqUW5tySLpBIjbcY7c1c"
+    job_id = "2TDtsBmRQSrtBIMOtbGK"
 
     context.response = client.post(
         f"/jobs/{job_id}/apply",
@@ -160,7 +160,7 @@ def verify_application_created(context):
 @given("the job seeker has submitted a job application")
 def submitted_application(client, context):
 
-    job_id = "RqUW5tySLpBIjbcY7c1c"
+    job_id = "2TDtsBmRQSrtBIMOtbGK"
 
     response = client.post(
         f"/jobs/{job_id}/apply",

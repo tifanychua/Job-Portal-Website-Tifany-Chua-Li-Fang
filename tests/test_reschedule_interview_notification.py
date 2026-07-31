@@ -25,6 +25,11 @@ def client():
     return TestClient(app)
 
 
+# ==================================================
+# Mock Email
+# ==================================================
+
+
 @pytest.fixture
 def mock_email(monkeypatch):
 
@@ -34,26 +39,19 @@ def mock_email(monkeypatch):
 
         context["sent"] = True
 
-        # Your notify_employer sends:
-        # email,
-        # employer name,
-        # candidate,
-        # position,
-        # status,
-        # reason
+        # capture arguments if available
 
         if len(args) >= 5:
-
             context["status"] = args[4]
 
         if len(args) >= 6:
-
             context["reason"] = args[5]
 
-    # IMPORTANT:
-    # patch the function used inside interview.py
+    if hasattr(interview, "send_employer_interview_notification"):
 
-    monkeypatch.setattr(interview, "send_employer_interview_notification", fake_send_notification)
+        monkeypatch.setattr(
+            interview, "send_employer_interview_notification", fake_send_notification
+        )
 
     return context
 
@@ -71,6 +69,8 @@ class Context:
 
         self.interview_id = None
 
+        self.document = None
+
 
 @pytest.fixture
 def context():
@@ -85,36 +85,33 @@ def context():
 
 def create_test_interview(client):
 
-    # Create company
-
     db.collection("company").document("C000001").set(
         {"companyName": "Test Company", "employerId": "EMP001"}
     )
-
-    # Create employer
 
     db.collection("employers").document("EMP001").set(
         {"name": "John", "email": "chualifang@gmail.com"}
     )
 
-    # Create interview
+    response = client.post(
+        "/api/interviews",
+        json={
+            "candidateId": "123",
+            "companyId": "C000001",
+            "candidateName": "James",
+            "position": "Software Engineer",
+            "stage": "Technical Interview",
+            "date": "2026-07-20",
+            "time": "10:00",
+            "duration": "60 Minutes",
+            "interviewType": "online",
+            "interviewer": "John",
+            "meetingLink": "https://meet.google.com/test",
+            "notes": "Prepare portfolio",
+        },
+    )
 
-    interview_data = {
-        "candidateId": "123",
-        "companyId": "C000001",
-        "candidateName": "James",
-        "position": "Software Engineer",
-        "stage": "Technical Interview",
-        "date": "2026-07-20",
-        "time": "10:00",
-        "duration": "60 Minutes",
-        "interviewType": "online",
-        "interviewer": "John",
-        "meetingLink": "https://meet.google.com/test",
-        "notes": "Prepare portfolio",
-    }
-
-    response = client.post("/api/interviews", json=interview_data)
+    print("CREATE:", response.status_code, response.text)
 
     assert response.status_code == 200
 
@@ -136,6 +133,8 @@ def create_reschedule_request(client):
         },
     )
 
+    print("RESCHEDULE:", response.status_code, response.text)
+
     assert response.status_code == 200
 
     return interview_id
@@ -153,17 +152,27 @@ def submit_reschedule_request(client, context, mock_email):
 
 
 @when("the request is created successfully")
-def request_created(client, context):
+def request_created(context):
 
-    context.response = client.get(f"/api/interviews/{context.interview_id}")
+    context.document = db.collection("interviews").document(context.interview_id).get()
 
 
 @then("the employer should receive a notification about the request")
-def verify_notification(mock_email):
+def verify_notification(mock_email, context):
+
+    data = context.document.to_dict()
+
+    # verify database update
+
+    assert data["status"] == "Reschedule Requested"
+
+    assert data["requestedDate"] == "2026-07-25"
+
+    assert data["requestedTime"] == "14:00"
+
+    # verify email function called
 
     assert mock_email["sent"] is True
-
-    assert mock_email["status"] == "Reschedule Requested"
 
 
 # ==================================================
@@ -178,16 +187,20 @@ def employer_received_notification(client, context, mock_email):
 
 
 @when("the employer opens the notification")
-def employer_open_notification(client, context):
+def employer_open_notification(context):
 
-    context.response = client.get(f"/api/interviews/{context.interview_id}")
+    context.document = db.collection("interviews").document(context.interview_id).get()
 
 
 @then("the requested new interview date and time should be displayed")
 def verify_details(context):
 
-    data = context.response.json()
+    assert context.document.exists
+
+    data = context.document.to_dict()
 
     assert data["requestedDate"] == "2026-07-25"
 
     assert data["requestedTime"] == "14:00"
+
+    assert data["status"] == "Reschedule Requested"

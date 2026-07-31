@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Login | JobConnect</title>
+
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/auth.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script type="module" src="/js/admin_login.js"></script>
+
+</head>
+
+<body>
+
+<div class="auth-page">
+
+
+
+<div class="auth-card">
+
+<a href="/" class="auth-brand">
+<i class="fa-solid fa-location-dot"></i>
+Job<span class="brand-connect">Connect</span>
+</a>
+
+<div class="auth-title">
+Welcome Back
+</div>
+
+
+<div class="auth-subtitle">
+Log in as Administrator
+</div>
+
+
+{% if error %}
+<div class="auth-alert auth-alert-error">
+<i class="fa-solid fa-circle-exclamation"></i>
+<span>Incorrect email or password.</span>
+</div>
+{% endif %}
+
+
+{% if registered %}
+<div class="auth-alert auth-alert-success">
+<i class="fa-solid fa-circle-check"></i>
+<span>Account created successfully! Please log in.</span>
+</div>
+{% endif %}
+
+
+
+<form id="adminLoginForm">
+
+<div class="auth-form-group">
+
+<label>Email Address</label>
+
+<div class="auth-input-wrap">
+
+<i class="fa-regular fa-envelope icon"></i>
+
+<input
+type="email"
+name="email"
+id="email"
+placeholder="admin@jobconnect.com"
+required>
+
+</div>
+
+</div>
+
+
+<div class="auth-form-group">
+
+<label>Password</label>
+
+<div class="auth-input-wrap">
+
+<i class="fa-solid fa-lock icon"></i>
+
+<input
+type="password"
+name="password"
+id="password"
+placeholder="Enter password"
+required>
+
+<i class="fa-regular fa-eye toggle-password"
+onclick="togglePassword('password',this)">
+</i>
+
+</div>
+
+</div>
+
+<button class="btn-auth-submit">
+Administrator Login
+</button>
+
+</form>
+
+
+
+</div>
+
+</div>
+
+
+<script>
+
+function togglePassword(id,icon){
+
+let input=document.getElementById(id);
+
+if(input.type==="password"){
+
+input.type="text";
+
+icon.classList.remove("fa-eye");
+icon.classList.add("fa-eye-slash");
+
+}
+
+else{
+
+input.type="password";
+
+icon.classList.remove("fa-eye-slash");
+icon.classList.add("fa-eye");
+
+}
+
+}
+
+
+
+</script>
+
+
+</body>
+</html>

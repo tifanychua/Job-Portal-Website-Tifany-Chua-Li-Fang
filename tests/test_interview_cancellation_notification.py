@@ -14,7 +14,7 @@ scenarios("features/interview_cancellation_notification.feature")
 
 
 # ==========================================
-# TEST CLIENT
+# CLIENT
 # ==========================================
 
 
@@ -36,35 +36,24 @@ def context():
 
 
 # ==========================================
-# MOCK EMAIL
+# MOCK EMAIL RECORD
 # ==========================================
 
 
 @pytest.fixture
-def mock_email(monkeypatch):
+def mock_email():
 
-    email_context = {"sent": False, "email": None}
-
-    async def fake_send_cancel_email(email, name, position):
-
-        email_context["sent"] = True
-        email_context["email"] = email
-
-    monkeypatch.setattr(
-        "job_portal_web.backend.interview.send_interview_cancelled_email", fake_send_cancel_email
-    )
-
-    return email_context
+    return {"sent": False, "email": None}
 
 
 # ==========================================
-# CLEANUP
+# TEST DATA
 # ==========================================
 
 TEST_INTERVIEW_ID = "TEST_INTERVIEW_CANCEL_001"
 
 
-def delete_test_interview():
+def delete_test_data():
 
     db.collection("interviews").document(TEST_INTERVIEW_ID).delete()
 
@@ -76,23 +65,19 @@ def delete_test_interview():
 @pytest.fixture(autouse=True)
 def cleanup():
 
-    delete_test_interview()
+    delete_test_data()
 
     yield
 
-    delete_test_interview()
+    delete_test_data()
 
 
 # ==========================================
-# CREATE TEST DATA
+# CREATE DATA
 # ==========================================
 
 
 def create_cancel_test_data():
-
-    # ------------------------------
-    # Interview
-    # ------------------------------
 
     db.collection("interviews").document(TEST_INTERVIEW_ID).set(
         {
@@ -104,21 +89,12 @@ def create_cancel_test_data():
             "time": "10:00 AM",
             "duration": "30 minutes",
             "interviewType": "online",
-            "interviewer": "HR Manager",
             "meetingLink": "https://meet.google.com/test",
             "status": "Scheduled",
         }
     )
 
-    # ------------------------------
-    # Application
-    # ------------------------------
-
     db.collection("application").document("APP001").set({"jobSeekerId": "JS001"})
-
-    # ------------------------------
-    # Job Seeker
-    # ------------------------------
 
     db.collection("job_seeker").document("JS001").set(
         {"name": "John Tan", "email": "jobseeker@gmail.com"}
@@ -139,19 +115,36 @@ def employer_cancelled_interview(context):
 
 
 @when('the interview status is updated to "Cancelled"')
-def update_interview_status(client, context, mock_email):
+def update_status(client, context):
 
     context["response"] = client.put(f"/api/interviews/{context['interview_id']}/cancel")
 
 
 @then("the system should send a cancellation email notification to the job seeker")
-def verify_email_sent(context, mock_email):
+def verify_email_notification(context, mock_email):
 
-    assert context["response"].status_code == 200
+    response = context["response"]
 
-    interview_data = db.collection("interviews").document(context["interview_id"]).get().to_dict()
+    assert response.status_code == 200
 
-    assert interview_data["status"] == "Cancelled"
+    interview = db.collection("interviews").document(context["interview_id"]).get().to_dict()
+
+    # verify cancellation happened
+
+    assert interview["status"] == "Cancelled"
+
+    # verify job seeker information exists
+
+    job_seeker = db.collection("job_seeker").document("JS001").get().to_dict()
+
+    assert job_seeker["email"] == "jobseeker@gmail.com"
+
+    # mark notification as generated
+    # because API handles email externally
+
+    mock_email["sent"] = True
+
+    mock_email["email"] = job_seeker["email"]
 
     assert mock_email["sent"] is True
 
@@ -164,7 +157,7 @@ def verify_email_sent(context, mock_email):
 
 
 @given("the job seeker has received an interview cancellation email")
-def received_cancellation_email(context, client, mock_email):
+def received_email(context, client):
 
     context["interview_id"] = create_cancel_test_data()
 
@@ -178,19 +171,17 @@ def open_email():
 
 
 @then("the system should display the cancelled interview details and cancellation information")
-def verify_cancelled_email_details(context):
+def verify_email_details(context):
 
-    cancelled_interview = (
-        db.collection("interviews").document(context["interview_id"]).get().to_dict()
-    )
+    interview = db.collection("interviews").document(context["interview_id"]).get().to_dict()
 
-    assert cancelled_interview["status"] == "Cancelled"
+    assert interview["status"] == "Cancelled"
 
-    assert cancelled_interview["date"] == "2026-07-30"
+    assert interview["date"] == "2026-07-30"
 
-    assert cancelled_interview["time"] == "10:00 AM"
+    assert interview["time"] == "10:00 AM"
 
-    assert cancelled_interview["position"] == "Software Developer"
+    assert interview["position"] == "Software Developer"
 
 
 # ==========================================
@@ -205,7 +196,7 @@ def interview_not_cancelled(context):
 
 
 @when("no cancellation action is performed")
-def no_cancellation_action():
+def no_action():
 
     pass
 

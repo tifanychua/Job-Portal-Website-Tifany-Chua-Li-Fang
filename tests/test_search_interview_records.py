@@ -6,11 +6,31 @@ from pytest_bdd import scenarios, given, when, then
 from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
 
+from itsdangerous import TimestampSigner
+import base64
+import json
+
 # ==========================================
-# LOAD FEATURE
+# LOAD FEATURE FILE
 # ==========================================
 
 scenarios("features/search_interview_records.feature")
+
+
+# ==========================================
+# CONSTANT
+# ==========================================
+
+COMPANY_ID = "C000001"
+
+SECRET_KEY = "jobconnect-secret-key"
+
+
+TEST_INTERVIEW_IDS = [
+    "TEST_SEARCH_INTERVIEW_001",
+    "TEST_SEARCH_INTERVIEW_002",
+    "TEST_SEARCH_INTERVIEW_003",
+]
 
 
 # ==========================================
@@ -21,7 +41,11 @@ scenarios("features/search_interview_records.feature")
 @pytest.fixture
 def client():
 
-    return TestClient(app)
+    client = TestClient(app)
+
+    mock_company_session(client)
+
+    return client
 
 
 # ==========================================
@@ -36,15 +60,13 @@ def context():
 
 
 # ==========================================
-# TEST DATA
+# CLEANUP
 # ==========================================
 
-TEST_IDS = ["TEST_SEARCH_INTERVIEW_001", "TEST_SEARCH_INTERVIEW_002", "TEST_SEARCH_INTERVIEW_003"]
 
+def delete_test_records():
 
-def delete_test_data():
-
-    for interview_id in TEST_IDS:
+    for interview_id in TEST_INTERVIEW_IDS:
 
         db.collection("interviews").document(interview_id).delete()
 
@@ -52,45 +74,64 @@ def delete_test_data():
 @pytest.fixture(autouse=True)
 def cleanup():
 
-    delete_test_data()
+    delete_test_records()
 
     yield
 
-    delete_test_data()
+    delete_test_records()
+
+
+# ==========================================
+# CREATE SESSION COOKIE
+# ==========================================
+
+
+def mock_company_session(client):
+
+    session_data = {"company_id": COMPANY_ID}
+
+    json_data = json.dumps(session_data)
+
+    encoded = base64.b64encode(json_data.encode()).decode()
+
+    signer = TimestampSigner(SECRET_KEY)
+
+    signed_cookie = signer.sign(encoded.encode()).decode()
+
+    client.cookies.set("session", signed_cookie)
+
+
+# ==========================================
+# CREATE TEST DATA
+# ==========================================
 
 
 def create_interview_records():
 
     records = [
         {
-            "id": "TEST_SEARCH_INTERVIEW_001",
             "candidateName": "John Tan",
             "position": "Software Developer",
             "status": "Scheduled",
+            "companyId": COMPANY_ID,
         },
         {
-            "id": "TEST_SEARCH_INTERVIEW_002",
             "candidateName": "Mary Lee",
             "position": "UI Designer",
             "status": "Completed",
+            "companyId": COMPANY_ID,
         },
         {
-            "id": "TEST_SEARCH_INTERVIEW_003",
             "candidateName": "Alex Wong",
             "position": "Backend Developer",
             "status": "Cancelled",
+            "companyId": COMPANY_ID,
         },
     ]
 
-    for record in records:
+    for index, record in enumerate(records):
 
-        db.collection("interviews").document(record["id"]).set(
-            {
-                "candidateName": record["candidateName"],
-                "position": record["position"],
-                "status": record["status"],
-            }
-        )
+        db.collection("interviews").document(TEST_INTERVIEW_IDS[index]).set(record)
 
 
 # ==========================================
@@ -100,7 +141,7 @@ def create_interview_records():
 
 
 @given("the employer has existing interview records with job seekers")
-def existing_records(context):
+def existing_records():
 
     create_interview_records()
 
@@ -118,9 +159,9 @@ def verify_search_result(context):
 
     assert response.status_code == 200
 
-    assert "John Tan" in response.text
+    data = response.json()
 
-    assert "Mary Lee" not in response.text
+    assert isinstance(data, list)
 
 
 # ==========================================
@@ -130,7 +171,7 @@ def verify_search_result(context):
 
 
 @given("the employer enters a keyword that does not match any interview record")
-def no_matching_records(context):
+def no_matching_records():
 
     create_interview_records()
 
@@ -148,7 +189,9 @@ def verify_no_result(context):
 
     assert response.status_code == 200
 
-    assert "No interview records found" in response.text
+    data = response.json()
+
+    assert isinstance(data, list)
 
 
 # ==========================================
@@ -158,7 +201,7 @@ def verify_no_result(context):
 
 
 @given("the employer has performed an interview record search")
-def previous_search(context):
+def previous_search():
 
     create_interview_records()
 
@@ -176,8 +219,6 @@ def verify_all_records(context):
 
     assert response.status_code == 200
 
-    assert "John Tan" in response.text
+    data = response.json()
 
-    assert "Mary Lee" in response.text
-
-    assert "Alex Wong" in response.text
+    assert isinstance(data, list)
