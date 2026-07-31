@@ -1258,3 +1258,66 @@ body{
     font-weight:600;
 
 }
+
+/* =====================================
+   Logout Button
+===================================== */
+
+.logout-section {
+
+    display: flex;
+
+    justify-content: center;
+
+    margin: 40px 0 30px;
+
+}
+
+
+.logout-btn {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    padding: 12px 35px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #dc2626;
+
+    color: white;
+
+    font-family: 'Poppins', sans-serif;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.3s ease;
+
+}
+
+
+.logout-btn i {
+
+    font-size: 16px;
+
+}
+
+
+.logout-btn:hover {
+
+    background: #b91c1c;
+
+    transform: translateY(-2px);
+
+}

@@ -372,50 +372,118 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
     doc = interview_ref.get()
 
     if not doc.exists:
-
-        raise HTTPException(status_code=404, detail="Interview not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Interview not found"
+        )
 
     old_data = doc.to_dict()
 
     updated_data = {
         **old_data,
         **interview.model_dump(),
-        "status": "Scheduled",
+        "status": "Rescheduled",
         "applicantResponse": "Pending",
     }
 
+
+    # Update interview
     interview_ref.update(
-        {**interview.model_dump(), "status": "Rescheduled", "applicantResponse": "Pending"}
+        {
+            **interview.model_dump(),
+            "status": "Rescheduled",
+            "applicantResponse": "Pending",
+        }
     )
+
 
     try:
 
-        seeker_doc = db.collection("job_seeker").document(updated_data.get("candidateId")).get()
+        # ======================================
+        # Get Job Seeker
+        # ======================================
+
+        candidate_id = updated_data.get("candidateId")
+
+        seeker_id = candidate_id
+
+
+        # CandidateId may be application ID
+        application_doc = (
+            db.collection("application")
+            .document(candidate_id)
+            .get()
+        )
+
+
+        if application_doc.exists:
+
+            application_data = application_doc.to_dict()
+
+            seeker_id = application_data.get(
+                "jobSeekerId",
+                candidate_id
+            )
+
+
+        seeker_doc = (
+            db.collection("job_seeker")
+            .document(seeker_id)
+            .get()
+        )
+
 
         if seeker_doc.exists:
 
             seeker = seeker_doc.to_dict()
 
+
+            # ======================================
+            # Get Company Address
+            # ======================================
+
             company_address = ""
 
-            company_doc = db.collection("company").document(updated_data.get("companyId")).get()
+            company_doc = (
+                db.collection("company")
+                .document(updated_data.get("companyId"))
+                .get()
+            )
+
 
             if company_doc.exists:
 
                 company = company_doc.to_dict()
 
-                company_address = company.get("address", "")
+                company_address = company.get(
+                    "address",
+                    ""
+                )
+
+
+            # ======================================
+            # Send Email
+            # ======================================
 
             await send_interview_rescheduled_email(
-                seeker.get("email"), seeker.get("name"), Interview(**updated_data), company_address
+                seeker.get("email"),
+                seeker.get("name"),
+                Interview(**updated_data),
+                company_address
             )
+
 
     except Exception as e:
 
-        print("Reschedule email error:", e)
+        print(
+            "Reschedule email error:",
+            e
+        )
 
-    return {"message": "Interview updated successfully"}
 
+    return {
+        "message": "Interview updated successfully"
+    }
 
 # ==================================================
 # APPLICANT VIEW INTERVIEWS

@@ -18,15 +18,32 @@ def get_current_applicant_id(request: Request):
         return "0YLcc18JszVqSXWn8DEDQ81o2vR2"
 
     if request.session.get("user_type") != "job_seeker":
-        raise HTTPException(status_code=403, detail="Access denied")
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied"
+        )
+
 
     applicant_id = request.session.get("applicant_id")
 
+
     if not applicant_id:
-        raise HTTPException(status_code=401, detail="Applicant not logged in")
+        raise HTTPException(
+            status_code=401,
+            detail="Applicant not logged in"
+        )
+
 
     return applicant_id
 
+def get_current_user(applicant_id):
+
+    user_doc = db.collection("job_seeker").document(applicant_id).get()
+
+    if user_doc.exists:
+        return user_doc.to_dict()
+
+    return None
 
 # ===========================================================
 # MANAGE EDUCATION PAGE
@@ -37,6 +54,8 @@ def get_current_applicant_id(request: Request):
 async def manage_education(request: Request):
 
     applicant_id = get_current_applicant_id(request)
+
+    user = get_current_user(applicant_id)
 
     education_list = []
 
@@ -50,8 +69,13 @@ async def manage_education(request: Request):
         education_list.append(data)
 
     return templates.TemplateResponse(
-        request=request, name="manageEducation.html", context={"education_list": education_list}
-    )
+    request=request,
+    name="manageEducation.html",
+    context={
+        "education_list": education_list,
+        "user": user
+    }
+)
 
 
 # ===========================================================

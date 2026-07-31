@@ -112,7 +112,10 @@ def save_interview(client, context, mocker):
 
         if name == "interviews":
 
-            collection.add.return_value = ("mock_interview_id", None)
+            mock_doc_ref = mocker.Mock()
+            mock_doc_ref.id = "mock_interview_id"
+
+            collection.add.return_value = ("unused", mock_doc_ref)
 
         elif name == "applications":
 

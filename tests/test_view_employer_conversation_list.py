@@ -1,29 +1,101 @@
+import json
+import base64
+
 from fastapi.testclient import TestClient
+from itsdangerous import TimestampSigner
+from starlette.middleware.sessions import SessionMiddleware
 
 from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
 
+
 client = TestClient(app)
 
 
+
 # =====================================
-# Insert test data
+# Session Helper
+# =====================================
+
+
+def create_session(data):
+
+    secret_key = None
+
+    for middleware in app.user_middleware:
+
+        if middleware.cls == SessionMiddleware:
+
+            secret_key = middleware.kwargs["secret_key"]
+            break
+
+
+    if secret_key is None:
+        raise Exception(
+            "SessionMiddleware secret_key not found"
+        )
+
+
+    json_data = json.dumps(data)
+
+
+    encoded_data = base64.b64encode(
+        json_data.encode()
+    ).decode()
+
+
+    signer = TimestampSigner(secret_key)
+
+
+    cookie_value = signer.sign(
+        encoded_data
+    ).decode()
+
+
+    client.cookies.set(
+        "session",
+        cookie_value
+    )
+
+
+
+def set_employer_session():
+
+    create_session(
+        {
+            "user_type": "employer",
+            "company_id": "EMP001",
+        }
+    )
+
+
+
+def set_empty_employer_session():
+
+    create_session(
+        {
+            "user_type": "employer",
+            "company_id": "EMP999",
+        }
+    )
+
+
+
+# =====================================
+# Insert Test Data
 # =====================================
 
 
 def create_test_messages():
 
-    # clear old test data
-    messages = db.collection("messages").stream()
+    delete_test_data()
 
-    for msg in messages:
-        data = msg.to_dict()
 
-        if data.get("test"):
-            msg.reference.delete()
+    # Message 1
 
-    # Insert messages
-    db.collection("messages").document("TEST_MESSAGE_001").set(
+    db.collection("messages").document(
+        "TEST_MESSAGE_001"
+    ).set(
         {
             "conversationId": "EMP001_JS001",
             "message": "Thank you for arranging the interview",
@@ -34,7 +106,12 @@ def create_test_messages():
         }
     )
 
-    db.collection("messages").document("TEST_MESSAGE_002").set(
+
+    # Message 2
+
+    db.collection("messages").document(
+        "TEST_MESSAGE_002"
+    ).set(
         {
             "conversationId": "EMP001_JS002",
             "message": "I am available for the interview",
@@ -45,97 +122,190 @@ def create_test_messages():
         }
     )
 
-    # Create job seekers
-    db.collection("job_seeker").document("JS001").set({"name": "John Tan"})
 
-    db.collection("job_seeker").document("JS002").set({"name": "Mary Lee"})
+    # Job seeker data
+
+    db.collection("job_seeker").document(
+        "JS001"
+    ).set(
+        {
+            "name": "John Tan",
+            "test": True,
+        }
+    )
+
+
+    db.collection("job_seeker").document(
+        "JS002"
+    ).set(
+        {
+            "name": "Mary Lee",
+            "test": True,
+        }
+    )
+
+
+
+# =====================================
+# Delete Test Data
+# =====================================
 
 
 def delete_test_data():
 
-    collections = ["messages", "job_seeker"]
+    collections = [
+        "messages",
+        "job_seeker",
+    ]
+
 
     for collection in collections:
 
         docs = db.collection(collection).stream()
 
+
         for doc in docs:
 
             data = doc.to_dict()
 
-            if data.get("test"):
+
+            if data.get("test") is True:
+
                 doc.reference.delete()
+
 
 
 # =====================================
 # Test 1
-# View conversation list
+# View Conversation List
 # =====================================
 
 
 def test_view_conversation_list():
 
-    create_test_messages()
+    try:
 
-    response = client.get("/api/conversations", params={"userId": "EMP001", "userType": "employer"})
+        create_test_messages()
 
-    print("\nRESPONSE:")
-    print(response.text)
+        set_employer_session()
 
-    assert response.status_code == 200
 
-    data = response.json()
+        response = client.get(
+            "/api/conversations"
+        )
 
-    assert len(data) > 0
 
-    assert data[0]["conversationId"] in ["EMP001_JS001", "EMP001_JS002"]
+        print("\nRESPONSE:")
+        print(response.text)
 
-    assert "name" in data[0]
 
-    delete_test_data()
+        assert response.status_code == 200
+
+
+        data = response.json()
+
+
+        assert len(data) > 0
+
+
+        conversation_ids = [
+            item["conversationId"]
+            for item in data
+        ]
+
+
+        assert (
+            "EMP001_JS001" in conversation_ids
+            or
+            "EMP001_JS002" in conversation_ids
+        )
+
+
+        assert "name" in data[0]
+
+
+    finally:
+
+        delete_test_data()
+
 
 
 # =====================================
 # Test 2
-# Latest message information
+# Latest Message Information
 # =====================================
 
 
 def test_display_latest_conversation_information():
 
-    create_test_messages()
+    try:
 
-    response = client.get("/api/conversations", params={"userId": "EMP001", "userType": "employer"})
+        create_test_messages()
 
-    assert response.status_code == 200
+        set_employer_session()
 
-    data = response.json()
 
-    messages = [item["lastMessage"] for item in data]
+        response = client.get(
+            "/api/conversations"
+        )
 
-    assert (
-        "Thank you for arranging the interview" in messages
-        or "I am available for the interview" in messages
-    )
 
-    delete_test_data()
+        assert response.status_code == 200
+
+
+        data = response.json()
+
+
+        latest_messages = [
+            item["lastMessage"]
+            for item in data
+        ]
+
+
+        assert (
+            "Thank you for arranging the interview"
+            in latest_messages
+            or
+            "I am available for the interview"
+            in latest_messages
+        )
+
+
+    finally:
+
+        delete_test_data()
+
 
 
 # =====================================
 # Test 3
-# No conversation available
+# No Conversation Available
 # =====================================
 
 
 def test_no_conversations_available():
 
-    # remove all test data first
-    delete_test_data()
+    try:
 
-    response = client.get("/api/conversations", params={"userId": "EMP999", "userType": "employer"})
+        delete_test_data()
 
-    assert response.status_code == 200
+        set_empty_employer_session()
 
-    data = response.json()
 
-    assert data == []
+        response = client.get(
+            "/api/conversations"
+        )
+
+
+        assert response.status_code == 200
+
+
+        data = response.json()
+
+
+        assert data == []
+
+
+    finally:
+
+        delete_test_data()

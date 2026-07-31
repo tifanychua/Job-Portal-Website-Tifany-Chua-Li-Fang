@@ -38,6 +38,14 @@ def get_current_applicant_id(request: Request):
 
     return applicant_id
 
+def get_current_user(applicant_id):
+
+    user_doc = db.collection("job_seeker").document(applicant_id).get()
+
+    if user_doc.exists:
+        return user_doc.to_dict()
+
+    return None
 
 # ======================================================
 # Manage Experience Page
@@ -48,6 +56,8 @@ def get_current_applicant_id(request: Request):
 async def manage_experience(request: Request):
 
     applicant_id = get_current_applicant_id(request)
+
+    user = get_current_user(applicant_id)
 
     experience_list = []
 
@@ -64,8 +74,13 @@ async def manage_experience(request: Request):
     experience_list.sort(key=lambda x: x.get("start_date", ""), reverse=True)
 
     return templates.TemplateResponse(
-        request=request, name="manageExperience.html", context={"experience_list": experience_list}
-    )
+    request=request,
+    name="manageExperience.html",
+    context={
+        "experience_list": experience_list,
+        "user": user
+    }
+)
 
 
 # ======================================================
