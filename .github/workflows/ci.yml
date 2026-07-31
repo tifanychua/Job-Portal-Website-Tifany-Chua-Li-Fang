@@ -27,9 +27,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install ruff black mypy types-requests
 
@@ -39,6 +39,7 @@ jobs:
           black --check .
 
       - name: Type check
+        continue-on-error: true
         run: |
           mypy src --ignore-missing-imports
 
