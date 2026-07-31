@@ -1,5 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
+from datetime import datetime, date
+
 
 from fastapi import (
     APIRouter,
@@ -58,7 +60,11 @@ async def edit_profile(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="edit_jobSeeker_profile.html",
-        context={"seeker": seeker},
+        context={
+            "seeker": seeker,
+            "today": date.today().isoformat(),
+            },
+        
     )
 
 
@@ -97,6 +103,27 @@ async def update_profile(
 
     image_url = seeker.get("profileImage", "")
 
+    # ----------------------------------------
+    # Validate Date of Birth
+    # ----------------------------------------
+
+    if date_of_birth:
+
+        dob = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
+
+        if dob >= date.today():
+
+            return templates.TemplateResponse(
+                request=request,
+                name="edit_jobSeeker_profile.html",
+                context={
+                    "seeker": seeker,
+                    "today": date.today().isoformat(),
+                    "error": "Date of birth must be before today.",
+                },
+                status_code=400,
+            )
+    
     # ----------------------------------------
     # Upload new profile image
     # ----------------------------------------

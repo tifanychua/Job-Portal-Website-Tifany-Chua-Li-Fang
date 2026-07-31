@@ -6,6 +6,8 @@ from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore
+from datetime import datetime
+
 from job_portal_web.backend.database import bucket
 import uuid
 
@@ -66,12 +68,18 @@ async def edit_company_profile(request: Request):
 
     categories.sort(key=lambda x: x.get("category_name", ""))
 
+    current_year = datetime.now().year
+
     return templates.TemplateResponse(
         request=request,
         name="editCompanyProfile.html",
-        context={"company": company, "industries": industries, "categories": categories},
+        context={
+            "company": company,
+            "industries": industries,
+            "categories": categories,
+            "current_year": current_year,
+        },
     )
-
 
 # =====================================================
 # Get Specialties by Industry
