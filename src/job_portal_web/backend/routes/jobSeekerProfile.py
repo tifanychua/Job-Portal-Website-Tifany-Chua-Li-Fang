@@ -97,18 +97,16 @@ async def profile(request: Request):
         applicant["experience_list"].append(doc.to_dict())
 
     # ===========================
-    # Load Skills
-    # ===========================
+# Load Skills
+# ===========================
 
     applicant["skills"] = []
 
     skill_docs = (
-    db.collection("job_seeker_skill")
-    .where("applicant_id", "==", applicant_id)
-    .stream()
-)
-
-    applicant["skills"] = []
+        db.collection("job_seeker_skill")
+        .where("applicant_id", "==", applicant_id)
+        .stream()
+    )
 
     for doc in skill_docs:
 
@@ -116,17 +114,35 @@ async def profile(request: Request):
 
         skill_id = data.get("skill_id")
 
-        if skill_id:
+        if not skill_id:
+            continue
 
-            skill_doc = db.collection("skills").document(skill_id).get()
+        # Search using the skill_id field
+        docs = (
+            db.collection("skills")
+            .where("skill_id", "==", skill_id)
+            .limit(1)
+            .stream()
+        )
 
-            if skill_doc.exists:
+        found = False
 
-                skill_data = skill_doc.to_dict()
+        for skill_doc in docs:
 
-                applicant["skills"].append(
-                    skill_data.get("skill_name", skill_id)
-                )
+            skill_data = skill_doc.to_dict()
+
+            applicant["skills"].append(
+                skill_data.get("skill_name", skill_id)
+            )
+
+            found = True
+
+        # If the skill doesn't exist in the skills collection,
+        # still display the stored skill_id.
+        if not found:
+            applicant["skills"].append(skill_id)
+
+    print("Applicant skills:", applicant["skills"])
 
     # ===========================
     # Return Template

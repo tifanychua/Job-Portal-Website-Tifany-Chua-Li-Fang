@@ -305,10 +305,24 @@ async def edit_skill(
             return RedirectResponse("/manageSkills", status_code=303)
 
     # ------------------------------------------
+    # Check whether the document exists
+    # ------------------------------------------
+
+    doc_ref = db.collection("job_seeker_skill").document(document_id)
+
+    doc = doc_ref.get()
+
+    if not doc.exists:
+        return RedirectResponse(
+            "/manageSkills",
+            status_code=303,
+        )
+
+    # ------------------------------------------
     # Update
     # ------------------------------------------
 
-    db.collection("job_seeker_skill").document(document_id).update(
+    doc_ref.update(
         {
             "industry_id": industry_id,
             "category_id": category_id,
@@ -318,7 +332,10 @@ async def edit_skill(
         }
     )
 
-    return RedirectResponse("/manageSkills", status_code=303)
+    return RedirectResponse(
+        "/manageSkills",
+        status_code=303,
+    )
 
 
 # ======================================================
