@@ -381,9 +381,16 @@
 
                         <button
                             type="submit"
-                            class="btn-save">
+                            class="btn-save"
+                            id="saveProfileBtn">
 
-                            Save Changes
+                            <span class="btn-spinner" style="display:none;">
+                                <i class="fa-solid fa-spinner fa-spin"></i>
+                            </span>
+
+                            <span class="btn-text">
+                                Save Changes
+                            </span>
 
                         </button>
 
@@ -845,14 +852,23 @@ updateEmptyState();
 
 registerLanguageEvents();
 
-</script>
+const profileForm = document.getElementById("editProfileForm");
 
-<div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-box">
-        <div class="spinner"></div>
-        <p>Saving profile...</p>
-    </div>
-</div>
+profileForm.addEventListener("submit", function () {
+
+    const saveBtn = document.getElementById("saveProfileBtn");
+    const spinner = saveBtn.querySelector(".btn-spinner");
+    const btnText = saveBtn.querySelector(".btn-text");
+
+    saveBtn.disabled = true;
+
+    spinner.style.display = "inline-flex";
+
+    btnText.textContent = "Saving...";
+
+});
+
+</script>
 
 </body>
 

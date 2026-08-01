@@ -181,48 +181,66 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* ======================================================
-   Submit Experience Form
-====================================================== */
+    Submit Experience Form
+    ====================================================== */
 
-form.addEventListener("submit", async function (e) {
+    form.addEventListener("submit", async function (e) {
 
-    e.preventDefault();
+        e.preventDefault();
 
-    errorBox.style.display = "none";
-    errorText.textContent = "";
+        errorBox.style.display = "none";
+        errorText.textContent = "";
 
-    try {
+        const saveBtn = document.getElementById("saveExperienceBtn");
+        const spinner = saveBtn.querySelector(".btn-spinner");
+        const btnText = saveBtn.querySelector(".btn-text");
 
-        const response = await fetch(form.action, {
+        saveBtn.disabled = true;
+        spinner.style.display = "inline-flex";
+        btnText.textContent = "Saving...";
 
-            method: "POST",
-            body: new FormData(form)
+        try {
 
-        });
+            const response = await fetch(form.action, {
 
-        const result = await response.json();
+                method: "POST",
+                body: new FormData(form)
 
-        if (result.success) {
+            });
 
-            window.location.href = result.redirect;
+            const result = await response.json();
 
-        } else {
+            if (result.success) {
 
-            errorText.textContent = result.message;
+                window.location.href = result.redirect;
+
+            } else {
+
+                // Restore button
+                saveBtn.disabled = false;
+                spinner.style.display = "none";
+                btnText.textContent = "Save Experience";
+
+                errorText.textContent = result.message;
+                errorBox.style.display = "flex";
+
+            }
+
+        } catch (error) {
+
+            // Restore button
+            saveBtn.disabled = false;
+            spinner.style.display = "none";
+            btnText.textContent = "Save Experience";
+
+            errorText.textContent =
+                "Something went wrong. Please try again.";
+
             errorBox.style.display = "flex";
 
         }
 
-    } catch (error) {
-
-        errorText.textContent =
-            "Something went wrong. Please try again.";
-
-        errorBox.style.display = "flex";
-
-    }
-
-});
+    });
 
 });
 

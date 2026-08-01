@@ -583,12 +583,20 @@
 
         </a>
 
-        <button type="submit"
-                class="save-btn">
+        <button
+            type="submit"
+            class="save-btn"
+            id="saveCompanyBtn">
 
-            <i class="fa-solid fa-floppy-disk"></i>
+            <span class="btn-spinner" style="display:none;">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+            </span>
 
-            Save Changes
+            <i class="fa-solid fa-floppy-disk btn-icon"></i>
+
+            <span class="btn-text">
+                Save Changes
+            </span>
 
         </button>
 
@@ -597,15 +605,6 @@
     </form>
 
     </main>
-
-    <div id="loadingOverlay" class="loading-overlay">
-
-        <div class="loader"></div>
-
-        <p>Saving company profile...</p>
-
-    </div>
-
 
 </body>
 
@@ -672,15 +671,23 @@ new TomSelect("#specialty_category_ids",{
 
 const form = document.getElementById("companyForm");
 
-form.addEventListener("submit", function (e){
+form.addEventListener("submit", function (e) {
 
     if (!form.checkValidity()) {
         return;
     }
 
-    document
-        .getElementById("loadingOverlay")
-        .classList.add("show");
+    const saveBtn = document.getElementById("saveCompanyBtn");
+    const spinner = saveBtn.querySelector(".btn-spinner");
+    const btnText = saveBtn.querySelector(".btn-text");
+    const icon = saveBtn.querySelector(".btn-icon");
+
+    saveBtn.disabled = true;
+
+    spinner.style.display = "inline-flex";
+    icon.style.display = "none";
+
+    btnText.textContent = "Saving...";
 
 });
 

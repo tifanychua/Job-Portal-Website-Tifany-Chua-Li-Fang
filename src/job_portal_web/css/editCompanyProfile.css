@@ -1016,3 +1016,20 @@ textarea.error{
     margin-bottom:20px;
     font-weight:500;
 }
+
+.save-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-spinner {
+    display: none;
+    align-items: center;
+}
+
+.save-btn:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+}

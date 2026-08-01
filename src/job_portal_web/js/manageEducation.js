@@ -258,17 +258,25 @@ educationForm.addEventListener("submit", async function (e) {
     // Submit
     // ===========================================
 
+    const saveBtn = document.getElementById("saveEducationBtn");
+    const spinner = saveBtn.querySelector(".btn-spinner");
+    const btnText = saveBtn.querySelector(".btn-text");
+
+    saveBtn.disabled = true;
+    spinner.style.display = "inline-flex";
+    btnText.textContent = "Saving...";
+
+    // Allow the browser to repaint
+    await new Promise(resolve => setTimeout(resolve, 50));
+
     const formData = new FormData(educationForm);
 
     const response = await fetch(
-
         educationForm.action,
-
         {
             method: "POST",
             body: formData
         }
-
     );
 
     const result = await response.json();
