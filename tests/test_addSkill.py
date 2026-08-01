@@ -189,7 +189,7 @@ def add_multiple_skills(context):
 
     clear_all_skills()
 
-    client.post(
+    response1 = client.post(
         "/add-skill",
         data={
             "industry_id": INDUSTRY_ID,
@@ -200,7 +200,9 @@ def add_multiple_skills(context):
         follow_redirects=True,
     )
 
-    response = client.post(
+    print("ADD PYTHON STATUS:", response1.status_code)
+
+    response2 = client.post(
         "/add-skill",
         data={
             "industry_id": INDUSTRY_ID,
@@ -211,7 +213,14 @@ def add_multiple_skills(context):
         follow_redirects=True,
     )
 
-    context["response"] = response
+    print("ADD JAVA STATUS:", response2.status_code)
+
+    docs = db.collection("job_seeker_skill").where("applicant_id", "==", APPLICANT_ID).stream()
+
+    for doc in docs:
+        print("FIRESTORE:", doc.to_dict())
+
+    context["response"] = response2
 
 
 @when("the job seeker leaves the skills section empty and saves the profile")

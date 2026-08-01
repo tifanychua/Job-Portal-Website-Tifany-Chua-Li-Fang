@@ -213,47 +213,30 @@ def get_all_interviews():
 
                 if company_id:
 
-                    company_doc = (
-                        db.collection("company")
-                        .document(company_id)
-                        .get(timeout=10)
-                    )
+                    company_doc = db.collection("company").document(company_id).get(timeout=10)
 
                     if company_doc.exists:
 
                         company = company_doc.to_dict()
 
-                        data["companyName"] = company.get(
-                            "companyName",
-                            "Company"
-                        )
+                        data["companyName"] = company.get("companyName", "Company")
 
                 candidate_id = data.get("candidateId")
 
                 if candidate_id:
 
-                    seeker_doc = (
-                        db.collection("job_seeker")
-                        .document(candidate_id)
-                        .get(timeout=10)
-                    )
+                    seeker_doc = db.collection("job_seeker").document(candidate_id).get(timeout=10)
 
                     if seeker_doc.exists:
 
                         seeker = seeker_doc.to_dict()
 
-                        data["candidateName"] = seeker.get(
-                            "name",
-                            "Applicant"
-                        )
+                        data["candidateName"] = seeker.get("name", "Applicant")
 
                 result.append(data)
 
             except Exception as e:
-                print(
-                    f"Skip interview {doc.id} error:",
-                    e
-                )
+                print(f"Skip interview {doc.id} error:", e)
                 continue
 
     except Exception as e:
