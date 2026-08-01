@@ -299,7 +299,6 @@ async def send_interview_acceptance_email(
     # Check if we're in test mode
     if os.getenv("PYTEST_CURRENT_TEST"):
         # Set the mock for testing
-        global email_mock
         email_mock["sent"] = True
         email_mock["email"] = email
         email_mock["candidate"] = candidate_name
