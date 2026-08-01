@@ -18,8 +18,7 @@ from .email_service import (
     send_interview_email,
     send_interview_cancelled_email,
     send_interview_rescheduled_email,
-    send_employer_interview_notification,
-    send_interview_acceptance_email,  # Add this line
+    send_employer_interview_notification,  # Add this line
 )
 
 router = APIRouter()
@@ -735,6 +734,7 @@ async def schedule_list(request: Request):
 # APPLICANT ACCEPT INTERVIEW
 # ==================================================
 
+
 @router.put("/api/interviews/{interview_id}/accept")
 async def accept_interview(interview_id: str):
     ref = db.collection("interviews").document(interview_id)
@@ -759,17 +759,17 @@ async def accept_interview(interview_id: str):
                 interview.get("position"),
                 "Accepted",
             )
-        
+
         # ===== NEW: Send email to candidate =====
         candidate_id = interview.get("candidateId")
         if candidate_id:
             seeker_doc = db.collection("job_seeker").document(candidate_id).get()
             if seeker_doc.exists:
                 seeker = seeker_doc.to_dict()
-                
+
                 # Import the send_interview_acceptance_email function or create one
                 from .email_service import send_interview_acceptance_email
-                
+
                 await send_interview_acceptance_email(
                     seeker.get("email"),
                     seeker.get("name", "Applicant"),

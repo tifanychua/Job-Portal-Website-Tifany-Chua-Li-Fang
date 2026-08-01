@@ -81,12 +81,12 @@ def test_employer_login_success(mock_db, mock_verify, client):
 
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
 def test_employer_invalid_token(mock_verify, client):
-    mock_verify.side_effect = Exception("Invalid Token")
+    mock_verify.side_effect = Exception("Authentication failed. Please sign in again.")
 
     response = client.post("/firebase-login", json={"token": "wrong_token"})
 
     assert response.status_code == 401
-    assert response.json()["error"] == "Invalid Token"
+    assert response.json()["error"] == "Authentication failed. Please sign in again."
 
 
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
@@ -97,8 +97,11 @@ def test_employer_not_found(mock_db, mock_verify, client):
 
     response = client.post("/firebase-login", json={"token": "valid_token"})
 
-    assert response.status_code == 401
-    assert response.json()["error"] == "User not found"
+    assert response.status_code == 404
+    assert (
+        response.json()["error"]
+        == "No account information was found. Please complete your registration or contact support."
+    )
 
 
 def test_employer_empty_token(client):
@@ -115,7 +118,10 @@ def test_employer_rejected_account(mock_db, mock_verify, client):
     response = client.post("/firebase-login", json={"token": "valid_token"})
 
     assert response.status_code == 403
-    assert response.json()["error"] == "Your company registration has been rejected."
+    assert (
+        response.json()["error"]
+        == "Your company registration has been rejected. Please contact the administrator for assistance."
+    )
 
 
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
@@ -127,7 +133,10 @@ def test_employer_deactive_account(mock_db, mock_verify, client):
     response = client.post("/firebase-login", json={"token": "valid_token"})
 
     assert response.status_code == 403
-    assert response.json()["error"] == "Your company account has been deactivated."
+    assert (
+        response.json()["error"]
+        == "Your company account has been deactivated. Please contact the administrator."
+    )
 
 
 @given("the employer has a registered company account")
@@ -166,14 +175,14 @@ def invalid_credentials():
 @when("the employer attempts to log in")
 def invalid_login(client, context):
     with patch("job_portal_web.backend.auth.auth.verify_id_token") as verify:
-        verify.side_effect = Exception("Invalid Token")
+        verify.side_effect = Exception("Authentication failed. Please sign in again.")
         context.response = client.post("/firebase-login", json={"token": "wrong_token"})
 
 
 @then("the system should display an error message")
 def error_message(context):
     assert context.response.status_code == 401
-    assert context.response.json()["error"] == "Invalid Token"
+    assert context.response.json()["error"] == "Authentication failed. Please sign in again."
 
 
 @then("prevent access to the account")
@@ -260,4 +269,7 @@ def block_login(context):
 
 @then("display an account status error message")
 def account_status_error(context):
-    assert context.response.json()["error"] == "Your company registration has been rejected."
+    assert (
+        context.response.json()["error"]
+        == "Your company registration has been rejected. Please contact the administrator for assistance."
+    )

@@ -29,13 +29,12 @@ class ApplicationStatusUpdate(BaseModel):
 
 # ==================================================
 # Template Folder
-# ==================================================
+# ===== =============================================
 
 # Points to:
 # src/job_portal_web
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "ui"))
 
@@ -180,9 +179,43 @@ async def view_applications(request: Request):
 
             application["applicant_email"] = job_seeker.get("email") or "No email provided"
 
-            application["experience"] = job_seeker.get("experience") or "Not provided"
+            experience_docs = (
+                db.collection("job_seeker_experience")
+                .where("applicant_id", "==", application["job_seeker_id"])
+                .stream()
+            )
 
-            application["skills"] = job_seeker.get("skills") or []
+            experiences = []
+
+            for doc in experience_docs:
+                exp = doc.to_dict()
+                experiences.append(exp.get("job_title"))
+
+            application["experience"] = ", ".join(experiences) if experiences else "Not provided"
+
+            skill_docs = (
+                db.collection("job_seeker_skill")
+                .where("applicant_id", "==", application["job_seeker_id"])
+                .stream()
+            )
+
+            skills = []
+
+            for doc in skill_docs:
+
+                data = doc.to_dict()
+
+                skill_id = data.get("skill_id")
+
+                if not skill_id:
+                    continue
+
+                skill_doc = db.collection("skills").document(skill_id).get()
+
+                if skill_doc.exists:
+                    skills.append(skill_doc.to_dict().get("skill_name"))
+
+            application["skills"] = skills
 
         applications.append(application)
 

@@ -77,8 +77,11 @@ def test_login_user_not_found(mock_db, mock_verify, client):
 
     response = client.post("/firebase-login", json={"token": "valid"})
 
-    assert response.status_code == 401
-    assert response.json()["error"] == "User not found"
+    assert response.status_code == 404
+    assert (
+        response.json()["error"]
+        == "No account information was found. Please complete your registration or contact support."
+    )
 
 
 @given("the job seeker has a registered account")

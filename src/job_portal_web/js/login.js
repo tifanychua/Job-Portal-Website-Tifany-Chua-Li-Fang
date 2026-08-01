@@ -27,62 +27,6 @@ function setLoading(isLoading) {
     }
 }
 
-form.addEventListener("submit", async function (e) {
-
-    e.preventDefault();
-
-    setLoading(true);
-
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
-
-    try {
-
-        const credential =
-            await signInWithEmailAndPassword(
-                auth,
-                email,
-                password
-            );
-
-        const token = await credential.user.getIdToken();
-
-        const response = await fetch("/firebase-login", {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                token: token
-            })
-
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-
-            window.location = result.redirect;
-
-            return;
-
-        }
-
-        setLoading(false);
-        alert(result.error);
-
-    }
-    catch (error) {
-
-        setLoading(false);
-        alert(error.message);
-
-    }
-
-});
 
 
 form.addEventListener("submit", async function (e) {
@@ -135,8 +79,31 @@ form.addEventListener("submit", async function (e) {
 
     }
     catch (error) {
+         setLoading(false);
 
-        alert(error.message);
+    switch (error.code) {
+
+        case "auth/invalid-credential":
+        case "auth/wrong-password":
+        case "auth/user-not-found":
+            alert("Invalid email or password.");
+            break;
+
+        case "auth/invalid-email":
+            alert("Please enter a valid email address.");
+            break;
+
+        case "auth/too-many-requests":
+            alert("Too many failed login attempts. Please try again later.");
+            break;
+
+        case "auth/network-request-failed":
+            alert("Network error. Please check your internet connection.");
+            break;
+
+        default:
+            alert("Login failed. Please try again.");
+    }
 
     }
 

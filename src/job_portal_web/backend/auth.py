@@ -134,26 +134,23 @@ def login_page(request: Request):
 @router.post("/firebase-login")
 async def firebase_login(request: Request, data: LoginToken):
 
+    # Verify Firebase ID token
     try:
-
         decoded = auth.verify_id_token(data.token)
-
         uid = decoded["uid"]
 
-    except Exception:
+    except Exception as e:
+        return JSONResponse(status_code=401, content={"error": str(e)})
 
-        return JSONResponse({"error": "Invalid Token"}, status_code=401)
-
+    # Job Seeker
     job = db.collection("job_seeker").document(uid).get()
 
     if job.exists:
-
         request.session["user_type"] = "job_seeker"
-
         request.session["applicant_id"] = uid
-
         return {"redirect": "/"}
 
+    # Employer
     company = db.collection("company").document(uid).get()
 
     if company.exists:
@@ -164,22 +161,36 @@ async def firebase_login(request: Request, data: LoginToken):
             request.session["user_type"] = "employer"
             request.session["company_id"] = uid
             return {"redirect": "/manage-jobs"}
+
         elif status == "Rejected":
             return JSONResponse(
-                {"error": "Your company registration has been rejected."},
+                {
+                    "error": "Your company registration has been rejected. Please contact the administrator for assistance."
+                },
                 status_code=403,
-            )
-        elif status == "Deactive":
-            return JSONResponse(
-                {"error": "Your company account has been deactivated."},
-                status_code=403,
-            )
-        else:
-            return JSONResponse(
-                {"error": "Your company account is not allowed to login."}, status_code=403
             )
 
-    return JSONResponse({"error": "User not found"}, status_code=401)
+        elif status == "Deactive":
+            return JSONResponse(
+                {
+                    "error": "Your company account has been deactivated. Please contact the administrator."
+                },
+                status_code=403,
+            )
+
+        else:
+            return JSONResponse(
+                {"error": "Your company account is not permitted to log in."},
+                status_code=403,
+            )
+
+    # User exists in Firebase Authentication but not in Firestore
+    return JSONResponse(
+        {
+            "error": "No account information was found. Please complete your registration or contact support."
+        },
+        status_code=404,
+    )
 
 
 @router.get("/logout")
@@ -225,7 +236,7 @@ async def firebase_register_job_seeker(data: JobSeekerRegisterRequest):
                 "name": data.name,
                 "email": email,
                 "phone": data.phone,
-                "profileImage": "user.png",
+                "profileImage": "",
                 "status": "Active",
                 "createdAt": firestore.SERVER_TIMESTAMP,
             }

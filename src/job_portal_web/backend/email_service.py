@@ -1,19 +1,12 @@
 from fastapi_mail import FastMail, MessageSchema, MessageType
 from .email_config import conf
 import os
-from fastapi_mail import FastMail, MessageSchema, MessageType
-from .email_config import conf
 
 # Mock for testing - make it accessible globally
-email_mock = {
-    "sent": False,
-    "email": None,
-    "candidate": None,
-    "company": None,
-    "interview": None
-}
+email_mock = {"sent": False, "email": None, "candidate": None, "company": None, "interview": None}
 
 # ... rest of your existing functions ...
+
 
 async def send_interview_email(email, name, interview, company_address):
 
@@ -315,11 +308,11 @@ async def send_interview_acceptance_email(
             "position": position,
             "date": date,
             "time": time,
-            "meeting_link": meeting_link
+            "meeting_link": meeting_link,
         }
         print(f"✅ EMAIL MOCK SET: {email_mock}")
         return
-    
+
     # Send real email (only when not in test mode)
     message = MessageSchema(
         subject=f"Interview Accepted - {company_name}",
