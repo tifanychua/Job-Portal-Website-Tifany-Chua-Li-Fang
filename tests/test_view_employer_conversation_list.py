@@ -8,9 +8,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
 
-
 client = TestClient(app)
-
 
 
 # =====================================
@@ -29,34 +27,18 @@ def create_session(data):
             secret_key = middleware.kwargs["secret_key"]
             break
 
-
     if secret_key is None:
-        raise Exception(
-            "SessionMiddleware secret_key not found"
-        )
-
+        raise Exception("SessionMiddleware secret_key not found")
 
     json_data = json.dumps(data)
 
-
-    encoded_data = base64.b64encode(
-        json_data.encode()
-    ).decode()
-
+    encoded_data = base64.b64encode(json_data.encode()).decode()
 
     signer = TimestampSigner(secret_key)
 
+    cookie_value = signer.sign(encoded_data).decode()
 
-    cookie_value = signer.sign(
-        encoded_data
-    ).decode()
-
-
-    client.cookies.set(
-        "session",
-        cookie_value
-    )
-
+    client.cookies.set("session", cookie_value)
 
 
 def set_employer_session():
@@ -69,7 +51,6 @@ def set_employer_session():
     )
 
 
-
 def set_empty_employer_session():
 
     create_session(
@@ -78,7 +59,6 @@ def set_empty_employer_session():
             "company_id": "EMP999",
         }
     )
-
 
 
 # =====================================
@@ -90,12 +70,9 @@ def create_test_messages():
 
     delete_test_data()
 
-
     # Message 1
 
-    db.collection("messages").document(
-        "TEST_MESSAGE_001"
-    ).set(
+    db.collection("messages").document("TEST_MESSAGE_001").set(
         {
             "conversationId": "EMP001_JS001",
             "message": "Thank you for arranging the interview",
@@ -106,12 +83,9 @@ def create_test_messages():
         }
     )
 
-
     # Message 2
 
-    db.collection("messages").document(
-        "TEST_MESSAGE_002"
-    ).set(
+    db.collection("messages").document("TEST_MESSAGE_002").set(
         {
             "conversationId": "EMP001_JS002",
             "message": "I am available for the interview",
@@ -122,28 +96,21 @@ def create_test_messages():
         }
     )
 
-
     # Job seeker data
 
-    db.collection("job_seeker").document(
-        "JS001"
-    ).set(
+    db.collection("job_seeker").document("JS001").set(
         {
             "name": "John Tan",
             "test": True,
         }
     )
 
-
-    db.collection("job_seeker").document(
-        "JS002"
-    ).set(
+    db.collection("job_seeker").document("JS002").set(
         {
             "name": "Mary Lee",
             "test": True,
         }
     )
-
 
 
 # =====================================
@@ -158,21 +125,17 @@ def delete_test_data():
         "job_seeker",
     ]
 
-
     for collection in collections:
 
         docs = db.collection(collection).stream()
-
 
         for doc in docs:
 
             data = doc.to_dict()
 
-
             if data.get("test") is True:
 
                 doc.reference.delete()
-
 
 
 # =====================================
@@ -189,45 +152,26 @@ def test_view_conversation_list():
 
         set_employer_session()
 
-
-        response = client.get(
-            "/api/conversations"
-        )
-
+        response = client.get("/api/conversations")
 
         print("\nRESPONSE:")
         print(response.text)
 
-
         assert response.status_code == 200
-
 
         data = response.json()
 
-
         assert len(data) > 0
 
+        conversation_ids = [item["conversationId"] for item in data]
 
-        conversation_ids = [
-            item["conversationId"]
-            for item in data
-        ]
-
-
-        assert (
-            "EMP001_JS001" in conversation_ids
-            or
-            "EMP001_JS002" in conversation_ids
-        )
-
+        assert "EMP001_JS001" in conversation_ids or "EMP001_JS002" in conversation_ids
 
         assert "name" in data[0]
-
 
     finally:
 
         delete_test_data()
-
 
 
 # =====================================
@@ -244,37 +188,22 @@ def test_display_latest_conversation_information():
 
         set_employer_session()
 
-
-        response = client.get(
-            "/api/conversations"
-        )
-
+        response = client.get("/api/conversations")
 
         assert response.status_code == 200
 
-
         data = response.json()
 
-
-        latest_messages = [
-            item["lastMessage"]
-            for item in data
-        ]
-
+        latest_messages = [item["lastMessage"] for item in data]
 
         assert (
-            "Thank you for arranging the interview"
-            in latest_messages
-            or
-            "I am available for the interview"
-            in latest_messages
+            "Thank you for arranging the interview" in latest_messages
+            or "I am available for the interview" in latest_messages
         )
-
 
     finally:
 
         delete_test_data()
-
 
 
 # =====================================
@@ -291,20 +220,13 @@ def test_no_conversations_available():
 
         set_empty_employer_session()
 
-
-        response = client.get(
-            "/api/conversations"
-        )
-
+        response = client.get("/api/conversations")
 
         assert response.status_code == 200
 
-
         data = response.json()
 
-
         assert data == []
-
 
     finally:
 

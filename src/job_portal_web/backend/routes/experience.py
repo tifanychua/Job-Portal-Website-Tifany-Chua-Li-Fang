@@ -1,5 +1,5 @@
+from datetime import datetime, timezone
 from pathlib import Path
-from datetime import datetime
 import os
 from fastapi import APIRouter, Request, Form, HTTPException
 
@@ -38,6 +38,7 @@ def get_current_applicant_id(request: Request):
 
     return applicant_id
 
+
 def get_current_user(applicant_id):
 
     user_doc = db.collection("job_seeker").document(applicant_id).get()
@@ -46,6 +47,7 @@ def get_current_user(applicant_id):
         return user_doc.to_dict()
 
     return None
+
 
 # ======================================================
 # Manage Experience Page
@@ -74,13 +76,10 @@ async def manage_experience(request: Request):
     experience_list.sort(key=lambda x: x.get("start_date", ""), reverse=True)
 
     return templates.TemplateResponse(
-    request=request,
-    name="manageExperience.html",
-    context={
-        "experience_list": experience_list,
-        "user": user
-    }
-)
+        request=request,
+        name="manageExperience.html",
+        context={"experience_list": experience_list, "user": user},
+    )
 
 
 # ======================================================
@@ -103,7 +102,7 @@ async def add_experience(
 
     applicant_id = get_current_applicant_id(request)
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     job_title = job_title.strip()
     company_name = company_name.strip()
@@ -112,16 +111,18 @@ async def add_experience(
     description = description.strip()
 
     # ADD THIS HERE
-    print({
-        "job_title": job_title,
-        "company_name": company_name,
-        "employment_type": employment_type,
-        "location": location,
-        "start_date": start_date,
-        "end_date": end_date,
-        "currently_working": currently_working,
-        "description": description,
-    })
+    print(
+        {
+            "job_title": job_title,
+            "company_name": company_name,
+            "employment_type": employment_type,
+            "location": location,
+            "start_date": start_date,
+            "end_date": end_date,
+            "currently_working": currently_working,
+            "description": description,
+        }
+    )
 
     if not job_title:
         return JSONResponse(
@@ -193,10 +194,7 @@ async def add_experience(
         }
     )
 
-    return JSONResponse({
-        "success": True,
-        "redirect": "/manageExperience"
-    })
+    return JSONResponse({"success": True, "redirect": "/manageExperience"})
 
 
 # ======================================================
@@ -309,7 +307,7 @@ async def edit_experience(
             "end_date": end_date,
             "currently_working": is_currently_working,
             "description": description,
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
         }
     )
 

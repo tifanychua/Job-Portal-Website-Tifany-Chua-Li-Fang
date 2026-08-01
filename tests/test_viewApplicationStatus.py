@@ -5,10 +5,10 @@ import pytest
 from job_portal_web.backend.main import app
 from job_portal_web.backend import job_application
 
-
 # --------------------------------------------------
 # Fake Login
 # --------------------------------------------------
+
 
 @pytest.fixture(autouse=True)
 def fake_login(monkeypatch):
@@ -30,7 +30,7 @@ def fake_login(monkeypatch):
 
     monkeypatch.setattr(
         job_application,
-        "_get_current_job_seeker",
+        "_get_currentjob_seeker",
         fake_current_user,
     )
 
@@ -38,6 +38,7 @@ def fake_login(monkeypatch):
 # --------------------------------------------------
 # Test Client Fixture
 # --------------------------------------------------
+
 
 @pytest.fixture
 def client():
@@ -47,6 +48,7 @@ def client():
 # --------------------------------------------------
 # Acceptance Test 1
 # --------------------------------------------------
+
 
 def test_view_application_status_list(client: TestClient):
 
@@ -79,6 +81,7 @@ def test_view_application_status_list(client: TestClient):
 # --------------------------------------------------
 # Acceptance Test 2
 # --------------------------------------------------
+
 
 def test_view_updated_application_status(client: TestClient):
 
@@ -121,6 +124,7 @@ scenarios("features/viewApplicationStatus.feature")
 # Context
 # --------------------------------------------------
 
+
 class Context:
 
     def __init__(self):
@@ -138,6 +142,7 @@ def context():
 # --------------------------------------------------
 # Scenario 1
 # --------------------------------------------------
+
 
 @given("the job seeker has submitted job applications")
 def submitted_applications():
@@ -174,6 +179,7 @@ def verify_status_list(context):
 # Scenario 2
 # --------------------------------------------------
 
+
 @given("an employer has updated an application status")
 def updated_status():
     pass
@@ -182,9 +188,7 @@ def updated_status():
 @when("the job seeker views the application details")
 def open_application_detail(client, context):
 
-    context.response = client.get(
-        f"/application/{context.application_id}"
-    )
+    context.response = client.get(f"/application/{context.application_id}")
 
 
 @then("the updated application status should be displayed")

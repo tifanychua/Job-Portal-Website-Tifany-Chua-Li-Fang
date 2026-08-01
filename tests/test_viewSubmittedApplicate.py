@@ -5,10 +5,10 @@ import pytest
 from job_portal_web.backend.main import app
 from job_portal_web.backend import job_application
 
-
 # --------------------------------------------------
 # Fake Login
 # --------------------------------------------------
+
 
 @pytest.fixture(autouse=True)
 def fake_login(monkeypatch):
@@ -30,7 +30,7 @@ def fake_login(monkeypatch):
 
     monkeypatch.setattr(
         job_application,
-        "_get_current_job_seeker",
+        "_get_currentjob_seeker",
         fake_current_user,
     )
 
@@ -38,6 +38,7 @@ def fake_login(monkeypatch):
 # --------------------------------------------------
 # Test Client Fixture
 # --------------------------------------------------
+
 
 @pytest.fixture
 def client():
@@ -50,6 +51,7 @@ APPLICATION_ID = "5iVgjmXsCDG4lpM5uUuj"
 # --------------------------------------------------
 # 1. Acceptance Test
 # --------------------------------------------------
+
 
 def test_view_submitted_application_list(client: TestClient):
 
@@ -69,6 +71,7 @@ def test_view_submitted_application_list(client: TestClient):
 # --------------------------------------------------
 # 2. Acceptance Test
 # --------------------------------------------------
+
 
 def test_view_submitted_application_details(client: TestClient):
 
@@ -115,6 +118,7 @@ scenarios("features/viewSubmittedApplicate.feature")
 # Context
 # --------------------------------------------------
 
+
 class Context:
 
     def __init__(self):
@@ -133,6 +137,7 @@ def context():
 # Scenario
 # --------------------------------------------------
 
+
 @given("the job seeker is viewing submitted applications")
 def viewing_applications(client, context):
 
@@ -144,9 +149,7 @@ def viewing_applications(client, context):
 @when("the job seeker selects an application")
 def select_application(client, context):
 
-    context.response = client.get(
-        f"/application/{context.application_id}"
-    )
+    context.response = client.get(f"/application/{context.application_id}")
 
 
 @then("the system should display the application details and status")

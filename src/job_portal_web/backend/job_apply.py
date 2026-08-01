@@ -71,7 +71,7 @@ def _get_screening_questions(job):
     return questions
 
 
-def _get_current_job_seeker(request: Request):
+def _get_currentjob_seeker(request: Request):
     job_seeker_id = request.session.get("applicant_id")
 
     if not job_seeker_id:
@@ -109,7 +109,7 @@ def job_apply_form(request: Request, job_id: str):
 
     job = _load_job(job_id)
 
-    job_seeker_id, job_seeker = _get_current_job_seeker(request)
+    job_seeker_id, job_seeker = _get_currentjob_seeker(request)
 
     job_seeker = job_seeker or {
         "full_name": "Guest Applicant",
@@ -123,10 +123,10 @@ def job_apply_form(request: Request, job_id: str):
         request=request,
         name="job_apply.html",
         context={
-            "user":user,
+            "user": user,
             "request": request,
             "job": job,
-            "job_seeker": job_seeker,  
+            "job_seeker": job_seeker,
             "questions": _get_screening_questions(job),
         },
     )
@@ -142,7 +142,7 @@ async def job_apply_submit(
 
     job = _load_job(job_id)
 
-    job_seeker_id, job_seeker = _get_current_job_seeker(request)
+    job_seeker_id, job_seeker = _get_currentjob_seeker(request)
 
     # ==============================
     # Check Login
@@ -151,12 +151,8 @@ async def job_apply_submit(
     if not job_seeker_id:
         return JSONResponse(
             status_code=401,
-            content={
-                "success": False,
-                "message": "Please log in to apply for this job."
-            },
+            content={"success": False, "message": "Please log in to apply for this job."},
         )
-
 
     form_data = await request.form()
 
@@ -219,10 +215,9 @@ async def job_apply_submit(
             "updated_on": datetime.now(timezone.utc),
         }
     )
-   
+
     user = job_seeker
-                
-                
+
     return JSONResponse(
         content=jsonable_encoder(
             {

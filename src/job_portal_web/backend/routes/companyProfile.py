@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+import os
 
 from firebase_admin import firestore
 
@@ -9,10 +10,6 @@ router = APIRouter()
 db = firestore.client()
 
 templates = Jinja2Templates(directory="src/job_portal_web/ui")
-
-
-from fastapi import Request, HTTPException
-import os
 
 
 def get_current_company_id(request: Request):
@@ -36,6 +33,7 @@ def get_current_company_id(request: Request):
         raise HTTPException(status_code=401, detail="Company not logged in")
 
     return company_id
+
 
 @router.get("/company-profile", response_class=HTMLResponse)
 async def company_profile(request: Request):

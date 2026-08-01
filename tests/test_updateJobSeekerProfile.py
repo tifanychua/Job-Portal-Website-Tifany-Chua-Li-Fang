@@ -151,14 +151,18 @@ def test_view_updated_profile(client):
 
 def test_cancel_profile_update(client):
 
-    applicant_before = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get().to_dict()
+    applicant_before = (
+        db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get().to_dict()
+    )
 
     # Cancel button redirects to /profile
     response = client.get("/profile")
 
     assert response.status_code == 200
 
-    applicant_after = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get().to_dict()
+    applicant_after = (
+        db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get().to_dict()
+    )
 
     assert applicant_before == applicant_after
 

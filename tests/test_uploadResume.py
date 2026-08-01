@@ -5,10 +5,10 @@ import pytest
 from job_portal_web.backend.main import app
 from job_portal_web.backend import job_apply
 
-
 # --------------------------------------------------
 # Fake Login
 # --------------------------------------------------
+
 
 @pytest.fixture(autouse=True)
 def fake_login(monkeypatch):
@@ -26,7 +26,7 @@ def fake_login(monkeypatch):
 
     monkeypatch.setattr(
         job_apply,
-        "_get_current_job_seeker",
+        "_get_currentjob_seeker",
         fake_current_user,
     )
 
@@ -34,6 +34,7 @@ def fake_login(monkeypatch):
 # --------------------------------------------------
 # Test Client
 # --------------------------------------------------
+
 
 @pytest.fixture
 def client():
@@ -43,6 +44,7 @@ def client():
 # --------------------------------------------------
 # Acceptance Test 1
 # --------------------------------------------------
+
 
 def test_upload_resume_success(client: TestClient):
     """
@@ -54,9 +56,7 @@ def test_upload_resume_success(client: TestClient):
 
     response = client.post(
         f"/jobs/{job_id}/apply",
-        data={
-            "cover_letter": "I am interested in this position."
-        },
+        data={"cover_letter": "I am interested in this position."},
         files={
             "resume": (
                 "resume.pdf",
@@ -83,6 +83,7 @@ def test_upload_resume_success(client: TestClient):
 # Acceptance Test 2
 # --------------------------------------------------
 
+
 def test_resume_information_saved(client: TestClient):
     """
     Acceptance test:
@@ -93,9 +94,7 @@ def test_resume_information_saved(client: TestClient):
 
     upload_response = client.post(
         f"/jobs/{job_id}/apply",
-        data={
-            "cover_letter": "Test cover letter"
-        },
+        data={"cover_letter": "Test cover letter"},
         files={
             "resume": (
                 "resume.pdf",
@@ -130,6 +129,7 @@ scenarios("features/uploadResume.feature")
 # Context
 # --------------------------------------------------
 
+
 class Context:
 
     def __init__(self):
@@ -149,12 +149,11 @@ def context():
 # Scenario 1
 # --------------------------------------------------
 
+
 @given("the job seeker is on the resume upload page")
 def resume_upload_page(client, context):
 
-    context.response = client.get(
-        f"/jobs/{context.job_id}/apply"
-    )
+    context.response = client.get(f"/jobs/{context.job_id}/apply")
 
     assert context.response.status_code == 200
 
@@ -164,9 +163,7 @@ def upload_resume(client, context):
 
     context.response = client.post(
         f"/jobs/{context.job_id}/apply",
-        data={
-            "cover_letter": "I am interested in this position."
-        },
+        data={"cover_letter": "I am interested in this position."},
         files={
             "resume": (
                 "resume.pdf",
@@ -197,14 +194,13 @@ def verify_upload(context):
 # Scenario 2
 # --------------------------------------------------
 
+
 @given("the job seeker has uploaded a resume")
 def uploaded_resume(client, context):
 
     response = client.post(
         f"/jobs/{context.job_id}/apply",
-        data={
-            "cover_letter": "Test cover letter"
-        },
+        data={"cover_letter": "Test cover letter"},
         files={
             "resume": (
                 "resume.pdf",
@@ -222,9 +218,7 @@ def uploaded_resume(client, context):
 @when("the upload process is completed")
 def process_upload(client, context):
 
-    context.response = client.get(
-        f"/application/{context.application_id}"
-    )
+    context.response = client.get(f"/application/{context.application_id}")
 
 
 @then("the resume information should be saved in the database")

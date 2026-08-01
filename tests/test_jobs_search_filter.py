@@ -22,6 +22,7 @@ scenarios("features/jobs_search_filter.feature")
 # Test Data Fixtures
 # ==========================================================
 
+
 @pytest.fixture
 def sample_jobs():
     """Sample job data for testing"""
@@ -74,11 +75,12 @@ def search_context(sample_jobs):
 # Helper Function
 # ==========================================================
 
+
 def _execute_combined_search(search_context):
     """Helper to execute combined search with all filters"""
     # Build params for API call
     params = {}
-    
+
     if search_context["search_keyword"]:
         params["q"] = search_context["search_keyword"]
     if search_context["selected_category"]:
@@ -89,7 +91,7 @@ def _execute_combined_search(search_context):
         params["position"] = search_context["selected_positions"][0]
     if search_context["selected_benefits"]:
         params["benefits"] = search_context["selected_benefits"][0]
-    
+
     # Make API call
     if params:
         response = client.get("/jobs", params=params)
@@ -98,30 +100,40 @@ def _execute_combined_search(search_context):
         # No filters, get all jobs
         response = client.get("/jobs")
         search_context["response"] = response
-    
+
     # Filter sample data
     filtered = search_context["all_jobs"].copy()
-    
+
     # Apply keyword search
     if search_context["search_keyword"]:
         filtered = apply_search(filtered, search_context["search_keyword"], "")
-    
+
     # Apply category filter
     if search_context["selected_category"]:
-        filtered = [job for job in filtered if job["category"] == search_context["selected_category"]]
-    
+        filtered = [
+            job for job in filtered if job["category"] == search_context["selected_category"]
+        ]
+
     # Apply location filter
     if search_context["selected_locations"]:
-        filtered = [job for job in filtered if job["location"] in search_context["selected_locations"]]
-    
+        filtered = [
+            job for job in filtered if job["location"] in search_context["selected_locations"]
+        ]
+
     # Apply position filter
     if search_context["selected_positions"]:
-        filtered = [job for job in filtered if job["position"] in search_context["selected_positions"]]
-    
+        filtered = [
+            job for job in filtered if job["position"] in search_context["selected_positions"]
+        ]
+
     # Apply benefits filter
     if search_context["selected_benefits"]:
-        filtered = [job for job in filtered if any(b in job["benefits"] for b in search_context["selected_benefits"])]
-    
+        filtered = [
+            job
+            for job in filtered
+            if any(b in job["benefits"] for b in search_context["selected_benefits"])
+        ]
+
     search_context["search_results"] = filtered
     return filtered
 
@@ -129,6 +141,7 @@ def _execute_combined_search(search_context):
 # ==========================================================
 # Background Steps
 # ==========================================================
+
 
 @given("the job portal contains active job postings")
 def active_job_postings(search_context):
@@ -185,6 +198,7 @@ def benefits_filter_applied(search_context):
 # When Steps - Search Actions
 # ==========================================================
 
+
 @when(parsers.parse('the job seeker enters "{keyword}" in the search box'))
 def enter_keyword(search_context, keyword):
     """Enter keyword in search box"""
@@ -197,9 +211,7 @@ def search_for_keyword(search_context, keyword):
     search_context["search_keyword"] = keyword
     response = client.get("/jobs", params={"q": keyword})
     search_context["response"] = response
-    search_context["search_results"] = apply_search(
-        search_context["all_jobs"], keyword, ""
-    )
+    search_context["search_results"] = apply_search(search_context["all_jobs"], keyword, "")
 
 
 @when('clicks the "Search Jobs" button')
@@ -207,16 +219,16 @@ def click_search_button(search_context):
     """Click the search button to execute search"""
     keyword = search_context["search_keyword"]
     category = search_context["selected_category"]
-    
+
     params = {}
     if keyword:
         params["q"] = keyword
     if category:
         params["category"] = category
-    
+
     response = client.get("/jobs", params=params)
     search_context["response"] = response
-    
+
     if search_context["all_jobs"]:
         search_context["search_results"] = apply_search(
             search_context["all_jobs"], keyword, category
@@ -240,6 +252,7 @@ def select_all_categories(search_context):
 # When Steps - Location Filters
 # ==========================================================
 
+
 @when(parsers.parse('the job seeker selects the location "{location}"'))
 def select_location(search_context, location):
     """Select a single location"""
@@ -254,7 +267,7 @@ def select_multiple_locations(search_context, locations, location2):
     _execute_combined_search(search_context)
 
 
-@when('the job seeker clears all selected locations')
+@when("the job seeker clears all selected locations")
 def clear_locations(search_context):
     """Clear all location filters"""
     search_context["selected_locations"] = []
@@ -264,6 +277,7 @@ def clear_locations(search_context):
 # ==========================================================
 # When Steps - Position Filters
 # ==========================================================
+
 
 @when(parsers.parse('the job seeker selects the position "{position}"'))
 def select_position(search_context, position):
@@ -279,7 +293,7 @@ def select_multiple_positions(search_context, position1, position2):
     _execute_combined_search(search_context)
 
 
-@when('the job seeker clears all selected positions')
+@when("the job seeker clears all selected positions")
 def clear_positions(search_context):
     """Clear all position filters"""
     search_context["selected_positions"] = []
@@ -289,6 +303,7 @@ def clear_positions(search_context):
 # ==========================================================
 # When Steps - Benefits Filters
 # ==========================================================
+
 
 @when(parsers.parse('the job seeker selects the benefit "{benefit}"'))
 def select_benefit(search_context, benefit):
@@ -304,7 +319,7 @@ def select_multiple_benefits(search_context, benefit1, benefit2):
     _execute_combined_search(search_context)
 
 
-@when('the job seeker clears all selected benefits')
+@when("the job seeker clears all selected benefits")
 def clear_benefits(search_context):
     """Clear all benefit filters"""
     search_context["selected_benefits"] = []
@@ -315,6 +330,7 @@ def clear_benefits(search_context):
 # CRITICAL FIX: Combined Scenarios Step Definitions
 # These match the exact wording in your feature file
 # ==========================================================
+
 
 @when(parsers.parse('selects the benefit "{benefit}"'))
 def selects_benefit_short(search_context, benefit):
@@ -348,6 +364,7 @@ def selects_position_short(search_context, position):
 # FIX: Add the full "the job seeker selects the category" step
 # This is what was missing!
 # ==========================================================
+
 
 @when(parsers.parse('the job seeker selects the category "{category}"'))
 def the_job_seeker_selects_category(search_context, category):
@@ -405,21 +422,18 @@ def and_selects_position(search_context, position):
     _execute_combined_search(search_context)
 
 
-@when(parsers.parse('the job seeker selects filters that have no matching jobs'))
+@when(parsers.parse("the job seeker selects filters that have no matching jobs"))
 def select_no_matching_filters(search_context):
     """Select filters that yield no results"""
     search_context["selected_locations"] = ["Mars"]
     search_context["selected_positions"] = ["Astronaut"]
-    
-    response = client.get("/jobs", params={
-        "location": "Mars",
-        "position": "Astronaut"
-    })
+
+    response = client.get("/jobs", params={"location": "Mars", "position": "Astronaut"})
     search_context["response"] = response
     search_context["search_results"] = []
 
 
-@when('the job seeker selects a job posting')
+@when("the job seeker selects a job posting")
 def select_job_posting(search_context):
     """Select a job from search results"""
     if search_context["search_results"]:
@@ -433,6 +447,7 @@ def select_job_posting(search_context):
 # ==========================================================
 # Then Steps - Verification
 # ==========================================================
+
 
 @then(parsers.parse('the system should display job postings with the title "{title}"'))
 def verify_exact_job_title(search_context, title):
@@ -482,7 +497,9 @@ def verify_partial_company(search_context, company):
             assert company.lower() in job["company_name"].lower()
 
 
-@then(parsers.parse('the system should display job postings belonging to the "{category}" category'))
+@then(
+    parsers.parse('the system should display job postings belonging to the "{category}" category')
+)
 def verify_category(search_context, category):
     """Verify category filtering"""
     assert search_context["response"].status_code == 200
@@ -513,7 +530,7 @@ def verify_location_filter(search_context, location):
             assert job["location"] == location
 
 
-@then(parsers.parse('the system should display job postings from either selected location'))
+@then(parsers.parse("the system should display job postings from either selected location"))
 def verify_multiple_locations(search_context):
     """Verify multiple locations filter"""
     assert search_context["response"].status_code == 200
@@ -533,7 +550,7 @@ def verify_position_filter(search_context, position):
             assert job["position"] == position
 
 
-@then(parsers.parse('the system should display job postings matching either selected position'))
+@then(parsers.parse("the system should display job postings matching either selected position"))
 def verify_multiple_positions(search_context):
     """Verify multiple positions filter"""
     assert search_context["response"].status_code == 200
@@ -553,7 +570,7 @@ def verify_benefit_filter(search_context, benefit):
             assert benefit in job["benefits"]
 
 
-@then(parsers.parse('the system should display job postings offering either selected benefit'))
+@then(parsers.parse("the system should display job postings offering either selected benefit"))
 def verify_multiple_benefits(search_context):
     """Verify multiple benefits filter"""
     assert search_context["response"].status_code == 200
@@ -573,18 +590,22 @@ def verify_combined_title_location(search_context, location):
             assert job["location"] == location
 
 
-@then(parsers.parse('the system should display only Information Technology jobs offering "{benefit}"'))
+@then(
+    parsers.parse('the system should display only Information Technology jobs offering "{benefit}"')
+)
 def verify_combined_category_benefit(search_context, benefit):
     """Verify combined category and benefit filter"""
     assert search_context["response"].status_code == 200
-    
+
     # Check that we have results
     assert len(search_context["search_results"]) > 0, "No search results found"
-    
+
     # Verify each result
     for job in search_context["search_results"]:
         # Check category
-        assert job["category"] == "Information Technology", f"Expected 'Information Technology', got '{job['category']}'"
+        assert (
+            job["category"] == "Information Technology"
+        ), f"Expected 'Information Technology', got '{job['category']}'"
         # Check benefit
         assert benefit in job["benefits"], f"Expected '{benefit}' in {job['benefits']}"
 
@@ -653,6 +674,7 @@ def verify_benefits_displayed(search_context):
 # Original Integration Tests
 # ==========================================================
 
+
 def test_view_all_jobs():
     response = client.get("/jobs")
     assert response.status_code == 200
@@ -687,16 +709,14 @@ def test_filter_by_benefits():
 
 
 def test_search_and_filter():
-    response = client.get("/jobs", params={
-        "q": "Engineer",
-        "location": "Kuala Lumpur"
-    })
+    response = client.get("/jobs", params={"q": "Engineer", "location": "Kuala Lumpur"})
     assert response.status_code == 200
 
 
 # ==========================================================
 # Original Unit Tests
 # ==========================================================
+
 
 def test_search_exact_job_title(sample_jobs):
     result = apply_search(sample_jobs, "Software Engineer", "")

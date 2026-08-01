@@ -1,6 +1,6 @@
+from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
-from datetime import datetime, date
 import re
 
 
@@ -55,9 +55,11 @@ def get_current_job_seeker_id(request: Request):
 
     return applicant_id
 
+
 # =====================================================
 # Edit Profile Page
 # =====================================================
+
 
 @router.get("/edit-profile", response_class=HTMLResponse)
 async def edit_profile(request: Request):
@@ -76,9 +78,8 @@ async def edit_profile(request: Request):
         name="edit_jobSeeker_profile.html",
         context={
             "seeker": seeker,
-            "today": date.today().isoformat(),
-            },
-        
+            "today": datetime.now(timezone.utc).date().isoformat(),
+        },
     )
 
 
@@ -86,11 +87,10 @@ async def edit_profile(request: Request):
 # Save Profile
 # =====================================================
 
+
 @router.post("/edit-profile")
 async def update_profile(
-
     request: Request,
-
     full_name: str = Form(...),
     date_of_birth: str = Form(""),
     gender: str = Form(""),
@@ -102,9 +102,7 @@ async def update_profile(
     experience_level: str = Form(""),
     current_company: str = Form(""),
     about_me: str = Form(""),
-
     profile_photo: UploadFile = File(None),
-
 ):
 
     applicant_id = get_current_job_seeker_id(request)
@@ -125,14 +123,14 @@ async def update_profile(
 
         dob = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
 
-        if dob >= date.today():
+        if dob >= datetime.now(timezone.utc).date():
 
             return templates.TemplateResponse(
                 request=request,
                 name="edit_jobSeeker_profile.html",
                 context={
                     "seeker": seeker,
-                    "today": date.today().isoformat(),
+                    "today": datetime.now(timezone.utc).date().isoformat(),
                     "error": "Date of birth must be before today.",
                 },
                 status_code=400,
@@ -151,7 +149,7 @@ async def update_profile(
                 name="edit_jobSeeker_profile.html",
                 context={
                     "seeker": seeker,
-                    "today": date.today().isoformat(),
+                    "today": datetime.now(timezone.utc).date().isoformat(),
                     "error": "Please enter a valid email address.",
                 },
                 status_code=400,
@@ -164,22 +162,19 @@ async def update_profile(
         malaysia_local = r"^01\d{8,9}$"
         malaysia_international = r"^\+60\s\d{1,2}-\d{7,8}$"
 
-        if not (
-            re.fullmatch(malaysia_local, phone)
-            or re.fullmatch(malaysia_international, phone)
-        ):
+        if not (re.fullmatch(malaysia_local, phone) or re.fullmatch(malaysia_international, phone)):
 
             return templates.TemplateResponse(
                 request=request,
                 name="edit_jobSeeker_profile.html",
                 context={
                     "seeker": seeker,
-                    "today": date.today().isoformat(),
+                    "today": datetime.now(timezone.utc).date().isoformat(),
                     "error": "Please enter a valid phone number.",
                 },
                 status_code=400,
             )
-    
+
     # ----------------------------------------
     # Upload new profile image
     # ----------------------------------------

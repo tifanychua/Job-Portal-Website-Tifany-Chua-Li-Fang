@@ -33,6 +33,7 @@ def test_check_status():
 
     print(doc.to_dict())
 
+
 # ==================================================
 # Acceptance Test 1
 # Employer rejects applicant
@@ -141,12 +142,9 @@ def received_applications(context):
     context.application_id = APPLICATION_ID
 
     # Reset to a non-final status before the test
-    db.collection("application").document(APPLICATION_ID).update(
-        {
-            "status": "Reviewed"
-        }
-    )
-    
+    db.collection("application").document(APPLICATION_ID).update({"status": "Reviewed"})
+
+
 @when("the employer selects an applicant to reject")
 def reject_applicant(client, context):
 

@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 from itsdangerous import TimestampSigner
 from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+
 # ==================================================
 # IMPORT PROJECT
 # ==================================================
@@ -18,8 +19,6 @@ from job_portal_web.backend.database import db
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 sys.path.insert(0, str(PROJECT_ROOT))
-
-
 
 
 # ==================================================

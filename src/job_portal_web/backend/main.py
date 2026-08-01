@@ -29,6 +29,7 @@ from job_portal_web.backend.routes.experience import router as experience_router
 from .routes.companyProfile import router as companyProfile_router
 from .routes.skill import router as skill_router
 from .routes.editCompanyProfile import router as editCompanyProfile_router
+import os
 
 # ==================================================
 # APP
@@ -41,7 +42,7 @@ app = FastAPI()
 # SESSION
 # ==================================================
 
-app.add_middleware(SessionMiddleware, secret_key="jobconnect-secret-key")
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "jobconnect-secret-key"))
 
 
 # ==================================================
@@ -279,18 +280,13 @@ def my_interviews_page(request: Request):
 
     return render_template(request, "applicant_interview.html", {"active_page": "interviews"})
 
+
 @app.get("/my_interviews/detail/{interview_id}")
-async def interview_detail_page(
-    request: Request,
-    interview_id: str
-):
-    return templates.TemplateResponse(
-        request=request,
-        name="applicant_interview_detail.html",
-        context={
-            "interview_id": interview_id
-        }
+async def interview_detail_page(request: Request, interview_id: str):
+    return render_template(
+        request, "applicant_interview_detail.html", {"interview_id": interview_id}
     )
+
 
 @app.get("/schedule_list")
 def schedule_list_page(request: Request):
@@ -310,9 +306,8 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
+
+
 @app.get("/login")
 def login_page(request: Request):
-    return templates.TemplateResponse(
-        "login.html",
-        {"request": request}
-    )
+    return render_template(request, "login.html")
