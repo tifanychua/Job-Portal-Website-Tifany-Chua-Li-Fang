@@ -663,6 +663,8 @@ def invalid_category_message(context):
 @pytest.fixture(autouse=True)
 def cleanup():
 
+    clear_all_skills()
+
     yield
 
     clear_all_skills()
