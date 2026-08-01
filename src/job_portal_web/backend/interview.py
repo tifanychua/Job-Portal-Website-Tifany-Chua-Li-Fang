@@ -19,6 +19,7 @@ from .email_service import (
     send_interview_cancelled_email,
     send_interview_rescheduled_email,
     send_employer_interview_notification,
+    send_interview_acceptance_email,  # Add this line
 )
 
 router = APIRouter()
@@ -734,16 +735,12 @@ async def schedule_list(request: Request):
 # APPLICANT ACCEPT INTERVIEW
 # ==================================================
 
-
 @router.put("/api/interviews/{interview_id}/accept")
 async def accept_interview(interview_id: str):
-
     ref = db.collection("interviews").document(interview_id)
-
     doc = ref.get()
 
     if not doc.exists:
-
         raise HTTPException(status_code=404, detail="Interview not found")
 
     interview = doc.to_dict()
@@ -751,13 +748,10 @@ async def accept_interview(interview_id: str):
     ref.update({"status": "Accepted", "applicantResponse": "Accepted"})
 
     try:
-
+        # Send email to employer (existing functionality)
         company_doc = db.collection("company").document(interview.get("companyId")).get()
-
         if company_doc.exists:
-
             company = company_doc.to_dict()
-
             await send_employer_interview_notification(
                 company.get("email"),
                 company.get("companyName", "Employer"),
@@ -765,9 +759,28 @@ async def accept_interview(interview_id: str):
                 interview.get("position"),
                 "Accepted",
             )
+        
+        # ===== NEW: Send email to candidate =====
+        candidate_id = interview.get("candidateId")
+        if candidate_id:
+            seeker_doc = db.collection("job_seeker").document(candidate_id).get()
+            if seeker_doc.exists:
+                seeker = seeker_doc.to_dict()
+                
+                # Import the send_interview_acceptance_email function or create one
+                from .email_service import send_interview_acceptance_email
+                
+                await send_interview_acceptance_email(
+                    seeker.get("email"),
+                    seeker.get("name", "Applicant"),
+                    interview.get("position"),
+                    company.get("companyName", "Company"),
+                    interview.get("date"),
+                    interview.get("time"),
+                    interview.get("meetingLink", "To be provided"),
+                )
 
     except Exception as e:
-
         print("Accept email error:", e)
 
     return {"message": "Interview accepted"}

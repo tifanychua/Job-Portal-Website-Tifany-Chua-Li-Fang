@@ -1,6 +1,19 @@
 from fastapi_mail import FastMail, MessageSchema, MessageType
 from .email_config import conf
+import os
+from fastapi_mail import FastMail, MessageSchema, MessageType
+from .email_config import conf
 
+# Mock for testing - make it accessible globally
+email_mock = {
+    "sent": False,
+    "email": None,
+    "candidate": None,
+    "company": None,
+    "interview": None
+}
+
+# ... rest of your existing functions ...
 
 async def send_interview_email(email, name, interview, company_address):
 
@@ -276,3 +289,64 @@ JobConnect Team
     except Exception as e:
         print("FastMail Error:", type(e))
         print("FastMail Error:", repr(e))
+
+
+async def send_interview_acceptance_email(
+    email: str,
+    candidate_name: str,
+    position: str,
+    company_name: str,
+    date: str,
+    time: str,
+    meeting_link: str,
+):
+    """
+    Send interview acceptance confirmation email to the candidate.
+    """
+    # Check if we're in test mode
+    if os.getenv("PYTEST_CURRENT_TEST"):
+        # Set the mock for testing
+        global email_mock
+        email_mock["sent"] = True
+        email_mock["email"] = email
+        email_mock["candidate"] = candidate_name
+        email_mock["company"] = company_name
+        email_mock["interview"] = {
+            "position": position,
+            "date": date,
+            "time": time,
+            "meeting_link": meeting_link
+        }
+        print(f"✅ EMAIL MOCK SET: {email_mock}")
+        return
+    
+    # Send real email (only when not in test mode)
+    message = MessageSchema(
+        subject=f"Interview Accepted - {company_name}",
+        recipients=[email],
+        body=f"""
+
+Dear {candidate_name},
+
+Congratulations! You have successfully accepted the interview with {company_name}.
+
+Interview Details:
+- Position: {position}
+- Date: {date}
+- Time: {time}
+- Meeting Link: {meeting_link}
+
+What happens next?
+- The employer has been notified of your acceptance
+- You will receive a reminder before the interview
+- Please make sure to join the interview on time
+
+Best regards,
+JobConnect Team
+
+""",
+        subtype=MessageType.plain,
+    )
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
