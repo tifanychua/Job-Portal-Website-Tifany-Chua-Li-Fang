@@ -4,7 +4,37 @@ import pytest
 from fastapi.testclient import TestClient
 from pytest_bdd import given, scenarios, then, when
 
+from job_portal_web.backend.database import db
 from job_portal_web.backend.main import app
+
+CANDIDATE_ID = "123"
+COMPANY_ID = "C000001"
+
+
+# --------------------------------------------------
+# Firestore Test Data Fixture
+# --------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def setup_interview_test_data():
+    db.collection("company").document(COMPANY_ID).set(
+        {
+            "id": COMPANY_ID,
+            "companyId": COMPANY_ID,
+            "company_id": COMPANY_ID,
+            "companyName": "Test Company",
+            "company_name": "Test Company",
+            "name": "Test Company",
+            "email": "testcompany@example.com",
+            "address": "Company Office",
+            "status": "Approved",
+        },
+        merge=True,
+    )
+
+    yield
+
 
 # --------------------------------------------------
 # Test Client Fixture
@@ -13,9 +43,6 @@ from job_portal_web.backend.main import app
 
 @pytest.fixture
 def client() -> TestClient:
-    """
-    Shared FastAPI test client.
-    """
     return TestClient(app)
 
 
