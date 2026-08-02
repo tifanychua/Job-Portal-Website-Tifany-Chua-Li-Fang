@@ -166,9 +166,9 @@ def post_skill(
 
 
 def assert_add_success(response):
-    assert (
-        response.status_code == 303
-    ), f"Expected 303 redirect, received {response.status_code}: {response.text}"
+    assert response.status_code == 303, (
+        f"Expected 303 redirect, received {response.status_code}: {response.text}"
+    )
 
     assert response.headers.get("location") == "/manageSkills"
 

@@ -7,7 +7,6 @@ from pytest_bdd import given, parsers, scenarios, then, when
 from job_portal_web.backend.database import db
 from job_portal_web.backend.main import app
 
-
 # ==================================================
 # Load Feature File
 # ==================================================
@@ -83,10 +82,7 @@ def delete_test_education(document_id):
     if not document_id:
         return
 
-    document_reference = (
-        db.collection("education")
-        .document(document_id)
-    )
+    document_reference = db.collection("education").document(document_id)
 
     if document_reference.get().exists:
         document_reference.delete()
@@ -120,9 +116,7 @@ def test_successfully_update_education(client):
             data={
                 "education_id": education_id,
                 "degree": "Master Degree",
-                "institution": (
-                    f"Taylor University Updated {unique}"
-                ),
+                "institution": (f"Taylor University Updated {unique}"),
                 "field_of_study": "Software Engineering",
                 "start_date": "2024-01",
                 "end_date": "2025-12",
@@ -138,11 +132,7 @@ def test_successfully_update_education(client):
 
         assert body["success"] is True
 
-        document = (
-            db.collection("education")
-            .document(education_id)
-            .get()
-        )
+        document = db.collection("education").document(education_id).get()
 
         assert document.exists
 
@@ -150,9 +140,7 @@ def test_successfully_update_education(client):
 
         assert data is not None
         assert data["qualification"] == "Master Degree"
-        assert data["institution"] == (
-            f"Taylor University Updated {unique}"
-        )
+        assert data["institution"] == (f"Taylor University Updated {unique}")
     finally:
         delete_test_education(education_id)
 
@@ -175,10 +163,7 @@ def test_missing_qualification(client):
         )
 
         assert response.status_code == 400
-        assert (
-            response.json()["message"]
-            == "Please select your qualification."
-        )
+        assert response.json()["message"] == "Please select your qualification."
     finally:
         delete_test_education(education_id)
 
@@ -201,10 +186,7 @@ def test_missing_institution(client):
         )
 
         assert response.status_code == 400
-        assert (
-            response.json()["message"]
-            == "Please enter your institution."
-        )
+        assert response.json()["message"] == "Please enter your institution."
     finally:
         delete_test_education(education_id)
 
@@ -227,10 +209,7 @@ def test_missing_start_date(client):
         )
 
         assert response.status_code == 400
-        assert (
-            response.json()["message"]
-            == "Please select your start date."
-        )
+        assert response.json()["message"] == "Please select your start date."
     finally:
         delete_test_education(education_id)
 
@@ -253,10 +232,7 @@ def test_missing_end_date(client):
         )
 
         assert response.status_code == 400
-        assert (
-            response.json()["message"]
-            == "Please select your end date."
-        )
+        assert response.json()["message"] == "Please select your end date."
     finally:
         delete_test_education(education_id)
 
@@ -281,9 +257,7 @@ def duplicate_record(context):
     context.education_id = create_test_education()
 
     unique = uuid4().hex[:8]
-    duplicate_institution = (
-        f"Taylor University Duplicate {unique}"
-    )
+    duplicate_institution = f"Taylor University Duplicate {unique}"
 
     document_reference = db.collection("education").document()
 
@@ -318,9 +292,7 @@ def duplicate_record(context):
 
 @given("the education record does not exist")
 def education_not_found(context):
-    context.education_id = (
-        f"INVALID_EDUCATION_{uuid4().hex}"
-    )
+    context.education_id = f"INVALID_EDUCATION_{uuid4().hex}"
 
     context.form_data = {
         "education_id": context.education_id,
@@ -338,18 +310,14 @@ def education_not_found(context):
 # ==================================================
 
 
-@when(
-    "the job seeker enters valid updated education information"
-)
+@when("the job seeker enters valid updated education information")
 def valid_update(context):
     unique = uuid4().hex[:8]
 
     context.form_data = {
         "education_id": context.education_id,
         "degree": "Master Degree",
-        "institution": (
-            f"Taylor University Updated {unique}"
-        ),
+        "institution": (f"Taylor University Updated {unique}"),
         "field_of_study": "Software Engineering",
         "start_date": "2024-01",
         "end_date": "2025-12",
@@ -411,10 +379,7 @@ def clear_end_date(context):
     }
 
 
-@when(
-    "the job seeker enters an end date earlier "
-    "than the start date"
-)
+@when("the job seeker enters an end date earlier than the start date")
 def invalid_period(context):
     context.form_data = {
         "education_id": context.education_id,
@@ -448,19 +413,13 @@ def submit_update(context, client):
 
 @then("the education record should be updated successfully")
 def updated(context):
-    assert context.response.status_code == 200, (
-        context.response.text
-    )
+    assert context.response.status_code == 200, context.response.text
 
     body = context.response.json()
 
     assert body["success"] is True
 
-    document = (
-        db.collection("education")
-        .document(context.education_id)
-        .get()
-    )
+    document = db.collection("education").document(context.education_id).get()
 
     assert document.exists
 
@@ -468,9 +427,7 @@ def updated(context):
 
     assert data is not None
     assert data["qualification"] == "Master Degree"
-    assert data["institution"] == (
-        context.form_data["institution"]
-    )
+    assert data["institution"] == (context.form_data["institution"])
 
 
 @then("the system should redirect to the Manage Education page")
@@ -496,11 +453,7 @@ def display_error(context, message):
 
 @then("the education record should remain unchanged")
 def unchanged(context):
-    document = (
-        db.collection("education")
-        .document(context.education_id)
-        .get()
-    )
+    document = db.collection("education").document(context.education_id).get()
 
     assert document.exists
 
