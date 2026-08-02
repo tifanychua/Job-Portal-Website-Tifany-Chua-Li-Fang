@@ -1,14 +1,13 @@
-from datetime import datetime, timezone
 import re
+import uuid
+from datetime import UTC, datetime
 
-
-from fastapi import APIRouter, Request, Form, UploadFile, File, HTTPException
-from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore
 
 from job_portal_web.backend.database import bucket
-import uuid
 
 router = APIRouter()
 
@@ -26,7 +25,6 @@ def get_current_company_id(request: Request):
     # ==========================================
 
     if os.getenv("PYTEST_CURRENT_TEST"):
-
         return "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
 
     # ==========================================
@@ -73,7 +71,6 @@ async def edit_company_profile(request: Request):
     docs = db.collection("skill_categories").stream()
 
     for doc in docs:
-
         category = doc.to_dict()
 
         if not selected_industry or category.get("industry_id") == selected_industry:
@@ -81,7 +78,7 @@ async def edit_company_profile(request: Request):
 
     categories.sort(key=lambda x: x.get("category_name", ""))
 
-    current_year = datetime.now(timezone.utc).year
+    current_year = datetime.now(UTC).year
 
     return templates.TemplateResponse(
         request=request,
@@ -108,11 +105,9 @@ async def get_industry_specialties(industry_id: str):
     docs = db.collection("skill_categories").stream()
 
     for doc in docs:
-
         category = doc.to_dict()
 
         if category.get("industry_id") == industry_id:
-
             categories.append(category)
 
     categories.sort(key=lambda x: x.get("category_name", ""))
@@ -161,7 +156,7 @@ async def update_company_profile(
 ):
 
     company_id = get_current_company_id(request)
-    current_year = datetime.now(timezone.utc).year
+    current_year = datetime.now(UTC).year
 
     industries = [
         doc.to_dict() for doc in db.collection("industries").order_by("industry_name").stream()
@@ -172,7 +167,6 @@ async def update_company_profile(
     docs = db.collection("skill_categories").stream()
 
     for doc in docs:
-
         category = doc.to_dict()
 
         if category.get("industry_id") == industry_id:
@@ -319,7 +313,6 @@ async def update_company_profile(
     }
 
     if logo and logo.filename:
-
         allowed_types = ["image/png", "image/jpeg", "image/jpg"]
 
         if logo.content_type not in allowed_types:
@@ -329,7 +322,7 @@ async def update_company_profile(
 
         extension = logo.filename.rsplit(".", 1)[-1]
 
-        filename = f"profile_images/" f"{company_id}_{uuid.uuid4()}.{extension}"
+        filename = f"profile_images/{company_id}_{uuid.uuid4()}.{extension}"
 
         blob = bucket.blob(filename)
 

@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import pytest
-
 from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # Test Client
@@ -44,7 +42,7 @@ def company_data():
         "country": "Malaysia",
         "industry_id": "it",
         "specialty_category_ids": ["software_engineering", "web_development"],
-        "companyDescription": ("ABC Technology is a software " "development company."),
+        "companyDescription": ("ABC Technology is a software development company."),
     }
 
 
@@ -60,7 +58,7 @@ def test_update_company_profile_success(client):
 
     assert response.status_code == 303
 
-    print("✅ Acceptance Test Passed: " "Company profile updated successfully.")
+    print("✅ Acceptance Test Passed: Company profile updated successfully.")
 
 
 # ==================================================
@@ -85,7 +83,7 @@ def test_updated_company_information_saved(client):
 
     assert data["companyDescription"] == "ABC Technology is a software development company."
 
-    print("✅ Acceptance Test Passed: " "Updated company information saved successfully.")
+    print("✅ Acceptance Test Passed: Updated company information saved successfully.")
 
 
 # ==================================================
@@ -109,7 +107,6 @@ def test_upload_company_logo_success(client):
     )
 
     with open(logo_path, "rb") as logo:
-
         response = client.post(
             "/update-company-profile",
             data=data,
@@ -125,7 +122,7 @@ def test_upload_company_logo_success(client):
 
     assert "logo" in company.to_dict()
 
-    print("✅ Acceptance Test Passed: " "Company logo uploaded successfully.")
+    print("✅ Acceptance Test Passed: Company logo uploaded successfully.")
 
 
 # ==================================================
@@ -142,7 +139,7 @@ def test_view_updated_company_profile(client):
 
     assert response.status_code == 200
 
-    print("✅ Acceptance Test Passed: " "Updated company profile displayed successfully.")
+    print("✅ Acceptance Test Passed: Updated company profile displayed successfully.")
 
     # ==================================================
 
@@ -162,7 +159,7 @@ def test_update_without_company_name(client):
 
     assert response.status_code >= 400
 
-    print("✅ Negative Test Passed: " "Company name validation works.")
+    print("✅ Negative Test Passed: Company name validation works.")
 
 
 # ==================================================
@@ -181,7 +178,7 @@ def test_update_without_industry(client):
 
     assert response.status_code >= 400
 
-    print("✅ Negative Test Passed: " "Industry validation works.")
+    print("✅ Negative Test Passed: Industry validation works.")
 
 
 # ==================================================
@@ -201,7 +198,7 @@ def test_update_without_contact_information(client):
 
     assert response.status_code >= 400
 
-    print("✅ Negative Test Passed: " "Contact information validation works.")
+    print("✅ Negative Test Passed: Contact information validation works.")
 
 
 # ==================================================
@@ -220,7 +217,7 @@ def test_update_invalid_founded_year(client):
 
     assert response.status_code >= 400
 
-    print("✅ Negative Test Passed: " "Founded year validation works.")
+    print("✅ Negative Test Passed: Founded year validation works.")
 
 
 # ==================================================
@@ -239,7 +236,7 @@ def test_update_invalid_postal_code(client):
 
     assert response.status_code >= 400
 
-    print("✅ Negative Test Passed: " "Postal code validation works.")
+    print("✅ Negative Test Passed: Postal code validation works.")
 
 
 # ==================================================
@@ -258,7 +255,7 @@ def test_update_without_specialties(client):
 
     assert response.status_code >= 400
 
-    print("✅ Negative Test Passed: " "Specialty validation works.")
+    print("✅ Negative Test Passed: Specialty validation works.")
 
 
 # ==================================================
@@ -277,7 +274,7 @@ def test_update_more_than_six_specialties(client):
 
     assert response.status_code >= 400
 
-    print("✅ Negative Test Passed: " "Maximum specialty validation works.")
+    print("✅ Negative Test Passed: Maximum specialty validation works.")
 
 
 # ==================================================
@@ -296,7 +293,7 @@ def test_update_without_company_description(client):
 
     assert response.status_code >= 400
 
-    print("✅ Negative Test Passed: " "Company description validation works.")
+    print("✅ Negative Test Passed: Company description validation works.")
 
 
 # ==================================================
@@ -316,7 +313,6 @@ def test_upload_invalid_logo_format(client):
     )
 
     with open(pdf_path, "rb") as logo:
-
         response = client.post(
             "/update-company-profile",
             data=data,
@@ -326,7 +322,7 @@ def test_upload_invalid_logo_format(client):
 
     assert response.status_code >= 400
 
-    print("✅ Negative Test Passed: " "Unsupported logo format rejected.")
+    print("✅ Negative Test Passed: Unsupported logo format rejected.")
 
     # ==================================================
 
@@ -343,7 +339,6 @@ scenarios("features/updateCompanyProfile.feature")
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -380,7 +375,7 @@ def verify_company_updated(context):
 
     assert context.response.status_code == 303
 
-    print("✅ Scenario Passed: " "Company profile updated successfully.")
+    print("✅ Scenario Passed: Company profile updated successfully.")
 
 
 @then("display the updated company information")
@@ -394,7 +389,7 @@ def verify_updated_information():
 
     assert data["companyName"] == "ABC Technology Sdn Bhd"
 
-    print("✅ Scenario Passed: " "Updated company information displayed.")
+    print("✅ Scenario Passed: Updated company information displayed.")
 
 
 # ==================================================
@@ -424,7 +419,7 @@ def verify_required_information_saved():
 
     assert company.exists
 
-    print("✅ Scenario Passed: " "Required information updated successfully.")
+    print("✅ Scenario Passed: Required information updated successfully.")
 
 
 # ==================================================
@@ -455,7 +450,6 @@ def upload_company_logo(client, context):
     )
 
     with open(logo_path, "rb") as logo:
-
         context.response = client.post(
             "/update-company-profile",
             data=data,
@@ -473,7 +467,7 @@ def verify_logo_saved():
 
     assert "logo" in company.to_dict()
 
-    print("✅ Scenario Passed: " "Logo uploaded successfully.")
+    print("✅ Scenario Passed: Logo uploaded successfully.")
 
 
 @then("display the logo on the company profile")
@@ -485,7 +479,7 @@ def verify_logo_display():
 
     assert company.to_dict().get("logo") is not None
 
-    print("✅ Scenario Passed: " "Logo displayed successfully.")
+    print("✅ Scenario Passed: Logo displayed successfully.")
 
     # ==================================================
 
@@ -703,7 +697,6 @@ def unsupported_logo(client, context):
     )
 
     with open(pdf_path, "rb") as logo:
-
         context.response = client.post(
             "/update-company-profile",
             data=data,

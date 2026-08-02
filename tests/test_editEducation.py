@@ -1,14 +1,11 @@
 from uuid import uuid4
 
 import pytest
-
-from pytest_bdd import scenarios
-
 from fastapi.testclient import TestClient
+from pytest_bdd import given, parsers, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
-from pytest_bdd import given, when, then, parsers
+from job_portal_web.backend.main import app
 
 client = TestClient(app)
 
@@ -16,7 +13,6 @@ scenarios("features/editEducation.feature")
 
 
 class TestContext:
-
     def __init__(self):
 
         self.response = None
@@ -396,5 +392,4 @@ def unchanged(context):
     db.collection("education").document(context.education_id).delete()
 
     if hasattr(context, "duplicate_id"):
-
         db.collection("education").document(context.duplicate_id).delete()

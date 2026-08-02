@@ -1,11 +1,10 @@
-from collections import Counter
-
-from fastapi import APIRouter, Request, Query
-from fastapi.templating import Jinja2Templates
-from google.cloud.firestore_v1.base_query import FieldFilter
-from typing import List
 import math
 import os
+from collections import Counter
+
+from fastapi import APIRouter, Query, Request
+from fastapi.templating import Jinja2Templates
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 from .database import db
 
@@ -29,7 +28,6 @@ def load_company_cache():
     docs = db.collection("company").stream()
 
     for doc in docs:
-
         company = doc.to_dict()
 
         # document id
@@ -51,7 +49,6 @@ def load_gallery_cache():
     docs = db.collection("gallery").stream()
 
     for doc in docs:
-
         gallery = doc.to_dict()
 
         company_id = gallery.get("company_id")
@@ -59,7 +56,6 @@ def load_gallery_cache():
         image = gallery.get("image")
 
         if company_id and image:
-
             cache[company_id] = image
 
     return cache
@@ -77,7 +73,6 @@ def load_jobs():
     docs = db.collection("job_list").where(filter=FieldFilter("status", "==", "Active")).stream()
 
     for doc in docs:
-
         job = doc.to_dict()
 
         job["id"] = doc.id
@@ -95,7 +90,6 @@ def load_jobs():
 def attach_company_information(jobs, company_cache, gallery_cache):
 
     for job in jobs:
-
         company = company_cache.get(job.get("company_id"))
 
         job.setdefault("company_name", "Unknown")
@@ -103,13 +97,11 @@ def attach_company_information(jobs, company_cache, gallery_cache):
         job.setdefault("company_logo", "default.jpg")
 
         if company:
-
             job["company_name"] = company.get("companyName", "Unknown")
 
             job["company_logo"] = company.get("logo", "default.jpg")
 
             if not job.get("location"):
-
                 job["location"] = company.get("location", "Unknown")
 
     return jobs
@@ -123,7 +115,6 @@ def attach_company_information(jobs, company_cache, gallery_cache):
 def apply_search(jobs, keyword, category):
 
     if keyword:
-
         keyword = keyword.lower()
 
         jobs = [
@@ -137,7 +128,6 @@ def apply_search(jobs, keyword, category):
         ]
 
     if category:
-
         jobs = [job for job in jobs if job.get("category", "").lower() == category.lower()]
 
     return jobs
@@ -161,7 +151,6 @@ def build_sidebar(jobs):
     top_category_counter = Counter()
 
     for job in jobs:
-
         location_counter[job.get("location", "Unknown")] += 1
 
         position_counter[job.get("position", "Unknown")] += 1
@@ -169,13 +158,11 @@ def build_sidebar(jobs):
         category = job.get("category")
 
         if category:
-
             category_set.add(category)
 
             top_category_counter[category] += 1
 
         for benefit in job.get("benefits", []):
-
             benefit_counter[benefit] += 1
 
     return {
@@ -192,9 +179,9 @@ def browse_jobs(
     request: Request,
     q: str = Query(""),
     category: str = Query(""),
-    location: List[str] = Query([]),
-    position: List[str] = Query([]),
-    benefits: List[str] = Query([]),
+    location: list[str] = Query([]),
+    position: list[str] = Query([]),
+    benefits: list[str] = Query([]),
     page: int = Query(1),
 ):
 
@@ -226,9 +213,7 @@ def browse_jobs(
     category_counter: Counter = Counter()
 
     for job in all_jobs:
-
         if job.get("category"):
-
             category_counter[job["category"]] += 1
 
     topCategories = [c for c, _ in category_counter.most_common(5)]
@@ -249,15 +234,12 @@ def browse_jobs(
     # =====================================================
 
     if location:
-
         jobs = [job for job in jobs if job.get("location") in location]
 
     if position:
-
         jobs = [job for job in jobs if job.get("position") in position]
 
     if benefits:
-
         jobs = [job for job in jobs if any(b in job.get("benefits", []) for b in benefits)]
     sidebar = build_sidebar(search_jobs)
     # =====================================================
@@ -276,11 +258,9 @@ def browse_jobs(
 
     total_pages = max(1, math.ceil(total_jobs / per_page))
 
-    if page < 1:
-        page = 1
+    page = max(page, 1)
 
-    if page > total_pages:
-        page = total_pages
+    page = min(page, total_pages)
 
     start_index = (page - 1) * per_page
 
@@ -289,12 +269,10 @@ def browse_jobs(
     display_jobs = jobs[start_index:end_index]
 
     if total_jobs == 0:
-
         show_start = 0
         show_end = 0
 
     else:
-
         show_start = start_index + 1
 
         show_end = min(end_index, total_jobs)
@@ -306,15 +284,12 @@ def browse_jobs(
     user = None
 
     if request.session.get("user_type") == "job_seeker":
-
         uid = request.session.get("applicant_id")
 
         if uid:
-
             doc = db.collection("job_seeker").document(uid).get()
 
             if doc.exists:
-
                 user = doc.to_dict()
 
     # =====================================================

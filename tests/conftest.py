@@ -1,9 +1,9 @@
-import pytest
 import os
 
+import pytest
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 # Import the email service for mocking
 from job_portal_web.backend import email_service
@@ -90,6 +90,7 @@ def email_mock():
 def client():
 
     from fastapi.testclient import TestClient
+
     from job_portal_web.backend.main import app
 
     return TestClient(app)

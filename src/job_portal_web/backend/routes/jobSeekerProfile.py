@@ -1,6 +1,7 @@
-from pathlib import Path
 import os
-from fastapi import APIRouter, Request, HTTPException
+from pathlib import Path
+
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -29,13 +30,11 @@ def get_current_applicant_id(request: Request):
     print("SESSION:", request.session)
 
     if request.session.get("user_type") != "job_seeker":
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     applicant_id = request.session.get("applicant_id")
 
     if not applicant_id:
-
         raise HTTPException(status_code=401, detail="Applicant not logged in")
 
     return applicant_id
@@ -60,7 +59,6 @@ async def profile(request: Request):
     applicant = {}
 
     if doc.exists:
-
         applicant = doc.to_dict()
 
         print("Applicant data:", applicant)
@@ -101,7 +99,6 @@ async def profile(request: Request):
     )
 
     for doc in skill_docs:
-
         data = doc.to_dict()
 
         skill_id = data.get("skill_id")
@@ -115,7 +112,6 @@ async def profile(request: Request):
         found = False
 
         for skill_doc in docs:
-
             skill_data = skill_doc.to_dict()
 
             applicant["skills"].append(skill_data.get("skill_name", skill_id))

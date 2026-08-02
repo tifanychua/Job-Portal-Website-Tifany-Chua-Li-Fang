@@ -1,7 +1,8 @@
-from pytest_bdd import scenarios, given, when, then
-from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
 from job_portal_web.backend.main import app
 
@@ -150,7 +151,6 @@ def valid_login(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-
         verify.return_value = {"uid": "company123"}
         mock_company_login(db)
 
@@ -196,7 +196,6 @@ def employer_logged_in(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-
         verify.return_value = {"uid": "company123"}
         mock_company_login(db)
 
@@ -231,7 +230,6 @@ def test_employer_cannot_access_job_seeker_features(client):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-
         verify.return_value = {"uid": "company123"}
         mock_company_login(db)
 

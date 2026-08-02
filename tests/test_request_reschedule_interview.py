@@ -1,11 +1,10 @@
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
-from job_portal_web.backend.database import db
 from job_portal_web.backend import interview
+from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # FEATURE
@@ -54,7 +53,6 @@ def mock_email(monkeypatch):
 
 
 class Context:
-
     def __init__(self):
 
         self.interview_id = None

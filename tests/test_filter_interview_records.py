@@ -1,14 +1,13 @@
-from fastapi.testclient import TestClient
-import pytest
-
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
-from job_portal_web.backend.database import db
-
-from itsdangerous import TimestampSigner
 import base64
 import json
+
+import pytest
+from fastapi.testclient import TestClient
+from itsdangerous import TimestampSigner
+from pytest_bdd import given, scenarios, then, when
+
+from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==========================================
 # LOAD FEATURE FILE
@@ -67,7 +66,6 @@ def context():
 def delete_test_records():
 
     for interview_id in TEST_INTERVIEW_IDS:
-
         db.collection("interviews").document(interview_id).delete()
 
 
@@ -130,7 +128,6 @@ def create_interview_records():
     ]
 
     for index, record in enumerate(records):
-
         db.collection("interviews").document(TEST_INTERVIEW_IDS[index]).set(record)
 
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
+from pytest_bdd import given, scenarios, then, when
 
 from job_portal_web.backend.main import app
 
@@ -88,11 +88,9 @@ def test_filter_job_opportunities(client: TestClient):
     )
 
     if response.status_code == 200:
-
         print("✅ SUCCESS: Filtered job opportunities displayed")
 
     else:
-
         print("❌ FAILED: Unable to filter jobs")
 
     assert response.status_code == 200
@@ -111,7 +109,6 @@ scenarios("features/browsepage.feature")
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -211,11 +208,9 @@ def verify_filtered_jobs(context):
     page = context.response.text.lower()
 
     if "software engineer" in page or "kuala lumpur" in page:
-
         print("✅ SUCCESS: Filtered job opportunities displayed")
 
     else:
-
         print("❌ FAILED: Filtered jobs not displayed")
 
     assert "software engineer" in page or "kuala lumpur" in page

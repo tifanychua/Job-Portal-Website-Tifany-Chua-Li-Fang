@@ -1,17 +1,17 @@
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 
-from .database import db, bucket
+from .database import bucket, db
 from .job_information import (
+    _attach_company_fields,
     _find_company,
     _normalize_job,
-    _attach_company_fields,
 )
 
 router = APIRouter()
@@ -159,7 +159,6 @@ async def job_apply_submit(
     answers = {}
 
     for question in _get_screening_questions(job):
-
         answers[question["id"]] = form_data.get(f"answer_{question['id']}", "")
 
     # ==============================
@@ -170,11 +169,9 @@ async def job_apply_submit(
     resume_path = None
 
     if resume is not None and resume.filename:
-
         ext = os.path.splitext(resume.filename)[1].lower()
 
         if ext not in ALLOWED_RESUME_EXTENSIONS:
-
             return JSONResponse(
                 status_code=400,
                 content={"success": False, "message": "Resume must be a PDF, DOC, or DOCX file."},
@@ -183,7 +180,6 @@ async def job_apply_submit(
         contents = await resume.read()
 
         if len(contents) > MAX_RESUME_SIZE_MB * 1024 * 1024:
-
             return JSONResponse(
                 status_code=400,
                 content={
@@ -192,7 +188,7 @@ async def job_apply_submit(
                 },
             )
 
-        resume_name = f"{job_seeker_id}_" f"{job_id}_" f"{uuid.uuid4().hex[:8]}" f"{ext}"
+        resume_name = f"{job_seeker_id}_{job_id}_{uuid.uuid4().hex[:8]}{ext}"
 
         blob = bucket.blob(f"resumes/{resume_name}")
 
@@ -211,8 +207,8 @@ async def job_apply_submit(
             "cover_letter": cover_letter,
             "answers": answers,
             "status": "Submitted",
-            "created_at": datetime.now(timezone.utc),
-            "updated_on": datetime.now(timezone.utc),
+            "created_at": datetime.now(UTC),
+            "updated_on": datetime.now(UTC),
         }
     )
 

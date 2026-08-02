@@ -1,14 +1,13 @@
-from fastapi.testclient import TestClient
-import pytest
-
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
-from job_portal_web.backend.database import db
-
-from itsdangerous import TimestampSigner
 import base64
 import json
+
+import pytest
+from fastapi.testclient import TestClient
+from itsdangerous import TimestampSigner
+from pytest_bdd import given, scenarios, then, when
+
+from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==========================================
 # LOAD FEATURE
@@ -67,7 +66,6 @@ def context():
 def delete_test_interviews():
 
     for interview_id in TEST_INTERVIEW_IDS:
-
         db.collection("interviews").document(interview_id).delete()
 
 
@@ -135,7 +133,6 @@ def create_interview_records():
     ]
 
     for record in records:
-
         db.collection("interviews").document(record["id"]).set(record)
 
 
@@ -173,7 +170,6 @@ def verify_filtered_records(context):
     assert len(data) > 0
 
     for item in data:
-
         assert item["status"] == "Scheduled"
 
 

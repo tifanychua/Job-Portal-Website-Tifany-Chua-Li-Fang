@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend import interview
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # LOAD FEATURE FILE
@@ -77,7 +77,6 @@ def email_mock(monkeypatch):
 
 
 class Context:
-
     def __init__(self):
 
         self.interview_id = None

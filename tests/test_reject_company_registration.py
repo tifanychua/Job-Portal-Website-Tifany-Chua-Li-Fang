@@ -1,9 +1,9 @@
-from pytest_bdd import scenarios, given, when, then
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # =====================================
 # LOAD FEATURE FILE
@@ -58,11 +58,9 @@ def delete_test_company():
     doc = db.collection("company").document(COMPANY_ID).get()
 
     if doc.exists:
-
         data = doc.to_dict()
 
         if data.get("test"):
-
             doc.reference.delete()
 
 

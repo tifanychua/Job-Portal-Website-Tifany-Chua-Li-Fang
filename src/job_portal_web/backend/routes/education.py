@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Request, Form, HTTPException
-from fastapi.responses import JSONResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
-from job_portal_web.backend.database import db
 import os
 
-
 import requests
+from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+
+from job_portal_web.backend.database import db
 
 router = APIRouter()
 
@@ -55,7 +55,6 @@ async def manage_education(request: Request):
     docs = db.collection("education").where("applicant_id", "==", applicant_id).stream()
 
     for doc in docs:
-
         data = doc.to_dict()
         data["id"] = doc.id
 
@@ -103,33 +102,27 @@ async def add_education(
     # ===========================================
 
     if degree == "":
-
         return JSONResponse(
             {"success": False, "message": "Please select your qualification."}, status_code=400
         )
 
     if institution == "":
-
         return JSONResponse(
             {"success": False, "message": "Please enter your institution."}, status_code=400
         )
 
     if start_date == "":
-
         return JSONResponse(
             {"success": False, "message": "Please select your start date."}, status_code=400
         )
 
     if not current_study:
-
         if end_date == "":
-
             return JSONResponse(
                 {"success": False, "message": "Please select your end date."}, status_code=400
             )
 
         if end_date < start_date:
-
             return JSONResponse(
                 {"success": False, "message": "Invalid study period."}, status_code=400
             )
@@ -148,7 +141,6 @@ async def add_education(
     )
 
     if next(duplicate, None):
-
         return JSONResponse(
             {"success": False, "message": "This education record already exists."}, status_code=409
         )
@@ -185,7 +177,6 @@ async def get_education(education_id: str):
     doc = db.collection("education").document(education_id).get()
 
     if not doc.exists:
-
         return JSONResponse({"success": False, "message": "Education not found"}, status_code=404)
 
     data = doc.to_dict()
@@ -222,7 +213,6 @@ async def update_education(
     doc_ref = db.collection("education").document(education_id)
 
     if not doc_ref.get().exists:
-
         return JSONResponse({"success": False, "message": "Education not found"}, status_code=404)
 
     # ===========================================
@@ -240,33 +230,27 @@ async def update_education(
     # ===========================================
 
     if degree == "":
-
         return JSONResponse(
             {"success": False, "message": "Please select your qualification."}, status_code=400
         )
 
     if institution == "":
-
         return JSONResponse(
             {"success": False, "message": "Please enter your institution."}, status_code=400
         )
 
     if start_date == "":
-
         return JSONResponse(
             {"success": False, "message": "Please select your start date."}, status_code=400
         )
 
     if not current_study:
-
         if end_date == "":
-
             return JSONResponse(
                 {"success": False, "message": "Please select your end date."}, status_code=400
             )
 
         if end_date < start_date:
-
             return JSONResponse(
                 {"success": False, "message": "Invalid study period."}, status_code=400
             )
@@ -286,9 +270,7 @@ async def update_education(
     )
 
     for doc in duplicates:
-
         if doc.id != education_id:
-
             return JSONResponse(
                 {"success": False, "message": "This education record already exists."},
                 status_code=409,
@@ -336,11 +318,9 @@ async def delete_education(education_id: str):
 async def search_university(name: str):
 
     if not name:
-
         return JSONResponse([])
 
     try:
-
         response = requests.get(
             "http://universities.hipolabs.com/search", params={"name": name}, timeout=10
         )
@@ -352,7 +332,6 @@ async def search_university(name: str):
         result = []
 
         for university in universities:
-
             result.append(
                 {
                     "name": university.get("name"),
@@ -367,7 +346,6 @@ async def search_university(name: str):
         return JSONResponse(result)
 
     except Exception as e:
-
         print(e)
 
         return JSONResponse([])

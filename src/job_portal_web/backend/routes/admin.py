@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Request, HTTPException
-from fastapi.templating import Jinja2Templates
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 
 from ..database import db
 
@@ -29,7 +29,6 @@ def company_requests(request: Request, status: str = "Pending"):
     company_docs = db.collection("company").stream()
 
     for doc in company_docs:
-
         company = doc.to_dict()
 
         # Add document ID
@@ -37,9 +36,7 @@ def company_requests(request: Request, status: str = "Pending"):
 
         # Filter status
         if status != "All":
-
             if company.get("status") != status:
-
                 continue
 
         companies.append(company)
@@ -68,7 +65,6 @@ def review_company(request: Request, company_id: str):
     company = {}
 
     if company_doc.exists:
-
         company = company_doc.to_dict()
 
         company["company_id"] = company_id
@@ -123,7 +119,6 @@ def deactivate_company(company_id: str):
     company_doc = company_ref.get()
 
     if not company_doc.exists:
-
         raise HTTPException(status_code=404, detail="Company not found")
 
     company_ref.update({"status": "Deactivated"})

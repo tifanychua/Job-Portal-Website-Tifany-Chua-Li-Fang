@@ -1,15 +1,15 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 from .database import db
-from .encryption import encrypt_message, decrypt_message
+from .encryption import decrypt_message, encrypt_message
 
 router = APIRouter()
 
 
 class Message(BaseModel):
-
     conversationId: str
     senderId: str
     senderType: str
@@ -29,7 +29,6 @@ def get_messages(conversation_id: str):
     docs = db.collection("messages").where("conversationId", "==", conversation_id).stream()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         encrypted_text = data.get("message")
@@ -64,7 +63,7 @@ def send_message(message: Message):
         "senderId": message.senderId,
         "senderType": message.senderType,
         "message": encrypted_text,
-        "time": datetime.now(timezone.utc).isoformat(),
+        "time": datetime.now(UTC).isoformat(),
     }
 
     db.collection("messages").add(data)
@@ -82,11 +81,9 @@ def get_chat_info(employer_id: str, job_seeker_id: str, senderType: str):
 
     # Job seeker chatting with employer
     if senderType == "job_seeker":
-
         company_doc = db.collection("company").document(employer_id).get()
 
         if company_doc.exists:
-
             company = company_doc.to_dict()
 
             return {
@@ -97,11 +94,9 @@ def get_chat_info(employer_id: str, job_seeker_id: str, senderType: str):
 
     # Employer chatting with job seeker
     else:
-
         seeker_doc = db.collection("job_seeker").document(job_seeker_id).get()
 
         if seeker_doc.exists:
-
             seeker = seeker_doc.to_dict()
 
             return {

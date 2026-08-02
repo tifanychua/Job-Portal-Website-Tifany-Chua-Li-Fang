@@ -1,21 +1,18 @@
-from datetime import datetime, timezone
+import re
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
-import re
-
 
 from fastapi import (
     APIRouter,
-    Request,
-    HTTPException,
-    Form,
-    UploadFile,
     File,
+    Form,
+    HTTPException,
+    Request,
+    UploadFile,
 )
-
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
 from firebase_admin import firestore, storage
 
 router = APIRouter()
@@ -38,7 +35,6 @@ def get_current_job_seeker_id(request: Request):
     # ==========================================
 
     if os.getenv("PYTEST_CURRENT_TEST"):
-
         return "F9fDAUiFvYcYAVt7jRHLFb1IqrQ2"
 
     # ==========================================
@@ -78,7 +74,7 @@ async def edit_profile(request: Request):
         name="edit_jobSeeker_profile.html",
         context={
             "seeker": seeker,
-            "today": datetime.now(timezone.utc).date().isoformat(),
+            "today": datetime.now(UTC).date().isoformat(),
         },
     )
 
@@ -120,17 +116,15 @@ async def update_profile(
     # ----------------------------------------
 
     if date_of_birth:
-
         dob = datetime.strptime(date_of_birth, "%Y-%m-%d").date()
 
-        if dob >= datetime.now(timezone.utc).date():
-
+        if dob >= datetime.now(UTC).date():
             return templates.TemplateResponse(
                 request=request,
                 name="edit_jobSeeker_profile.html",
                 context={
                     "seeker": seeker,
-                    "today": datetime.now(timezone.utc).date().isoformat(),
+                    "today": datetime.now(UTC).date().isoformat(),
                     "error": "Date of birth must be before today.",
                 },
                 status_code=400,
@@ -143,13 +137,12 @@ async def update_profile(
         email_pattern = r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
 
         if not re.fullmatch(email_pattern, email):
-
             return templates.TemplateResponse(
                 request=request,
                 name="edit_jobSeeker_profile.html",
                 context={
                     "seeker": seeker,
-                    "today": datetime.now(timezone.utc).date().isoformat(),
+                    "today": datetime.now(UTC).date().isoformat(),
                     "error": "Please enter a valid email address.",
                 },
                 status_code=400,
@@ -163,13 +156,12 @@ async def update_profile(
         malaysia_international = r"^\+60\s\d{1,2}-\d{7,8}$"
 
         if not (re.fullmatch(malaysia_local, phone) or re.fullmatch(malaysia_international, phone)):
-
             return templates.TemplateResponse(
                 request=request,
                 name="edit_jobSeeker_profile.html",
                 context={
                     "seeker": seeker,
-                    "today": datetime.now(timezone.utc).date().isoformat(),
+                    "today": datetime.now(UTC).date().isoformat(),
                     "error": "Please enter a valid phone number.",
                 },
                 status_code=400,
@@ -180,7 +172,6 @@ async def update_profile(
     # ----------------------------------------
 
     if profile_photo and profile_photo.filename:
-
         extension = profile_photo.filename.split(".")[-1]
 
         filename = f"profile_images/{applicant_id}_{uuid4().hex}.{extension}"

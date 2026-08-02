@@ -1,16 +1,15 @@
-from datetime import datetime, timezone
-from typing import Optional
+import os
+from datetime import UTC, datetime
+from urllib.parse import quote
 
-from fastapi import APIRouter, Request, Form
+from fastapi import APIRouter, Form, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
-from .database import db
 from firebase_admin import auth, firestore
 from pydantic import BaseModel
-from urllib.parse import quote
+
+from .database import db
 from .email_service import send_password_reset_email
-import os
 
 router = APIRouter()
 
@@ -65,7 +64,7 @@ class EmployerRegisterRequest(BaseModel):
     contactDepartment: str
     contactEmail: str
     contactPhone: str
-    altPhone: Optional[str] = ""
+    altPhone: str | None = ""
 
     preferredContactMethod: str
     bestTimeToContact: str
@@ -101,7 +100,7 @@ def _find_user_by_email(collection_name, email):
 
 
 def _now_utc():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # ==============================
@@ -224,7 +223,6 @@ def register_page(request: Request):
 async def firebase_register_job_seeker(data: JobSeekerRegisterRequest):
 
     try:
-
         decoded = auth.verify_id_token(data.token)
 
         uid = decoded["uid"]
@@ -245,7 +243,6 @@ async def firebase_register_job_seeker(data: JobSeekerRegisterRequest):
         return {"success": True}
 
     except Exception as e:
-
         return JSONResponse(status_code=401, content={"error": str(e)})
 
 
@@ -253,7 +250,6 @@ async def firebase_register_job_seeker(data: JobSeekerRegisterRequest):
 async def firebase_register_employer(data: EmployerRegisterRequest):
 
     try:
-
         decoded = auth.verify_id_token(data.token)
 
         uid = decoded["uid"]
@@ -297,7 +293,6 @@ async def firebase_register_employer(data: EmployerRegisterRequest):
         return {"success": True}
 
     except Exception as e:
-
         return JSONResponse(status_code=401, content={"error": str(e)})
 
 
@@ -399,13 +394,11 @@ async def admin_firebase_login(request: Request, data: LoginToken):
         uid = decoded["uid"]
 
     except Exception:
-
         return JSONResponse({"error": "Invalid Token"}, status_code=401)
 
     admin = db.collection("admin").document(uid).get()
 
     if not admin.exists:
-
         return JSONResponse({"error": "Access denied."}, status_code=403)
 
     request.session["user_type"] = "admin"

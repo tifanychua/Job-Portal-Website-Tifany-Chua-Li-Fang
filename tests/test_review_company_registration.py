@@ -1,10 +1,9 @@
 import pytest
-
-from pytest_bdd import scenarios, given, when, then
 from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 client = TestClient(app)
 
@@ -72,7 +71,6 @@ def delete_all_pending_companies():
     docs = db.collection("company").where("status", "==", "Pending").stream()
 
     for doc in docs:
-
         doc.reference.delete()
 
 

@@ -1,9 +1,10 @@
-from pytest_bdd import scenarios, given, when, then
+from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from pytest_bdd import given, scenarios, then, when
 
 from job_portal_web.backend.main import app
-import pytest
 
 scenarios("features/login.feature")
 
@@ -95,7 +96,6 @@ def step_valid_login(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-
         verify.return_value = {"uid": "user123"}
         doc = MagicMock()
         doc.exists = True
@@ -167,7 +167,6 @@ def job_seeker_logged_in(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-
         verify.return_value = {"uid": "user123"}
         doc = MagicMock()
         doc.exists = True

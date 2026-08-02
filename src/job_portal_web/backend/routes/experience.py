@@ -1,9 +1,9 @@
-from datetime import datetime, timezone
-from pathlib import Path
 import os
-from fastapi import APIRouter, Request, Form, HTTPException
+from datetime import UTC, datetime
+from pathlib import Path
 
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from job_portal_web.backend.database import db
@@ -27,13 +27,11 @@ def get_current_applicant_id(request: Request):
         return "0YLcc18JszVqSXWn8DEDQ81o2vR2"
 
     if request.session.get("user_type") != "job_seeker":
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     applicant_id = request.session.get("applicant_id")
 
     if not applicant_id:
-
         raise HTTPException(status_code=401, detail="Applicant not logged in")
 
     return applicant_id
@@ -66,7 +64,6 @@ async def manage_experience(request: Request):
     docs = db.collection("job_seeker_experience").where("applicant_id", "==", applicant_id).stream()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         data["id"] = doc.id
@@ -102,7 +99,7 @@ async def add_experience(
 
     applicant_id = get_current_applicant_id(request)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     job_title = job_title.strip()
     company_name = company_name.strip()
@@ -173,7 +170,6 @@ async def add_experience(
     )
 
     if next(duplicate.stream(), None):
-
         return JSONResponse(
             {"success": False, "message": "This experience record already exists."}, status_code=409
         )
@@ -223,7 +219,6 @@ async def edit_experience(
     document = doc_ref.get()
 
     if not document.exists:
-
         return JSONResponse({"success": False, "message": "Experience not found."}, status_code=404)
 
     job_title = job_title.strip()
@@ -233,31 +228,26 @@ async def edit_experience(
     description = description.strip()
 
     if not job_title:
-
         return JSONResponse(
             {"success": False, "message": "Please enter your job title."}, status_code=400
         )
 
     if not company_name:
-
         return JSONResponse(
             {"success": False, "message": "Please enter your company name."}, status_code=400
         )
 
     if not employment_type:
-
         return JSONResponse(
             {"success": False, "message": "Please select your employment type."}, status_code=400
         )
 
     if not location:
-
         return JSONResponse(
             {"success": False, "message": "Please enter your location."}, status_code=400
         )
 
     if not start_date:
-
         return JSONResponse(
             {"success": False, "message": "Please select your start date."}, status_code=400
         )
@@ -265,13 +255,11 @@ async def edit_experience(
     is_currently_working = currently_working in ("on", "true", "True", "1")
 
     if not is_currently_working and not end_date:
-
         return JSONResponse(
             {"success": False, "message": "Please select your end date."}, status_code=400
         )
 
     if not is_currently_working and end_date and end_date < start_date:
-
         return JSONResponse(
             {"success": False, "message": "Invalid employment period."}, status_code=400
         )
@@ -289,9 +277,7 @@ async def edit_experience(
     )
 
     for doc in duplicate:
-
         if doc.id != document_id:
-
             return JSONResponse(
                 {"success": False, "message": "This experience record already exists."},
                 status_code=409,
@@ -307,7 +293,7 @@ async def edit_experience(
             "end_date": end_date,
             "currently_working": is_currently_working,
             "description": description,
-            "updated_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(UTC),
         }
     )
 

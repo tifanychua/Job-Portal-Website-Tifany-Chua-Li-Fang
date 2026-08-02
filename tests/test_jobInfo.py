@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
+from pytest_bdd import given, scenarios, then, when
+
 from job_portal_web.backend.database import db
 from job_portal_web.backend.main import app
 
@@ -69,7 +70,6 @@ def test_view_required_job_information(client: TestClient):
     response = client.get(f"/jobs/{job_id}")
 
     if response.status_code == 200:
-
         data = response.text
 
         required_fields = ["job", "description", "location", "company"]
@@ -106,7 +106,6 @@ scenarios("features/jobInfo.feature")
 
 
 class Context:
-
     def __init__(self):
         self.response = None
 
@@ -175,7 +174,6 @@ def view_job_details(client, context):
 def verify_required_job_information(context):
 
     if context.response.status_code == 200:
-
         data = context.response.text
 
         required_fields = ["job", "description", "location", "company"]

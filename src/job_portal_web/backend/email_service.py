@@ -1,10 +1,12 @@
-from fastapi_mail import FastMail, MessageSchema, MessageType
-from fastapi_mail.schemas import NameEmail
-from .email_config import conf
 import os
 
 # Mock for testing - make it accessible globally
 from typing import Any
+
+from fastapi_mail import FastMail, MessageSchema, MessageType
+from fastapi_mail.schemas import NameEmail
+
+from .email_config import conf
 
 email_mock: dict[str, Any] = {
     "sent": False,
@@ -21,14 +23,12 @@ async def send_interview_email(email, name, interview, company_address):
     location_text = ""
 
     if interview.interviewType == "online":
-
         location_text = f"""
 Meeting Link:
 {interview.meetingLink}
 """
 
     elif interview.interviewType == "physical":
-
         location_text = f"""
 Company Address:
 {company_address}
@@ -86,7 +86,6 @@ async def send_employer_interview_notification(
     reschedule_text = ""
 
     if status == "Reschedule Requested":
-
         reschedule_text = f"""
 
 Requested New Interview Date:
@@ -101,7 +100,6 @@ Requested New Interview Time:
     reason_text = ""
 
     if reason:
-
         reason_text = f"""
 
 Reason:
@@ -164,14 +162,12 @@ async def send_interview_rescheduled_email(
     location_text = ""
 
     if interview.interviewType == "online":
-
         location_text = f"""
 Meeting Link:
 {interview.meetingLink}
 """
 
     elif interview.interviewType == "physical":
-
         location_text = f"""
 Company Address:
 {company_address}

@@ -1,17 +1,13 @@
-from pathlib import Path
-from typing import List
-from fastapi import APIRouter, Request, Form, HTTPException
 import os
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from pathlib import Path
 
-
+from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
-from ..helper import get_company
-
 from firebase_admin import firestore
 
 from ..database import db
+from ..helper import get_company
 
 router = APIRouter()
 
@@ -31,13 +27,11 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "ui"))
 def get_current_company_id(request: Request):
 
     if request.session.get("user_type") != "employer":
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     company_id = request.session.get("company_id")
 
     if not company_id:
-
         raise HTTPException(status_code=401, detail="Company not logged in")
 
     return company_id
@@ -54,13 +48,11 @@ async def publish_job_confirm(request: Request):
     job = request.session.get("job")
 
     if not job:
-
         return RedirectResponse(url="/publish-job", status_code=303)
 
     company = get_company(request)
 
     if company is None:
-
         return RedirectResponse("/login", status_code=303)
 
     company_id = get_current_company_id(request)
@@ -159,7 +151,6 @@ async def edit_job(request: Request, job_id: str):
     job_doc = db.collection("job_list").document(job_id).get()
 
     if not job_doc.exists:
-
         return RedirectResponse("/manage-jobs", status_code=303)
 
     job = job_doc.to_dict()
@@ -171,7 +162,6 @@ async def edit_job(request: Request, job_id: str):
     categories = []
 
     for doc in category_docs:
-
         categories.append(doc.to_dict())
 
     return templates.TemplateResponse(
@@ -203,7 +193,7 @@ async def review_job(
     salary: str = Form(""),
     minSalary: str = Form(""),
     maxSalary: str = Form(""),
-    benefits: List[str] = Form([]),
+    benefits: list[str] = Form([]),
     other_benefit: str = Form(""),
     action: str = Form("review"),
 ):
@@ -273,7 +263,7 @@ async def review_edit_job(
     salary: str = Form(""),
     minSalary: str = Form(""),
     maxSalary: str = Form(""),
-    benefits: List[str] = Form([]),
+    benefits: list[str] = Form([]),
     other_benefit: str = Form(""),
     action: str = Form("review"),
 ):
@@ -396,7 +386,6 @@ async def delete_job(request: Request, job_id: str):
     doc = doc_ref.get()
 
     if not doc.exists:
-
         return RedirectResponse("/manage-jobs?error=notfound", status_code=303)
 
     job = doc.to_dict()
@@ -404,7 +393,6 @@ async def delete_job(request: Request, job_id: str):
     # Prevent deleting another company's job
 
     if job.get("company_id") != company_id:
-
         return RedirectResponse("/manage-jobs?error=unauthorized", status_code=303)
 
     doc_ref.update({"status": "Deleted", "updated_at": firestore.SERVER_TIMESTAMP})
@@ -423,13 +411,11 @@ async def view_job(request: Request, job_id: str):
     company = get_company(request)
 
     if company is None:
-
         return RedirectResponse("/login", status_code=303)
 
     job_doc = db.collection("job_list").document(job_id).get()
 
     if not job_doc.exists:
-
         return RedirectResponse("/manage-jobs", status_code=303)
 
     job = job_doc.to_dict()
@@ -452,7 +438,6 @@ async def restore_job(request: Request, job_id: str):
     company_id = request.session.get("company_id")
 
     if not company_id:
-
         return RedirectResponse("/login", status_code=303)
 
     doc_ref = db.collection("job_list").document(job_id)
@@ -460,13 +445,11 @@ async def restore_job(request: Request, job_id: str):
     doc = doc_ref.get()
 
     if not doc.exists:
-
         return RedirectResponse("/manage-jobs", status_code=303)
 
     job = doc.to_dict()
 
     if job.get("company_id") != company_id:
-
         return RedirectResponse("/manage-jobs", status_code=303)
 
     doc_ref.update({"status": "Active", "updated_at": firestore.SERVER_TIMESTAMP})
@@ -485,7 +468,6 @@ async def job_statistics(request: Request):
     company_id = request.session.get("company_id")
 
     if not company_id:
-
         return JSONResponse({"success": False, "message": "Not logged in"}, status_code=401)
 
     docs = db.collection("job_list").where("company_id", "==", company_id).stream()
@@ -499,21 +481,17 @@ async def job_statistics(request: Request):
     deleted = 0
 
     for doc in docs:
-
         total += 1
 
         status = doc.to_dict().get("status", "").lower()
 
         if status == "active":
-
             active += 1
 
         elif status == "draft":
-
             draft += 1
 
         elif status == "deleted":
-
             deleted += 1
 
     return JSONResponse(

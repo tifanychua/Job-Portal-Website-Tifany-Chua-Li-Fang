@@ -1,6 +1,8 @@
-from fastapi import APIRouter
-from .database import db, bucket
 from datetime import timedelta
+
+from fastapi import APIRouter
+
+from .database import bucket, db
 
 router = APIRouter()
 
@@ -32,11 +34,9 @@ def get_skills(skill_ids):
     skills = []
 
     for skill_id in skill_ids:
-
         skill_doc = db.collection("skills").document(skill_id).get()
 
         if skill_doc.exists:
-
             skill = skill_doc.to_dict()
 
             skills.append({"id": skill_id, "name": skill.get("name")})
@@ -83,7 +83,6 @@ def get_shortlisted_candidates():
     docs = db.collection("application").where("status", "==", "Shortlisted").stream()
 
     for doc in docs:
-
         application = doc.to_dict()
 
         application["applicationId"] = doc.id
@@ -134,7 +133,6 @@ def get_application(application_id: str):
     doc = db.collection("application").document(application_id).get()
 
     if not doc.exists:
-
         return {"error": "Application not found"}
 
     application = doc.to_dict()
@@ -148,7 +146,6 @@ def get_application(application_id: str):
     seeker = get_job_seeker(job_seeker_id)
 
     if seeker:
-
         application.update(seeker)
 
     # Answers

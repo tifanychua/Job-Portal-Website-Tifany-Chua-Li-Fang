@@ -1,103 +1,149 @@
-from fastapi.testclient import TestClient
+from __future__ import annotations
+
+from uuid import uuid4
+
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
 from job_portal_web.backend import interview
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
-# Load Feature File
+# LOAD FEATURE FILE
 # ==================================================
 
 scenarios("features/request_reschedule_interview_notification.feature")
 
 
 # ==================================================
-# Client
+# CLIENT
 # ==================================================
 
 
 @pytest.fixture
 def client():
-
-    return TestClient(app)
-
-
-# ==================================================
-# Mock Email
-# ==================================================
-
-
-@pytest.fixture
-def mock_email(monkeypatch):
-
-    context = {"sent": False, "status": None, "reason": None}
-
-    async def fake_send_notification(*args, **kwargs):
-
-        context["sent"] = True
-
-        # capture arguments if available
-
-        if len(args) >= 5:
-            context["status"] = args[4]
-
-        if len(args) >= 6:
-            context["reason"] = args[5]
-
-    if hasattr(interview, "send_employer_interview_notification"):
-
-        monkeypatch.setattr(
-            interview, "send_employer_interview_notification", fake_send_notification
-        )
-
-    return context
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 # ==================================================
-# Context
+# CONTEXT
 # ==================================================
 
 
 class Context:
-
     def __init__(self):
-
         self.response = None
-
-        self.interview_id = None
-
+        self.interview_id: str | None = None
         self.document = None
 
 
 @pytest.fixture
 def context():
-
     return Context()
 
 
 # ==================================================
-# Helper
+# MOCK EMAIL
 # ==================================================
 
 
-def create_test_interview(client):
+@pytest.fixture
+def mock_email(monkeypatch):
+    email_context = {
+        "sent": False,
+        "email": None,
+        "company": None,
+        "candidate": None,
+        "position": None,
+        "status": None,
+        "reason": None,
+        "requested_date": None,
+        "requested_time": None,
+    }
 
-    db.collection("company").document("C000001").set(
-        {"companyName": "Test Company", "employerId": "EMP001"}
+    async def fake_send_notification(
+        email,
+        company,
+        candidate,
+        position,
+        status,
+        reason=None,
+        requested_date=None,
+        requested_time=None,
+    ):
+        email_context["sent"] = True
+        email_context["email"] = email
+        email_context["company"] = company
+        email_context["candidate"] = candidate
+        email_context["position"] = position
+        email_context["status"] = status
+        email_context["reason"] = reason
+        email_context["requested_date"] = requested_date
+        email_context["requested_time"] = requested_time
+
+    monkeypatch.setattr(
+        interview,
+        "send_employer_interview_notification",
+        fake_send_notification,
     )
 
-    db.collection("employers").document("EMP001").set(
-        {"name": "John", "email": "chualifang@gmail.com"}
+    return email_context
+
+
+# ==================================================
+# UNIQUE TEST DATA
+# ==================================================
+
+
+@pytest.fixture
+def test_data():
+    suffix = uuid4().hex
+
+    data = {
+        "interview_id": f"TEST_RESCHEDULE_REQUEST_{suffix}",
+        "candidate_id": f"TEST_CANDIDATE_{suffix}",
+        "company_id": f"TEST_COMPANY_{suffix}",
+    }
+
+    yield data
+
+    db.collection("interviews").document(data["interview_id"]).delete()
+    db.collection("job_seeker").document(data["candidate_id"]).delete()
+    db.collection("company").document(data["company_id"]).delete()
+
+
+# ==================================================
+# CREATE TEST INTERVIEW
+# ==================================================
+
+
+def create_test_interview(test_data):
+    interview_id = test_data["interview_id"]
+    candidate_id = test_data["candidate_id"]
+    company_id = test_data["company_id"]
+
+    db.collection("job_seeker").document(candidate_id).set(
+        {
+            "name": "James",
+            "email": "james@test.com",
+        }
     )
 
-    response = client.post(
-        "/api/interviews",
-        json={
-            "candidateId": "123",
-            "companyId": "C000001",
+    db.collection("company").document(company_id).set(
+        {
+            "companyName": "Test Company",
+            "email": "employer@test.com",
+            "address": "Penang",
+        }
+    )
+
+    db.collection("interviews").document(interview_id).set(
+        {
+            "candidateId": candidate_id,
+            "companyId": company_id,
             "candidateName": "James",
             "position": "Software Engineer",
             "stage": "Technical Interview",
@@ -108,21 +154,16 @@ def create_test_interview(client):
             "interviewer": "John",
             "meetingLink": "https://meet.google.com/test",
             "notes": "Prepare portfolio",
-        },
+            "status": "Scheduled",
+            "applicantResponse": "Pending",
+        }
     )
 
-    print("CREATE:", response.status_code, response.text)
-
-    assert response.status_code == 200
-
-    interviews = client.get("/api/interviews").json()
-
-    return interviews[-1]["id"]
+    return interview_id
 
 
-def create_reschedule_request(client):
-
-    interview_id = create_test_interview(client)
+def create_reschedule_request(client, test_data):
+    interview_id = create_test_interview(test_data)
 
     response = client.put(
         f"/api/interviews/{interview_id}/reschedule-request",
@@ -133,74 +174,104 @@ def create_reschedule_request(client):
         },
     )
 
-    print("RESCHEDULE:", response.status_code, response.text)
-
     assert response.status_code == 200
+    assert response.json()["message"] == "Reschedule request sent"
 
-    return interview_id
+    return interview_id, response
 
 
 # ==================================================
-# Scenario 1
+# SCENARIO 1
 # ==================================================
 
 
 @given("a job seeker submits an interview reschedule request")
-def submit_reschedule_request(client, context, mock_email):
+def submit_reschedule_request(
+    client,
+    context,
+    mock_email,
+    test_data,
+):
+    interview_id, response = create_reschedule_request(
+        client,
+        test_data,
+    )
 
-    context.interview_id = create_reschedule_request(client)
+    context.interview_id = interview_id
+    context.response = response
 
 
 @when("the request is created successfully")
 def request_created(context):
+    assert context.interview_id is not None
 
     context.document = db.collection("interviews").document(context.interview_id).get()
 
 
 @then("the employer should receive a notification about the request")
 def verify_notification(mock_email, context):
+    assert context.document is not None
+    assert context.document.exists
 
     data = context.document.to_dict()
 
-    # verify database update
-
+    assert data is not None
     assert data["status"] == "Reschedule Requested"
-
+    assert data["applicantResponse"] == "Reschedule Requested"
     assert data["requestedDate"] == "2026-07-25"
-
     assert data["requestedTime"] == "14:00"
-
-    # verify email function called
+    assert data["rescheduleReason"] == ("Unable to attend original schedule")
 
     assert mock_email["sent"] is True
+    assert mock_email["email"] == "employer@test.com"
+    assert mock_email["company"] == "Test Company"
+    assert mock_email["candidate"] == "James"
+    assert mock_email["position"] == "Software Engineer"
+    assert mock_email["status"] == "Reschedule Requested"
+    assert mock_email["reason"] == ("Unable to attend original schedule")
+    assert mock_email["requested_date"] == "2026-07-25"
+    assert mock_email["requested_time"] == "14:00"
 
 
 # ==================================================
-# Scenario 2
+# SCENARIO 2
 # ==================================================
 
 
 @given("the employer has received a reschedule request notification")
-def employer_received_notification(client, context, mock_email):
+def employer_received_notification(
+    client,
+    context,
+    mock_email,
+    test_data,
+):
+    interview_id, response = create_reschedule_request(
+        client,
+        test_data,
+    )
 
-    context.interview_id = create_reschedule_request(client)
+    context.interview_id = interview_id
+    context.response = response
+
+    assert mock_email["sent"] is True
 
 
 @when("the employer opens the notification")
 def employer_open_notification(context):
+    assert context.interview_id is not None
 
     context.document = db.collection("interviews").document(context.interview_id).get()
 
 
 @then("the requested new interview date and time should be displayed")
 def verify_details(context):
-
+    assert context.document is not None
     assert context.document.exists
 
     data = context.document.to_dict()
 
+    assert data is not None
     assert data["requestedDate"] == "2026-07-25"
-
     assert data["requestedTime"] == "14:00"
-
     assert data["status"] == "Reschedule Requested"
+    assert data["rescheduleReason"] == ("Unable to attend original schedule")

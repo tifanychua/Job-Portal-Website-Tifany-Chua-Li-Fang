@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import pytest
-
 from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # Test Client
@@ -86,11 +84,9 @@ def test_save_published_job(client):
     found = False
 
     for doc in jobs:
-
         job = doc.to_dict()
 
         if job["status"] == "Active":
-
             found = True
 
             break
@@ -146,7 +142,6 @@ scenarios("features/jobPublish.feature")
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -214,7 +209,6 @@ def verify_saved():
     found = False
 
     for doc in jobs:
-
         job = doc.to_dict()
 
         if job["status"] == "Active" and job["location"] == "Kuala Lumpur":
@@ -254,7 +248,6 @@ def verify_display(context):
     found = False
 
     for doc in jobs:
-
         job = doc.to_dict()
 
         if job["status"] == "Active":

@@ -1,18 +1,17 @@
-from uuid import uuid4
 from datetime import datetime
+from uuid import uuid4
 
 import pytest
-
 from fastapi.testclient import TestClient
 from pytest_bdd import (
-    scenarios,
     given,
-    when,
+    scenarios,
     then,
+    when,
 )
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 client = TestClient(app)
 
@@ -112,7 +111,6 @@ def remove_multiple(context):
     responses = []
 
     for doc_id in context["document_ids"]:
-
         responses.append(client.post(f"/delete-skill/{doc_id}", follow_redirects=False))
 
     context["responses"] = responses
@@ -169,7 +167,6 @@ def update_skill_list():
 def remove_multiple_success(context):
 
     for response in context["responses"]:
-
         assert response.status_code == 303
 
 

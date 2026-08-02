@@ -1,11 +1,10 @@
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
+from job_portal_web.backend.database import db
 from job_portal_web.backend.main import app
 from job_portal_web.backend.routes import admin
-from job_portal_web.backend.database import db
 
 # ==========================================
 # LOAD FEATURE
@@ -53,7 +52,6 @@ def mock_email(monkeypatch):
 
     # Only patch if function exists
     if hasattr(admin, "send_company_approval_email"):
-
         monkeypatch.setattr(admin, "send_company_approval_email", fake_send_company_approval_email)
 
     return result
@@ -200,5 +198,4 @@ def verify_notification(context, mock_email):
 
     # Only verify email if your system sends email
     if mock_email["sent"]:
-
         assert mock_email["email"] == "abc@gmail.com"
