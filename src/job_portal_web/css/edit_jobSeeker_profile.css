@@ -1,0 +1,1198 @@
+/* =====================================================
+   GLOBAL
+===================================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background:#F8FAFC;
+    color:#111827;
+}
+
+/* =====================================================
+   LAYOUT
+===================================================== */
+
+.profile-layout{
+    display:flex;
+    min-height:100vh;
+}
+
+.edit-profile-page{
+    flex:1;
+    padding:32px;
+}
+
+.edit-profile-wrapper{
+    display:grid;
+    grid-template-columns:1fr 300px;
+    gap:28px;
+    align-items:start;
+}
+
+/* =====================================================
+   PAGE HEADER
+===================================================== */
+
+.page-header{
+    margin-bottom:24px;
+}
+
+.page-header h1{
+    font-size:32px;
+    font-weight:700;
+    color:#111827;
+    margin-bottom:6px;
+}
+
+.page-header p{
+    font-size:15px;
+    color:#6B7280;
+}
+
+/* =====================================================
+   MAIN CARD
+===================================================== */
+
+.edit-profile-card{
+    background:#FFFFFF;
+    border:1px solid #E5E7EB;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+/* =====================================================
+   TABS
+===================================================== */
+
+.profile-tabs{
+    display:flex;
+    border-bottom:1px solid #E5E7EB;
+    padding:0 24px;
+    gap:36px;
+    background:#FFFFFF;
+}
+
+.tab-btn{
+    background:none;
+    border:none;
+    padding:18px 0;
+    cursor:pointer;
+
+    font-size:14px;
+    font-weight:500;
+
+    color:#6B7280;
+
+    position:relative;
+
+    transition:.25s;
+}
+
+.tab-btn:hover{
+    color:#2563EB;
+}
+
+.tab-btn.active{
+    color:#2563EB;
+    font-weight:600;
+}
+
+.tab-btn.active::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    right:0;
+    bottom:-1px;
+
+    height:3px;
+
+    background:#2563EB;
+
+    border-radius:3px 3px 0 0;
+}
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.edit-profile-card form{
+    padding:28px;
+}
+
+/* =====================================================
+   TAB CONTENT
+===================================================== */
+
+.tab-content{
+    display:none;
+}
+
+.tab-content.active{
+    display:block;
+}
+
+/* =====================================================
+   FORM ROW
+===================================================== */
+
+.form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+    margin-bottom:22px;
+}
+
+/* =====================================================
+   FORM GROUP
+===================================================== */
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    margin-bottom:20px;
+}
+
+.form-group label{
+    font-size:14px;
+    font-weight:500;
+    color:#374151;
+    margin-bottom:8px;
+}
+
+/* =====================================================
+   INPUT
+===================================================== */
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+
+    width:100%;
+
+    border:1px solid #D1D5DB;
+
+    border-radius:8px;
+
+    background:#FFFFFF;
+
+    font-size:14px;
+
+    color:#111827;
+
+    transition:.25s;
+}
+
+/* text input */
+
+.form-group input,
+.form-group select{
+
+    height:46px;
+
+    padding:0 14px;
+}
+
+/* textarea */
+
+.form-group textarea{
+
+    padding:14px;
+
+    resize:vertical;
+
+    min-height:260px;
+
+    line-height:1.7;
+}
+
+/* focus */
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+
+    outline:none;
+
+    border-color:#2563EB;
+
+    box-shadow:0 0 0 3px rgba(37,99,235,.10);
+}
+
+/* =====================================================
+   PLACEHOLDER
+===================================================== */
+
+input::placeholder,
+textarea::placeholder{
+
+    color:#9CA3AF;
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.form-actions{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    margin-top:28px;
+}
+
+.btn-cancel{
+
+    padding:11px 24px;
+
+    background:#FFFFFF;
+
+    border:1px solid #D1D5DB;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:14px;
+    font-weight:500;
+
+    transition:.25s;
+}
+
+.btn-cancel:hover{
+
+    background:#F9FAFB;
+}
+
+.btn-save{
+
+    padding:11px 24px;
+
+    border:none;
+
+    background:#2563EB;
+
+    color:#FFFFFF;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:14px;
+    font-weight:600;
+
+    transition:.25s;
+}
+
+.btn-save:hover{
+
+    background:#1D4ED8;
+}
+
+/* =====================================================
+   RIGHT SIDEBAR
+===================================================== */
+
+.profile-right-panel{
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+
+/* =====================================================
+   PHOTO CARD
+===================================================== */
+
+.photo-card{
+
+    background:#FFFFFF;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:12px;
+
+    padding:28px;
+
+    text-align:center;
+
+    transition:.25s;
+}
+
+.photo-card:hover{
+
+    border-color:#D1D5DB;
+
+    box-shadow:0 8px 20px rgba(15,23,42,.06);
+}
+
+.photo-card h3{
+
+    font-size:18px;
+
+    font-weight:600;
+
+    color:#111827;
+
+    margin-bottom:24px;
+}
+
+/* =====================================================
+   PROFILE IMAGE
+===================================================== */
+
+.photo-preview{
+
+    width:150px;
+    height:150px;
+
+    margin:0 auto 24px;
+
+    position:relative;
+}
+
+.photo-preview img{
+
+    width:150px;
+    height:150px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    border:4px solid #EFF6FF;
+
+    transition:.25s;
+}
+
+.photo-preview img:hover{
+
+    transform:scale(1.03);
+}
+
+/* ==============================
+   PHOTO CONTAINER
+============================== */
+
+.photo-container{
+
+    position:relative;
+
+    width:170px;
+    height:170px;
+
+    margin:auto;
+}
+
+/* ==============================
+   PROFILE IMAGE
+============================== */
+
+.photo-container img{
+
+    width:170px;
+    height:170px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    border:4px solid #EFF6FF;
+}
+
+/* ==============================
+   CAMERA BUTTON
+============================== */
+
+.photo-edit-btn{
+
+    position:absolute;
+
+    right:5px;
+    bottom:8px;
+
+    width:42px;
+    height:42px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#2563EB;
+
+    color:white;
+
+    cursor:pointer;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:16px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+
+    transition:.25s;
+}
+
+.photo-edit-btn:hover{
+
+    background:#1D4ED8;
+
+    transform:scale(1.08);
+}
+
+/* =====================================================
+   SCROLLBAR
+===================================================== */
+
+::-webkit-scrollbar{
+
+    width:8px;
+}
+
+::-webkit-scrollbar-track{
+
+    background:#F3F4F6;
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#CBD5E1;
+
+    border-radius:999px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#94A3B8;
+}
+
+/* =====================================================
+   ANIMATION
+===================================================== */
+
+.tab-content{
+
+    animation:fade .25s ease;
+}
+
+@keyframes fade{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(10px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* =====================================================
+   CARD ANIMATION
+===================================================== */
+
+.edit-profile-card,
+.photo-card{
+
+    transition:.25s ease;
+}
+
+.edit-profile-card:hover{
+
+    box-shadow:0 8px 24px rgba(15,23,42,.05);
+}
+
+/* =====================================================
+   BUTTON CLICK
+===================================================== */
+
+.btn-save:active,
+.btn-cancel:active,
+.change-photo:active,
+.remove-photo:active{
+
+    transform:scale(.98);
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width:1100px){
+
+    .edit-profile-wrapper{
+
+        grid-template-columns:1fr;
+    }
+
+    .profile-right-panel{
+
+        order:-1;
+
+        max-width:420px;
+
+        margin:auto;
+    }
+
+}
+
+@media (max-width:768px){
+
+    .edit-profile-page{
+
+        padding:20px;
+    }
+
+    .profile-tabs{
+
+        overflow-x:auto;
+
+        gap:24px;
+    }
+
+    .profile-tabs::-webkit-scrollbar{
+
+        display:none;
+    }
+
+    .form-row{
+
+        grid-template-columns:1fr;
+    }
+
+    .form-actions{
+
+        flex-direction:column;
+    }
+
+    .btn-save,
+    .btn-cancel{
+
+        width:100%;
+    }
+
+    .photo-preview{
+
+        width:120px;
+        height:120px;
+    }
+
+    .photo-preview img{
+
+        width:120px;
+        height:120px;
+    }
+
+}
+
+@media (max-width:480px){
+
+    .edit-profile-page{
+
+        padding:16px;
+    }
+
+    .page-header h1{
+
+        font-size:28px;
+    }
+
+    .page-header p{
+
+        font-size:14px;
+    }
+
+    .edit-profile-card form{
+
+        padding:20px;
+    }
+
+    .profile-tabs{
+
+        padding:0 16px;
+    }
+
+    .tab-btn{
+
+        font-size:13px;
+    }
+
+}
+
+/*====================================================
+                LANGUAGE PAGE
+====================================================*/
+
+.language-page{
+
+    display:flex;
+    flex-direction:column;
+    gap:24px;
+
+}
+
+.language-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+
+    padding-bottom:20px;
+    margin-bottom:10px;
+
+    border-bottom:1px solid #E5E7EB;
+
+}
+
+.language-header h3{
+
+    margin:0;
+
+    font-size:22px;
+    font-weight:600;
+
+    color:#111827;
+
+}
+
+.language-header p{
+
+    margin-top:6px;
+
+    font-size:14px;
+    color:#6B7280;
+
+    line-height:1.6;
+
+}
+
+/*====================================================
+                ADD LANGUAGE BUTTON
+====================================================*/
+
+.add-language{
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    background:#2563EB;
+    color:#FFFFFF;
+
+    border:none;
+
+    padding:10px 18px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:14px;
+    font-weight:500;
+
+    transition:.25s;
+
+}
+
+.add-language:hover{
+
+    background:#1D4ED8;
+
+}
+
+.add-language i{
+
+    font-size:13px;
+
+}
+
+/*====================================================
+                LANGUAGE CONTAINER
+====================================================*/
+
+#languageContainer{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:16px;
+
+}
+
+/*====================================================
+                EMPTY STATE
+====================================================*/
+
+.language-empty{
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    min-height:140px;
+
+    border:2px dashed #D1D5DB;
+
+    border-radius:12px;
+
+    background:#F9FAFB;
+
+    color:#9CA3AF;
+
+    font-size:15px;
+
+    text-align:center;
+
+}
+
+/*====================================================
+                LANGUAGE CARD
+====================================================*/
+
+.language-card{
+
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+
+    padding:20px;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:12px;
+
+    background:#FFFFFF;
+
+    transition:.25s;
+
+}
+
+.language-card:hover{
+
+    border-color:#2563EB;
+
+    box-shadow:0 8px 20px rgba(37,99,235,.08);
+
+}
+
+.language-info{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:5px;
+
+}
+
+.language-name{
+
+    font-size:16px;
+
+    font-weight:600;
+
+    color:#111827;
+
+}
+
+.language-level{
+
+    font-size:14px;
+
+    color:#6B7280;
+
+}
+
+/*====================================================
+                ACTION BUTTONS
+====================================================*/
+
+.language-actions{
+
+    display:flex;
+    gap:10px;
+
+}
+
+.language-actions button{
+
+    width:40px;
+    height:40px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.edit-language{
+
+    background:#DBEAFE;
+
+    color:#2563EB;
+
+}
+
+.edit-language:hover{
+
+    background:#BFDBFE;
+
+}
+
+.delete-language{
+
+    background:#FEE2E2;
+
+    color:#DC2626;
+
+}
+
+.delete-language:hover{
+
+    background:#FECACA;
+
+}
+
+/*====================================================
+                MODAL
+====================================================*/
+
+.language-modal{
+
+    position:fixed;
+
+    left:0;
+    top:0;
+
+    width:100%;
+    height:100%;
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    background:rgba(0,0,0,.45);
+
+    z-index:9999;
+
+}
+
+.language-modal.show{
+
+    display:flex;
+
+}
+
+/*====================================================
+                MODAL CONTENT
+====================================================*/
+
+.language-modal-content{
+
+    width:430px;
+
+    background:#FFFFFF;
+
+    border-radius:16px;
+
+    overflow:hidden;
+
+    animation:popup .25s ease;
+
+}
+
+/*====================================================
+                MODAL HEADER
+====================================================*/
+
+.modal-header{
+
+    display:flex;
+
+    justify-content:space-between;
+    align-items:center;
+
+    padding:20px 24px;
+
+    border-bottom:1px solid #E5E7EB;
+
+}
+
+.modal-header h2{
+
+    margin:0;
+
+    font-size:20px;
+
+    font-weight:600;
+
+}
+
+.close-modal{
+
+    width:38px;
+    height:38px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#F3F4F6;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.close-modal:hover{
+
+    background:#E5E7EB;
+
+}
+
+/*====================================================
+                MODAL BODY
+====================================================*/
+
+.modal-body{
+
+    padding:24px;
+
+}
+
+.modal-body .form-group{
+
+    margin-bottom:18px;
+
+}
+
+.modal-body label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-size:14px;
+
+    font-weight:500;
+
+    color:#374151;
+
+}
+
+.modal-body select{
+
+    width:100%;
+
+    height:46px;
+
+    border:1px solid #D1D5DB;
+
+    border-radius:8px;
+
+    padding:0 14px;
+
+    font-size:14px;
+
+    transition:.25s;
+
+}
+
+.modal-body select:focus{
+
+    outline:none;
+
+    border-color:#2563EB;
+
+    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+
+}
+
+/*====================================================
+                MODAL FOOTER
+====================================================*/
+
+.modal-footer{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    padding:20px 24px;
+
+    border-top:1px solid #E5E7EB;
+
+}
+
+/*====================================================
+                ANIMATION
+====================================================*/
+
+@keyframes popup{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(20px) scale(.95);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0) scale(1);
+
+    }
+
+}
+
+/*====================================================
+                RESPONSIVE
+====================================================*/
+
+@media (max-width:768px){
+
+    .language-header{
+
+        flex-direction:column;
+
+        gap:16px;
+
+    }
+
+    .add-language{
+
+        width:100%;
+
+        justify-content:center;
+
+    }
+
+    .language-card{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:16px;
+
+    }
+
+    .language-actions{
+
+        width:100%;
+
+        justify-content:flex-end;
+
+    }
+
+    .language-modal-content{
+
+        width:95%;
+
+    }
+
+}
+
+.error-message{
+    background:#FEE2E2;
+    color:#B91C1C;
+    border:1px solid #FCA5A5;
+    padding:12px;
+    margin-bottom:20px;
+    border-radius:8px;
+    font-size:14px;
+}
+
+.loading-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-overlay.show{
+    display: flex;
+}
+
+.loading-box{
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+    text-align: center;
+}
+
+.spinner{
+    width: 45px;
+    height: 45px;
+    border: 5px solid #E5E7EB;
+    border-top: 5px solid #2563EB;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin: 0 auto 15px;
+}
+
+.loading-box p{
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #374151;
+}
+
+@keyframes spin{
+    to{
+        transform: rotate(360deg);
+    }
+}
+
+.btn-save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-spinner {
+    display: none;
+    align-items: center;
+}
+
+.btn-save:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Verification</title>
+
+    <link rel="stylesheet" href="/css/employerHeader.css">
+
+    <style>
+        .pending-wrapper{
+            margin-left:260px;
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:#f5f7fb;
+        }
+
+        .pending-card{
+            width:650px;
+            background:#fff;
+            padding:50px;
+            border-radius:18px;
+            text-align:center;
+            box-shadow:0 10px 30px rgba(0,0,0,.08);
+        }
+
+        .pending-icon{
+            font-size:70px;
+            color:#f59e0b;
+            margin-bottom:20px;
+        }
+
+        h2{
+            margin-bottom:15px;
+        }
+
+        p{
+            color:#666;
+            line-height:1.7;
+        }
+
+        .status{
+            display:inline-block;
+            margin:25px 0;
+            padding:8px 20px;
+            border-radius:50px;
+            background:#fff7e6;
+            color:#d97706;
+            font-weight:600;
+        }
+
+        .btn{
+            display:inline-block;
+            margin-top:20px;
+            padding:12px 28px;
+            background:#2563eb;
+            color:#fff;
+            border-radius:8px;
+            text-decoration:none;
+        }
+    </style>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+{% include "employerHeader.html" %}
+
+<div class="pending-wrapper">
+
+    <div class="pending-card">
+
+        <div class="pending-icon">
+            <i class="fa-solid fa-hourglass-half"></i>
+        </div>
+
+        <h2>Company Verification in Progress</h2>
+
+        <span class="status">
+            {{ company.status }}
+        </span>
+
+        <p>
+            Your company registration has been submitted successfully.
+            Our administrator is currently reviewing your company information.
+        </p>
+
+        <p>
+            You will be able to post jobs, manage applications and access all employer features once your company has been approved.
+        </p>
+
+        <a href="/company-profile" class="btn">
+            View Company Profile
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

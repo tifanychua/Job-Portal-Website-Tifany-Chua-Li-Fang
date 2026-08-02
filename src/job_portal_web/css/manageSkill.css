@@ -1,0 +1,248 @@
+/* ======================================================
+   Manage Skills
+====================================================== */
+
+.skill-page{
+    max-width:1600px;
+    margin:0 auto;
+    padding:48px 80px;
+}
+
+/* ======================================================
+   Header
+====================================================== */
+
+.skill-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:28px;
+}
+
+.skill-description{
+    color:var(--color-text-secondary);
+    margin-top:8px;
+}
+
+.skill-header .btn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+/* ======================================================
+   Main Card
+====================================================== */
+
+.skill-card-container{
+    background:var(--color-card-bg);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-card);
+    overflow:hidden;
+
+    background:#fff;
+
+    border-radius:20px;
+
+    box-shadow:0 8px 24px rgba(0,0,0,.06);
+
+    padding:28px;
+}
+
+/* ======================================================
+   Search
+====================================================== */
+
+.skill-toolbar{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:10px 0 30px;
+
+}
+
+.skill-search{
+    width:600px;
+    max-width:100%;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 18px;
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-md);
+    background:#fff;
+}
+
+.skill-search i{
+    color:var(--color-text-secondary);
+}
+
+.skill-search input{
+    border:none;
+    outline:none;
+    width:100%;
+    font-size:15px;
+    background:transparent;
+}
+
+/* ======================================================
+   Section
+====================================================== */
+
+.skill-group:last-child{
+    border-bottom:none;
+}
+
+
+.skill-group-header span{
+    color:var(--color-text-secondary);
+}
+
+/* ======================================================
+   Level
+====================================================== */
+
+.dots{
+    display:flex;
+    gap:6px;
+}
+
+.dots span{
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:#d9dce3;
+}
+
+.dots .active{
+    background:#22C55E;
+}
+
+.skill-level small{
+    color:var(--color-text-secondary);
+    font-size:13px;
+}
+
+
+/* ======================================================
+   Responsive
+====================================================== */
+
+@media(max-width:1000px){
+
+.skill-header{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:20px;
+}
+
+.skill-search{
+    width:100%;
+}
+
+
+}
+
+@media(max-width:768px){
+
+.skill-page{
+
+    padding:18px;
+
+}
+
+}
+
+.empty-state{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:100px 30px;
+
+    text-align:center;
+
+    border:2px dashed #E5E7EB;
+
+    border-radius:18px;
+
+    margin-top:24px;
+
+}
+
+.empty-state i{
+
+    font-size:64px;
+
+    color:#2563EB;
+
+    margin-bottom:24px;
+
+}
+
+.empty-state h3{
+
+    font-size:42px;
+
+    font-weight:700;
+
+    margin-bottom:16px;
+
+}
+
+.empty-state p{
+
+    color:#6B7280;
+
+    font-size:18px;
+
+    max-width:600px;
+
+    line-height:1.7;
+
+}
+
+/* Overlay */
+
+.modal-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+
+    display: none;
+
+    justify-content: center;
+    align-items: center;
+
+    z-index: 9999;
+}
+
+/* Show modal */
+
+.modal-overlay.show{
+    display:flex;
+}
+
+/* Modal */
+
+.education-modal{
+    width:700px;
+    max-width:90%;
+    background:#fff;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,.2);
+}
+
+.education-info-card {
+    margin-top: 30px;
+}

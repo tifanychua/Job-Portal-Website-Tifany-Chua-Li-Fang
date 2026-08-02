@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>JobConnect - Messages</title>
+
+{% if user_type == "employer" %}
+
+<link rel="stylesheet" href="/css/employerHeader.css">
+
+{% else %}
+
+<link rel="stylesheet" href="/css/base.css">
+
+<link rel="stylesheet" href="/static/style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+{% endif %}
+
+<link rel="stylesheet" href="/css/chat.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% if user_type == "employer" %}
+
+{% include "employerHeader.html" %}
+
+{% else %}
+
+{% include "components/header.html" %}
+
+{% endif %}
+
+<div class="container chat-page {% if user_type == 'employer' %} employer-chat {% else %} user-chat {% endif %}">
+<main>
+
+<section class="chat-card">
+
+<!-- Header -->
+
+<div class="chat-header">
+
+    <div class="header-title">
+
+        <h2>
+            <i class="fa-solid fa-comments"></i>
+            Messages
+        </h2>
+
+        <p>
+            View and continue your conversations
+        </p>
+
+    </div>
+
+</div>
+
+<!-- Conversation List -->
+
+<div
+class="conversation-body"
+id="conversationList">
+
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+<script>
+
+// ==========================================
+// Current User
+// ==========================================
+
+const currentUserId = "{{ userId }}";
+
+const currentUserType = "{{ userType }}";
+
+
+// ==========================================
+// Load Conversations
+// ==========================================
+
+async function loadConversations(){
+
+    try{
+
+        const response = await fetch(
+
+            `/api/conversations?userId=${currentUserId}&userType=${currentUserType}`
+
+        );
+
+        const conversations = await response.json();
+
+        console.log(conversations);
+
+        const list = document.getElementById("conversationList");
+
+        list.innerHTML = "";
+
+        if(conversations.length === 0){
+
+            list.innerHTML = `
+
+                <div class="empty-message">
+
+                    <i class="fa-solid fa-comment-slash"></i>
+
+                    <h3>No conversations yet</h3>
+
+                    <p>
+                        Your conversations will appear here.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+        conversations.forEach(chat=>{
+
+            const div = document.createElement("div");
+
+            div.className = "conversation-item";
+
+            div.innerHTML = `
+
+<div class="conversation-avatar">
+
+    ${chat.name.charAt(0).toUpperCase()}
+
+</div>
+
+<div class="conversation-content">
+
+    <div class="conversation-top">
+
+        <h3>
+
+            ${chat.name}
+
+        </h3>
+
+        <span class="conversation-time">
+
+            ${formatTime(chat.time)}
+
+        </span>
+
+    </div>
+
+    <div class="conversation-bottom">
+
+        <p>
+
+            ${chat.lastMessage}
+
+        </p>
+
+        <i class="fa-solid fa-chevron-right"></i>
+
+    </div>
+
+</div>
+
+`;
+
+            div.addEventListener("click",()=>{
+
+                window.location.href=
+
+                `/chat?employerId=${chat.employerId}`+
+
+                `&jobSeekerId=${chat.jobSeekerId}`+
+
+                `&senderId=${chat.senderId}`+
+
+                `&senderType=${chat.senderType}`;
+
+            });
+
+            list.appendChild(div);
+
+        });
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+// ==========================================
+// Format Time
+// ==========================================
+
+function formatTime(time){
+
+    if(!time){
+
+        return "";
+
+    }
+
+    const date = new Date(time);
+
+    return date.toLocaleTimeString([],{
+
+        hour:"2-digit",
+
+        minute:"2-digit"
+
+    });
+
+}
+
+
+// ==========================================
+// Start
+// ==========================================
+
+loadConversations();
+
+</script>
+
+</body>
+
+</html>

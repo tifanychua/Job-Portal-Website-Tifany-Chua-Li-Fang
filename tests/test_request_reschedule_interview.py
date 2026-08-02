@@ -1,33 +1,31 @@
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
-from job_portal_web.backend.database import db
 from job_portal_web.backend import interview
+from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
-# --------------------------------------------------
-# BDD Feature
-# --------------------------------------------------
+# ==================================================
+# FEATURE
+# ==================================================
 
 scenarios("features/request_reschedule_interview.feature")
 
 
-# --------------------------------------------------
-# Test Client
-# --------------------------------------------------
+# ==================================================
+# CLIENT
+# ==================================================
 
 
 @pytest.fixture
 def client():
-
     return TestClient(app)
 
 
-# --------------------------------------------------
-# Mock Email Notification
-# --------------------------------------------------
+# ==================================================
+# MOCK EMAIL
+# ==================================================
 
 
 @pytest.fixture
@@ -36,28 +34,32 @@ def mock_email(monkeypatch):
     async def fake_send_email(*args, **kwargs):
         return None
 
-    async def fake_send_notification(*args, **kwargs):
+    async def fake_notification(*args, **kwargs):
         return None
 
-    monkeypatch.setattr(interview, "send_interview_email", fake_send_email)
+    if hasattr(interview, "send_interview_email"):
+        monkeypatch.setattr(interview, "send_interview_email", fake_send_email)
 
-    monkeypatch.setattr(interview, "send_employer_interview_notification", fake_send_notification)
+    if hasattr(interview, "send_employer_interview_notification"):
+        monkeypatch.setattr(interview, "send_employer_interview_notification", fake_notification)
 
-    monkeypatch.setattr(interview, "notify_employer", fake_send_notification)
+    if hasattr(interview, "notify_employer"):
+        monkeypatch.setattr(interview, "notify_employer", fake_notification)
 
 
-# --------------------------------------------------
-# Context
-# --------------------------------------------------
+# ==================================================
+# CONTEXT
+# ==================================================
 
 
 class Context:
-
     def __init__(self):
 
         self.interview_id = None
 
         self.response = None
+
+        self.document = None
 
 
 @pytest.fixture
@@ -66,9 +68,9 @@ def context():
     return Context()
 
 
-# --------------------------------------------------
-# Helper Function
-# --------------------------------------------------
+# ==================================================
+# CREATE TEST DATA
+# ==================================================
 
 
 def create_interview(client):
@@ -95,16 +97,21 @@ def create_interview(client):
         },
     )
 
+    print("CREATE:", response.status_code, response.text)
+
     assert response.status_code == 200
 
-    interviews = client.get("/api/interviews").json()
+    interviews = client.get("/api/interviews")
 
-    return interviews[-1]["id"]
+    data = interviews.json()
+
+    print("ALL:", data)
+
+    return data[-1]["id"]
 
 
 # ==================================================
-# Scenario 1:
-# Job Seeker Requests Reschedule
+# SCENARIO 1
 # ==================================================
 
 
@@ -132,6 +139,8 @@ def submit_request(client, context):
         },
     )
 
+    print("RESCHEDULE:", context.response.status_code, context.response.text)
+
 
 @then("the reschedule request should be sent to the employer")
 def verify_sent(context):
@@ -140,8 +149,7 @@ def verify_sent(context):
 
 
 # ==================================================
-# Scenario 2:
-# Save Reschedule Request
+# SCENARIO 2
 # ==================================================
 
 
@@ -159,21 +167,30 @@ def submitted_request(client, context, mock_email):
         },
     )
 
+    print("SUBMIT:", response.status_code, response.text)
+
     assert response.status_code == 200
 
 
 @when("the system processes the request")
-def process_request(client, context):
+def process_request(context):
 
-    context.response = client.get(f"/api/interviews/{context.interview_id}")
+    # Direct Firestore checking
+    # Avoid protected GET API
+
+    context.document = db.collection("interviews").document(context.interview_id).get()
 
 
 @then("the reschedule request details should be saved in the database")
 def verify_saved(context):
 
-    assert context.response.status_code == 200
+    assert context.document.exists
 
-    data = context.response.json()
+    data = context.document.to_dict()
+
+    print("DATABASE:", data)
+
+    assert data["status"] == "Reschedule Requested"
 
     assert data["requestedDate"] == "2026-07-25"
 

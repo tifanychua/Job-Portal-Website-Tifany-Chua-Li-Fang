@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Request
+from datetime import timedelta
+
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from datetime import timedelta
 from google.cloud.firestore_v1.base_query import FieldFilter
-from .database import db, bucket
+
+from .database import bucket, db
+from .job_apply import UI_DIR, _get_currentjob_seeker, _get_screening_questions
 from .job_information import _find_company
-from .job_apply import UI_DIR, _get_current_applicant, _get_screening_questions
 
 router = APIRouter()
 
@@ -60,9 +62,11 @@ def _get_job_summary(job_id):
     if company:
         job["companyName"] = company.get("companyName", "Unknown")
         job["company_verified"] = company.get("verified", False)
+        job["company_logo"] = company.get("logo", "default.jpg")
     else:
         job["companyName"] = "Unknown"
         job["company_verified"] = False
+        job["company_logo"] = "default.jpg"
 
     return job
 
@@ -95,11 +99,13 @@ def _get_resume_url(path):
 
 @router.get("/application", name="my_applications")
 def my_applications(request: Request, status: str = "all"):
-    applicant_id, applicant = _get_current_applicant(request)
+    applicant_id, applicant = _get_currentjob_seeker(request)
 
     if not applicant_id:
-        #     return RedirectResponse(url="/login?next=/application", status_code=302)
-        applicant_id = "J000001"
+        return RedirectResponse(
+            url="/login?next=/application",
+            status_code=302,
+        )
 
     docs = (
         db.collection("application")
@@ -111,7 +117,6 @@ def my_applications(request: Request, status: str = "all"):
     counts = {key: 0 for key in STATUS_META}
 
     for doc in docs:
-
         data = doc.to_dict()
         data["id"] = doc.id
 
@@ -149,10 +154,22 @@ def my_applications(request: Request, status: str = "all"):
 
     total_count = sum(counts.values())
 
+    user = None
+
+    if request.session.get("user_type") == "job_seeker":
+        uid = request.session.get("applicant_id")
+
+        if uid:
+            doc = db.collection("job_seeker").document(uid).get()
+
+            if doc.exists:
+                user = doc.to_dict()
+
     return templates.TemplateResponse(
         request=request,
         name="job_application.html",
         context={
+            "user": user,
             "request": request,
             "application": application,
             "counts": counts,
@@ -180,7 +197,19 @@ def my_applications_detail(request: Request, application_id: str):
     questions = _get_screening_questions(job)
     current_status = data.get("status", "Submitted")
 
+    user = None
+
+    if request.session.get("user_type") == "job_seeker":
+        uid = request.session.get("applicant_id")
+
+        if uid:
+            doc = db.collection("job_seeker").document(uid).get()
+
+            if doc.exists:
+                user = doc.to_dict()
+
     application = {
+        "user": user,
         "id": data["id"],
         "job": job,
         "status": current_status,
@@ -196,7 +225,11 @@ def my_applications_detail(request: Request, application_id: str):
     return templates.TemplateResponse(
         request=request,
         name="job_application_detail.html",
-        context={"request": request, "application": application},
+        context={
+            "request": request,
+            "application": application,
+            "user": user,
+        },
     )
 
 
@@ -208,13 +241,13 @@ def withdraw_application(application_id: str):
     doc = doc_ref.get()
 
     if not doc.exists:
-
         return RedirectResponse("/application", status_code=302)
 
     data = doc.to_dict()
+    if data.get("status") == "Cancelled":
+        raise HTTPException(status_code=409, detail="Application already cancelled")
 
     if data.get("status") == "Submitted":
-
         doc_ref.update({"status": "Cancelled"})
 
     return RedirectResponse(f"/application/{application_id}", status_code=302)

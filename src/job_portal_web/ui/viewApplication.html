@@ -304,6 +304,18 @@
 
         </div>
 
+        {% if no_experience_message %}
+
+        <div class="no-applications">
+
+            <i class="fa-regular fa-folder-open"></i>
+
+            <p>{{ no_experience_message }}</p>
+
+        </div>
+
+        {% endif %}
+
         <!-- ============================= -->
         <!-- Application Table -->
         <!-- ============================= -->
@@ -796,11 +808,14 @@
 
 
                     <p>
-
-                        No applications received yet.
-
+                        {% if no_experience_message %}
+                            {{ no_experience_message }}
+                        {% elif no_status_message %}
+                            {{ no_status_message }}
+                        {% else %}
+                            No applicants found.
+                        {% endif %}
                     </p>
-
                 </td>
 
             </tr>

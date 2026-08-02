@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+
+    <title>Review Company Registration</title>
+
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <link rel="stylesheet" href="/css/employerHeader.css">
+
+    <link rel="stylesheet" href="/css/reviewCompany.css">
+
+
+</head>
+
+
+<body>
+
+
+{% include "adminHeader.html" %}
+
+
+
+<main class="main-content">
+
+
+
+<!-- ====================================== -->
+<!-- Page Header -->
+<!-- ====================================== -->
+
+
+<div class="page-header">
+
+
+    <div>
+
+
+        <h1>
+            Review Company Registration
+        </h1>
+
+
+        <p>
+            Review all submitted company information carefully before approving the registration.
+        </p>
+
+
+    </div>
+
+
+
+    <div class="header-buttons">
+
+
+        <a href="/admin/company-requests"
+           class="back-btn">
+
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back
+
+
+        </a>
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+<!-- ====================================== -->
+<!-- Company Information -->
+<!-- ====================================== -->
+
+
+<div class="preview-card">
+
+
+    <div class="preview-title">
+
+
+        <div>
+
+            <img src="/images/number-1.png">
+
+            <h2>
+                Company Information
+            </h2>
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <div class="preview-grid">
+
+
+
+        <div>
+
+            <label>
+                Company Name
+            </label>
+
+
+            <p>
+                {{ company.companyName }}
+            </p>
+
+        </div>
+
+
+
+
+        <div>
+
+            <label>
+                Registration Number
+            </label>
+
+
+            <p>
+                {{ company.registrationNumber }}
+            </p>
+
+        </div>
+
+
+
+
+
+        <div>
+
+            <label>
+                Industry
+            </label>
+
+
+            <p>
+                {{ company.industry }}
+            </p>
+
+
+        </div>
+
+
+
+
+
+        <div>
+
+            <label>
+                Company Size
+            </label>
+
+
+            <p>
+                {{ company.companySize }}
+            </p>
+
+
+        </div>
+
+
+
+
+
+        <div>
+
+            <label>
+                Website
+            </label>
+
+
+            <p>
+
+                {% if company.companyWebsite %}
+
+                    {{ company.companyWebsite }}
+
+                {% else %}
+
+                    -
+
+                {% endif %}
+
+            </p>
+
+
+        </div>
+
+
+
+
+
+        <div>
+
+            <label>
+                Status
+            </label>
+
+
+            <p>
+                {{ company.status }}
+            </p>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+<!-- ====================================== -->
+<!-- Contact Information -->
+<!-- ====================================== -->
+
+
+<div class="preview-card">
+
+
+    <div class="preview-title">
+
+
+        <div>
+
+            <img src="/images/number-2.png">
+
+            <h2>
+                Contact Information
+            </h2>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+    <div class="preview-grid">
+
+
+
+        <div>
+
+            <label>
+                Contact Person
+            </label>
+
+
+            <p>
+                {{ company.contactPerson.fullName }}
+            </p>
+
+
+        </div>
+
+
+
+
+        <div>
+
+            <label>
+                Job Title
+            </label>
+
+
+            <p>
+                {{ company.contactPerson.jobTitle }}
+            </p>
+
+
+        </div>
+
+
+
+
+        <div>
+
+            <label>
+                Email
+            </label>
+
+
+            <p>
+                {{ company.contactPerson.email }}
+            </p>
+
+
+        </div>
+
+
+
+
+
+        <div>
+
+            <label>
+                Phone Number
+            </label>
+
+
+            <p>
+                {{ company.contactPerson.phone }}
+            </p>
+
+
+        </div>
+
+
+
+
+        <div>
+
+            <label>
+                Department
+            </label>
+
+
+            <p>
+
+                {% if company.contactPerson.department %}
+
+                    {{ company.contactPerson.department }}
+
+                {% else %}
+
+                    -
+
+                {% endif %}
+
+            </p>
+
+
+        </div>
+
+
+
+        <div>
+
+            <label>
+                Preferred Contact Method
+            </label>
+
+
+            <p>
+                {{ company.contactPerson.preferredContactMethod }}
+            </p>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+</div>
+
+
+
+
+
+
+<!-- ====================================== -->
+<!-- Address -->
+<!-- ====================================== -->
+
+
+<div class="preview-card">
+
+
+    <div class="preview-title">
+
+
+        <div>
+
+            <img src="/images/number-3.png">
+
+            <h2>
+                Company Address
+            </h2>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+    <div class="preview-section">
+
+
+        <p>
+
+
+            {{ company.address }},
+            {{ company.city }},
+            {{ company.state }},
+            {{ company.country }}
+            {{ company.postalCode }}
+
+
+        </p>
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+<!-- ====================================== -->
+<!-- Company Description -->
+<!-- ====================================== -->
+
+
+<div class="preview-card">
+
+
+    <div class="preview-title">
+
+
+        <div>
+
+            <img src="/images/number-4.png">
+
+            <h2>
+                Company Description
+            </h2>
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+    <div class="preview-section">
+
+
+        <label>
+            About Company
+        </label>
+
+
+        <p style="white-space:pre-line;">
+
+            {{ company.companyDescription }}
+
+        </p>
+
+
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+
+<!-- ====================================== -->
+<!-- Bottom Buttons -->
+<!-- ====================================== -->
+
+
+<!-- ====================================== -->
+<!-- Bottom Buttons -->
+<!-- ====================================== -->
+
+
+<div class="bottom-buttons">
+
+
+{% if company.status == "Pending" %}
+
+
+    <!-- Reject Button -->
+
+    <form action="/admin/company/{{ company.company_id }}/reject"
+          method="post">
+
+
+        <button class="reject-btn"
+                type="submit"
+                onclick="return confirm('Reject this registration?')">
+
+
+            <i class="fa-solid fa-xmark"></i>
+
+
+            Reject
+
+
+        </button>
+
+
+    </form>
+
+
+
+
+
+    <!-- Approve Button -->
+
+    <form action="/admin/company/{{ company.company_id }}/approve"
+          method="post">
+
+
+        <button class="approve-btn"
+                type="submit"
+                onclick="return confirm('Approve this company?')">
+
+
+            <i class="fa-solid fa-check"></i>
+
+
+            Approve Company
+
+
+        </button>
+
+
+    </form>
+
+
+
+{% elif company.status == "Active" %}
+
+
+
+    <!-- Deactivate Button -->
+
+    <form action="/admin/company/{{ company.company_id }}/deactivate"
+          method="post">
+
+
+        <button class="reject-btn"
+                type="submit"
+                onclick="return confirm('Deactivate this company?')">
+
+
+            <i class="fa-solid fa-ban"></i>
+
+
+            Deactivate Company
+
+
+        </button>
+
+
+    </form>
+
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+</main>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet" href="/css/profile.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/css/base.css">
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<!-- ================= HERO ================= -->
+
+<section class="profile-hero">
+
+    <div class="profile-hero-inner">
+
+        <div class="profile-top">
+
+            <div>
+
+                <h1 class="text-page-title">
+                    My Profile
+                </h1>
+
+                <p class="text-normal">
+                    Manage your personal information and professional details.
+                </p>
+
+            </div>
+
+            <button class="profile-primary-btn"
+                    onclick="window.location.href='/edit-profile'">
+                <i class="fa-solid fa-pen"></i>
+                Edit Profile
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================= MAIN CONTENT ================= -->
+
+<div class="profile-page">
+
+    <!-- ================= PROFILE CARD ================= -->
+
+    <div class="profile-card">
+
+        <!-- Left -->
+
+        <div class="profile-left">
+
+            <div class="profile-photo">
+                {% if applicant.profileImage %}
+                    <img src="{{ applicant.profileImage }}" alt="Profile">
+                {% else %}
+                    <img src="/images/user.png" alt="Profile">
+                {% endif %}
+            </div>
+
+            <div class="profile-basic">
+
+                <div class="profile-name">
+
+                    <h2>{{ applicant.name }}</h2>
+
+                    <span>Job Seeker</span>
+
+                </div>
+
+                <h4>{{ applicant.position }}</h4>
+
+                <div class="profile-contact">
+
+                    <p>
+                        <i class="fa-solid fa-location-dot"></i>
+                        {{ applicant.location }}
+                    </p>
+
+                    <p>
+                        <i class="fa-regular fa-envelope"></i>
+                        {{ applicant.email }}
+                    </p>
+
+                    <p>
+                        <i class="fa-solid fa-phone"></i>
+                        {{ applicant.phone }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Middle -->
+
+        <div class="profile-middle">
+
+            <div class="profile-info">
+                <label>Current Position</label>
+                <p>{{ applicant.position }}</p>
+            </div>
+
+            <div class="profile-info">
+
+                <label>Experience</label>
+
+                {% if applicant.experience_list %}
+
+                    <p>{{ applicant.experience_list[0].job_title }}</p>
+
+                {% else %}
+
+                    <p>Not added</p>
+
+                {% endif %}
+
+            </div>
+
+            <div class="profile-info">
+                <label>Education</label>
+
+                {% if applicant.education %}
+
+                    <p>{{ applicant.education[0].qualification }}</p>
+
+                {% else %}
+
+                    <p>Not added</p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <!-- Right -->
+
+        <div class="profile-right">
+
+            <h3>About Me</h3>
+
+            <p>{{ applicant.about }}</p>
+
+        </div>
+
+    </div>
+
+    <!-- ================= EDUCATION ================= -->
+
+    <div class="profile-section">
+
+        <div class="section-icon purple">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+
+        <div class="section-title">
+
+            <h3>Education</h3>
+
+            <p>
+                Add your educational background and qualifications.
+            </p>
+
+        </div>
+
+        <div class="section-detail">
+
+            {% if applicant.education %}
+
+                {% set edu = applicant.education[0] %}
+
+                <h4>{{ edu.qualification }}</h4>
+
+                <p>{{ edu.institution }}</p>
+
+                {% if edu.current_study %}
+
+                    <span>{{ edu.start_date }} - Present</span>
+
+                {% else %}
+
+                    <span>{{ edu.start_date }} - {{ edu.end_date }}</span>
+
+                {% endif %}
+
+            {% else %}
+
+                <p>No education added.</p>
+
+            {% endif %}
+
+        </div>
+
+        <button class="profile-outline-btn"
+            onclick="window.location.href='/manage-education'">
+            Manage Education
+        </button>
+
+    </div>
+
+    <!-- ================= SKILLS ================= -->
+
+    <div class="profile-section">
+
+        <div class="section-icon orange">
+            <i class="fa-solid fa-code"></i>
+        </div>
+
+        <div class="section-title">
+
+            <h3>Skills</h3>
+
+            <p>
+                Add and manage your professional skills.
+            </p>
+
+        </div>
+
+        <div class="section-detail">
+
+            <div class="skill-list">
+
+                {% if applicant.skills %}
+
+                    {% for skill in applicant.skills %}
+                        <span>{{ skill }}</span>
+                    {% endfor %}
+
+                {% else %}
+
+                    <p>No skills have been added</p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <button
+            class="profile-outline-btn"
+            onclick="window.location.href='/manageSkills'">
+
+            Manage Skills
+
+        </button>
+
+    </div>
+
+    <!-- ================= EXPERIENCE ================= -->
+
+    <div class="profile-section">
+
+        <div class="section-icon blue">
+            <i class="fa-solid fa-briefcase"></i>
+        </div>
+
+        <div class="section-title">
+
+            <h3>Experience</h3>
+
+            <p>
+                Add your work experience and career history.
+            </p>
+
+        </div>
+
+        <div class="section-detail">
+
+            {% if applicant.experience_list %}
+
+                {% set exp = applicant.experience_list[0] %}
+
+                <h4>{{ exp.job_title }}</h4>
+
+                <p>{{ exp.company }}</p>
+
+                {% if exp.currently_working %}
+
+                    <span>{{ exp.start_date }} - Present</span>
+
+                {% else %}
+
+                    <span>{{ exp.start_date }} - {{ exp.end_date }}</span>
+
+                {% endif %}
+
+            {% else %}
+
+                <p>No work experience added.</p>
+
+            {% endif %}
+
+        </div>
+
+        <button
+            class="profile-outline-btn"
+            onclick="window.location.href='/manageExperience'">
+
+            Manage Experience
+
+        </button>
+
+    </div>
+
+    <!-- ================= ADDITIONAL INFORMATION ================= -->
+
+    <div class="additional-card">
+
+        <div class="additional-header">
+
+            <h3>Additional Information</h3>
+
+        </div>
+
+        <div class="additional-grid">
+
+            <div>
+
+                <label>Date of Birth</label>
+                <p>{{ applicant.date_of_birth }}</p>
+
+                <label>Gender</label>
+                <p>{{ applicant.gender }}</p>
+
+            </div>
+
+            <div>
+                <label>Nationality</label>
+                <p>{{ applicant.nationality }}</p>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- ================= LOGOUT ================= -->
+
+    <div class="logout-section">
+
+        <button class="logout-btn"
+        onclick="window.location.href='http://127.0.0.1:8000/login'">
+
+    <i class="fa-solid fa-right-from-bracket"></i>
+    Logout
+
+</button>
+
+    </div>
+</div>
+
+<script>
+    // Refresh page when returning using the browser Back button
+    window.addEventListener("pageshow", function (event) {
+
+        if (
+            event.persisted ||
+            window.performance.getEntriesByType("navigation")[0]?.type === "back_forward"
+        ) {
+            window.location.reload();
+        }
+
+    });
+</script>
+</body>
+</html>

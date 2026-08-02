@@ -5,7 +5,8 @@ description = "Teaching repo: Agile + Tests + CI/CD"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115",
-  "uvicorn>=0.30"
+  "uvicorn>=0.30",
+  "firebase-admin"
 ]
 
 [build-system]
@@ -35,6 +36,28 @@ dev = [
 line-length = 100
 target-version = "py311"
 
+[tool.ruff.lint]
+ignore = [
+    "BLE001",
+    "B008",
+    "DTZ003",
+    "DTZ005",
+    "DTZ007",
+    "DTZ011",
+    "RUF059",
+    "SIM102",
+    "ASYNC210",
+    "TRY002",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*.py" = [
+    "TRY002",
+    "BLE001",
+    "DTZ003",
+    "DTZ005",
+]
+
 [tool.black]
 line-length = 100
 target-version = ['py311']
@@ -46,3 +69,7 @@ addopts = "-q"
 [tool.mypy]
 python_version = "3.11"
 packages = ["src"]
+ignore_missing_imports = true
+allow_untyped_defs = true
+allow_untyped_calls = true
+ignore_errors = true

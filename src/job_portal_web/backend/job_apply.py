@@ -1,16 +1,17 @@
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 
-from .database import db, bucket
+from .database import bucket, db
 from .job_information import (
+    _attach_company_fields,
     _find_company,
     _normalize_job,
-    _attach_company_fields,
 )
 
 router = APIRouter()
@@ -70,25 +71,21 @@ def _get_screening_questions(job):
     return questions
 
 
-def _get_current_applicant(request: Request):
-    """Looks up the logged-in applicant's profile.
+def _get_currentjob_seeker(request: Request):
+    job_seeker_id = request.session.get("applicant_id")
 
-    NOTE: this assumes an `applicant_id` is stored in the session (e.g. set at
-    login by your auth flow / applicant.py). Adjust this to match however
-    your project actually tracks the logged-in user.
-    """
-
-    applicant_id = request.session.get("applicant_id") if hasattr(request, "session") else None
-
-    if not applicant_id:
+    if not job_seeker_id:
         return None, None
 
-    applicant_doc = db.collection("applicant").document(applicant_id).get()
+    doc = db.collection("job_seeker").document(job_seeker_id).get()
 
-    if not applicant_doc.exists:
-        return applicant_id, None
+    if doc.exists:
+        print(doc.to_dict())
 
-    return applicant_id, applicant_doc.to_dict()
+    if not doc.exists:
+        return job_seeker_id, None
+
+    return job_seeker_id, doc.to_dict()
 
 
 def _load_job(job_id: str):
@@ -112,21 +109,24 @@ def job_apply_form(request: Request, job_id: str):
 
     job = _load_job(job_id)
 
-    applicant_id, applicant = _get_current_applicant(request)
+    job_seeker_id, job_seeker = _get_currentjob_seeker(request)
 
-    applicant = applicant or {
+    job_seeker = job_seeker or {
         "full_name": "Guest Applicant",
         "headline": "Complete your profile to speed up applications",
         "photo": "",
     }
+    user = job_seeker
+    print(user)
 
     return templates.TemplateResponse(
         request=request,
         name="job_apply.html",
         context={
+            "user": user,
             "request": request,
             "job": job,
-            "applicant": applicant,
+            "job_seeker": job_seeker,
             "questions": _get_screening_questions(job),
         },
     )
@@ -142,28 +142,23 @@ async def job_apply_submit(
 
     job = _load_job(job_id)
 
-    applicant_id, applicant = _get_current_applicant(request)
+    job_seeker_id, job_seeker = _get_currentjob_seeker(request)
 
     # ==============================
     # Check Login
     # ==============================
 
-    if not applicant_id:
-        applicant_id = "J000001"
-        # return JSONResponse(
-        #     status_code=401,
-        #     content={
-        #         "success": False,
-        #         "message": "Please log in to apply for this job."
-        #     },
-        # )
+    if not job_seeker_id:
+        return JSONResponse(
+            status_code=401,
+            content={"success": False, "message": "Please log in to apply for this job."},
+        )
 
     form_data = await request.form()
 
     answers = {}
 
     for question in _get_screening_questions(job):
-
         answers[question["id"]] = form_data.get(f"answer_{question['id']}", "")
 
     # ==============================
@@ -174,11 +169,9 @@ async def job_apply_submit(
     resume_path = None
 
     if resume is not None and resume.filename:
-
         ext = os.path.splitext(resume.filename)[1].lower()
 
         if ext not in ALLOWED_RESUME_EXTENSIONS:
-
             return JSONResponse(
                 status_code=400,
                 content={"success": False, "message": "Resume must be a PDF, DOC, or DOCX file."},
@@ -187,7 +180,6 @@ async def job_apply_submit(
         contents = await resume.read()
 
         if len(contents) > MAX_RESUME_SIZE_MB * 1024 * 1024:
-
             return JSONResponse(
                 status_code=400,
                 content={
@@ -196,7 +188,7 @@ async def job_apply_submit(
                 },
             )
 
-        resume_name = f"{applicant_id}_" f"{job_id}_" f"{uuid.uuid4().hex[:8]}" f"{ext}"
+        resume_name = f"{job_seeker_id}_{job_id}_{uuid.uuid4().hex[:8]}{ext}"
 
         blob = bucket.blob(f"resumes/{resume_name}")
 
@@ -209,22 +201,27 @@ async def job_apply_submit(
     application_ref.set(
         {
             "job_id": job_id,
-            "job_seeker_id": applicant_id,
+            "job_seeker_id": job_seeker_id,
             "resume_filename": resume_name,
             "resume_path": resume_path,
             "cover_letter": cover_letter,
             "answers": answers,
             "status": "Submitted",
-            "created_at": datetime.now(timezone.utc),
-            "updated_on": datetime.now(timezone.utc),
+            "created_at": datetime.now(UTC),
+            "updated_on": datetime.now(UTC),
         }
     )
 
+    user = job_seeker
+
     return JSONResponse(
-        content={
-            "success": True,
-            "message": "Application submitted successfully!",
-            "application_id": application_ref.id,
-            "redirect_url": f"/jobs/{job_id}",
-        }
+        content=jsonable_encoder(
+            {
+                "user": user,
+                "success": True,
+                "message": "Application submitted successfully!",
+                "application_id": application_ref.id,
+                "redirect_url": f"/jobs/{job_id}",
+            }
+        )
     )

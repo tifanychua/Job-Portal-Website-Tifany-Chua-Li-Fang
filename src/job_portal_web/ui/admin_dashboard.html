@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard | JobConnect</title>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-left">
+    <a href="/admin/dashboard" class="brand">
+      <i class="fa-solid fa-location-dot brand-pin"></i>
+      Job<span class="brand-connect">Connect</span> <span class="text-caption" style="margin-left:6px; color:var(--color-text-secondary);">Admin</span>
+    </a>
+  </div>
+  <div class="navbar-right">
+    <a href="/login/admin" class="btn btn-outline">Log Out</a>
+  </div>
+</nav>
+<h2>Welcome, {{ admin.name }}</h2>
+
+<p>{{ admin.email }}</p>
+
+<div style="max-width:1000px; margin:40px auto; padding:0 24px;">
+  <h1 class="text-page-title-alt">Admin Dashboard</h1>
+  <p class="text-normal" style="color:var(--color-text-secondary); margin-top:8px;">
+    This is a placeholder — build out user management, job moderation, and reports here.
+  </p>
+</div>
+
+</body>
+</html>

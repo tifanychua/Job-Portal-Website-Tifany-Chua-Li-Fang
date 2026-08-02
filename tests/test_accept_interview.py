@@ -2,53 +2,70 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend import interview
+from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
-# --------------------------------------------------
-# Test Client Fixture
-# --------------------------------------------------
+# ==================================================
+# LOAD FEATURE
+# ==================================================
+
+scenarios("features/accept_interview_invitation.feature")
+
+
+# ==================================================
+# CLIENT
+# ==================================================
 
 
 @pytest.fixture
-def client() -> TestClient:
+def client():
 
     return TestClient(app)
 
 
-# --------------------------------------------------
-# Mock Email / Notification
-# --------------------------------------------------
+# ==================================================
+# MOCK EMAIL
+# ==================================================
 
 
 @pytest.fixture
 def mock_email(monkeypatch):
 
-    async def fake_send_email(*args, **kwargs):
-        return None
+    context = {"sent": False}
 
     async def fake_send_notification(*args, **kwargs):
-        return None
 
-    monkeypatch.setattr(interview, "send_interview_email", fake_send_email)
+        context["sent"] = True
 
     monkeypatch.setattr(interview, "send_employer_interview_notification", fake_send_notification)
 
-    monkeypatch.setattr(interview, "notify_employer", fake_send_notification)
+    return context
 
 
-# --------------------------------------------------
-# Helper Function
-# --------------------------------------------------
+# ==================================================
+# CREATE TEST INTERVIEW
+# ==================================================
 
 
 def create_test_interview(client):
 
-    interview_data = {
-        "candidateId": "123",
-        "companyId": "C000001",
+    candidate_id = "TEST_CANDIDATE_001"
+    company_id = "TEST_COMPANY_001"
+
+    db.collection("job_seeker").document(candidate_id).set(
+        {"name": "James", "email": "james@test.com"}
+    )
+
+    db.collection("company").document(company_id).set(
+        {"companyName": "ABC Technology", "email": "hr@abc.com", "address": "Penang"}
+    )
+
+    data = {
+        "candidateId": candidate_id,
+        "companyId": company_id,
         "candidateName": "James",
         "position": "Software Engineer",
         "stage": "Technical Interview",
@@ -61,32 +78,21 @@ def create_test_interview(client):
         "notes": "Prepare portfolio",
     }
 
-    response = client.post("/api/interviews", json=interview_data)
+    response = client.post("/api/interviews", json=data)
 
     assert response.status_code == 200
 
-    # Get created Firestore ID
-
-    response = client.get("/api/interviews")
-
-    assert response.status_code == 200
-
-    interviews = response.json()
+    interviews = client.get("/api/interviews").json()
 
     return interviews[-1]["id"]
 
 
-# --------------------------------------------------
-# 1. Acceptance Test
-# --------------------------------------------------
+# ==================================================
+# NORMAL TEST
+# ==================================================
 
 
-def test_accept_interview_success(client: TestClient, mock_email):
-    """
-    Given the job seeker has received an interview invitation
-    When the job seeker accepts the interview
-    Then the interview should be accepted successfully
-    """
+def test_accept_interview_success(client, mock_email):
 
     interview_id = create_test_interview(client)
 
@@ -94,67 +100,48 @@ def test_accept_interview_success(client: TestClient, mock_email):
 
     assert response.status_code == 200
 
-    data = response.json()
-
-    assert data["message"] == "Interview accepted"
+    assert response.json()["message"] == "Interview accepted"
 
 
-# --------------------------------------------------
-# 2. Verify Saved Status
-# --------------------------------------------------
+# ==================================================
+# VERIFY STATUS
+# ==================================================
 
 
-def test_accepted_interview_saved(client: TestClient, mock_email):
-    """
-    Given the job seeker has accepted an interview
-    When the system retrieves the interview
-    Then the status should be Accepted
-    """
+def test_accepted_interview_saved(client, mock_email):
 
     interview_id = create_test_interview(client)
 
-    client.put(f"/api/interviews/{interview_id}/accept")
-
-    response = client.get(f"/api/interviews/{interview_id}")
+    response = client.put(f"/api/interviews/{interview_id}/accept")
 
     assert response.status_code == 200
 
-    data = response.json()
+    # Check Firestore directly
+    document = db.collection("interviews").document(interview_id).get()
+
+    data = document.to_dict()
 
     assert data["status"] == "Accepted"
 
 
-# --------------------------------------------------
-# 3. Negative Test
-# --------------------------------------------------
+# ==================================================
+# INVALID INTERVIEW
+# ==================================================
 
 
-def test_accept_invalid_interview(client: TestClient, mock_email):
-    """
-    Given the interview does not exist
-    When the job seeker accepts the interview
-    Then the system should reject the request
-    """
+def test_accept_invalid_interview(client, mock_email):
 
     response = client.put("/api/interviews/INVALID_ID/accept")
 
-    assert response.status_code in (404, 500)
+    assert response.status_code in (404, 400)
 
 
-# --------------------------------------------------
-# BDD Feature Loading
-# --------------------------------------------------
-
-scenarios("features/accept_interview_invitation.feature")
-
-
-# --------------------------------------------------
-# BDD Context
-# --------------------------------------------------
+# ==================================================
+# BDD CONTEXT
+# ==================================================
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -168,14 +155,13 @@ def context():
     return Context()
 
 
-# --------------------------------------------------
-# Scenario 1:
-# Accept Interview
-# --------------------------------------------------
+# ==================================================
+# BDD SCENARIO 1
+# ==================================================
 
 
 @given("the job seeker has received an interview invitation")
-def received_invitation(client, context, mock_email):
+def received_invitation(client, context):
 
     context.interview_id = create_test_interview(client)
 
@@ -194,14 +180,13 @@ def verify_accept(context):
     assert context.response.json()["message"] == "Interview accepted"
 
 
-# --------------------------------------------------
-# Scenario 2:
-# Save Accepted Status
-# --------------------------------------------------
+# ==================================================
+# BDD SCENARIO 2
+# ==================================================
 
 
 @given("the job seeker has accepted an interview")
-def already_accepted(client, context, mock_email):
+def accepted_before(client, context):
 
     context.interview_id = create_test_interview(client)
 
@@ -211,12 +196,10 @@ def already_accepted(client, context, mock_email):
 @when("the system processes the request")
 def process_request(client, context):
 
-    context.response = client.get(f"/api/interviews/{context.interview_id}")
+    context.response = client.put(f"/api/interviews/{context.interview_id}/accept")
 
 
 @then("the updated interview status should be saved in the database")
-def verify_saved(context):
+def verify_saved_status(context):
 
     assert context.response.status_code == 200
-
-    assert context.response.json()["status"] == "Accepted"

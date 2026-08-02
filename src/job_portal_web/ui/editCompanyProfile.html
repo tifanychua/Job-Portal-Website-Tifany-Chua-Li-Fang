@@ -1,0 +1,697 @@
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Company Profile</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/editCompanyProfile.css">
+
+</head>
+
+<body>
+
+    {% include "employerHeader.html" %}
+
+    <main class="main-content">
+
+        <!-- ===================================== -->
+        <!-- Page Header -->
+        <!-- ===================================== -->
+
+        <div class="page-header">
+
+            <div class="page-title">
+
+                <h1>
+
+                    Company Details
+
+                </h1>
+
+                <p>
+
+                    Manage your company's basic information and contact details.
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+    <form
+        id="companyForm"
+        action="/update-company-profile"
+        method="POST"
+        enctype="multipart/form-data"
+        novalidate>
+
+        {% if error %}
+        <div class="form-error">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+
+    <!-- ===================================================== -->
+    <!-- Basic Information -->
+    <!-- ===================================================== -->
+
+    <section class="form-card">
+
+        <h2>
+
+            Basic Information
+
+        </h2>
+
+        <div class="basic-layout">
+
+            <!-- ======================== -->
+            <!-- Logo -->
+            <!-- ======================== -->
+
+            <div class="logo-wrapper">
+
+                <img
+                    id="logoPreview"
+                    src="{{ company.logo if company.logo else '/images/user.png' }}"
+                    class="company-logo"
+                    alt="Company Logo">
+
+                <label class="camera-btn">
+
+                    <i class="fa-solid fa-camera"></i>
+
+                    <input
+                        id="logoInput"
+                        type="file"
+                        name="logo"
+                        accept=".jpg,.jpeg,.png"
+                        hidden>
+
+                </label>
+
+            </div>
+
+            <!-- ======================== -->
+            <!-- Form -->
+            <!-- ======================== -->
+
+            <div class="form-grid">
+
+                <div class="form-group">
+
+                    <label>
+
+                        Company Name
+
+                    </label>
+
+                    <input
+                        type="text"
+                        name="companyName"
+                        value="{{ company.companyName }}"
+                        placeholder="Enter company name"
+                        required
+                        minlength="3"
+                        maxlength="100">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Registration Number
+
+                    </label>
+
+                    <input
+                        type="text"
+                        name="registrationNumber"
+                        value="{{ company.registrationNumber }}"
+                        placeholder="e.g. 202301012345"
+                        required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Website</label>
+
+                    <input
+                        type="url"
+                        name="companyWebsite"
+                        value="{{ company.companyWebsite }}"
+                        placeholder="https://www.company.com">
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Company Email
+
+                    </label>
+
+                    <input type="email"
+                        name="businessEmail"
+                        value="{{ company.businessEmail }}"
+                        placeholder="company@example.com">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Phone Number
+
+                    </label>
+
+                    <input
+                        type="tel"
+                        name="phone"
+                        value="{{ company.phone }}"
+                        placeholder="+60 11-12345678"
+                        required
+                        pattern="^\+60\s\d{1,2}-\d{7,8}$">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Founded Year
+
+                    </label>
+
+                    <input
+                        type="number"
+                        name="foundedYear"
+                        value="{{ company.foundedYear }}"
+                        required
+                        min="1800"
+                        max="{{ current_year }}">
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Company Size
+
+                    </label>
+
+                    <select name="companySize">
+
+                        <option value="">Select Company Size</option>
+
+                        <option value="1 - 10 Employees"
+                            {% if company.companySize == "1 - 10 Employees" %}
+                                selected
+                            {% endif %}>
+                            1 - 10 Employees
+                        </option>
+
+                        <option value="11 - 50 Employees"
+                            {% if company.companySize == "11 - 50 Employees" %}
+                                selected
+                            {% endif %}>
+                            11 - 50 Employees
+                        </option>
+
+                        <option value="51 - 200 Employees"
+                            {% if company.companySize == "51 - 200 Employees" %}
+                                selected
+                            {% endif %}>
+                            51 - 200 Employees
+                        </option>
+
+                        <option value="201 - 500 Employees"
+                            {% if company.companySize == "201 - 500 Employees" %}
+                                selected
+                            {% endif %}>
+                            201 - 500 Employees
+                        </option>
+
+                        <option value="501 - 1000 Employees"
+                            {% if company.companySize == "501 - 1000 Employees" %}
+                                selected
+                            {% endif %}>
+                            501 - 1000 Employees
+                        </option>
+
+                        <option value="1000+ Employees"
+                            {% if company.companySize == "1000+ Employees" %}
+                                selected
+                            {% endif %}>
+                            1000+ Employees
+                        </option>
+                    </select>
+
+                </div>
+
+                <div class="form-group full-width">
+
+                    <label>
+
+                        Company Type
+
+                    </label>
+
+                    <select name="companyType" required>
+
+                        <option value="">Select Company Type</option>
+
+                        <option value="Private Limited"
+                            {% if company.companyType == "Private Limited" %}
+                                selected
+                            {% endif %}>
+                            Private Limited
+                        </option>
+
+                        <option value="Public Company"
+                            {% if company.companyType == "Public Company" %}
+                                selected
+                            {% endif %}>
+                            Public Company
+                        </option>
+
+                        <option value="Government"
+                            {% if company.companyType == "Government" %}
+                                selected
+                            {% endif %}>
+                            Government
+                        </option>
+
+                        <option value="Non-Profit"
+                            {% if company.companyType == "Non-Profit" %}
+                                selected
+                            {% endif %}>
+                            Non-Profit
+                        </option>
+
+                        <option value="Startup"
+                            {% if company.companyType == "Startup" %}
+                                selected
+                            {% endif %}>
+                            Startup
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- Headquarters Address -->
+    <!-- ===================================================== -->
+
+    <section class="form-card">
+
+        <h2>
+
+            Headquarters Address
+
+        </h2>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+
+                <label>
+
+                    Address Line 1
+
+                </label>
+
+                <input
+                    type="text"
+                    name="address"
+                    value="{{ company.address }}"
+                    required
+                    maxlength="200">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+
+                    Address Line 2
+
+                </label>
+
+                <input type="text"
+                    name="address_line2"
+                    value="{{ company.address_line2 }}"
+                    placeholder="Suite, Floor, Building (Optional)">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+
+                    City
+
+                </label>
+
+                <input
+                    type="text"
+                    name="city"
+                    value="{{ company.city }}"
+                    required
+                    pattern="[A-Za-z ]+"
+                    title="Only letters are allowed">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+
+                    State / Province
+
+                </label>
+
+                <input
+                    type="text"
+                    name="state"
+                    value="{{ company.state }}"
+                    required
+                    pattern="[A-Za-z ]+">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+
+                    Postal Code
+
+                </label>
+
+                <input
+                    type="text"
+                    name="postalCode"
+                    value="{{ company.postalCode }}"
+                    required
+                    pattern="[0-9]{5}"
+                    maxlength="5"
+                    placeholder="43000"
+                    title="Postal code must be exactly 5 digits">
+
+            </div>
+
+            <div class="form-group">
+
+                <label>
+
+                    Country
+
+                </label>
+
+                <select name="country">
+
+                    <option selected>
+
+                        {{ company.country }}
+
+                    </option>
+                    <option>Malaysia</option>
+                    <option>Singapore</option>
+                    <option>Indonesia</option>
+                    <option>Thailand</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ===================================================== -->
+    <!-- Industry & Specialties -->
+    <!-- ===================================================== -->
+
+    <section class="form-card">
+
+        <h2>
+
+            Industry & Specialties
+
+        </h2>
+
+        <div class="form-grid">
+
+            <div class="form-group full-width">
+
+                <label>
+
+                    Industry
+
+                </label>
+
+                <select
+                    name="industry_id"
+                    required>
+
+                    <option value="">Select Industry</option>
+
+                    {% for industry in industries %}
+
+                    <option
+                        value="{{ industry.industry_id }}"
+                        {% if company.industry_id == industry.industry_id %}
+                            selected
+                        {% endif %}>
+
+                        {{ industry.industry_name }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="form-group full-width">
+
+                <label>
+
+                    Company Specialties
+
+                </label>
+
+                <select
+                    id="specialty_category_ids"
+                    name="specialty_category_ids"
+                    multiple
+                    required>
+
+                    {% for category in categories %}
+
+                    <option
+                        value="{{ category.category_id }}"
+                        {% if company.specialty_category_ids
+                            and category.category_id in company.specialty_category_ids %}
+                            selected
+                        {% endif %}>
+
+                        {{ category.category_name }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ===================================================== -->
+    <!-- About Company -->
+    <!-- ===================================================== -->
+
+    <section class="form-card">
+
+        <h2>
+
+            About Company
+
+        </h2>
+
+        <div class="form-group">
+
+            <label>
+
+                Company Description
+
+            </label>
+
+            <textarea
+                name="companyDescription"
+                required
+                minlength="30"
+                maxlength="1000"
+                placeholder="Tell job seekers about your company...">{{ company.companyDescription }}</textarea>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ===================================================== -->
+    <!-- Form Footer -->
+    <!-- ===================================================== -->
+
+    <div class="form-actions">
+
+        <a href="/company-profile"
+        class="cancel-btn">
+
+            Cancel
+
+        </a>
+
+        <button
+            type="submit"
+            class="save-btn"
+            id="saveCompanyBtn">
+
+            <span class="btn-spinner" style="display:none;">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+            </span>
+
+            <i class="fa-solid fa-floppy-disk btn-icon"></i>
+
+            <span class="btn-text">
+                Save Changes
+            </span>
+
+        </button>
+
+    </div>
+
+    </form>
+
+    </main>
+
+</body>
+
+<script>
+
+function showSection(id){
+
+    document.querySelectorAll(".content-section").forEach(section=>{
+        section.classList.remove("active");
+    });
+
+    document.querySelectorAll(".menu").forEach(button=>{
+        button.classList.remove("active");
+    });
+
+    document.getElementById(id).classList.add("active");
+
+    event.currentTarget.classList.add("active");
+
+}
+
+const logoInput = document.getElementById("logoInput");
+const logoPreview = document.getElementById("logoPreview");
+
+logoInput.addEventListener("change", function () {
+
+    const file = this.files[0];
+
+    if (!file) return;
+
+    // Only allow image files
+    if (!file.type.startsWith("image/")) {
+        alert("Please select a JPG or PNG image.");
+        this.value = "";
+        return;
+    }
+
+    // Preview the selected image
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+
+        logoPreview.src = e.target.result;
+
+    };
+
+    reader.readAsDataURL(file);
+
+});
+
+new TomSelect("#specialty_category_ids",{
+
+    plugins:["remove_button"],
+
+    maxItems:6,
+
+    create:false,
+
+    persist:false,
+
+    placeholder:"Select up to 6 specialties"
+
+});
+
+const form = document.getElementById("companyForm");
+
+form.addEventListener("submit", function (e) {
+
+    if (!form.checkValidity()) {
+        return;
+    }
+
+    const saveBtn = document.getElementById("saveCompanyBtn");
+    const spinner = saveBtn.querySelector(".btn-spinner");
+    const btnText = saveBtn.querySelector(".btn-text");
+    const icon = saveBtn.querySelector(".btn-icon");
+
+    saveBtn.disabled = true;
+
+    spinner.style.display = "inline-flex";
+    icon.style.display = "none";
+
+    btnText.textContent = "Saving...";
+
+});
+
+</script>
+
+
+</html>

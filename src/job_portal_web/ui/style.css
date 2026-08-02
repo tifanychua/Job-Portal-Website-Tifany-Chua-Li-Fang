@@ -4601,3 +4601,142 @@ cursor:pointer;
 
 
 }
+
+.loading-overlay {
+
+    display:none;
+
+    position:fixed;
+
+    top:0;
+    left:0;
+
+    width:100%;
+    height:100%;
+
+    background:rgba(255,255,255,0.8);
+
+    z-index:9999;
+
+    justify-content:center;
+
+    align-items:center;
+
+    flex-direction:column;
+
+}
+
+
+
+.loader {
+
+    width:45px;
+
+    height:45px;
+
+    border:5px solid #ddd;
+
+    border-top:5px solid #2563eb;
+
+    border-radius:50%;
+
+    animation:spin 1s linear infinite;
+
+}
+
+
+
+@keyframes spin {
+
+    100%{
+        transform:rotate(360deg);
+    }
+
+}
+
+
+.loading-overlay p {
+
+    margin-top:15px;
+
+    font-size:16px;
+
+    font-weight:500;
+
+}
+
+/* Search Filter Only */
+
+.filter-card{
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:20px;
+
+    margin-bottom:20px;
+
+}
+
+
+
+.filter-section{
+
+    display:flex;
+
+    gap:20px;
+
+}
+
+
+
+.filter-section label{
+
+    font-size:13px;
+
+    font-weight:600;
+
+    display:block;
+
+    margin-bottom:8px;
+
+}
+
+
+
+.filter-section input,
+.filter-section select{
+
+    width:380px;
+
+    height:38px;
+
+    border:1px solid #d1d5db;
+
+    border-radius:8px;
+
+    padding:0 10px;
+
+}
+
+.btn-login{
+    color:#2F80ED;
+    text-decoration:none;
+    font-weight:600;
+    margin-right:12px;
+}
+
+.btn-signup{
+    background:#2F80ED;
+    color:#fff;
+    text-decoration:none;
+    padding:10px 20px;
+    border-radius:8px;
+    font-weight:600;
+    transition:.2s;
+}
+
+.btn-signup:hover{
+    opacity:.9;
+}

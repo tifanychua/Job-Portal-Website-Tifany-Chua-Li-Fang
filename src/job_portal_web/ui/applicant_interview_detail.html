@@ -5,8 +5,12 @@
 
 <title>Interview Details</title>
 
+<link rel="stylesheet" href="/css/base.css">
+
 <link rel="stylesheet" href="/static/style.css">
 
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 
@@ -174,11 +178,10 @@ Additional Notes
 
 
 <button
+id="acceptBtn"
 class="applicant-accept-btn"
 onclick="acceptInterview()">
-
 Accept
-
 </button>
 
 
@@ -411,16 +414,18 @@ data.notes || "No additional notes";
 
 
 document.getElementById("status").innerHTML =
-data.status || "Pending";
+data.applicantResponse || data.status || "Pending";
 
 
-
+let responseStatus =
+data.applicantResponse;
 
 
 if(
-data.status === "Accepted" ||
-data.status === "Declined" ||
-data.status === "Reschedule Requested"
+responseStatus === "Accepted" ||
+responseStatus === "Declined" ||
+responseStatus === "Reschedule Requested" ||
+data.status === "Cancelled"
 ){
 
 document.querySelector(
@@ -434,28 +439,64 @@ document.querySelector(
 
 });
 
+function showLoading(message){
+
+    document.getElementById(
+        "loadingText"
+    ).innerHTML = message;
+
+
+    document.getElementById(
+        "loadingOverlay"
+    ).style.display="flex";
+
+
+    document.querySelectorAll(
+        "button"
+    ).forEach(btn=>{
+        btn.disabled=true;
+    });
+
+}
 
 
 
+function hideLoading(){
+
+    document.getElementById(
+        "loadingOverlay"
+    ).style.display="none";
 
 
+    document.querySelectorAll(
+        "button"
+    ).forEach(btn=>{
+        btn.disabled=false;
+    });
 
-
+}
 
 
 function acceptInterview(){
+
+showLoading(
+    "Accepting interview..."
+);
 
 
 fetch(
 "/api/interviews/"+interviewId+"/accept",
 {
-method:"PUT"
+    method:"PUT"
 }
 
 )
 
-
 .then(()=>{
+
+
+hideLoading();
+
 
 alert(
 "Interview accepted"
@@ -463,6 +504,22 @@ alert(
 
 
 location.reload();
+
+
+})
+
+.catch(error=>{
+
+
+hideLoading();
+
+
+alert(
+"Failed to accept interview"
+);
+
+
+console.log(error);
 
 
 });
@@ -480,6 +537,9 @@ location.reload();
 
 function declineInterview(){
 
+showLoading(
+    "Declining interview..."
+);
 
 fetch(
 "/api/interviews/"+interviewId+"/decline",
@@ -493,6 +553,9 @@ method:"PUT"
 .then(()=>{
 
 
+hideLoading();
+
+
 alert(
 "Interview declined"
 );
@@ -500,6 +563,17 @@ alert(
 
 location.reload();
 
+
+})
+.catch(error=>{
+
+hideLoading();
+
+alert(
+"Failed to decline interview"
+);
+
+console.log(error);
 
 });
 
@@ -551,8 +625,6 @@ document.getElementById(
 
 function submitReschedule(){
 
-
-
 let requestedDate =
 document.getElementById(
 "requestedDate"
@@ -596,11 +668,9 @@ return;
 
 }
 
-
-
-
-
-
+showLoading(
+    "Sending reschedule request..."
+);
 
 fetch(
 "/api/interviews/"+interviewId+"/reschedule-request",
@@ -652,18 +722,34 @@ reason
 .then(()=>{
 
 
+hideLoading();
+
+
 alert(
 "Reschedule request sent"
 );
 
 
-
 closeRescheduleModal();
-
 
 
 location.reload();
 
+
+})
+
+.catch(error=>{
+
+
+hideLoading();
+
+
+alert(
+"Failed to send request"
+);
+
+
+console.log(error);
 
 
 });
@@ -675,11 +761,15 @@ location.reload();
 
 
 </script>
+<div id="loadingOverlay" class="loading-overlay">
 
+    <div class="loader"></div>
 
+    <p id="loadingText">
+        Processing...
+    </p>
 
-
-
+</div>
 </body>
 
 </html>

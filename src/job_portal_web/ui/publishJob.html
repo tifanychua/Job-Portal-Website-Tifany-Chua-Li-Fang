@@ -78,13 +78,12 @@
                         {% for category in categories %}
 
                             <option
-                                value="{{ category.category_name }}"
-                                {% if job.get('category') == category.category_name %}
+                                value="{{ category.industry_name }}"
+                                {% if job.get('category') == category.industry_name %}
                                     selected
-                                {% endif %}>
-
-                                {{ category.category_name }}
-
+                                {% endif %}
+                            >
+                                {{ category.industry_name }}
                             </option>
 
                         {% endfor %}

@@ -277,6 +277,8 @@ Action
 </div>
 
 
+
+
 <script>
 
 
@@ -284,51 +286,105 @@ let interviewList = [];
 
 let currentInterviewId = "";
 
-function loadInterviews(){
 
 
-fetch("/api/interviews")
+function showLoading(message){
 
 
-.then(response=>response.json())
+    document.getElementById(
+        "loadingText"
+    ).innerHTML = message;
 
 
-.then(data=>{
 
+    document.getElementById(
+        "loadingOverlay"
+    ).style.display="flex";
 
-data.forEach(interview=>{
-
-
-if(!interview.status){
-
-interview.status = "Scheduled";
 
 }
 
 
-});
+
+function hideLoading(){
+
+
+    document.getElementById(
+        "loadingOverlay"
+    ).style.display="none";
+
+
+}
+
+function loadInterviews(){
+
+
+let table = document.getElementById(
+"interviewTable"
+);
 
 
 
-interviewList = data;
+table.innerHTML = `
+
+<tr>
+
+<td colspan="8" class="loading-row">
+
+
+<div class="table-loader"></div>
+
+
+<p>
+Loading interviews...
+</p>
+
+
+</td>
+
+</tr>
+
+`;
 
 
 
-updateSummary(data);
+fetch(
+    "/employer/interviews",
+    {
+        method:"GET",
+        credentials:"include"
+    }
+)
+.then(response=>response.json())
+.then(data=>{
+
+    console.log("Employer interviews:", data);
 
 
+    data.forEach(interview=>{
 
-filterInterviews();
+        if(!interview.status){
 
+            interview.status = "Scheduled";
+
+        }
+
+    });
+
+
+    interviewList = data;
+
+
+    updateSummary(data);
+
+
+    filterInterviews();
 
 
 })
-
 .catch(error=>{
 
-
-console.log(error);
-
+    console.error(error);
 
 });
 
@@ -337,32 +393,42 @@ console.log(error);
 }
 
 function updateSummary(data){
+
 let today = new Date();
+
+
 let upcoming = data.filter(interview=>{
 
 
-
 let interviewDate = new Date(
-interview.date + "T" + interview.time
+    interview.date + "T" + interview.time
 );
 
 
 
 return (
 
-interviewDate >= today &&
-interview.status !== "Cancelled" &&
-interview.status !== "Completed"&&
-interview.status !== "Declined"
+
+    interview.status === "Accepted" &&
+
+    interview.status !== "Cancelled" &&
+
+    interview.status !== "Completed"
 
 );
+
+
 });
+
+
 
 document.getElementById(
 "totalInterview"
 ).innerHTML =
 
 upcoming.length + " Scheduled";
+
+
 
 let candidates = new Set(
 
@@ -384,10 +450,7 @@ candidates.size + " Candidates";
 
 
 
-
-
 if(upcoming.length > 0){
-
 
 
 upcoming.sort((a,b)=>{
@@ -434,7 +497,6 @@ next.date
 next.time;
 
 
-
 }
 
 else{
@@ -448,7 +510,6 @@ document.getElementById(
 
 
 }
-
 
 
 }
@@ -684,13 +745,33 @@ Cancel
 function cancelInterview(id){
 
 
-
 if(confirm(
-
 "Are you sure you want to cancel this interview?"
-
 )){
 
+
+document.getElementById(
+"interviewTable"
+).innerHTML = `
+
+<tr>
+
+<td colspan="8" class="loading-row">
+
+
+<div class="table-loader"></div>
+
+
+<p>
+Cancelling interview...
+</p>
+
+
+</td>
+
+</tr>
+
+`;
 
 
 fetch(
@@ -707,8 +788,13 @@ method:"PUT"
 
 .then(response=>response.json())
 .then(data=>{
+
+
 alert(data.message);
+
+
 loadInterviews();
+
 
 });
 
@@ -719,68 +805,106 @@ loadInterviews();
 
 function openReschedule(id){
 
-currentInterviewId = id;
+    currentInterviewId = id;
 
-fetch(
+    console.log("Selected interview ID:", id);
 
-"/api/interviews/"+id
 
+    document.getElementById(
+        "rescheduleModal"
+    ).style.display="block";
+
+
+    fetch(
+    "/api/interviews/" + id,
+    {
+        method:"GET",
+        credentials:"include"
+    }
 )
+.then(response => {
 
-.then(response=>response.json())
+    console.log("Response status:", response.status);
 
+    if(!response.ok){
+
+        throw new Error(
+            "Failed to load interview: " + response.status
+        );
+
+    }
+
+    return response.json();
+
+})
 .then(data=>{
-document.getElementById(
-"rescheduleStage"
-).value = data.stage;
 
-document.getElementById(
-"rescheduleDate"
-).value = data.date;
-
-document.getElementById(
-"rescheduleTime"
-).value = data.time;
-
-document.getElementById(
-"rescheduleDuration"
-).value = data.duration;
-
-document.getElementById(
-"rescheduleInterviewer"
-).value = data.interviewer;
-
-document.getElementById(
-"rescheduleMeetingLink"
-).value = data.meetingLink || "";
-
-document.getElementById(
-"rescheduleNotes"
-).value = data.notes || "";
-
-let radio = document.querySelector(
-
-'input[name="rescheduleType"][value="'+data.interviewType+'"]'
-
-);
-
-if(radio){
-
-radio.checked = true;
-
-}
-
-toggleRescheduleLink();
-
-document.getElementById(
-"rescheduleModal"
-).style.display="block";
+    console.log("Interview data:", data);
 
 
+    document.getElementById(
+        "rescheduleStage"
+    ).value = data.stage || "";
+
+
+    document.getElementById(
+        "rescheduleDate"
+    ).value = data.date || "";
+
+
+    document.getElementById(
+        "rescheduleTime"
+    ).value = data.time || "";
+
+
+    document.getElementById(
+        "rescheduleDuration"
+    ).value = data.duration || "";
+
+
+    document.getElementById(
+        "rescheduleInterviewer"
+    ).value = data.interviewer || "";
+
+
+    document.getElementById(
+        "rescheduleMeetingLink"
+    ).value = data.meetingLink || "";
+
+
+    document.getElementById(
+        "rescheduleNotes"
+    ).value = data.notes || "";
+
+
+
+    let radio = document.querySelector(
+        'input[name="rescheduleType"][value="' 
+        + data.interviewType + '"]'
+    );
+
+
+    if(radio){
+        radio.checked = true;
+    }
+
+
+    toggleRescheduleLink();
+
+
+})
+.catch(error=>{
+
+    console.error(
+        "Load interview error:",
+        error
+    );
+
+    alert(
+        error.message
+    );
 
 });
-
-
 
 }
 
@@ -849,6 +973,32 @@ document.getElementById(
 
 
 function updateInterview(){
+
+
+document.getElementById(
+"interviewTable"
+).innerHTML = `
+
+<tr>
+
+<td colspan="8" class="loading-row">
+
+
+<div class="table-loader"></div>
+
+
+<p>
+Updating interview...
+</p>
+
+
+</td>
+
+</tr>
+
+`;
+
+
 let data = {
 stage:
 document.getElementById(
@@ -909,6 +1059,7 @@ body:JSON.stringify(data)
 
 .then(response=>response.json())
 .then(data=>{
+
 alert(data.message);
 closeReschedule();
 loadInterviews();
@@ -1216,6 +1367,8 @@ loadInterviews();
 
 
 </div>
+
+
 
 </body>
 

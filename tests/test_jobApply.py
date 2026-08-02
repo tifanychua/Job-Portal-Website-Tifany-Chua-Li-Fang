@@ -1,42 +1,64 @@
-from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
+from job_portal_web.backend import job_apply
 from job_portal_web.backend.main import app
 
 # --------------------------------------------------
-# Test Client Fixture
+# Fake Login
+# --------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def fake_login(monkeypatch):
+
+    def fake_current_user(request):
+        return (
+            "J000001",
+            {
+                "uid": "J000001",
+                "full_name": "Test User",
+                "headline": "Software Engineer",
+                "photo": "user.png",
+            },
+        )
+
+    monkeypatch.setattr(
+        job_apply,
+        "_get_currentjob_seeker",
+        fake_current_user,
+    )
+
+
+# --------------------------------------------------
+# Test Client
 # --------------------------------------------------
 
 
 @pytest.fixture
 def client():
-    """
-    Shared FastAPI test client.
-    """
     return TestClient(app)
 
 
 # --------------------------------------------------
-# 1. Acceptance Test
+# Acceptance Test 1
 # --------------------------------------------------
 
 
 def test_job_seeker_submit_application(client: TestClient):
-    """
-    Acceptance test: Job seeker submits a job application
 
-    Given the job seeker is viewing a job posting
-    When the job seeker submits an application
-    Then the application should be successfully created
-    """
-
-    job_id = "RqUW5tySLpBIjbcY7c1c"
+    job_id = "2TDtsBmRQSrtBIMOtbGK"
 
     response = client.post(
         f"/jobs/{job_id}/apply",
-        data={"applicant_id": "J000001"},
-        files={"resume": ("resume.pdf", b"test resume content", "application/pdf")},
+        files={
+            "resume": (
+                "resume.pdf",
+                b"test resume content",
+                "application/pdf",
+            )
+        },
     )
 
     if response.status_code in [200, 201]:
@@ -48,25 +70,23 @@ def test_job_seeker_submit_application(client: TestClient):
 
 
 # --------------------------------------------------
-# 2. Acceptance Test
+# Acceptance Test 2
 # --------------------------------------------------
 
 
 def test_view_saved_application_details(client: TestClient):
-    """
-    Acceptance test: Job seeker views submitted application details
 
-    Given the job seeker has submitted a job application
-    When the system retrieves the application
-    Then the application details should be displayed
-    """
-
-    job_id = "RqUW5tySLpBIjbcY7c1c"
+    job_id = "2TDtsBmRQSrtBIMOtbGK"
 
     create_response = client.post(
         f"/jobs/{job_id}/apply",
-        data={"applicant_id": "J000001"},
-        files={"resume": ("resume.pdf", b"test resume content", "application/pdf")},
+        files={
+            "resume": (
+                "resume.pdf",
+                b"test resume content",
+                "application/pdf",
+            )
+        },
     )
 
     assert create_response.status_code in [200, 201]
@@ -78,58 +98,58 @@ def test_view_saved_application_details(client: TestClient):
     if response.status_code == 200:
         print("✅ SUCCESS: Job seeker views submitted application details")
     else:
-        print("❌ FAILED: Unable to retrieve application")
+        print("❌ FAILED:", response.status_code, response.text)
 
     assert response.status_code == 200
 
 
 # --------------------------------------------------
-# BDD Feature Loading
+# Load BDD Feature
 # --------------------------------------------------
 
 scenarios("features/jobApply.feature")
 
 
 # --------------------------------------------------
-# BDD Context
+# Context
 # --------------------------------------------------
 
 
 class Context:
-
     def __init__(self):
-
         self.response = None
         self.application_id = None
 
 
 @pytest.fixture
 def context():
-
     return Context()
 
 
 # --------------------------------------------------
-# Scenario 1:
-# Submit Job Application
+# Scenario 1
 # --------------------------------------------------
 
 
 @given("the job seeker is viewing a job posting")
 def view_job():
-
     pass
 
 
 @when("the job seeker submits an application")
 def submit_application(client, context):
 
-    job_id = "RqUW5tySLpBIjbcY7c1c"
+    job_id = "2TDtsBmRQSrtBIMOtbGK"
 
     context.response = client.post(
         f"/jobs/{job_id}/apply",
-        data={"applicant_id": "J000001"},
-        files={"resume": ("resume.pdf", b"test resume content", "application/pdf")},
+        files={
+            "resume": (
+                "resume.pdf",
+                b"test resume content",
+                "application/pdf",
+            )
+        },
     )
 
 
@@ -137,7 +157,6 @@ def submit_application(client, context):
 def verify_application_created(context):
 
     if context.response.status_code in [200, 201]:
-
         print("✅ SUCCESS: Job application created successfully")
 
         data = context.response.json()
@@ -145,34 +164,35 @@ def verify_application_created(context):
         context.application_id = data.get("application_id")
 
     else:
-
         print("❌ FAILED:", context.response.status_code, context.response.text)
 
     assert context.response.status_code in [200, 201]
 
 
 # --------------------------------------------------
-# Scenario 2:
-# Save Application Details
+# Scenario 2
 # --------------------------------------------------
 
 
 @given("the job seeker has submitted a job application")
 def submitted_application(client, context):
 
-    job_id = "RqUW5tySLpBIjbcY7c1c"
+    job_id = "2TDtsBmRQSrtBIMOtbGK"
 
     response = client.post(
         f"/jobs/{job_id}/apply",
-        data={"applicant_id": "J000001"},
-        files={"resume": ("resume.pdf", b"test resume content", "application/pdf")},
+        files={
+            "resume": (
+                "resume.pdf",
+                b"test resume content",
+                "application/pdf",
+            )
+        },
     )
 
     assert response.status_code in [200, 201]
 
-    data = response.json()
-
-    context.application_id = data.get("application_id")
+    context.application_id = response.json().get("application_id")
 
 
 @when("the application is processed")
@@ -185,11 +205,9 @@ def process_application(client, context):
 def verify_saved(context):
 
     if context.response.status_code == 200:
-
         print("✅ SUCCESS: Application information stored in database")
 
     else:
-
-        print("❌ FAILED: Application not found")
+        print("❌ FAILED:", context.response.status_code, context.response.text)
 
     assert context.response.status_code == 200

@@ -5,9 +5,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Applications | JobConnect</title>
-  <link rel="stylesheet" href="/static/css/job_application.css">
+  <link rel="stylesheet" href="/css/job_application.css">
   <link rel="stylesheet" href="/static/style.css">
-  <link rel="stylesheet" href="/static/css/base.css">
+  <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -121,9 +121,20 @@
           <!-- LEFT CONTENT -->
           <div class="application-left">
 
-            <div class="application-logo">
-              {{ app.job.companyName[:1] }}
-            </div>
+            {% if app.job.company_logo and app.job.company_logo != "default.jpg" %}
+              <div class="application-logo"><img
+                  src="{{ app.job.company_logo }}"
+                  alt="{{ app.job.companyName }}"
+                  class="application-logo"
+              ></div>
+
+          {% else %}
+
+              <div class="application-logo">
+                  {{ app.job.companyName[:1] | upper }}
+              </div>
+
+          {% endif %}
 
 
             <div class="application-content">

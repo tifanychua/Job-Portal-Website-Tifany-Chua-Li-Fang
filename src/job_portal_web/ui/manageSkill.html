@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Manage Skills</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/manageSkill.css">
+    <link rel="stylesheet" href="/css/manageEducation.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<!-- ================================================= -->
+<!-- HERO -->
+<!-- ================================================= -->
+
+<section class="profile-hero">
+
+    <div class="profile-hero-inner">
+
+        <div class="profile-top">
+
+            <div>
+
+                <h1 class="profile-title">
+
+                    Manage Skills
+
+                </h1>
+
+                <p class="profile-subtitle">
+
+                    Add, edit and organize your professional skills to showcase your expertise to employers.
+
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                id="addSkillBtn"
+                class="profile-primary-btn">
+
+                <i class="fa-solid fa-plus"></i>
+
+                Add Skill
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ================================================= -->
+<!-- PAGE -->
+<!-- ================================================= -->
+
+<div class="skill-page">
+
+    <div class="skill-card-container">
+
+        <!-- Toolbar -->
+
+        <div class="skill-toolbar">
+
+            <div class="skill-search">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    id="skillSearch"
+                    placeholder="Search your skills...">
+
+            </div>
+
+        </div>
+
+        {% if skills %}
+
+        <div class="education-card-wrapper">
+
+            <div class="education-header">
+
+                <div>
+
+                    <h2>My Skills</h2>
+
+                    <p>
+                        Add your professional skills to attract employers.
+                    </p>
+
+                </div>
+
+            </div>
+            
+
+            {% for skill in skills %}
+
+            <div class="education-card">
+
+                <div class="education-icon">
+
+                    <i class="fa-solid fa-code"></i>
+
+                </div>
+
+                <div class="education-body">
+
+                    <h3 class="education-title">
+
+                        {{ skill.skill_name }}
+
+                    </h3>
+
+                    <p class="institution">
+
+                        {{ skill.industry_name }}
+
+                        •
+
+                        {{ skill.category_name }}
+
+                    </p>
+
+                    <div class="education-grade">
+
+                        <span class="grade-badge">
+
+                            {{ skill.level }}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="education-actions">
+
+                    <button
+                        type="button"
+                        class="icon-btn editSkillBtn"
+                        data-id="{{ skill.id }}"
+                        data-industry="{{ skill.industry_id }}"
+                        data-category="{{ skill.category_id }}"
+                        data-skill="{{ skill.skill_id }}"
+                        data-level="{{ skill.level }}">
+
+                        <i class="fa-solid fa-pen"></i>
+
+                    <form
+                        action="/delete-skill/{{ skill.id }}"
+                        method="post">
+
+                        <button
+                            type="submit"
+                            class="icon-btn deleteBtn"
+                            onclick="return confirm('Delete this skill?')">
+
+                            <i class="fa-solid fa-trash"></i>
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+        
+
+        <!-- ================================================= -->
+        <!-- EMPTY STATE -->
+        <!-- ================================================= -->
+
+        <div class="empty-state">
+
+            <i class="fa-solid fa-code"></i>
+
+            <h3>
+
+                Build Your Professional Profile
+
+            </h3>
+
+            <p>
+
+                No skills have been added yet.
+
+                Start by adding your first professional skill to make your profile more attractive to employers.
+
+            </p>
+
+        </div>
+
+        {% endif %}
+
+</div>
+
+<div class="education-info-card">
+
+            <div class="info-icon">
+
+                <i class="fa-solid fa-lightbulb"></i>
+
+            </div>
+
+            <div>
+
+                <h4>Tips</h4>
+
+                <p>
+
+                    Add skills that are relevant to your career goals.
+                    Include technical skills, software, programming languages,
+                    certifications and soft skills to improve your profile visibility.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+<!-- ================================================= -->
+<!-- ADD SKILL MODAL -->
+<!-- ================================================= -->
+
+<div
+    class="modal-overlay"
+    id="skillModal">
+
+    <div class="education-modal">
+
+        <form
+            id="skillForm"
+            action="/add-skill"
+            method="post">
+
+            <!-- Header -->
+
+            <div class="modal-header">
+
+                <h2>
+
+                    Add Skill
+
+                </h2>
+
+            </div>
+
+            <!-- Body -->
+
+            <div class="modal-body">
+
+                <!-- Industry -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Industry
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select
+                        id="industry"
+                        name="industry_id"
+                        required>
+
+                        <option value="">
+
+                            Select Industry
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Skill Category -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Skill Category
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select
+                        id="category"
+                        name="category_id"
+                        disabled
+                        required>
+
+                        <option value="">
+
+                            Select Skill Category
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Skill -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Skill
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select
+                        id="skill"
+                        name="skill_id"
+                        disabled
+                        required>
+
+                        <option value="">
+
+                            Select Skill
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Skill Level -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Skill Level
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select
+                        id="level"
+                        name="level"
+                        required>
+
+                        <option value="">
+
+                            Select Skill Level
+
+                        </option>
+
+                        <option value="Beginner">
+
+                            Beginner
+
+                        </option>
+
+                        <option value="Intermediate">
+
+                            Intermediate
+
+                        </option>
+
+                        <option value="Advanced">
+
+                            Advanced
+
+                        </option>
+
+                        <option value="Expert">
+
+                            Expert
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    id="closeSkillModal"
+                    class="btn-secondary">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-primary">
+
+                    Save Skill
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- ================================================= -->
+<!-- EDIT SKILL MODAL -->
+<!-- ================================================= -->
+
+<div
+    class="modal-overlay"
+    id="editSkillModal">
+
+    <div class="education-modal">
+
+        <form
+            id="editSkillForm"
+            method="post">
+
+            <!-- Header -->
+
+            <div class="modal-header">
+
+                <h2>
+
+                    Edit Skill
+
+                </h2>
+
+            </div>
+
+            <!-- Body -->
+
+            <div class="modal-body">
+
+                <!-- Industry -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Industry
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select
+                        id="editIndustry"
+                        name="industry_id"
+                        required>
+
+                        <option value="">
+
+                            Select Industry
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Skill Category -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Skill Category
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select
+                        id="editCategory"
+                        name="category_id"
+                        required
+                        disabled>
+
+                        <option value="">
+
+                            Select Skill Category
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Skill -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Skill
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select
+                        id="editSkill"
+                        name="skill_id"
+                        required
+                        disabled>
+
+                        <option value="">
+
+                            Select Skill
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Skill Level -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Skill Level
+
+                        <span class="required">*</span>
+
+                    </label>
+
+                    <select
+                        id="editLevel"
+                        name="level"
+                        required>
+
+                        <option value="Beginner">
+
+                            Beginner
+
+                        </option>
+
+                        <option value="Intermediate">
+
+                            Intermediate
+
+                        </option>
+
+                        <option value="Advanced">
+
+                            Advanced
+
+                        </option>
+
+                        <option value="Expert">
+
+                            Expert
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    id="closeEditSkillModal"
+                    class="btn-secondary">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-primary">
+
+                    <i class="fa-solid fa-pen"></i>
+
+                    Update Skill
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script src="../js/manageSkill.js"></script>
+</body>
+
+</html>

@@ -5,8 +5,12 @@
 
 <title>My Interviews</title>
 
+<link rel="stylesheet" href="/css/base.css">
+
 <link rel="stylesheet" href="/static/style.css">
 
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 
@@ -34,7 +38,69 @@ View your interview invitations and manage your responses.
 
 </div>
 
+<section class="filter-card">
 
+<div class="filter-section">
+
+
+<div>
+
+<label>
+Search Interview
+</label>
+
+<input 
+type="text"
+id="searchInterview"
+placeholder="Search company, position or interviewer..."
+onkeyup="filterInterviews()">
+
+</div>
+
+
+
+<div style="margin-left: 100px;">
+
+<label>
+Interview Status
+</label>
+
+<select 
+id="statusFilter"
+onchange="filterInterviews()">
+
+<option value="All">
+All Status
+</option>
+
+<option value="Pending">
+Pending
+</option>
+
+<option value="Accepted">
+Accepted
+</option>
+
+<option value="Declined">
+Declined
+</option>
+
+<option value="Completed">
+Completed
+</option>
+
+<option value="Cancelled">
+Cancelled
+</option>
+
+</select>
+
+</div>
+
+
+</div>
+
+</section>
 
 
 <section id="interviewList" class="interview-list">
@@ -61,10 +127,15 @@ View your interview invitations and manage your responses.
 <script>
 
 
+let interviewList = [];
+
+
+
 function loadInterviews(){
 
 
 fetch(`/api/applicant/interviews?application_id={{ application_id }}`)
+
 .then(res=>res.json())
 
 
@@ -77,42 +148,7 @@ let container = document.getElementById(
 
 
 
-container.innerHTML = "";
-
-
-
-// No interview
-
-if(data.length === 0){
-
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-<h3>
-No Interview Invitation
-</h3>
-
-<p>
-You currently have no scheduled interviews.
-</p>
-
-</div>
-
-`;
-
-
-return;
-
-}
-
-
-
-// Error
-
 if(data.error){
-
 
 container.innerHTML = `
 
@@ -126,10 +162,175 @@ ${data.error}
 
 `;
 
-
 return;
 
 }
+
+
+
+interviewList = data;
+
+
+filterInterviews();
+
+
+
+})
+
+
+.catch(error=>{
+
+
+console.log(error);
+
+
+document.getElementById("interviewList").innerHTML = `
+
+
+<div class="empty-state">
+
+<h3>
+Failed to load interviews
+</h3>
+
+<p>
+Please try again later.
+</p>
+
+</div>
+
+
+`;
+
+});
+
+
+}
+
+
+
+
+
+
+function filterInterviews(){
+
+
+let keyword = document
+.getElementById("searchInterview")
+.value
+.toLowerCase();
+
+
+
+let status = document
+.getElementById("statusFilter")
+.value;
+
+
+
+
+
+let filtered = interviewList.filter(interview=>{
+
+
+let searchMatch =
+
+(interview.companyName || "")
+.toLowerCase()
+.includes(keyword)
+
+
+||
+
+
+(interview.position || "")
+.toLowerCase()
+.includes(keyword)
+
+
+||
+
+
+(interview.interviewer || "")
+.toLowerCase()
+.includes(keyword);
+
+
+
+
+
+let statusMatch =
+
+status === "All"
+
+||
+
+interview.status === status;
+
+
+
+return searchMatch && statusMatch;
+
+
+
+});
+
+
+
+displayInterviews(filtered);
+
+
+
+}
+
+
+
+
+
+
+
+
+function displayInterviews(data){
+
+
+let container = document.getElementById(
+"interviewList"
+);
+
+
+
+container.innerHTML = "";
+
+
+
+
+
+if(data.length === 0){
+
+
+container.innerHTML = `
+
+
+<div class="empty-state">
+
+<h3>
+No Interview Invitation
+</h3>
+
+<p>
+No interview matches your search.
+</p>
+
+</div>
+
+
+`;
+
+return;
+
+
+}
+
 
 
 
@@ -145,7 +346,9 @@ if(interview.status){
 statusClass = interview.status
 .toLowerCase()
 .replaceAll(" ","-");
+
 }
+
 
 
 
@@ -202,7 +405,6 @@ ${interview.status}
 
 <div>
 
-
 <strong>
 Date
 </strong>
@@ -221,7 +423,6 @@ ${interview.date}
 
 
 <div>
-
 
 <strong>
 Time
@@ -243,7 +444,6 @@ ${interview.time}
 
 <div>
 
-
 <strong>
 Interview Type
 </strong>
@@ -264,7 +464,6 @@ ${interview.interviewType}
 
 <div>
 
-
 <strong>
 Interviewer
 </strong>
@@ -283,14 +482,11 @@ ${interview.interviewer}
 
 </div>
 
-
-
-
-
 <div class="action-buttons">
 
 
 <a href="/my_interviews/detail/${interview.id}">
+
 
 <button class="primary">
 
@@ -318,38 +514,9 @@ View Details
 });
 
 
-})
-
-
-.catch(error=>{
-
-
-console.log(error);
-
-
-document.getElementById("interviewList").innerHTML = `
-
-
-<div class="empty-state">
-
-<h3>
-Failed to load interviews
-</h3>
-
-<p>
-Please try again later.
-</p>
-
-</div>
-
-
-`;
-
-
-});
-
-
 }
+
+
 
 
 

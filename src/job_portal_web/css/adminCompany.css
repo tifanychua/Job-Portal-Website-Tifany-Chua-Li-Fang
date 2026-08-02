@@ -1,0 +1,780 @@
+/* ===================================
+            PAGE
+=================================== */
+
+.main-content{
+
+    margin-left:220px;
+
+    margin-top:85px;
+
+    padding:35px;
+
+    background:#f8fafc;
+
+    min-height:100vh;
+
+}
+
+
+
+
+
+/* ===================================
+          PAGE HEADER
+=================================== */
+
+
+.page-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+
+    margin-bottom:30px;
+
+}
+
+
+
+.page-header h1{
+
+    font-size:30px;
+
+    font-weight:700;
+
+    color:#1f2937;
+
+    margin-bottom:8px;
+
+}
+
+
+
+.page-header p{
+
+    font-size:15px;
+
+    color:#6b7280;
+
+}
+
+
+
+
+
+
+/* ===================================
+            TOOLBAR
+=================================== */
+
+
+.toolbar{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+
+    margin-bottom:25px;
+
+}
+
+
+
+
+
+/* ===================================
+            SEARCH BOX
+=================================== */
+
+
+.search-box{
+
+
+    width:350px;
+
+
+    display:flex;
+
+    align-items:center;
+
+
+    gap:10px;
+
+
+    background:#ffffff;
+
+
+    border:1px solid #e5e7eb;
+
+
+    border-radius:8px;
+
+
+    padding:12px 16px;
+
+
+}
+
+
+
+.search-box:focus-within{
+
+
+    border-color:#2563EB;
+
+
+}
+
+
+
+
+
+.search-box i{
+
+
+    color:#9ca3af;
+
+
+    font-size:14px;
+
+
+}
+
+
+
+
+.search-box input{
+
+
+    width:100%;
+
+
+    border:none;
+
+    outline:none;
+
+
+    font-size:14px;
+
+
+    background:transparent;
+
+
+}
+
+
+
+
+
+
+
+/* ===================================
+            TABLE CARD
+=================================== */
+
+
+.table-card{
+
+
+    background:#ffffff;
+
+
+    border:1px solid #e5e7eb;
+
+
+    border-radius:12px;
+
+
+    overflow:hidden;
+
+
+    box-shadow:
+    0 2px 10px rgba(0,0,0,.03);
+
+
+}
+
+
+
+
+
+
+
+/* ===================================
+            TABLE
+=================================== */
+
+
+table{
+
+
+    width:100%;
+
+
+    border-collapse:collapse;
+
+
+}
+
+
+
+
+
+thead{
+
+
+    background:#f9fafb;
+
+
+}
+
+
+
+
+th{
+
+
+    padding:16px 18px;
+
+
+    text-align:left;
+
+
+    font-size:13px;
+
+
+    font-weight:700;
+
+
+    color:#6b7280;
+
+
+    border-bottom:1px solid #e5e7eb;
+
+
+}
+
+
+
+
+
+td{
+
+
+    padding:18px;
+
+
+    font-size:14px;
+
+
+    color:#374151;
+
+
+    border-bottom:1px solid #e5e7eb;
+
+
+}
+
+
+
+
+
+tbody tr{
+
+
+    transition:.2s;
+
+
+}
+
+
+
+
+tbody tr:hover{
+
+
+    background:#f9fafb;
+
+
+}
+
+
+
+
+
+
+
+
+/* ===================================
+            STATUS
+=================================== */
+
+
+.status{
+
+
+    display:inline-flex;
+
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+
+    padding:6px 14px;
+
+
+    border-radius:999px;
+
+
+    font-size:12px;
+
+
+    font-weight:600;
+
+
+}
+
+
+
+
+.pending{
+
+
+    background:#FEF3C7;
+
+
+    color:#92400E;
+
+
+}
+
+
+
+
+.approved{
+
+
+    background:#DCFCE7;
+
+
+    color:#166534;
+
+
+}
+
+
+
+
+.rejected{
+
+
+    background:#FEE2E2;
+
+
+    color:#B91C1C;
+
+
+}
+
+
+
+
+
+
+
+
+/* ===================================
+            REVIEW BUTTON
+=================================== */
+
+
+.review-btn{
+
+
+    display:inline-flex;
+
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+    gap:8px;
+
+
+
+    height:40px;
+
+
+    padding:0 18px;
+
+
+
+    border-radius:8px;
+
+
+    background:#2563EB;
+
+
+    color:white;
+
+
+
+    text-decoration:none;
+
+
+
+    font-size:14px;
+
+
+    font-weight:600;
+
+
+
+    transition:.2s;
+
+
+}
+
+
+
+
+.review-btn:hover{
+
+
+    background:#1d4ed8;
+
+
+}
+
+
+
+/* ===================================
+            RESPONSIVE
+=================================== */
+
+
+@media(max-width:900px){
+
+
+    .main-content{
+
+
+        margin-left:0;
+
+
+        padding:20px;
+
+
+    }
+
+
+
+    .page-header{
+
+
+        flex-direction:column;
+
+
+        align-items:flex-start;
+
+
+        gap:15px;
+
+
+    }
+
+
+
+    .toolbar{
+
+
+        width:100%;
+
+
+    }
+
+    /* ===================================
+            FILTER BOX
+=================================== */
+
+
+.filter-box select{
+
+
+    height:44px;
+
+
+    padding:0 16px;
+
+
+    border:1px solid #e5e7eb;
+
+
+    border-radius:8px;
+
+
+    background:#ffffff;
+
+
+    color:#374151;
+
+
+    font-size:14px;
+
+
+    font-weight:500;
+
+
+    cursor:pointer;
+
+
+    outline:none;
+
+
+}
+
+
+
+.filter-box select:hover{
+
+
+    border-color:#2563EB;
+
+
+}
+
+
+
+.filter-box select:focus{
+
+
+    border-color:#2563EB;
+
+
+}
+
+
+
+    .search-box{
+
+
+        width:100%;
+
+
+    }
+
+
+
+    .table-card{
+
+
+        overflow-x:auto;
+
+
+    }
+
+
+
+    table{
+
+
+        min-width:900px;
+
+
+    }
+
+
+}
+
+.deactivated{
+
+
+    background:#E5E7EB;
+
+
+    color:#374151;
+
+
+}
+
+/* ===================================
+            FILTER BOX
+=================================== */
+
+
+.filter-box select{
+
+
+    height:44px;
+
+
+    padding:0 16px;
+
+
+    border:1px solid #e5e7eb;
+
+
+    border-radius:8px;
+
+
+    background:#ffffff;
+
+
+    color:#374151;
+
+
+    font-size:14px;
+
+
+    font-weight:500;
+
+
+    cursor:pointer;
+
+
+    outline:none;
+
+
+}
+
+
+
+/* ===================================
+            FILTER BOX
+=================================== */
+
+
+.filter-box{
+
+    width:220px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:8px;
+
+    padding:12px 16px;
+
+}
+
+
+.filter-box:focus-within{
+
+    border-color:#2563EB;
+
+}
+
+
+
+.filter-box i{
+
+    color:#9ca3af;
+
+    font-size:14px;
+
+}
+
+
+
+.filter-box select{
+
+
+    width:100%;
+
+    border:none;
+
+    outline:none;
+
+    background:transparent;
+
+    font-size:14px;
+
+    color:#374151;
+
+    cursor:pointer;
+
+
+}
+
+/* ===================================
+            FILTER BOX
+=================================== */
+
+.filter-box{
+
+    display:flex;
+
+    align-items:center;
+
+}
+
+
+
+.filter-box select{
+
+    height:44px;
+
+    width:180px;
+
+    padding:0 16px;
+
+    background:#ffffff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:8px;
+
+    color:#374151;
+
+    font-size:14px;
+
+    font-weight:500;
+
+    outline:none;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+
+/* Hover */
+
+.filter-box select:hover{
+
+    border-color:#2563EB;
+
+}
+
+
+
+/* Focus */
+
+.filter-box select:focus{
+
+    border-color:#2563EB;
+
+    box-shadow:0 0 0 3px rgba(37,99,235,0.1);
+
+}
