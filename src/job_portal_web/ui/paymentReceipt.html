@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Payment Receipt</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+    <link rel="stylesheet"
+          href="/css/paymentReceipt.css">
+
+</head>
+
+<body>
+
+    {% include "employerHeader.html" %}
+
+    <div class="main-content">
+
+        <div class="receipt-card">
+
+            <!-- ==========================
+                 Success Icon
+            =========================== -->
+
+            <div class="success-icon">
+
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+
+            </div>
+
+            <!-- ==========================
+                 Header
+            =========================== -->
+
+            <div class="receipt-header">
+
+                <h1>Payment Receipt</h1>
+
+                <p>
+                    Your payment has been successfully processed.
+                    This receipt serves as proof of payment.
+                </p>
+
+            </div>
+
+            <!-- ==========================
+                 Receipt Details
+            =========================== -->
+
+            <div class="receipt-body">
+
+                <div class="receipt-row">
+
+                    <span>Receipt Number</span>
+
+                    <strong>{{ order_id }}</strong>
+
+                </div>
+
+                <div class="receipt-row">
+
+                    <span>Company</span>
+
+                    <strong>{{ company.companyName }}</strong>
+
+                </div>
+
+                <div class="receipt-row">
+
+                    <span>Package</span>
+
+                    <strong>{{ payment.package }}</strong>
+
+                </div>
+
+                <div class="receipt-row">
+
+                    <span>Credits Purchased</span>
+
+                    <strong>{{ payment.credits }} Credits</strong>
+
+                </div>
+
+                <div class="receipt-row">
+
+                    <span>Payment Method</span>
+
+                    <strong>{{ payment.payment_method }}</strong>
+
+                </div>
+
+                <div class="receipt-row">
+
+                    <span>Purchase Date</span>
+
+                    <strong>{{ payment.completed_at }}</strong>
+
+                </div>
+
+                <div class="receipt-row">
+
+                    <span>Payment Status</span>
+
+                    <strong class="status-success">
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        {{ payment.status }}
+
+                    </strong>
+
+                </div>
+
+                <div class="receipt-row total-row">
+
+                    <span>Total Paid</span>
+
+                    <strong>
+
+                        RM {{ payment.amount }}
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <!-- ==========================
+                 Footer
+            =========================== -->
+
+            <div class="receipt-footer">
+
+                <a href="/download-receipt/{{ order_id }}"
+                   class="btn-primary">
+
+                    <i class="fa-solid fa-download"></i>
+
+                    Download PDF
+
+                </a>
+
+                <a href="/employer-credit"
+                   class="btn-secondary">
+
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                    Back to Credits
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

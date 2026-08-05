@@ -7,6 +7,10 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 from .database import db
+from .helper import (
+    get_company,
+    get_unread_notification_count
+)
 
 # Routers
 from .auth import router as auth_router
@@ -23,12 +27,15 @@ from .routes.editProfile import router as editProfile_router
 from .routes.jobSeekerProfile import router as jobSeekerProfile_router
 from .routes.employer import router as employer_router
 from .routes.employerApplication import router as employer_application_router
+from .routes.employerCredit import router as employer_credit_router
 from .routes.admin import router as admin_router
 from job_portal_web.backend.routes.education import router as education_router
 from job_portal_web.backend.routes.experience import router as experience_router
 from .routes.companyProfile import router as companyProfile_router
 from .routes.skill import router as skill_router
+from .routes.payment import router as payment_router
 from .routes.editCompanyProfile import router as editCompanyProfile_router
+from .routes.notification import router as notification_router
 import os
 
 # ==================================================
@@ -160,6 +167,11 @@ app.include_router(skill_router)
 
 app.include_router(editCompanyProfile_router)
 
+app.include_router(employer_credit_router)
+
+app.include_router(payment_router)
+
+app.include_router(notification_router)
 
 # ==================================================
 # TEMPLATE HELPER
@@ -171,19 +183,24 @@ def render_template(request: Request, template: str, context=None):
     if context is None:
         context = {}
 
-    # Get current logged-in user
+    # Current user
     user = get_current_user(request)
-
-    # Existing user variable
     context["user"] = user
 
-    # Add company variable for employerHeader.html
+    # Employer information
     if request.session.get("user_type") == "employer":
 
-        context["company"] = user
+        company = get_company(request)
 
-    return templates.TemplateResponse(request=request, name=template, context=context)
+        context["company"] = company
 
+        context["unread_count"] = get_unread_notification_count(request)
+
+    return templates.TemplateResponse(
+        request=request,
+        name=template,
+        context=context
+    )
 
 # ==================================================
 # PAGE ROUTES

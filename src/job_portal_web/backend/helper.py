@@ -21,6 +21,56 @@ def get_company(request: Request):
 
     return company
 
+# ==========================================
+# Get Unread Notification Count
+# ==========================================
+
+def get_unread_notification_count(request: Request):
+
+    company_id = request.session.get("company_id")
+
+    if not company_id:
+        return 0
+
+    docs = (
+        db.collection("notification")
+        .where("company_id", "==", company_id)
+        .where("is_read", "==", False)
+        .stream()
+    )
+
+    return sum(1 for _ in docs)
+
+def get_notifications(request: Request):
+
+    company_id = request.session.get("company_id")
+
+    if not company_id:
+        return []
+
+    docs = (
+        db.collection("notification")
+        .where("company_id", "==", company_id)
+        .order_by("created_at", direction="DESCENDING")
+        .stream()
+    )
+
+    notifications = []
+
+    for doc in docs:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        notifications.append(data)
+
+    return notifications
+
+
+def mark_notification_read(notification_id: str):
+
+    db.collection("notification").document(notification_id).update({
+        "is_read": True
+    })
+
 
 def get_current_user(request: Request):
 

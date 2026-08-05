@@ -7,7 +7,10 @@ from firebase_admin import firestore
 from fastapi.templating import Jinja2Templates
 from datetime import timedelta
 from pydantic import BaseModel
-from ..helper import get_company
+from ..helper import (
+    get_company,
+    get_unread_notification_count
+)
 from ..database import db
 import os
 
@@ -59,6 +62,8 @@ def get_current_company(request: Request):
         raise HTTPException(status_code=404, detail="Company not found")
 
     return company_id, company
+
+    unread_count = get_unread_notification_count(request)
 
 
 # ==================================================
@@ -180,9 +185,50 @@ async def view_applications(request: Request):
 
             application["applicant_email"] = job_seeker.get("email") or "No email provided"
 
-            application["experience"] = job_seeker.get("experience") or "Not provided"
+            experience_docs = (
+                db.collection("job_seeker_experience")
+                .where("applicant_id", "==", application["job_seeker_id"])
+                .stream()
+            )
 
-            application["skills"] = job_seeker.get("skills") or []
+            experiences = []
+
+            for doc in experience_docs:
+                exp = doc.to_dict()
+                experiences.append(exp.get("job_title"))
+
+            application["experience"] = ", ".join(experiences) if experiences else "Not provided"
+
+
+            skill_docs = (
+                db.collection("job_seeker_skill")
+                .where("applicant_id", "==", application["job_seeker_id"])
+                .stream()
+            )
+
+            skills = []
+
+            for doc in skill_docs:
+
+                data = doc.to_dict()
+
+                skill_id = data.get("skill_id")
+
+                if not skill_id:
+                    continue
+
+                skill_doc = (
+                    db.collection("skills")
+                    .document(skill_id)
+                    .get()
+                )
+
+                if skill_doc.exists:
+                    skills.append(
+                        skill_doc.to_dict().get("skill_name")
+                    )
+
+            application["skills"] = skills
 
         applications.append(application)
 

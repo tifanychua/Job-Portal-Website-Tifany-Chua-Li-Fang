@@ -1,0 +1,461 @@
+/* ==========================================
+   Payment Receipt
+   ========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",sans-serif;
+}
+
+body{
+    background:#F5F7FB;
+}
+
+/* ==========================================
+   Main Content
+   ========================================== */
+
+.main-content{
+
+    margin-left:250px;
+
+    margin-top:65px;
+
+    padding:18px 35px 35px;
+
+}
+
+/* ==========================================
+   Receipt Card
+   ========================================== */
+
+.receipt-card{
+
+    max-width:760px;
+
+    margin:0 auto;
+
+    background:#fff;
+
+    border-radius:18px;
+
+    padding:28px;
+
+    box-shadow:0 8px 25px rgba(15,23,42,.08);
+
+}
+
+/* ==========================================
+   Success Icon
+   ========================================== */
+
+.success-icon{
+
+    width:70px;
+
+    height:70px;
+
+    margin:0 auto 15px;
+
+    border-radius:50%;
+
+    background:#DBFCE7;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+}
+
+.success-icon i{
+
+    font-size:32px;
+
+    color:#22C55E;
+
+}
+
+/* ==========================================
+   Header
+   ========================================== */
+
+.receipt-header{
+
+    text-align:center;
+
+    margin-bottom:25px;
+}
+
+.receipt-header h1{
+
+    font-size:30px;
+
+    color:#162447;
+
+    font-weight:700;
+
+    margin-bottom:6px;
+
+}
+
+.receipt-header p{
+
+    color:#64748B;
+
+    font-size:14px;
+
+    line-height:1.5;
+
+}
+
+/* ==========================================
+   Receipt Body
+   ========================================== */
+
+.receipt-body{
+
+    border-top:1px solid #E5E7EB;
+
+    border-bottom:1px solid #E5E7EB;
+
+    margin-top:18px;
+
+}
+
+/* ==========================================
+   Receipt Row
+   ========================================== */
+
+.receipt-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:12px 0;
+
+    border-bottom:1px solid #EEF2F7;
+
+}
+
+.receipt-row:last-child{
+
+    border-bottom:none;
+
+}
+
+.receipt-row span{
+
+    color:#64748B;
+
+    font-size:14px;
+
+}
+
+.receipt-row strong{
+
+    color:#162447;
+
+    font-size:15px;
+
+    font-weight:600;
+
+}
+
+/* ==========================================
+   Status
+   ========================================== */
+
+.status-success{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:#16A34A !important;
+
+}
+
+.status-success i{
+
+    font-size:18px;
+
+}
+
+/* ==========================================
+   Total
+   ========================================== */
+
+.total-row{
+
+    background:#F8FAFC;
+
+    padding:14px 0;
+
+}
+
+.total-row span{
+
+    font-size:16px;
+
+    font-weight:600;
+
+    color:#162447;
+
+}
+
+.total-row strong{
+
+    color:#2563EB;
+
+    font-size:22px;
+
+    font-weight:700;
+
+}
+
+/* ==========================================
+   Footer
+   ========================================== */
+
+.receipt-footer{
+
+    margin-top:25px;
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:12px;
+
+}
+
+/* ==========================================
+   Buttons
+   ========================================== */
+
+.receipt-footer a{
+
+    text-decoration:none;
+
+}
+
+.btn-primary,
+.btn-secondary{
+
+    height:44px;
+
+    min-width:160px;
+
+    padding:0 25px;
+
+    border-radius:12px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.btn-primary{
+
+    background:#2563EB;
+
+    color:#fff;
+
+}
+
+.btn-primary:hover{
+
+    background:#1D4ED8;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 20px rgba(37,99,235,.25);
+
+}
+
+.btn-secondary{
+
+    background:#F1F5F9;
+
+    color:#162447;
+
+}
+
+.btn-secondary:hover{
+
+    background:#E2E8F0;
+
+    transform:translateY(-2px);
+
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+
+@media (max-width:1024px){
+
+    .receipt-card{
+
+        padding:35px;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    .main-content{
+
+        margin-left:0;
+
+        padding:20px;
+
+    }
+
+    .receipt-card{
+
+        padding:28px;
+
+    }
+
+    .receipt-header h1{
+
+        font-size:30px;
+
+    }
+
+    .receipt-row{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:8px;
+
+    }
+
+    .receipt-row strong{
+
+        width:100%;
+
+        text-align:left;
+
+    }
+
+    .receipt-footer{
+
+        flex-direction:column;
+
+    }
+
+    .btn-primary,
+    .btn-secondary{
+
+        width:100%;
+
+    }
+
+}
+
+@media (max-width:480px){
+
+    .receipt-card{
+
+        padding:22px;
+
+        border-radius:18px;
+
+    }
+
+    .success-icon{
+
+        width:70px;
+
+        height:70px;
+
+    }
+
+    .success-icon i{
+
+        font-size:32px;
+
+    }
+
+    .receipt-header h1{
+
+        font-size:26px;
+
+    }
+
+    .receipt-header p{
+
+        font-size:14px;
+
+    }
+
+    .total-row strong{
+
+        font-size:22px;
+
+    }
+
+}
+
+/* ==========================================
+   Print
+   ========================================== */
+
+@media print{
+
+    body{
+
+        background:#fff;
+
+    }
+
+    .topbar,
+    .sidebar,
+    .receipt-footer{
+
+        display:none;
+
+    }
+
+    .main-content{
+
+        margin:0;
+
+        padding:0;
+
+    }
+
+    .receipt-card{
+
+        box-shadow:none;
+
+        border:none;
+
+        max-width:100%;
+
+    }
+
+}

@@ -1,0 +1,1037 @@
+/* ==========================================
+   Employer Credit
+   ========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",sans-serif;
+}
+
+body{
+    background:#F5F7FB;
+}
+
+/* ==========================================
+   Main Content
+   ========================================== */
+
+.main-content{
+
+    margin-left:180px;
+    margin-top:65px;
+
+    padding:32px;
+
+    min-height:100vh;
+
+}
+
+/* ==========================================
+   Page Title
+   ========================================== */
+
+.page-title{
+
+    margin-bottom:30px;
+
+}
+
+.page-title h1{
+
+    font-size:46px;
+
+    font-weight:700;
+
+    color:#162447;
+
+    margin-bottom:8px;
+
+}
+
+.page-title p{
+
+    font-size:17px;
+
+    color:#64748B;
+
+}
+
+/* ==========================================
+   Credit Summary
+   ========================================== */
+
+.credit-summary{
+
+    background:#fff;
+
+    border-radius:22px;
+
+    padding:35px;
+
+    margin-bottom:35px;
+
+    box-shadow:0 10px 30px rgba(15,23,42,.06);
+
+    display:grid;
+
+    grid-template-columns:minmax(260px,1fr) 220px 220px;
+
+    gap:35px;
+
+    align-items:center;
+
+}
+
+/* ==========================================
+   Left
+   ========================================== */
+
+.summary-left{
+
+    min-width:0;
+
+}
+
+.summary-left h3{
+
+    font-size:18px;
+
+    font-weight:600;
+
+    color:#162447;
+
+    margin-bottom:18px;
+
+}
+
+.credit-number{
+
+    font-size:68px;
+
+    font-weight:700;
+
+    line-height:1;
+
+    color:#162447;
+
+}
+
+.credit-number span{
+
+    display:block;
+
+    margin-top:10px;
+
+    font-size:20px;
+
+    color:#64748B;
+
+    font-weight:500;
+
+}
+
+.summary-left p{
+
+    margin-top:22px;
+
+    margin-bottom:24px;
+
+    color:#64748B;
+
+    font-size:16px;
+
+    line-height:1.6;
+
+}
+
+/* ==========================================
+   Post Button
+   ========================================== */
+
+.post-btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:10px;
+
+    padding:14px 24px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#2563EB;
+
+    color:#fff;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+}
+
+.post-btn:hover{
+
+    background:#1D4ED8;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 18px rgba(37,99,235,.25);
+
+}
+
+/* ==========================================
+   Progress Circle
+   ========================================== */
+
+.summary-center{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.progress-circle{
+
+    position:relative;
+
+    width:200px;
+
+    height:200px;
+
+}
+
+.progress-circle svg{
+
+    width:200px;
+
+    height:200px;
+
+}
+
+.bg{
+
+    fill:none;
+
+    stroke:#E5E7EB;
+
+    stroke-width:12;
+
+}
+
+.progress{
+
+    fill:none;
+
+    stroke:#2563EB;
+
+    stroke-width:12;
+
+    stroke-linecap:round;
+
+    transform-origin:50% 50%;
+
+}
+
+.circle-text{
+
+    position:absolute;
+
+    top:50%;
+
+    left:50%;
+
+    transform:translate(-50%,-50%);
+
+    text-align:center;
+
+}
+
+.circle-text h2{
+
+    font-size:46px;
+
+    font-weight:700;
+
+    padding-right: 10px;
+
+    color:#162447;
+
+}
+
+.circle-text span{
+
+    display:block;
+
+    margin-top:5px;
+
+    font-size:17px;
+
+    padding-right: 10px;
+
+    color:#64748B;
+
+}
+
+/* ==========================================
+   Statistics
+   ========================================== */
+
+.summary-right{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+}
+
+.legend{
+
+    display:grid;
+
+    grid-template-columns:18px 1fr auto;
+
+    gap:12px;
+
+    align-items:center;
+
+}
+
+.legend span{
+
+    width:10px;
+
+    height:10px;
+
+    border-radius:50%;
+
+}
+
+.blue{
+
+    background:#2563EB;
+
+}
+
+.orange{
+
+    background:#F59E0B;
+
+}
+
+.green{
+
+    background:#22C55E;
+
+}
+
+.red{
+
+    background:#EF4444;
+
+}
+
+.legend label{
+
+    font-size:15px;
+
+    color:#475569;
+
+}
+
+.legend strong{
+
+    font-size:18px;
+
+    color:#162447;
+
+}
+
+/* ==========================================
+   History Card
+   ========================================== */
+
+.history-card{
+
+    background:#fff;
+
+    border-radius:22px;
+
+    padding:30px;
+
+    margin-bottom:35px;
+
+    box-shadow:0 10px 30px rgba(15,23,42,.06);
+
+    overflow-x:auto;
+
+}
+
+.history-card h2{
+
+    font-size:32px;
+
+    font-weight:700;
+
+    color:#162447;
+
+    margin-bottom:25px;
+
+}
+
+/* ==========================================
+   Table
+   ========================================== */
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    min-width:700px;
+
+}
+
+thead{
+
+    border-bottom:2px solid #E5E7EB;
+
+}
+
+th{
+
+    padding:18px 12px;
+
+    text-align:left;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    color:#64748B;
+
+}
+
+td{
+
+    padding:18px 12px;
+
+    font-size:15px;
+
+    color:#1E293B;
+
+    border-bottom:1px solid #EEF2F7;
+
+}
+
+tbody tr{
+
+    transition:.25s;
+
+}
+
+tbody tr:hover{
+
+    background:#F8FAFC;
+
+}
+
+.reference{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    color:#2563EB;
+
+    font-weight:600;
+
+    text-decoration:none;
+
+    transition:.2s;
+
+}
+
+.reference:hover{
+
+    color:#1D4ED8;
+
+    text-decoration:underline;
+
+}
+
+.reference i{
+
+    font-size:14px;
+
+}
+
+/* ==========================================
+   Packages
+   ========================================== */
+
+.packages{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+
+    gap:30px;
+
+    margin-top:30px;
+
+}
+
+/* ==========================================
+   Package Card
+   ========================================== */
+
+.package-card{
+
+    position:relative;
+
+    display:flex;
+
+    flex-direction:column;
+
+    background:#fff;
+
+    border-radius:22px;
+
+    padding:34px;
+
+    box-shadow:0 10px 30px rgba(15,23,42,.06);
+
+    transition:.3s;
+
+    min-height:450px;
+
+}
+
+.package-card:hover{
+
+    transform:translateY(-6px);
+
+    box-shadow:0 18px 40px rgba(15,23,42,.12);
+
+}
+
+.package-card.active{
+
+    border:2px solid #2563EB;
+
+    box-shadow:0 18px 40px rgba(37,99,235,.15);
+
+}
+
+/* ==========================================
+   Popular
+   ========================================== */
+
+.popular-text{
+
+    position:absolute;
+
+    top:-14px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    background:#2563EB;
+
+    color:#fff;
+
+    padding:7px 18px;
+
+    border-radius:999px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+
+/* ==========================================
+   Active Tag
+   ========================================== */
+
+.current-tag{
+
+    position:absolute;
+
+    top:18px;
+
+    right:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    padding:6px 14px;
+
+    background:#22C55E;
+
+    color:#fff;
+
+    border-radius:18px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+
+.current-tag i{
+
+    font-size:11px;
+
+}
+
+/* ==========================================
+   Package Title
+   ========================================== */
+
+.package-card h3{
+
+    margin-top:8px;
+
+    margin-bottom:18px;
+
+    text-align:center;
+
+    font-size:28px;
+
+    font-weight:700;
+
+    color:#162447;
+
+}
+
+/* ==========================================
+   Price
+   ========================================== */
+
+.price{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:flex-end;
+
+    gap:8px;
+
+    margin-bottom:30px;
+
+}
+
+.price strong{
+
+    font-size:52px;
+
+    font-weight:700;
+
+    color:#2563EB;
+
+}
+
+.price span{
+
+    font-size:18px;
+
+    color:#64748B;
+
+    margin-bottom:8px;
+
+}
+
+/* ==========================================
+   Features
+   ========================================== */
+
+.package-card ul{
+
+    flex:1;
+
+    list-style:none;
+
+    margin:0;
+
+    padding:0;
+
+}
+
+.package-card li{
+
+    position:relative;
+
+    padding-left:38px;
+
+    margin:18px 0;
+
+    font-size:15px;
+
+    color:#475569;
+
+}
+
+.package-card li::before{
+
+    content:"✓";
+
+    position:absolute;
+
+    left:0;
+
+    top:0;
+
+    width:24px;
+
+    height:24px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:#ECFDF5;
+
+    color:#22C55E;
+
+    border-radius:50%;
+
+    font-size:13px;
+
+    font-weight:700;
+
+}
+
+/* ==========================================
+   Package Buttons
+   ========================================== */
+
+.package-card button{
+
+    width:100%;
+
+    height:52px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#2563EB;
+
+    color:#fff;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    margin-top:25px;
+
+}
+
+.package-card button:hover{
+
+    background:#1D4ED8;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 10px 20px rgba(37,99,235,.25);
+
+}
+
+/* ==========================================
+   Current Plan Button
+   ========================================== */
+
+.current-plan-btn{
+
+    background:#22C55E !important;
+
+    cursor:default !important;
+
+}
+
+.current-plan-btn:hover{
+
+    background:#22C55E !important;
+
+    transform:none !important;
+
+    box-shadow:none !important;
+
+}
+
+/* ==========================================
+   Disabled Button
+   ========================================== */
+
+button:disabled{
+
+    opacity:1;
+
+}
+
+/* ==========================================
+   Responsive - Large Laptop
+   ========================================== */
+
+@media (max-width:1300px){
+
+    .credit-summary{
+
+        grid-template-columns:1fr 220px;
+
+        gap:25px;
+
+    }
+
+    .summary-right{
+
+        grid-column:1 / -1;
+
+        display:grid;
+
+        grid-template-columns:repeat(2,1fr);
+
+        gap:18px;
+
+    }
+
+}
+
+/* ==========================================
+   Responsive - Tablet
+   ========================================== */
+
+@media (max-width:992px){
+
+    .page-title h1{
+
+        font-size:38px;
+
+    }
+
+    .credit-number{
+
+        font-size:56px;
+
+    }
+
+    .credit-summary{
+
+        grid-template-columns:1fr;
+
+        text-align:center;
+
+    }
+
+    .summary-left{
+
+        order:1;
+
+    }
+
+    .summary-center{
+
+        order:2;
+
+    }
+
+    .summary-right{
+
+        order:3;
+
+        display:grid;
+
+        grid-template-columns:repeat(2,1fr);
+
+        gap:18px;
+
+    }
+
+}
+
+/* ==========================================
+   Responsive - Small Tablet
+   ========================================== */
+
+@media (max-width:768px){
+
+    .main-content{
+
+        padding:20px;
+
+    }
+
+    .page-title{
+
+        margin-bottom:20px;
+
+    }
+
+    .page-title h1{
+
+        font-size:32px;
+
+    }
+
+    .page-title p{
+
+        font-size:15px;
+
+    }
+
+    .credit-summary{
+
+        padding:25px;
+
+        gap:25px;
+
+    }
+
+    .credit-number{
+
+        font-size:50px;
+
+    }
+
+    .circle-text h2{
+
+        font-size:38px;
+
+    }
+
+    .circle-text span{
+
+        font-size:15px;
+
+    }
+
+    .summary-right{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .history-card{
+
+        padding:22px;
+
+    }
+
+    .history-card h2{
+
+        font-size:26px;
+
+    }
+
+}
+
+/* ==========================================
+   Responsive - Mobile
+   ========================================== */
+
+@media (max-width:600px){
+
+    .main-content{
+
+        padding:15px;
+
+    }
+
+    .credit-summary{
+
+        padding:20px;
+
+    }
+
+    .page-title h1{
+
+        font-size:28px;
+
+    }
+
+    .credit-number{
+
+        font-size:42px;
+
+    }
+
+    .progress-circle{
+
+        width:170px;
+
+        height:170px;
+
+    }
+
+    .progress-circle svg{
+
+        width:170px;
+
+        height:170px;
+
+    }
+
+    .circle-text h2{
+
+        font-size:32px;
+
+    }
+
+    .package-card{
+
+        min-height:auto;
+
+        padding:28px;
+
+    }
+
+    .package-card h3{
+
+        font-size:24px;
+
+    }
+
+    .price strong{
+
+        font-size:42px;
+
+    }
+
+    .price span{
+
+        font-size:16px;
+
+    }
+
+}

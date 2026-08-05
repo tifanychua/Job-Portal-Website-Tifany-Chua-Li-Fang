@@ -225,7 +225,7 @@ async def firebase_register_job_seeker(data: JobSeekerRegisterRequest):
                 "name": data.name,
                 "email": email,
                 "phone": data.phone,
-                "profileImage": "user.png",
+                "profileImage": "",
                 "status": "Active",
                 "createdAt": firestore.SERVER_TIMESTAMP,
             }

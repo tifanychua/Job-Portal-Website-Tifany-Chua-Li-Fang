@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Posting Credits</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/employerCredit.css">
+
+</head>
+<body>
+    {% include "employerHeader.html" %}
+
+    <div class="main-content">
+
+        <div class="page-title">
+            <h1>Job Posting Credits</h1>
+            <p>Manage your job posting credits and package details.</p>
+        </div>
+
+        <!-- Credit Summary -->
+        <section class="credit-summary">
+
+            <!-- Left -->
+            <div class="summary-left">
+
+                <h3>Available Job Posting Credits</h3>
+
+                <div class="credit-number">
+                    {{ available_credit }}
+                    <span>credits left</span>
+                </div>
+
+                <p>You can post {{ available_credit }} more job(s)</p>
+
+                <button class="post-btn">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Post New Job
+                </button>
+
+            </div>
+
+            <!-- Center -->
+            <div class="summary-center">
+
+                <div class="progress-circle">
+
+                    <svg width="190" height="190">
+
+                        <circle
+                            class="bg"
+                            cx="95"
+                            cy="95"
+                            r="70">
+                        </circle>
+
+                        <circle
+                            id="progress-ring"
+                            class="progress"
+                            cx="95"
+                            cy="95"
+                            r="70">
+                        </circle>
+
+                    </svg>
+
+                    <div class="circle-text">
+                        <h2>{{ available_credit }}</h2>
+                        <span>left</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Right -->
+
+            <div class="summary-right">
+
+                <div class="legend">
+                    <span class="blue"></span>
+                    <label>Total Credits</label>
+                    <strong>{{ total_credit }}</strong>
+                </div>
+
+                <div class="legend">
+                    <span class="orange"></span>
+                    <label>Used Credits</label>
+                    <strong>{{ used_credit }}</strong>
+                </div>
+
+                <div class="legend">
+                    <span class="green"></span>
+                    <label>Available Credits</label>
+                    <strong>{{ available_credit }}</strong>
+                </div>
+
+                <div class="legend">
+                    <span class="red"></span>
+                    <label>Expired Credits</label>
+                    <strong>{{ expired_credit }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- History -->
+
+        <section class="history-card">
+
+            <h2>Credit Usage History</h2>
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>Date</th>
+
+                    <th>Description</th>
+
+                    <th>Credits</th>
+
+                    <th>Balance</th>
+
+                    <th>Reference</th>
+
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for item in histories %}
+
+                <tr>
+
+                    <td>{{ item.date }}</td>
+
+                    <td>{{ item.description }}</td>
+
+                    <td>{{ item.credit }}</td>
+
+                    <td>{{ item.balance }}</td>
+
+                    <td>
+
+                        <a href="/payment-receipt/{{ item.reference }}"
+                        class="reference">
+
+                            <i class="fa-solid fa-receipt"></i>
+
+                            Receipt #{{ item.reference }}
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+        <!-- Package -->
+
+        <section class="packages">
+
+            <div class="package-card {% if current_plan == 'starter' %}active{% endif %}">
+
+                <h3>Starter Pack</h3>
+
+                <div class="price">
+                    <strong>RM 49</strong>
+                    <span>/month</span>
+                </div>
+
+                <ul>
+
+                    <li>10 job posting credits</li>
+
+                    <li>Valid for 30 days</li>
+
+                    <li>Standard visibility</li>
+
+                </ul>
+
+                {% if current_plan == "starter" %}
+
+                <div class="current-tag">
+                    <i class="fa-solid fa-crown"></i>
+                    ACTIVE
+                </div>
+
+                <button class="current-plan-btn" disabled>
+                    <i class="fa-solid fa-circle-check"></i>
+                    Current Plan
+                </button>
+
+                {% else %}
+
+                <button type="button"
+                        onclick="window.location.href='/payment/starter'">
+                    Select Plan
+                </button>
+
+                {% endif %}
+
+            </div>
+
+            <div class="package-card {% if current_plan == 'business' %}active{% endif %}">
+
+                <div class="popular-text">
+
+                    Most Popular
+
+                </div>
+
+                <h3>Business Pack</h3>
+
+                <div class="price">
+
+                    <strong>RM 129</strong>
+
+                    <span>/month</span>
+
+                </div>
+
+                <ul>
+
+                    <li>30 job posting credits</li>
+
+                    <li>Valid for 60 days</li>
+
+                    <li>Featured job visibility</li>
+
+                </ul>
+
+                {% if current_plan == "business" %}
+
+                <div class="current-tag">
+                    <i class="fa-solid fa-crown"></i>
+                    ACTIVE
+                </div>
+
+                <button class="current-plan-btn" disabled>
+                    <i class="fa-solid fa-circle-check"></i>
+                    Current Plan
+                </button>
+
+                {% else %}
+
+                <button type="button"
+                        onclick="window.location.href='/payment/business'">
+                    Upgrade Plan
+                </button>
+
+                {% endif %}
+
+            </div>
+
+            <div class="package-card {% if current_plan == 'enterprise' %}active{% endif %}">
+
+                <h3>Enterprise Pack</h3>
+
+                <div class="price">
+
+                    <strong>RM 229</strong>
+
+                    <span>/month</span>
+
+                </div>
+
+                <ul>
+
+                    <li>60 job posting credits</li>
+
+                    <li>Valid for 90 days</li>
+
+                    <li>Featured + Top placement</li>
+
+                </ul>
+
+                {% if current_plan == "enterprise" %}
+
+                <div class="current-tag">
+                    <i class="fa-solid fa-crown"></i>
+                    ACTIVE
+                </div>
+
+                <button class="current-plan-btn" disabled>
+                    <i class="fa-solid fa-circle-check"></i>
+                    Current Plan
+                </button>
+
+                {% else %}
+
+                <button type="button"
+                        onclick="window.location.href='/payment/enterprise'">
+                    Upgrade Plan
+                </button>
+
+                {% endif %}
+
+            </div>
+
+        </section>
+
+    </div>
+
+        <div
+            id="credit-data"
+            data-total-credit="{{ total_credit }}"
+            data-available-credit="{{ available_credit }}">
+        </div>
+
+        <script src="/js/employerCredit.js"></script>
+
+</body>
+</html>

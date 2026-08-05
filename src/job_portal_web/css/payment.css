@@ -1,0 +1,422 @@
+/* ==========================================
+   Payment
+========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",sans-serif;
+}
+
+body{
+
+    background:#F5F7FB;
+
+}
+
+/* ==========================================
+   Main
+========================================== */
+
+.main-content{
+
+    margin-left:250px;
+    margin-top:70px;
+    padding:24px 30px;
+
+}
+
+/* ==========================================
+   Title
+========================================== */
+
+.page-title{
+
+    margin-bottom:18px;
+
+}
+
+.page-title h1{
+
+    font-size:34px;
+    color:#162447;
+    font-weight:700;
+
+}
+
+.page-title p{
+
+    margin-top:8px;
+    color:#64748B;
+    font-size:17px;
+
+}
+
+/* ==========================================
+   Checkout
+========================================== */
+
+.checkout-container{
+
+    display:grid;
+    grid-template-columns:1.5fr 420px;
+    gap:35px;
+    align-items:start;
+
+}
+
+/* ==========================================
+   Card
+========================================== */
+
+.payment-card,
+.summary-card{
+
+    background:#fff;
+
+    border-radius:22px;
+
+    padding:24px;
+
+    box-shadow:
+        0 12px 35px rgba(15,23,42,.08);
+
+}
+
+/* ==========================================
+   Package Header
+========================================== */
+
+.package-header{
+
+    text-align:center;
+
+    padding-bottom:30px;
+
+    border-bottom:1px solid #E5E7EB;
+
+    margin-bottom:30px;
+
+}
+
+.package-header h2{
+
+    font-size:32px;
+
+    color:#162447;
+
+    margin-bottom:15px;
+
+}
+
+.package-price{
+
+    font-size:46px;
+
+    color:#2563EB;
+
+    font-weight:700;
+
+    line-height:1;
+
+}
+
+.package-header span{
+
+    display:block;
+
+    margin-top:10px;
+
+    color:#64748B;
+
+}
+
+/* ==========================================
+   Features
+========================================== */
+
+.package-feature{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:12px 0;
+
+    font-size:15px;
+
+    border-bottom:1px solid #EEF2F7;
+
+    color:#334155;
+
+}
+
+.package-feature:last-child{
+
+    border:none;
+
+}
+
+.package-feature i{
+
+    color:#22C55E;
+
+    font-size:18px;
+
+}
+
+/* ==========================================
+   Payment Method
+========================================== */
+
+.payment-method{
+
+    margin-top:22px;
+
+}
+
+.payment-method h3{
+
+    color:#162447;
+
+    margin-bottom:16px;
+
+    font-size:20px;
+
+}
+
+.method-box{
+
+    height:52px;
+
+    border:2px solid #DCE6F5;
+
+    border-radius:14px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:14px;
+
+    background:#F8FAFC;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    color:#162447;
+
+}
+
+.method-box i{
+
+    color:#0070BA;
+
+    font-size:34px;
+
+}
+
+/* ==========================================
+   Summary
+========================================== */
+
+.summary-card h2{
+
+    font-size:28px;
+
+    color:#162447;
+
+    margin-bottom:30px;
+
+}
+
+.summary-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:12px 0;
+
+    color:#475569;
+
+    border-bottom:1px solid #EEF2F7;
+
+}
+
+.summary-row strong{
+
+    color:#162447;
+
+}
+
+.summary-card hr{
+
+    border:none;
+
+    border-top:2px dashed #E2E8F0;
+
+    margin:28px 0;
+
+}
+
+/* ==========================================
+   Total
+========================================== */
+
+.summary-total{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:25px;
+
+}
+
+.summary-total span{
+
+    font-size:19px;
+
+    color:#162447;
+
+    font-weight:600;
+
+}
+
+.summary-total strong{
+
+    font-size:28px;
+
+    color:#2563EB;
+
+}
+
+/* ==========================================
+   Security
+========================================== */
+
+.security-box{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    background:#ECFDF5;
+
+    color:#166534;
+
+    border-radius:12px;
+
+    padding:10px 14px;
+
+    margin-bottom:28px;
+
+    font-size:13px;
+
+}
+
+.security-box i{
+
+    font-size:18px;
+
+}
+
+/* ==========================================
+   PayPal
+========================================== */
+
+.paypal-area{
+
+    margin-bottom:28px;
+    margin:18px 0;
+
+}
+
+/* ==========================================
+   Back Button
+========================================== */
+
+.back-btn{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:10px;
+
+    height:52px;
+
+    border-radius:12px;
+
+    text-decoration:none;
+
+    color:#2563EB;
+
+    border:2px solid #2563EB;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.back-btn:hover{
+
+    background:#2563EB;
+
+    color:#fff;
+
+}
+
+/* ==========================================
+   Responsive
+========================================== */
+
+@media(max-width:1200px){
+
+    .checkout-container{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+@media(max-width:900px){
+
+    .main-content{
+
+        margin-left:0;
+
+        padding:20px;
+
+    }
+
+    .page-title h1{
+
+        font-size:34px;
+
+    }
+
+    .package-price{
+
+        font-size:42px;
+
+    }
+
+}

@@ -8,10 +8,17 @@
     <!-- Right -->
     <div class="topbar-right">
 
-        <button class="icon-btn notification">
+        <a href="/notifications" class="icon-btn notification">
+
             <i class="fa-regular fa-bell"></i>
-            <span class="badge">3</span>
-        </button>
+
+            {% if unread_count|default(0) > 0 %}
+                <span class="badge">
+                    {{ unread_count|default(0) }}
+                </span>
+            {% endif %}
+
+        </a>
 
         <div class="profile">
 
@@ -96,10 +103,10 @@
             </a>
         </li>
 
-        <!-- Subscription -->
+        <!-- Job Posting Credits -->
         <li>
-            <a href="/subscription"
-               class="{% if request.url.path == '/subscription' %}active{% endif %}">
+            <a href="/employer-credit"
+            class="{% if request.url.path == '/employer-credit' %}active{% endif %}">
                 <i class="fa-regular fa-credit-card"></i>
                 <span>Subscription</span>
             </a>
