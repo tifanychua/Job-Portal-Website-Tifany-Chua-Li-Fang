@@ -1,6 +1,0 @@
-* [32mfeature/credit           [m b8c57d6 [[34morigin/feature/credit[m] Allow employer to purchase the credit
-  feature/employer-module  [m 3464c3a [[34morigin/feature/employer-module[m] Implement employer acceptance tests and BDD scenarios
-  feature/jobSeeker-profile[m b1a8a13 [[34morigin/feature/jobSeeker-profile[m] Bug Fixing and Testing
-  main                     [m d71cb0f [[34morigin/main[m: behind 47] Merge sprint-1: Integrate job seeker, employer, interview, and chat modules
-  sprint-1                 [m ba6afea [[34morigin/sprint-1[m] Complete Sprint 1 final improvements and update tests
-  sprint-2                 [m d1cc272 [[34morigin/sprint-2[m: behind 11] Merge branch 'sprint-2' of https://github.com/tifanychua/Job-Portal-Website-Tifany-Chua-Li-Fang into sprint-2 :wq# Please enter a commit message to explain why this merge is necessary, :wq# the commit.
