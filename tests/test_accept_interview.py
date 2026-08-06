@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import pytest
-
 from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
 from job_portal_web.backend import interview
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # LOAD FEATURE
@@ -144,7 +142,6 @@ def test_accept_invalid_interview(client, mock_email):
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None

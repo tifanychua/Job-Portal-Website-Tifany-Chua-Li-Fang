@@ -1,6 +1,6 @@
-from pytest_bdd import scenarios, given, when, then
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
 from job_portal_web.backend.main import app
 

@@ -1,9 +1,10 @@
-from pytest_bdd import scenarios, given, when, then
+from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from pytest_bdd import given, scenarios, then, when
 
 from job_portal_web.backend.main import app
-import pytest
 
 scenarios("features/login.feature")
 
@@ -77,8 +78,11 @@ def test_login_user_not_found(mock_db, mock_verify, client):
 
     response = client.post("/firebase-login", json={"token": "valid"})
 
-    assert response.status_code == 401
-    assert response.json()["error"] == "User not found"
+    assert response.status_code == 404
+    assert (
+        response.json()["error"]
+        == "No account information was found. Please complete your registration or contact support."
+    )
 
 
 @given("the job seeker has a registered account")
@@ -92,7 +96,6 @@ def step_valid_login(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-
         verify.return_value = {"uid": "user123"}
         doc = MagicMock()
         doc.exists = True
@@ -164,7 +167,6 @@ def job_seeker_logged_in(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-
         verify.return_value = {"uid": "user123"}
         doc = MagicMock()
         doc.exists = True

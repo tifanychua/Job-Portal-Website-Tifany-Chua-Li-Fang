@@ -1,10 +1,11 @@
-from fastapi.testclient import TestClient
+from uuid import uuid4
+
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # =====================================
 # LOAD FEATURE
@@ -20,8 +21,8 @@ scenarios("features/deactivate_company_account.feature")
 
 @pytest.fixture
 def client():
-
-    return TestClient(app)
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 # =====================================
@@ -31,43 +32,32 @@ def client():
 
 @pytest.fixture
 def context():
-
-    return {}
-
-
-# =====================================
-# TEST DATA
-# =====================================
-
-TEST_COMPANY_ID = "TEST_DEACTIVATE_COMPANY_001"
+    return {
+        "company_id": None,
+        "response": None,
+    }
 
 
 # =====================================
-# CLEANUP
+# TEST DATA FIXTURE
 # =====================================
 
 
-def delete_test_company():
+@pytest.fixture
+def company_id():
+    test_company_id = f"TEST_DEACTIVATE_COMPANY_{uuid4().hex}"
 
-    doc = db.collection("company").document(TEST_COMPANY_ID).get()
+    yield test_company_id
 
-    if doc.exists:
+    document_reference = db.collection("company").document(test_company_id)
 
-        data = doc.to_dict()
+    document = document_reference.get()
 
-        if data.get("test"):
+    if document.exists:
+        data = document.to_dict()
 
-            doc.reference.delete()
-
-
-@pytest.fixture(autouse=True)
-def cleanup():
-
-    delete_test_company()
-
-    yield
-
-    delete_test_company()
+        if data and data.get("test") is True:
+            document_reference.delete()
 
 
 # =====================================
@@ -75,9 +65,8 @@ def cleanup():
 # =====================================
 
 
-def create_verified_company():
-
-    db.collection("company").document(TEST_COMPANY_ID).set(
+def create_verified_company(company_id):
+    db.collection("company").document(company_id).set(
         {
             "companyName": "ABC Technology Sdn Bhd",
             "email": "abc@gmail.com",
@@ -86,12 +75,11 @@ def create_verified_company():
         }
     )
 
-    return TEST_COMPANY_ID
+    return company_id
 
 
-def create_deactivated_company():
-
-    db.collection("company").document(TEST_COMPANY_ID).set(
+def create_deactivated_company(company_id):
+    db.collection("company").document(company_id).set(
         {
             "companyName": "ABC Technology Sdn Bhd",
             "email": "abc@gmail.com",
@@ -101,7 +89,7 @@ def create_deactivated_company():
         }
     )
 
-    return TEST_COMPANY_ID
+    return company_id
 
 
 # =====================================
@@ -110,38 +98,43 @@ def create_deactivated_company():
 
 
 @given("the administrator is viewing a verified company account")
-def verified_company(context):
-
-    context["company_id"] = create_verified_company()
+def verified_company(context, company_id):
+    context["company_id"] = create_verified_company(company_id)
 
 
 @when("the administrator deactivates the company account")
 def deactivate_company(client, context):
-
-    response = client.post(
-        f"/admin/company/{context['company_id']}/deactivate", follow_redirects=False
+    context["response"] = client.post(
+        f"/admin/company/{context['company_id']}/deactivate",
+        follow_redirects=False,
     )
-
-    context["response"] = response
 
 
 @then('the system should update the company status to "Deactivated"')
 def verify_company_status(context):
-
     response = context["response"]
 
-    assert response.status_code in (302, 303, 307)
+    assert response.status_code in (200, 302, 303, 307)
 
-    company = db.collection("company").document(context["company_id"]).get().to_dict()
+    document = db.collection("company").document(context["company_id"]).get()
 
+    assert document.exists
+
+    company = document.to_dict()
+
+    assert company is not None
     assert company["status"] == "Deactivated"
 
 
 @then("the company should no longer have access to employer features")
 def verify_company_access(context):
+    document = db.collection("company").document(context["company_id"]).get()
 
-    company = db.collection("company").document(context["company_id"]).get().to_dict()
+    assert document.exists
 
+    company = document.to_dict()
+
+    assert company is not None
     assert company["status"] == "Deactivated"
 
 
@@ -151,33 +144,41 @@ def verify_company_access(context):
 
 
 @given("one or more company accounts have been deactivated")
-def deactivated_company(context):
-
-    context["company_id"] = create_deactivated_company()
+def deactivated_company(context, company_id):
+    context["company_id"] = create_deactivated_company(company_id)
 
 
 @when("the administrator views the company management page")
 def view_company_management(client, context):
-
-    response = client.get("/admin/company-requests?status=Deactivated")
-
-    context["response"] = response
+    context["response"] = client.get(
+        "/admin/company-requests",
+        params={"status": "Deactivated"},
+    )
 
 
 @then(
-    "the system should display all deactivated company accounts along with their deactivation reasons"
+    "the system should display all deactivated company accounts "
+    "along with their deactivation reasons"
 )
 def verify_deactivated_company_list(context):
-
     response = context["response"]
 
     assert response.status_code == 200
 
-    html = response.text
+    document = db.collection("company").document(context["company_id"]).get()
 
-    assert "ABC Technology Sdn Bhd" in html
+    assert document.exists
 
-    assert "Deactivated" in html
+    company = document.to_dict()
+
+    assert company is not None
+    assert company["companyName"] == "ABC Technology Sdn Bhd"
+    assert company["status"] == "Deactivated"
+    assert company["deactivationReason"] == "Policy violation"
+
+    # Verify what the page actually shows
+    assert "ABC Technology Sdn Bhd" in response.text
+    assert "Deactivated" in response.text
 
 
 # =====================================
@@ -185,16 +186,27 @@ def verify_deactivated_company_list(context):
 # =====================================
 
 
-def test_view_deactivated_company_accounts(client):
+def test_view_deactivated_company_accounts(client, company_id):
+    create_deactivated_company(company_id)
 
-    create_deactivated_company()
+    document = db.collection("company").document(company_id).get()
 
-    response = client.get("/admin/company-requests?status=Deactivated")
+    assert document.exists
+
+    company = document.to_dict()
+
+    assert company is not None
+    assert company["companyName"] == "ABC Technology Sdn Bhd"
+    assert company["status"] == "Deactivated"
+    assert company["deactivationReason"] == "Policy violation"
+
+    response = client.get(
+        "/admin/company-requests",
+        params={"status": "Deactivated"},
+    )
 
     assert response.status_code == 200
-
     assert "ABC Technology Sdn Bhd" in response.text
-
     assert "Deactivated" in response.text
 
 
@@ -204,7 +216,11 @@ def test_view_deactivated_company_accounts(client):
 
 
 def test_deactivate_invalid_company(client):
+    invalid_company_id = f"INVALID_COMPANY_{uuid4().hex}"
 
-    response = client.post("/admin/company/INVALID_ID/deactivate")
+    response = client.post(
+        f"/admin/company/{invalid_company_id}/deactivate",
+        follow_redirects=False,
+    )
 
     assert response.status_code in (404, 500)

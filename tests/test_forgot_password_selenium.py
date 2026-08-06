@@ -1,6 +1,5 @@
 import pytest
-from pytest_bdd import scenarios, given, when, then
-
+from pytest_bdd import given, scenarios, then, when
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 

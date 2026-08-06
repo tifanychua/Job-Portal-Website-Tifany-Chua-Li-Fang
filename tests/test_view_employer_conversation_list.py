@@ -1,12 +1,12 @@
-import json
 import base64
+import json
 
 from fastapi.testclient import TestClient
 from itsdangerous import TimestampSigner
 from starlette.middleware.sessions import SessionMiddleware
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 client = TestClient(app)
 
@@ -21,9 +21,7 @@ def create_session(data):
     secret_key = None
 
     for middleware in app.user_middleware:
-
         if middleware.cls == SessionMiddleware:
-
             secret_key = middleware.kwargs["secret_key"]
             break
 
@@ -126,15 +124,12 @@ def delete_test_data():
     ]
 
     for collection in collections:
-
         docs = db.collection(collection).stream()
 
         for doc in docs:
-
             data = doc.to_dict()
 
             if data.get("test") is True:
-
                 doc.reference.delete()
 
 
@@ -147,7 +142,6 @@ def delete_test_data():
 def test_view_conversation_list():
 
     try:
-
         create_test_messages()
 
         set_employer_session()
@@ -170,7 +164,6 @@ def test_view_conversation_list():
         assert "name" in data[0]
 
     finally:
-
         delete_test_data()
 
 
@@ -183,7 +176,6 @@ def test_view_conversation_list():
 def test_display_latest_conversation_information():
 
     try:
-
         create_test_messages()
 
         set_employer_session()
@@ -202,7 +194,6 @@ def test_display_latest_conversation_information():
         )
 
     finally:
-
         delete_test_data()
 
 
@@ -215,7 +206,6 @@ def test_display_latest_conversation_information():
 def test_no_conversations_available():
 
     try:
-
         delete_test_data()
 
         set_empty_employer_session()
@@ -229,5 +219,4 @@ def test_no_conversations_available():
         assert data == []
 
     finally:
-
         delete_test_data()

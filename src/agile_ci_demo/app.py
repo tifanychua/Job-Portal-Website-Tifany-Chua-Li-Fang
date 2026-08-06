@@ -1,5 +1,3 @@
-from typing import Dict
-
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
@@ -13,7 +11,7 @@ class Item(BaseModel):
 
 
 # naive in-memory "database" – fine for a teaching/demo app
-_db: Dict[int, Item] = {}
+_db: dict[int, Item] = {}
 
 
 @app.get("/health")

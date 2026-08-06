@@ -1,25 +1,13 @@
-import sys
 import base64
 import json
-
-from pathlib import Path
+from uuid import uuid4
 
 import pytest
-
 from fastapi.testclient import TestClient
-
 from itsdangerous import TimestampSigner
-from job_portal_web.backend.main import app
+
 from job_portal_web.backend.database import db
-
-# ==================================================
-# IMPORT PROJECT
-# ==================================================
-
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-
-sys.path.insert(0, str(PROJECT_ROOT))
-
+from job_portal_web.backend.main import app
 
 # ==================================================
 # CLIENT
@@ -28,8 +16,34 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 @pytest.fixture
 def client():
+    with TestClient(app) as test_client:
+        yield test_client
 
-    return TestClient(app)
+
+# ==================================================
+# UNIQUE TEST DATA
+# ==================================================
+
+
+@pytest.fixture
+def test_data():
+    suffix = uuid4().hex
+
+    data = {
+        "company_id": f"TEST_SEARCH_COMPANY_{suffix}",
+        "interview_ids": [
+            f"TEST_SEARCH_INTERVIEW_1_{suffix}",
+            f"TEST_SEARCH_INTERVIEW_2_{suffix}",
+            f"TEST_SEARCH_INTERVIEW_3_{suffix}",
+        ],
+    }
+
+    yield data
+
+    for interview_id in data["interview_ids"]:
+        db.collection("interviews").document(interview_id).delete()
+
+    db.collection("company").document(data["company_id"]).delete()
 
 
 # ==================================================
@@ -38,47 +52,23 @@ def client():
 
 
 @pytest.fixture
-def authenticated_client(client):
+def authenticated_client(client, test_data):
+    session_data = {
+        "user_type": "employer",
+        "company_id": test_data["company_id"],
+    }
 
-    session_data = {"user_type": "employer", "company_id": "company123"}
-
-    encoded = base64.b64encode(json.dumps(session_data).encode())
+    encoded_session = base64.b64encode(json.dumps(session_data).encode())
 
     signer = TimestampSigner("jobconnect-secret-key")
+    signed_session = signer.sign(encoded_session)
 
-    signed_session = signer.sign(encoded)
-
-    client.cookies.set("session", signed_session.decode())
+    client.cookies.set(
+        "session",
+        signed_session.decode(),
+    )
 
     return client
-
-
-# ==================================================
-# TEST DATA
-# ==================================================
-
-TEST_INTERVIEW_IDS = [
-    "TEST_SEARCH_INTERVIEW_001",
-    "TEST_SEARCH_INTERVIEW_002",
-    "TEST_SEARCH_INTERVIEW_003",
-]
-
-
-def delete_test_data():
-
-    for interview_id in TEST_INTERVIEW_IDS:
-
-        db.collection("interviews").document(interview_id).delete()
-
-
-@pytest.fixture(autouse=True)
-def cleanup():
-
-    delete_test_data()
-
-    yield
-
-    delete_test_data()
 
 
 # ==================================================
@@ -86,106 +76,137 @@ def cleanup():
 # ==================================================
 
 
-def create_interview_records():
+def create_interview_records(test_data):
+    company_id = test_data["company_id"]
+    interview_ids = test_data["interview_ids"]
+
+    db.collection("company").document(company_id).set(
+        {
+            "companyName": "Search Test Company",
+            "email": "search-test@example.com",
+            "status": "Verified",
+            "test": True,
+        }
+    )
 
     records = [
         {
-            "candidateId": "candidate001",
+            "candidateId": f"CANDIDATE_1_{uuid4().hex}",
             "candidateName": "John Tan",
             "position": "Software Developer",
             "stage": "Interview",
             "status": "Scheduled",
-            "companyId": "company123",
+            "companyId": company_id,
+            "date": "2026-08-10",
+            "time": "10:00",
         },
         {
-            "candidateId": "candidate002",
+            "candidateId": f"CANDIDATE_2_{uuid4().hex}",
             "candidateName": "Mary Lee",
             "position": "UI Designer",
             "stage": "Interview",
             "status": "Completed",
-            "companyId": "company123",
+            "companyId": company_id,
+            "date": "2026-08-11",
+            "time": "11:00",
         },
         {
-            "candidateId": "candidate003",
+            "candidateId": f"CANDIDATE_3_{uuid4().hex}",
             "candidateName": "Alex Wong",
             "position": "Backend Developer",
             "stage": "Technical",
             "status": "Cancelled",
-            "companyId": "company123",
+            "companyId": company_id,
+            "date": "2026-08-12",
+            "time": "14:00",
         },
     ]
 
-    for index, record in enumerate(records):
+    for interview_id, record in zip(
+        interview_ids,
+        records,
+        strict=True,
+    ):
+        db.collection("interviews").document(interview_id).set(record)
 
-        db.collection("interviews").document(TEST_INTERVIEW_IDS[index]).set(record)
+    created_documents = [
+        db.collection("interviews").document(interview_id).get() for interview_id in interview_ids
+    ]
 
-
-# ==================================================
-# TEST 1
-# SEARCH MATCHING KEYWORD
-# ==================================================
-
-
-def test_search_interview_records_by_keyword(authenticated_client):
-
-    create_interview_records()
-
-    response = authenticated_client.get(
-        "/employer/interviews/search", params={"keyword": "Software"}
-    )
-
-    assert response.status_code == 200
-
-    data = response.json()
-
-    assert len(data) == 1
-
-    assert data[0]["candidateName"] == "John Tan"
+    assert all(document.exists for document in created_documents)
 
 
 # ==================================================
-# TEST 2
-# SEARCH NO RESULT
+# TEST 1: SEARCH MATCHING KEYWORD
 # ==================================================
 
 
-def test_search_interview_records_with_no_matching_results(authenticated_client):
-
-    create_interview_records()
-
-    response = authenticated_client.get("/employer/interviews/search", params={"keyword": "Doctor"})
-
-    assert response.status_code == 200
-
-    data = response.json()
-
-    assert data == []
-
-
-# ==================================================
-# TEST 3
-# CLEAR SEARCH
-# ==================================================
-
-
-def test_clear_interview_search(authenticated_client):
-
-    create_interview_records()
+def test_search_interview_records_by_keyword(
+    authenticated_client,
+    test_data,
+):
+    create_interview_records(test_data)
 
     response = authenticated_client.get(
         "/employer/interviews/search",
+        params={"keyword": "Software"},
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 200, response.text
 
     data = response.json()
 
-    assert len(data) == 3
+    assert len(data) == 1, data
+    assert data[0]["candidateName"] == "John Tan"
+    assert data[0]["position"] == "Software Developer"
 
-    names = [item["candidateName"] for item in data]
 
-    assert "John Tan" in names
+# ==================================================
+# TEST 2: SEARCH NO RESULT
+# ==================================================
 
-    assert "Mary Lee" in names
 
-    assert "Alex Wong" in names
+def test_search_interview_records_with_no_matching_results(
+    authenticated_client,
+    test_data,
+):
+    create_interview_records(test_data)
+
+    response = authenticated_client.get(
+        "/employer/interviews/search",
+        params={"keyword": "Doctor"},
+    )
+
+    assert response.status_code == 200, response.text
+    assert response.json() == []
+
+
+# ==================================================
+# TEST 3: CLEAR SEARCH
+# ==================================================
+
+
+def test_clear_interview_search(
+    authenticated_client,
+    test_data,
+):
+    create_interview_records(test_data)
+
+    response = authenticated_client.get(
+        "/employer/interviews/search",
+        params={"keyword": ""},
+    )
+
+    assert response.status_code == 200, response.text
+
+    data = response.json()
+
+    assert len(data) == 3, data
+
+    names = {item["candidateName"] for item in data}
+
+    assert names == {
+        "John Tan",
+        "Mary Lee",
+        "Alex Wong",
+    }

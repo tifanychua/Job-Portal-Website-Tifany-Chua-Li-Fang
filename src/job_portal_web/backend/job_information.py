@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Request, HTTPException
+import os
+
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.templating import Jinja2Templates
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 from .database import db
-
-import os
 
 router = APIRouter()
 
@@ -130,15 +130,12 @@ def job_detail(request: Request, job_id: str):
     user = None
 
     if request.session.get("user_type") == "job_seeker":
-
         uid = request.session.get("applicant_id")
 
         if uid:
-
             doc = db.collection("job_seeker").document(uid).get()
 
             if doc.exists:
-
                 user = doc.to_dict()
 
     job_doc = db.collection("job_list").document(job_id).get()
@@ -172,14 +169,12 @@ def job_detail(request: Request, job_id: str):
     )
 
     for app in applications:
-
         application = app.to_dict()
 
         if (
             application.get("job_seeker_id") == job_seeker_id
             and application.get("status") == "Submitted"
         ):
-
             application_status = "Submitted"
             application_id = app.id
 
@@ -196,14 +191,12 @@ def job_detail(request: Request, job_id: str):
     query = db.collection("job_list")
 
     if category:
-
         query = query.where(filter=FieldFilter("category", "==", category))
         query = query.where(filter=FieldFilter("status", "==", "Active"))
 
     docs = query.limit(4).stream()
 
     for doc in docs:
-
         if doc.id == job_id:
             continue
 
@@ -218,13 +211,11 @@ def job_detail(request: Request, job_id: str):
         sim_company = _find_company(sim.get("company_id"))
 
         if sim_company:
-
             sim["companyName"] = sim_company.get("companyName", "Unknown")
 
             sim["company_logo"] = sim_company.get("logo", "default.jpg")
 
         else:
-
             sim["companyName"] = "Unknown"
 
             sim["company_logo"] = "default.jpg"

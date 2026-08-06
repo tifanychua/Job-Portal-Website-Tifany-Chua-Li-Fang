@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import pytest
-
 from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # Test Client
@@ -115,7 +114,6 @@ scenarios("features/deleteEducation.feature")
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None

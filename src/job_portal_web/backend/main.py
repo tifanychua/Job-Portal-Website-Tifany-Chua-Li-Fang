@@ -1,6 +1,7 @@
+import os
 from pathlib import Path
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -14,17 +15,19 @@ from .helper import (
 
 # Routers
 from .auth import router as auth_router
-from .interview import router as interview_router
-from .applicant import router as applicant_router
 from .chat import router as chat_router
-from .messages import router as messages_router
-from .jobs import router as jobs_router
+from .database import db
 from .homepage import router as home_router
-from .job_information import router as job_information_router
-from .job_apply import router as job_apply_router
+from .interview import router as interview_router
 from .job_application import router as job_application_router
+from .job_apply import router as job_apply_router
+from .job_information import router as job_information_router
+from .jobs import router as jobs_router
+from .messages import router as messages_router
+from .routes.admin import router as admin_router
+from .routes.companyProfile import router as companyProfile_router
+from .routes.editCompanyProfile import router as editCompanyProfile_router
 from .routes.editProfile import router as editProfile_router
-from .routes.jobSeekerProfile import router as jobSeekerProfile_router
 from .routes.employer import router as employer_router
 from .routes.employerApplication import router as employer_application_router
 from .routes.employerCredit import router as employer_credit_router
@@ -79,11 +82,9 @@ def get_current_user(request: Request):
 
     # Job seeker
     if user_type == "job_seeker":
-
         user_id = request.session.get("applicant_id")
 
         if user_id:
-
             doc = db.collection("job_seeker").document(user_id).get()
 
             if doc.exists:
@@ -91,11 +92,9 @@ def get_current_user(request: Request):
 
     # Employer
     elif user_type == "employer":
-
         company_id = request.session.get("company_id")
 
         if company_id:
-
             doc = db.collection("company").document(company_id).get()
 
             if doc.exists:
@@ -227,15 +226,12 @@ def messages_page(request: Request):
         return RedirectResponse("/login", status_code=303)
 
     if user_type == "employer":
-
         user_id = request.session.get("company_id")
 
     elif user_type == "job_seeker":
-
         user_id = request.session.get("applicant_id")
 
     else:
-
         raise HTTPException(status_code=403, detail="Invalid user type")
 
     return render_template(
@@ -292,7 +288,6 @@ def chat_page(request: Request):
 def my_interviews_page(request: Request):
 
     if request.session.get("user_type") != "job_seeker":
-
         return RedirectResponse("/login", status_code=303)
 
     return render_template(request, "applicant_interview.html", {"active_page": "interviews"})
@@ -319,7 +314,6 @@ def schedule_list_page(request: Request):
 # ==================================================
 
 if __name__ == "__main__":
-
     import uvicorn
 
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)

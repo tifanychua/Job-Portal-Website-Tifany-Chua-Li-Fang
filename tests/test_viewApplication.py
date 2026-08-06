@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 import pytest
-
 from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # Test Client
@@ -78,7 +76,6 @@ def test_applicant_list_displayed(client):
     application_docs = db.collection("application").stream()
 
     for application_doc in application_docs:
-
         application = application_doc.to_dict()
 
         job_id = application.get("job_id")
@@ -94,7 +91,6 @@ def test_applicant_list_displayed(client):
         job = job_doc.to_dict()
 
         if job.get("company_id") == COMPANY_ID:
-
             applications.append(application)
 
     assert len(applications) > 0
@@ -129,7 +125,6 @@ scenarios("features/viewApplication.feature")
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -177,7 +172,6 @@ def verify_applicant_list(context):
     application_docs = db.collection("application").stream()
 
     for application_doc in application_docs:
-
         application = application_doc.to_dict()
 
         job_id = application.get("job_id")
@@ -193,7 +187,6 @@ def verify_applicant_list(context):
         job = job_doc.to_dict()
 
         if job.get("company_id") == COMPANY_ID:
-
             applications.append(application)
 
     assert len(applications) > 0

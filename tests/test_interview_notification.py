@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import pytest
-
 from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
+from pytest_bdd import given, scenarios, then, when
 
 from job_portal_web.backend.main import app
 
@@ -31,7 +30,6 @@ def client():
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -111,22 +109,18 @@ def save_interview(client, context, mocker):
         collection = mocker.Mock()
 
         if name == "interviews":
-
             mock_doc_ref = mocker.Mock()
             mock_doc_ref.id = "mock_interview_id"
 
             collection.add.return_value = ("unused", mock_doc_ref)
 
         elif name == "applications":
-
             collection.document.return_value.get.return_value = mock_application
 
         elif name == "company":
-
             collection.document.return_value.get.return_value = mock_company
 
         elif name == "job_seeker":
-
             collection.document.return_value.get.return_value = mock_seeker
 
         return collection

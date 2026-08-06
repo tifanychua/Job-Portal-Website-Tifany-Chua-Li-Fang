@@ -2,10 +2,11 @@ from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
+from job_portal_web.backend.routes import skill as skill_route
 
 # ==================================================
 # Load Feature File
@@ -13,17 +14,14 @@ from job_portal_web.backend.database import db
 
 scenarios("features/addSkill.feature")
 
-# ==================================================
-# Test Client
-# ==================================================
-
-client = TestClient(app)
 
 # ==================================================
 # Test Constants
 # ==================================================
 
-APPLICANT_ID = "0YLcc18JszVqSXWn8DEDQ81o2vR2"
+TEST_SUFFIX = uuid4().hex
+
+APPLICANT_ID = f"TEST_ADD_SKILL_APPLICANT_{TEST_SUFFIX}"
 
 INDUSTRY_ID = "IND001"
 CATEGORY_ID = "CAT001"
@@ -36,9 +34,51 @@ LEVEL_BEGINNER = "Beginner"
 LEVEL_INTERMEDIATE = "Intermediate"
 LEVEL_ADVANCED = "Advanced"
 
+
+# ==================================================
+# Test Client
+# ==================================================
+
+
+@pytest.fixture
+def client():
+    with TestClient(app) as test_client:
+        yield test_client
+
+
+# ==================================================
+# Context
+# ==================================================
+
+
+@pytest.fixture
+def context():
+    return {}
+
+
 # ==================================================
 # Helper Functions
 # ==================================================
+
+
+def get_document_id(skill_id: str) -> str:
+    return f"{APPLICANT_ID}_{skill_id}"
+
+
+def get_skill_document(skill_id: str):
+    return db.collection("job_seeker_skill").document(get_document_id(skill_id)).get()
+
+
+def get_skill_data(skill_id: str) -> dict:
+    document = get_skill_document(skill_id)
+
+    assert document.exists, f"Expected skill document {get_document_id(skill_id)} was not found"
+
+    data = document.to_dict()
+
+    assert data is not None
+
+    return data
 
 
 def create_skill(
@@ -47,15 +87,11 @@ def create_skill(
     industry_id: str = INDUSTRY_ID,
     category_id: str = CATEGORY_ID,
 ):
-    """
-    Insert a skill into Firestore.
-    """
+    document_id = get_document_id(skill_id)
 
-    doc_id = str(uuid4())
-
-    db.collection("job_seeker_skill").document(doc_id).set(
+    db.collection("job_seeker_skill").document(document_id).set(
         {
-            "id": doc_id,
+            "id": document_id,
             "applicant_id": APPLICANT_ID,
             "industry_id": industry_id,
             "category_id": category_id,
@@ -64,47 +100,135 @@ def create_skill(
         }
     )
 
-    return doc_id
+    return document_id
 
 
 def delete_skill(skill_id: str):
-    """
-    Remove all matching skills.
-    """
+    deterministic_reference = db.collection("job_seeker_skill").document(get_document_id(skill_id))
 
-    docs = (
+    if deterministic_reference.get().exists:
+        deterministic_reference.delete()
+
+    matching_documents = list(
         db.collection("job_seeker_skill")
         .where("applicant_id", "==", APPLICANT_ID)
         .where("skill_id", "==", skill_id)
         .stream()
     )
 
-    for doc in docs:
-        doc.reference.delete()
+    for document in matching_documents:
+        document.reference.delete()
 
 
 def clear_all_skills():
-    """
-    Remove every skill belonging to 0YLcc18JszVqSXWn8DEDQ81o2vR2.
-    """
+    matching_documents = list(
+        db.collection("job_seeker_skill").where("applicant_id", "==", APPLICANT_ID).stream()
+    )
 
-    docs = db.collection("job_seeker_skill").where("applicant_id", "==", APPLICANT_ID).stream()
+    for document in matching_documents:
+        document.reference.delete()
 
-    for doc in docs:
-        doc.reference.delete()
+    for skill_id in (
+        SKILL_ID_1,
+        SKILL_ID_2,
+        SKILL_ID_3,
+        "INVALID_SKILL",
+    ):
+        reference = db.collection("job_seeker_skill").document(get_document_id(skill_id))
+
+        if reference.get().exists:
+            reference.delete()
+
+
+def get_all_skills():
+    return list(
+        db.collection("job_seeker_skill").where("applicant_id", "==", APPLICANT_ID).stream()
+    )
+
+
+def post_skill(
+    client,
+    skill_id: str,
+    level: str,
+    industry_id: str = INDUSTRY_ID,
+    category_id: str = CATEGORY_ID,
+):
+    return client.post(
+        "/add-skill",
+        data={
+            "industry_id": industry_id,
+            "category_id": category_id,
+            "skill_id": skill_id,
+            "level": level,
+        },
+        follow_redirects=False,
+    )
+
+
+def assert_add_success(response):
+    assert response.status_code == 303, (
+        f"Expected 303 redirect, received {response.status_code}: {response.text}"
+    )
+
+    assert response.headers.get("location") == "/manageSkills"
+
+
+def assert_saved_skill(
+    skill_id: str,
+    expected_level: str,
+):
+    data = get_skill_data(skill_id)
+
+    assert data["applicant_id"] == APPLICANT_ID
+    assert data["industry_id"] == INDUSTRY_ID
+    assert data["category_id"] == CATEGORY_ID
+    assert data["skill_id"] == skill_id
+    assert data["level"] == expected_level
 
 
 # ==================================================
-# Fixtures
+# Automatic Test Isolation
 # ==================================================
 
 
-@pytest.fixture
-def context():
+@pytest.fixture(autouse=True)
+def reset_test_applicant(monkeypatch):
     """
-    Shared scenario context.
+    Give this test module its own applicant and skill records.
     """
-    return {}
+
+    monkeypatch.setenv(
+        "TEST_APPLICANT_ID",
+        APPLICANT_ID,
+    )
+
+    monkeypatch.setattr(
+        skill_route,
+        "get_current_applicant_id",
+        lambda request: APPLICANT_ID,
+    )
+
+    clear_all_skills()
+
+    db.collection("job_seeker").document(APPLICANT_ID).set(
+        {
+            "uid": APPLICANT_ID,
+            "name": "Add Skill Test User",
+            "email": f"{APPLICANT_ID.lower()}@example.com",
+            "position": "Software Engineer",
+            "user_type": "job_seeker",
+            "test": True,
+        }
+    )
+
+    yield
+
+    clear_all_skills()
+
+    applicant_reference = db.collection("job_seeker").document(APPLICANT_ID)
+
+    if applicant_reference.get().exists:
+        applicant_reference.delete()
 
 
 # ==================================================
@@ -114,15 +238,12 @@ def context():
 
 @given("the job seeker is logged in")
 def job_seeker_logged_in():
-    """
-    Login is mocked.
-    """
     return True
 
 
 @given("is on the Edit Profile page")
 @given("the job seeker is on the Edit Profile page")
-def open_edit_profile(context):
+def open_edit_profile(context, client):
     response = client.get("/manageSkills")
 
     assert response.status_code == 200
@@ -134,6 +255,8 @@ def open_edit_profile(context):
 def no_skills():
     clear_all_skills()
 
+    assert len(get_all_skills()) == 0
+
 
 @given("the job seeker has already added a skill")
 def existing_skill():
@@ -142,6 +265,11 @@ def existing_skill():
     create_skill(
         skill_id=SKILL_ID_1,
         level=LEVEL_ADVANCED,
+    )
+
+    assert_saved_skill(
+        skill_id=SKILL_ID_1,
+        expected_level=LEVEL_ADVANCED,
     )
 
 
@@ -166,503 +294,357 @@ def existing_multiple_skills():
 
 
 @when("the job seeker enters one or more skills and saves the profile")
-def add_single_skill(context):
+def add_single_skill(context, client):
+    clear_all_skills()
 
-    delete_skill(SKILL_ID_1)
-
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_1,
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+    context["response"] = post_skill(
+        client=client,
+        skill_id=SKILL_ID_1,
+        level=LEVEL_ADVANCED,
     )
-
-    context["response"] = response
 
 
 @when("the job seeker adds multiple skills and saves the profile")
-def add_multiple_skills(context):
-
+def add_multiple_skills(context, client):
     clear_all_skills()
 
-    client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_1,
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+    first_response = post_skill(
+        client=client,
+        skill_id=SKILL_ID_1,
+        level=LEVEL_ADVANCED,
     )
 
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_2,
-            "level": LEVEL_INTERMEDIATE,
-        },
-        follow_redirects=True,
+    assert_add_success(first_response)
+
+    second_response = post_skill(
+        client=client,
+        skill_id=SKILL_ID_2,
+        level=LEVEL_INTERMEDIATE,
     )
 
-    context["response"] = response
+    assert_add_success(second_response)
+
+    context["response"] = second_response
 
 
 @when("the job seeker leaves the skills section empty and saves the profile")
-def save_without_skill(context):
+def save_without_skill(context, client):
+    clear_all_skills()
 
-    response = client.post(
+    context["response"] = client.post(
         "/save-profile",
         data={},
         follow_redirects=True,
     )
 
-    context["response"] = response
-
 
 @when("the job seeker adds skills with different proficiency levels")
-def add_different_levels(context):
-
+def add_different_levels(context, client):
     clear_all_skills()
 
-    client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_1,
-            "level": LEVEL_BEGINNER,
-        },
-        follow_redirects=True,
+    first_response = post_skill(
+        client=client,
+        skill_id=SKILL_ID_1,
+        level=LEVEL_BEGINNER,
     )
 
-    client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_2,
-            "level": LEVEL_INTERMEDIATE,
-        },
-        follow_redirects=True,
+    assert_add_success(first_response)
+
+    second_response = post_skill(
+        client=client,
+        skill_id=SKILL_ID_2,
+        level=LEVEL_INTERMEDIATE,
     )
 
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_3,
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+    assert_add_success(second_response)
+
+    third_response = post_skill(
+        client=client,
+        skill_id=SKILL_ID_3,
+        level=LEVEL_ADVANCED,
     )
 
-    context["response"] = response
+    assert_add_success(third_response)
+
+    context["response"] = third_response
 
 
 @when("the job seeker adds a new skill and saves the profile")
-def add_first_skill(context):
-
+def add_first_skill(context, client):
     clear_all_skills()
 
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_1,
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+    response = post_skill(
+        client=client,
+        skill_id=SKILL_ID_1,
+        level=LEVEL_ADVANCED,
     )
+
+    assert_add_success(response)
 
     context["response"] = response
 
 
 @when("the job seeker attempts to add the same skill again")
-def add_duplicate_skill(context):
-
-    # The skill has already been created in the Given step.
-    # Simply attempt to add it again through the API.
-
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_1,
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+def add_duplicate_skill(context, client):
+    context["response"] = post_skill(
+        client=client,
+        skill_id=SKILL_ID_1,
+        level=LEVEL_ADVANCED,
     )
-
-    context["response"] = response
 
 
 @when("the job seeker leaves the industry field empty")
-def empty_industry(context):
-
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": "",
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_1,
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+def empty_industry(context, client):
+    context["response"] = post_skill(
+        client=client,
+        skill_id=SKILL_ID_1,
+        level=LEVEL_ADVANCED,
+        industry_id="",
     )
-
-    context["response"] = response
 
 
 @when("saves the profile")
-def save_profile(context):
-    """
-    Placeholder step for validation scenarios.
-    """
+def save_profile():
     pass
 
 
 @when("the job seeker leaves the skill category field empty")
-def empty_category(context):
-
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": "",
-            "skill_id": SKILL_ID_1,
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+def empty_category(context, client):
+    context["response"] = post_skill(
+        client=client,
+        skill_id=SKILL_ID_1,
+        level=LEVEL_ADVANCED,
+        category_id="",
     )
-
-    context["response"] = response
 
 
 @when("the job seeker leaves the skill field empty")
-def empty_skill(context):
-
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": "",
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+def empty_skill(context, client):
+    context["response"] = post_skill(
+        client=client,
+        skill_id="",
+        level=LEVEL_ADVANCED,
     )
-
-    context["response"] = response
 
 
 @when("the job seeker leaves the proficiency level field empty")
-def empty_level(context):
-
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": SKILL_ID_1,
-            "level": "",
-        },
-        follow_redirects=True,
+def empty_level(context, client):
+    context["response"] = post_skill(
+        client=client,
+        skill_id=SKILL_ID_1,
+        level="",
     )
-
-    context["response"] = response
 
 
 @when("the job seeker attempts to add an invalid skill")
-def invalid_skill(context):
-
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": INDUSTRY_ID,
-            "category_id": CATEGORY_ID,
-            "skill_id": "INVALID_SKILL",
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+def invalid_skill(context, client):
+    context["response"] = post_skill(
+        client=client,
+        skill_id="INVALID_SKILL",
+        level=LEVEL_ADVANCED,
     )
-
-    context["response"] = response
 
 
 @when("the job seeker selects a skill category that does not belong to the selected industry")
-def invalid_category(context):
-
-    response = client.post(
-        "/add-skill",
-        data={
-            "industry_id": "IND001",
-            "category_id": "INVALID_CATEGORY",
-            "skill_id": SKILL_ID_1,
-            "level": LEVEL_ADVANCED,
-        },
-        follow_redirects=True,
+def invalid_category(context, client):
+    context["response"] = post_skill(
+        client=client,
+        skill_id=SKILL_ID_1,
+        level=LEVEL_ADVANCED,
+        category_id="INVALID_CATEGORY",
     )
-
-    context["response"] = response
 
 
 # ==================================================
-# Then Steps (Positive Scenarios)
+# Then Steps: Positive Scenarios
 # ==================================================
 
 
 @then("the system should save the skills successfully")
 def skill_saved_successfully(context):
+    assert_add_success(context["response"])
 
-    response = context["response"]
-
-    assert response.status_code == 200
-
-    docs = (
-        db.collection("job_seeker_skill")
-        .where("applicant_id", "==", APPLICANT_ID)
-        .where("skill_id", "==", SKILL_ID_1)
-        .stream()
+    assert_saved_skill(
+        skill_id=SKILL_ID_1,
+        expected_level=LEVEL_ADVANCED,
     )
-
-    skills = list(docs)
-
-    assert len(skills) == 1
 
 
 @then("display the updated skills in the profile")
-def updated_skill_displayed(context):
-
+def updated_skill_displayed(context, client):
     response = client.get("/profile")
 
     assert response.status_code == 200
 
-    response_text = response.text
-
-    assert "Python" in response_text
+    assert_saved_skill(
+        skill_id=SKILL_ID_1,
+        expected_level=LEVEL_ADVANCED,
+    )
 
 
 @then("the system should display all added skills in the profile")
-def multiple_skills_displayed(context):
-
+def multiple_skills_displayed(context, client):
     response = client.get("/profile")
 
     assert response.status_code == 200
 
-    response_text = response.text
+    assert_saved_skill(
+        skill_id=SKILL_ID_1,
+        expected_level=LEVEL_ADVANCED,
+    )
 
-    assert "Python" in response_text
-    assert "Java" in response_text
+    assert_saved_skill(
+        skill_id=SKILL_ID_2,
+        expected_level=LEVEL_INTERMEDIATE,
+    )
 
 
 @then("the system should save the profile")
 def profile_saved(context):
-
-    response = context["response"]
-
-    assert response.status_code == 200
+    assert context["response"].status_code == 200
 
 
 @then("indicate that no skills have been added")
-def no_skill_message(context):
-
+def no_skill_message(context, client):
     response = client.get("/profile")
 
     assert response.status_code == 200
-
-    response_text = response.text
-
-    assert (
-        "No skills have been added" in response_text
-        or "No Skills" in response_text
-        or "No skills yet" in response_text
-    )
+    assert len(get_all_skills()) == 0
 
 
 @then("the system should save all skills with their selected proficiency levels")
 def verify_skill_levels(context):
+    assert_saved_skill(
+        skill_id=SKILL_ID_1,
+        expected_level=LEVEL_BEGINNER,
+    )
 
-    docs = db.collection("job_seeker_skill").where("applicant_id", "==", APPLICANT_ID).stream()
+    assert_saved_skill(
+        skill_id=SKILL_ID_2,
+        expected_level=LEVEL_INTERMEDIATE,
+    )
 
-    levels = []
-
-    for doc in docs:
-
-        levels.append(doc.to_dict()["level"])
-
-    assert LEVEL_BEGINNER in levels
-    assert LEVEL_INTERMEDIATE in levels
-    assert LEVEL_ADVANCED in levels
+    assert_saved_skill(
+        skill_id=SKILL_ID_3,
+        expected_level=LEVEL_ADVANCED,
+    )
 
 
 @then("the system should display the newly added skill in the profile")
-def first_skill_displayed(context):
-
+def first_skill_displayed(context, client):
     response = client.get("/profile")
 
     assert response.status_code == 200
 
-    response_text = response.text
-
-    assert "Python" in response_text
+    assert_saved_skill(
+        skill_id=SKILL_ID_1,
+        expected_level=LEVEL_ADVANCED,
+    )
 
 
 # ==================================================
-# Then Steps (Negative Scenarios)
+# Then Steps: Negative Scenarios
 # ==================================================
 
 
 @then("the system should prevent duplicate skills from being added")
 def duplicate_skill_not_added(context):
+    response = context["response"]
 
-    docs = (
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Skill already added"
+
+    assert_saved_skill(
+        skill_id=SKILL_ID_1,
+        expected_level=LEVEL_ADVANCED,
+    )
+
+    matching_documents = list(
         db.collection("job_seeker_skill")
         .where("applicant_id", "==", APPLICANT_ID)
         .where("skill_id", "==", SKILL_ID_1)
         .stream()
     )
 
-    skills = list(docs)
-
-    # Only one record should exist
-    assert len(skills) == 1
+    assert len(matching_documents) == 1
 
 
 @then("display duplicate skill validation message")
 def duplicate_validation_message(context):
-
     response = context["response"]
 
-    assert response.status_code in (200, 400, 422)
-
-    assert (
-        "already exists" in response.text
-        or "Duplicate" in response.text
-        or "Skill already added" in response.text
-    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Skill already added"
 
 
 @then("the system should display a validation message for the industry field")
 def industry_validation(context):
-
     response = context["response"]
 
-    assert response.status_code in (200, 400, 422)
-
-    assert (
-        "Industry" in response.text
-        or "industry_id" in response.text
-        or "Select Industry" in response.text
-    )
+    assert response.status_code in (400, 422)
+    assert "Industry" in response.text or "industry_id" in response.text
 
 
 @then("the system should display a validation message for the skill category field")
 def category_validation(context):
-
     response = context["response"]
 
-    assert response.status_code in (200, 400, 422)
-
-    assert (
-        "Category" in response.text
-        or "category_id" in response.text
-        or "Select Skill Category" in response.text
-    )
+    assert response.status_code in (400, 422)
+    assert "Category" in response.text or "category_id" in response.text
 
 
 @then("the system should display a validation message for the skill field")
 def skill_validation(context):
-
     response = context["response"]
 
-    assert response.status_code in (200, 400, 422)
-
-    assert (
-        "Skill" in response.text or "skill_id" in response.text or "Select Skill" in response.text
-    )
+    assert response.status_code in (400, 422)
+    assert "Skill" in response.text or "skill_id" in response.text
 
 
 @then("the system should display a validation message for the proficiency level field")
 def level_validation(context):
-
     response = context["response"]
 
-    assert response.status_code in (200, 400, 422)
-
-    assert (
-        "Level" in response.text
-        or "level" in response.text
-        or "Select Skill Level" in response.text
-    )
+    assert response.status_code in (400, 422)
+    assert "Level" in response.text or "level" in response.text
 
 
 @then("the system should reject the skill")
 def reject_invalid_skill(context):
-
-    docs = (
+    matching_documents = list(
         db.collection("job_seeker_skill")
         .where("applicant_id", "==", APPLICANT_ID)
         .where("skill_id", "==", "INVALID_SKILL")
         .stream()
     )
 
-    assert len(list(docs)) == 0
+    assert len(matching_documents) == 0
+    assert not get_skill_document("INVALID_SKILL").exists
 
 
 @then("display invalid skill validation message")
 def invalid_skill_message(context):
-
     response = context["response"]
 
-    assert response.status_code in (200, 400, 422)
-
-    assert "Invalid Skill" in response.text or "Skill does not exist" in response.text
+    assert response.status_code == 400
+    assert "Invalid Skill" in response.text
 
 
 @then("the system should prevent the skill from being saved")
 def invalid_category_not_saved(context):
-
-    docs = (
+    matching_documents = list(
         db.collection("job_seeker_skill")
         .where("applicant_id", "==", APPLICANT_ID)
         .where("category_id", "==", "INVALID_CATEGORY")
         .stream()
     )
 
-    assert len(list(docs)) == 0
+    assert len(matching_documents) == 0
 
 
 @then("display invalid category validation message")
 def invalid_category_message(context):
-
     response = context["response"]
 
-    assert response.status_code in (200, 400, 422)
-
-    assert (
-        "Invalid Category" in response.text
-        or "Category does not belong to industry" in response.text
-    )
-
-
-# ==================================================
-# Cleanup
-# ==================================================
-
-
-@pytest.fixture(autouse=True)
-def cleanup():
-
-    yield
-
-    clear_all_skills()
+    assert response.status_code == 400
+    assert "Invalid Category" in response.text

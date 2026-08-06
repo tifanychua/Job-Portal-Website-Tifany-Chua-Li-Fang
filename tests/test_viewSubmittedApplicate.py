@@ -1,9 +1,9 @@
-from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend import job_application
+from job_portal_web.backend.main import app
 
 # --------------------------------------------------
 # Fake Login
@@ -58,11 +58,9 @@ def test_view_submitted_application_list(client: TestClient):
     response = client.get("/application")
 
     if response.status_code == 200:
-
         print("✅ SUCCESS: Submitted application list displayed")
 
     else:
-
         print("❌ FAILED:", response.status_code, response.text)
 
     assert response.status_code == 200
@@ -78,7 +76,6 @@ def test_view_submitted_application_details(client: TestClient):
     response = client.get(f"/application/{APPLICATION_ID}")
 
     if response.status_code == 200:
-
         data = response.text.lower()
 
         required_fields = ["application", "status"]
@@ -86,22 +83,18 @@ def test_view_submitted_application_details(client: TestClient):
         missing = []
 
         for field in required_fields:
-
             if field not in data:
                 missing.append(field)
 
         if not missing:
-
             print("✅ SUCCESS: Application details and status displayed")
 
         else:
-
             print(f"❌ FAILED: Missing {missing}")
 
         assert len(missing) == 0
 
     else:
-
         print("❌ FAILED:", response.status_code, response.text)
 
     assert response.status_code == 200
@@ -120,7 +113,6 @@ scenarios("features/viewSubmittedApplicate.feature")
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -164,16 +156,13 @@ def verify_application_details(context):
     missing = []
 
     for field in required_fields:
-
         if field not in data:
             missing.append(field)
 
     if missing:
-
         print(f"❌ FAILED: Missing {missing}")
 
     else:
-
         print("✅ SUCCESS: Application details and status displayed")
 
     assert len(missing) == 0

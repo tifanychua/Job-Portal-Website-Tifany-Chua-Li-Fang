@@ -1,16 +1,17 @@
 # tests/test_jobs_search_filter.py - COMPLETE FIXED VERSION
 
-from fastapi.testclient import TestClient
 import pytest
+from fastapi.testclient import TestClient
 from pytest_bdd import (
-    scenarios,
     given,
-    when,
-    then,
     parsers,
+    scenarios,
+    then,
+    when,
 )
-from job_portal_web.backend.main import app
+
 from job_portal_web.backend.jobs import apply_search
+from job_portal_web.backend.main import app
 
 client = TestClient(app)
 
@@ -146,7 +147,6 @@ def _execute_combined_search(search_context):
 @given("the job portal contains active job postings")
 def active_job_postings(search_context):
     """Prepare the database with active job postings"""
-    pass
 
 
 @given("the job seeker is on the job search page")
@@ -603,9 +603,9 @@ def verify_combined_category_benefit(search_context, benefit):
     # Verify each result
     for job in search_context["search_results"]:
         # Check category
-        assert (
-            job["category"] == "Information Technology"
-        ), f"Expected 'Information Technology', got '{job['category']}'"
+        assert job["category"] == "Information Technology", (
+            f"Expected 'Information Technology', got '{job['category']}'"
+        )
         # Check benefit
         assert benefit in job["benefits"], f"Expected '{benefit}' in {job['benefits']}"
 

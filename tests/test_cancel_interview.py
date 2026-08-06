@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-import pytest
+from uuid import uuid4
 
+import pytest
 from fastapi.testclient import TestClient
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # CLIENT
@@ -14,40 +15,24 @@ from job_portal_web.backend.database import db
 
 @pytest.fixture
 def client():
-
-    return TestClient(app)
-
-
-# ==================================================
-# TEST DATA
-# ==================================================
-
-TEST_INTERVIEW_ID = "TEST_CANCEL_INTERVIEW_001"
-
-
-def delete_test_interview():
-
-    db.collection("interviews").document(TEST_INTERVIEW_ID).delete()
-
-
-@pytest.fixture(autouse=True)
-def cleanup():
-
-    delete_test_interview()
-
-    yield
-
-    delete_test_interview()
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 # ==================================================
-# CREATE TEST INTERVIEW
+# TEST INTERVIEW FIXTURE
 # ==================================================
 
 
-def create_test_interview():
+@pytest.fixture
+def interview_id():
+    """
+    Create a unique interview for each test and remove it afterwards.
+    """
 
-    db.collection("interviews").document(TEST_INTERVIEW_ID).set(
+    test_interview_id = f"TEST_CANCEL_{uuid4()}"
+
+    db.collection("interviews").document(test_interview_id).set(
         {
             "candidateId": "123",
             "companyId": "C000001",
@@ -61,10 +46,13 @@ def create_test_interview():
             "meetingLink": "https://meet.google.com/test",
             "notes": "Prepare documents",
             "status": "Scheduled",
+            "applicantResponse": "Pending",
         }
     )
 
-    return TEST_INTERVIEW_ID
+    yield test_interview_id
+
+    db.collection("interviews").document(test_interview_id).delete()
 
 
 # ==================================================
@@ -72,7 +60,7 @@ def create_test_interview():
 # ==================================================
 
 
-def test_cancel_interview_success(client):
+def test_cancel_interview_success(client, interview_id):
     """
     Given the employer has a scheduled interview
 
@@ -81,17 +69,20 @@ def test_cancel_interview_success(client):
     Then the interview status should become Cancelled
     """
 
-    interview_id = create_test_interview()
-
     response = client.put(f"/api/interviews/{interview_id}/cancel")
 
     assert response.status_code == 200
+    assert response.json()["message"] == "Interview cancelled successfully"
 
-    assert response.json()["message"] == ("Interview cancelled successfully")
+    document = db.collection("interviews").document(interview_id).get()
 
-    interview = db.collection("interviews").document(interview_id).get().to_dict()
+    assert document.exists
 
+    interview = document.to_dict()
+
+    assert interview is not None
     assert interview["status"] == "Cancelled"
+    assert interview["applicantResponse"] == "Cancelled"
 
 
 # ==================================================
@@ -99,7 +90,7 @@ def test_cancel_interview_success(client):
 # ==================================================
 
 
-def test_cancelled_status_saved(client):
+def test_cancelled_status_saved(client, interview_id):
     """
     Given the employer cancelled an interview
 
@@ -108,15 +99,19 @@ def test_cancelled_status_saved(client):
     Then the cancelled status should persist
     """
 
-    interview_id = create_test_interview()
-
     response = client.put(f"/api/interviews/{interview_id}/cancel")
 
     assert response.status_code == 200
 
-    saved_interview = db.collection("interviews").document(interview_id).get().to_dict()
+    document = db.collection("interviews").document(interview_id).get()
 
+    assert document.exists
+
+    saved_interview = document.to_dict()
+
+    assert saved_interview is not None
     assert saved_interview["status"] == "Cancelled"
+    assert saved_interview["applicantResponse"] == "Cancelled"
 
 
 # ==================================================
@@ -128,11 +123,13 @@ def test_cancel_invalid_interview(client):
     """
     Given the interview does not exist
 
-    When employer cancels the interview
+    When the employer cancels the interview
 
-    Then system should return 404
+    Then the system should return 404
     """
 
-    response = client.put("/api/interviews/INVALID_ID/cancel")
+    invalid_interview_id = f"INVALID_CANCEL_{uuid4()}"
+
+    response = client.put(f"/api/interviews/{invalid_interview_id}/cancel")
 
     assert response.status_code == 404

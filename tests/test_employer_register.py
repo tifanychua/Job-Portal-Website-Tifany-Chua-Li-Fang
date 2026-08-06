@@ -1,7 +1,8 @@
-from pytest_bdd import scenarios, given, when, then
-from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
 from job_portal_web.backend.main import app
 
@@ -172,7 +173,6 @@ def register_success(context, client):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as mock_verify,
         patch("job_portal_web.backend.auth.db") as mock_db,
     ):
-
         mock_verify.return_value = {"uid": "company123", "email": "company@gmail.com"}
 
         document = setup_firestore(mock_db)
@@ -186,7 +186,6 @@ def register_success(context, client):
 def register_existing_email(context, client):
 
     with patch("job_portal_web.backend.auth.auth.verify_id_token") as mock_verify:
-
         mock_verify.side_effect = Exception("Email address already exists")
 
         context.response = client.post("/firebase-register/employer", json=valid_employer_data())
@@ -216,7 +215,6 @@ def registration_completed(context, client):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as mock_verify,
         patch("job_portal_web.backend.auth.db") as mock_db,
     ):
-
         mock_verify.return_value = {"uid": "company123", "email": "company@gmail.com"}
 
         document = setup_firestore(mock_db)

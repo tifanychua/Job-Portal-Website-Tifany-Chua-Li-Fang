@@ -1,5 +1,6 @@
-from .database import db
 from fastapi import Request
+
+from .database import db
 
 
 def get_company(request: Request):

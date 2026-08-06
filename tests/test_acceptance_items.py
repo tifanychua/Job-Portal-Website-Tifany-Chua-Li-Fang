@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Dict
-
 import pytest
 from fastapi.testclient import TestClient
 from hypothesis import given as hypothesis_given
 from hypothesis import strategies as st
-from pytest_bdd import given as bdd_given, parsers, scenarios, then as bdd_then, when as bdd_when
+from pytest_bdd import given as bdd_given
+from pytest_bdd import parsers, scenarios
+from pytest_bdd import then as bdd_then
+from pytest_bdd import when as bdd_when
 
 from agile_ci_demo.app import app, reset_db
 
@@ -233,7 +234,7 @@ def context() -> Context:
 
 
 @bdd_given("the API is running", target_fixture="api_is_running")
-def api_is_running(client: TestClient, context: Context) -> Dict[str, object]:
+def api_is_running(client: TestClient, context: Context) -> dict[str, object]:
     """
     BDD Given step: ensure we have a client and clean DB.
 
@@ -247,7 +248,7 @@ def api_is_running(client: TestClient, context: Context) -> Dict[str, object]:
 
 @bdd_when(parsers.parse('I create an item with id {item_id:d} and title "{title}"'))
 def create_item_step(
-    api_is_running: Dict[str, object],
+    api_is_running: dict[str, object],
     context: Context,
     item_id: int,
     title: str,
@@ -263,7 +264,7 @@ def create_item_step(
 
 @bdd_then(parsers.parse('the item with id {item_id:d} exists with title "{title}" and not done'))
 def item_exists_step(
-    api_is_running: Dict[str, object],
+    api_is_running: dict[str, object],
     context: Context,
     item_id: int,
     title: str,

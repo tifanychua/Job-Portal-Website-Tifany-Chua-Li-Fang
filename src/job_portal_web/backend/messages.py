@@ -48,7 +48,6 @@ def get_conversations(request: Request):
     checked = set()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         conversation_id = data.get("conversationId")
@@ -75,12 +74,10 @@ def get_conversations(request: Request):
         # ==========================
 
         if user_type == "employer":
-
             if employer_id != user_id:
                 continue
 
         else:
-
             if job_seeker_id != user_id:
                 continue
 
@@ -101,7 +98,6 @@ def get_conversations(request: Request):
         # ==========================
 
         if user_type == "employer":
-
             seeker_doc = db.collection("job_seeker").document(job_seeker_id).get()
 
             if seeker_doc.exists:
@@ -110,15 +106,12 @@ def get_conversations(request: Request):
                 name = "Job Seeker"
 
         else:
-
             company_doc = db.collection("company").document(employer_id).get()
 
             if company_doc.exists:
-
                 name = company_doc.to_dict().get("companyName", "Company")
 
             else:
-
                 name = "Company"
 
         conversations.append(

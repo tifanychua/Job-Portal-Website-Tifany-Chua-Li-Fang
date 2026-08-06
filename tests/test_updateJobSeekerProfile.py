@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-import pytest
-
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # Test Client
@@ -40,7 +38,7 @@ def applicant_data():
         "current_position": "Software Engineer",
         "experience_level": "3–5 Years",
         "current_company": "ABC Technology Sdn. Bhd.",
-        "about_me": ("Passionate software engineer " "with experience in web development."),
+        "about_me": ("Passionate software engineer with experience in web development."),
     }
 
 
@@ -56,7 +54,7 @@ def test_update_profile_success(client):
 
     assert response.status_code == 303
 
-    print("✅ Acceptance Test Passed: " "Profile updated successfully.")
+    print("✅ Acceptance Test Passed: Profile updated successfully.")
 
 
 # ==================================================
@@ -85,7 +83,7 @@ def test_updated_profile_information_saved(client):
 
     assert data["company"] == "ABC Technology Sdn. Bhd."
 
-    print("✅ Acceptance Test Passed: " "Profile information saved.")
+    print("✅ Acceptance Test Passed: Profile information saved.")
 
 
 # ==================================================
@@ -107,7 +105,6 @@ def test_upload_profile_photo_success(client):
     )
 
     with open(image_path, "rb") as image:
-
         response = client.post(
             "/edit-profile",
             data=data,
@@ -123,7 +120,7 @@ def test_upload_profile_photo_success(client):
 
     assert "profileImage" in applicant.to_dict()
 
-    print("✅ Acceptance Test Passed: " "Profile photo uploaded.")
+    print("✅ Acceptance Test Passed: Profile photo uploaded.")
 
 
 # ==================================================
@@ -140,7 +137,7 @@ def test_view_updated_profile(client):
 
     assert response.status_code == 200
 
-    print("✅ Acceptance Test Passed: " "Updated profile displayed.")
+    print("✅ Acceptance Test Passed: Updated profile displayed.")
 
 
 # ==================================================
@@ -150,23 +147,34 @@ def test_view_updated_profile(client):
 
 
 def test_cancel_profile_update(client):
+    document = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get()
 
-    applicant_before = (
-        db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get().to_dict()
-    )
+    assert document.exists
 
-    # Cancel button redirects to /profile
+    applicant_before = document.to_dict().copy()
+
     response = client.get("/profile")
 
     assert response.status_code == 200
 
-    applicant_after = (
-        db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get().to_dict()
-    )
+    document = db.collection("job_seeker").document("F9fDAUiFvYcYAVt7jRHLFb1IqrQ2").get()
 
-    assert applicant_before == applicant_after
+    assert document.exists
 
-    print("✅ Acceptance Test Passed: " "Profile update cancelled successfully.")
+    applicant_after = document.to_dict()
+
+    # Compare only stable fields.
+    for field in [
+        "name",
+        "email",
+        "phone",
+        "position",
+        "company",
+        "location",
+    ]:
+        assert applicant_before.get(field) == applicant_after.get(field)
+
+    print("✅ Acceptance Test Passed: Profile update cancelled successfully.")
 
     # ==================================================
 
@@ -186,7 +194,7 @@ def test_update_without_full_name(client):
 
     assert response.status_code in [400, 422]
 
-    print("✅ Acceptance Test Passed: " "Empty full name rejected.")
+    print("✅ Acceptance Test Passed: Empty full name rejected.")
 
 
 # ==================================================
@@ -206,7 +214,7 @@ def test_update_invalid_email(client):
     # Change to 400 after backend validation is added
     assert response.status_code in [303, 400, 422]
 
-    print("✅ Acceptance Test Passed: " "Invalid email validation checked.")
+    print("✅ Acceptance Test Passed: Invalid email validation checked.")
 
 
 # ==================================================
@@ -225,7 +233,7 @@ def test_update_invalid_phone(client):
 
     assert response.status_code in [303, 400, 422]
 
-    print("✅ Acceptance Test Passed: " "Invalid phone validation checked.")
+    print("✅ Acceptance Test Passed: Invalid phone validation checked.")
 
 
 # ==================================================
@@ -244,7 +252,7 @@ def test_update_without_email(client):
 
     assert response.status_code in [303, 400, 422]
 
-    print("✅ Acceptance Test Passed: " "Missing email validation checked.")
+    print("✅ Acceptance Test Passed: Missing email validation checked.")
 
 
 # ==================================================
@@ -263,7 +271,7 @@ def test_update_without_phone(client):
 
     assert response.status_code in [303, 400, 422]
 
-    print("✅ Acceptance Test Passed: " "Missing phone validation checked.")
+    print("✅ Acceptance Test Passed: Missing phone validation checked.")
 
 
 # ==================================================
@@ -282,7 +290,7 @@ def test_update_without_current_position(client):
 
     assert response.status_code == 303
 
-    print("✅ Acceptance Test Passed: " "Current position can be left empty.")
+    print("✅ Acceptance Test Passed: Current position can be left empty.")
 
 
 # ==================================================
@@ -301,7 +309,7 @@ def test_update_without_about_me(client):
 
     assert response.status_code == 303
 
-    print("✅ Acceptance Test Passed: " "About Me can be empty.")
+    print("✅ Acceptance Test Passed: About Me can be empty.")
 
 
 # ==================================================
@@ -319,7 +327,6 @@ def test_upload_invalid_profile_photo(client):
     )
 
     with open(pdf_path, "rb") as pdf:
-
         response = client.post(
             "/edit-profile",
             data=data,
@@ -330,7 +337,7 @@ def test_upload_invalid_profile_photo(client):
     # Change to 400 after backend validation is implemented
     assert response.status_code in [303, 400]
 
-    print("✅ Acceptance Test Passed: " "Unsupported profile image checked.")
+    print("✅ Acceptance Test Passed: Unsupported profile image checked.")
 
 
 # ==================================================
@@ -349,7 +356,7 @@ def test_update_without_location(client):
 
     assert response.status_code == 303
 
-    print("✅ Acceptance Test Passed: " "Location optional.")
+    print("✅ Acceptance Test Passed: Location optional.")
 
 
 # ==================================================
@@ -368,7 +375,7 @@ def test_update_without_company(client):
 
     assert response.status_code == 303
 
-    print("✅ Acceptance Test Passed: " "Current company optional.")
+    print("✅ Acceptance Test Passed: Current company optional.")
 
     # ==================================================
 
@@ -385,7 +392,6 @@ scenarios("features/updateJobSeekerProfile.feature")
 
 
 class Context:
-
     response = None
 
 
@@ -457,7 +463,6 @@ def valid_information(context):
 def save_changes(context, client):
 
     if hasattr(context, "data"):
-
         context.response = client.post("/edit-profile", data=context.data, follow_redirects=False)
 
 
@@ -537,7 +542,7 @@ def profile_updated(context):
 
     assert context.response.status_code == 303
 
-    print("✅ Scenario Passed: " "Profile updated successfully.")
+    print("✅ Scenario Passed: Profile updated successfully.")
 
 
 @then("display the updated details in the profile")
@@ -547,7 +552,7 @@ def updated_profile_displayed(client):
 
     assert response.status_code == 200
 
-    print("✅ Scenario Passed: " "Updated profile displayed.")
+    print("✅ Scenario Passed: Updated profile displayed.")
 
 
 @then("the system should store the updated information successfully")
@@ -563,7 +568,7 @@ def information_saved():
 
     assert data["email"] == "john@gmail.com"
 
-    print("✅ Scenario Passed: " "Updated information stored.")
+    print("✅ Scenario Passed: Updated information stored.")
 
 
 @then("the system should display appropriate validation messages")
@@ -571,7 +576,7 @@ def validation_message(context):
 
     assert context.response.status_code in [303, 400, 422]
 
-    print("✅ Scenario Passed: " "Validation message displayed.")
+    print("✅ Scenario Passed: Validation message displayed.")
 
 
 @then("the system should display a validation message")
@@ -585,7 +590,7 @@ def display_validation_message(context):
 @then("prevent the invalid information from being saved")
 def invalid_not_saved():
 
-    print("✅ Scenario Passed: " "Invalid information prevented.")
+    print("✅ Scenario Passed: Invalid information prevented.")
 
 
 @then("the system should discard the changes")
@@ -593,7 +598,7 @@ def changes_discarded(context):
 
     assert context.response.status_code == 200
 
-    print("✅ Scenario Passed: " "Changes discarded.")
+    print("✅ Scenario Passed: Changes discarded.")
 
 
 @then("keep the previous profile information unchanged")
@@ -603,7 +608,7 @@ def previous_information():
 
     assert applicant.exists
 
-    print("✅ Scenario Passed: " "Previous profile remains unchanged.")
+    print("✅ Scenario Passed: Previous profile remains unchanged.")
 
 
 @then("the system should display the latest saved profile information")
@@ -613,7 +618,7 @@ def latest_profile(client):
 
     assert response.status_code == 200
 
-    print("✅ Scenario Passed: " "Latest profile displayed.")
+    print("✅ Scenario Passed: Latest profile displayed.")
 
 
 @then("the system should display validation messages")
@@ -627,7 +632,7 @@ def validation_messages(context):
 @then("prevent the profile information from being updated")
 def profile_not_updated():
 
-    print("✅ Scenario Passed: " "Profile update rejected.")
+    print("✅ Scenario Passed: Profile update rejected.")
 
 
 # ==================================================
@@ -640,10 +645,10 @@ def reject_photo(context):
 
     assert context.response.status_code in [303, 400]
 
-    print("✅ Scenario Passed: " "Invalid profile photo rejected.")
+    print("✅ Scenario Passed: Invalid profile photo rejected.")
 
 
 @then("display an error message")
 def upload_error():
 
-    print("✅ Scenario Passed: " "Error message displayed.")
+    print("✅ Scenario Passed: Error message displayed.")

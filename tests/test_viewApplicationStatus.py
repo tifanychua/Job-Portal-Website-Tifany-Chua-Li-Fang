@@ -1,9 +1,9 @@
-from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend import job_application
+from job_portal_web.backend.main import app
 
 # --------------------------------------------------
 # Fake Login
@@ -55,7 +55,6 @@ def test_view_application_status_list(client: TestClient):
     response = client.get("/application")
 
     if response.status_code == 200:
-
         page = response.text
 
         statuses = [
@@ -90,7 +89,6 @@ def test_view_updated_application_status(client: TestClient):
     response = client.get(f"/application/{application_id}")
 
     if response.status_code == 200:
-
         page = response.text
 
         statuses = [
@@ -126,7 +124,6 @@ scenarios("features/viewApplicationStatus.feature")
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None

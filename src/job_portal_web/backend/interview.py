@@ -1,24 +1,19 @@
-from typing import Optional
 import base64
 import json
-from itsdangerous import TimestampSigner
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
-
-from fastapi.responses import RedirectResponse, HTMLResponse
-
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
+from itsdangerous import TimestampSigner
 from pydantic import BaseModel, field_validator
 
 from .database import db
-
 from .email_service import (
-    send_interview_email,
+    send_employer_interview_notification,  # Add this line
     send_interview_cancelled_email,
+    send_interview_email,
     send_interview_rescheduled_email,
-    send_employer_interview_notification,
 )
 
 router = APIRouter()
@@ -36,7 +31,6 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "ui"))
 
 
 class Interview(BaseModel):
-
     candidateId: str
 
     companyId: str
@@ -67,7 +61,6 @@ class Interview(BaseModel):
     def validate_fields(cls, value):
 
         if not value.strip():
-
             raise ValueError("Field cannot be empty")
 
         return value
@@ -82,7 +75,6 @@ class Interview(BaseModel):
 async def create_interview(interview: Interview):
 
     try:
-
         print("========== CREATE INTERVIEW ==========")
 
         print("Received candidateId:", interview.candidateId)
@@ -96,7 +88,6 @@ async def create_interview(interview: Interview):
         real_candidate_id = None
 
         if application_doc.exists:
-
             application = application_doc.to_dict()
 
             print("Application data:", application)
@@ -104,20 +95,17 @@ async def create_interview(interview: Interview):
             real_candidate_id = application.get("job_seeker_id")
 
         else:
-
             # fallback:
             # if frontend already sends job seeker id
 
             seeker_doc = db.collection("job_seeker").document(interview.candidateId).get()
 
             if seeker_doc.exists:
-
                 real_candidate_id = interview.candidateId
 
         print("Real candidate ID:", real_candidate_id)
 
         if not real_candidate_id:
-
             raise Exception("Cannot find job seeker ID")
 
         # ==========================================
@@ -129,7 +117,6 @@ async def create_interview(interview: Interview):
         print("Candidate exists:", seeker_doc.exists)
 
         if not seeker_doc.exists:
-
             raise Exception("Candidate record not found")
 
         seeker = seeker_doc.to_dict()
@@ -143,7 +130,6 @@ async def create_interview(interview: Interview):
         print("Company exists:", company_doc.exists)
 
         if not company_doc.exists:
-
             raise Exception("Company record not found")
 
         company = company_doc.to_dict()
@@ -183,7 +169,6 @@ async def create_interview(interview: Interview):
         return {"message": "Interview scheduled successfully"}
 
     except Exception as e:
-
         print("CREATE INTERVIEW ERROR:", e)
 
         raise HTTPException(status_code=500, detail=str(e))
@@ -199,43 +184,43 @@ def get_all_interviews():
 
     result = []
 
-    docs = db.collection("interviews").stream()
+    try:
+        docs = db.collection("interviews").stream()
 
-    for doc in docs:
+        for doc in docs:
+            try:
+                data = doc.to_dict()
 
-        data = doc.to_dict()
+                data["id"] = doc.id
 
-        data["id"] = doc.id
+                company_id = data.get("companyId")
 
-        # company details
+                if company_id:
+                    company_doc = db.collection("company").document(company_id).get()
 
-        company_id = data.get("companyId")
+                    if company_doc.exists:
+                        company = company_doc.to_dict()
 
-        if company_id:
+                        data["companyName"] = company.get("companyName", "Company")
 
-            company_doc = db.collection("company").document(company_id).get()
+                candidate_id = data.get("candidateId")
 
-            if company_doc.exists:
+                if candidate_id:
+                    seeker_doc = db.collection("job_seeker").document(candidate_id).get()
 
-                company = company_doc.to_dict()
+                    if seeker_doc.exists:
+                        seeker = seeker_doc.to_dict()
 
-                data["companyName"] = company.get("companyName", "Company")
+                        data["candidateName"] = seeker.get("name", "Applicant")
 
-        # candidate details
+                result.append(data)
 
-        candidate_id = data.get("candidateId")
+            except Exception as e:
+                print(f"Skip interview {doc.id} error:", e)
+                continue
 
-        if candidate_id:
-
-            seeker_doc = db.collection("job_seeker").document(candidate_id).get()
-
-            if seeker_doc.exists:
-
-                seeker = seeker_doc.to_dict()
-
-                data["candidateName"] = seeker.get("name", "Applicant")
-
-        result.append(data)
+    except Exception as e:
+        print("GET ALL INTERVIEWS ERROR:", e)
 
     return result
 
@@ -251,33 +236,27 @@ def get_interview(interview_id: str, request: Request):
     user_type = request.session.get("user_type")
 
     if user_type not in ["job_seeker", "employer"]:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     doc = db.collection("interviews").document(interview_id).get()
 
     if not doc.exists:
-
         raise HTTPException(status_code=404, detail="Interview not found")
 
     interview = doc.to_dict()
 
     if user_type == "employer":
-
         company_id = request.session.get("company_id")
 
         print("SESSION COMPANY ID:", company_id)
 
         if interview.get("companyId") != company_id:
-
             raise HTTPException(status_code=403, detail="Not your interview")
 
     elif user_type == "job_seeker":
-
         applicant_id = request.session.get("applicant_id")
 
         if interview.get("candidateId") != applicant_id:
-
             raise HTTPException(status_code=403, detail="Not your interview")
 
     interview["id"] = doc.id
@@ -298,7 +277,6 @@ async def cancel_interview(interview_id: str):
     doc = interview_ref.get()
 
     if not doc.exists:
-
         raise HTTPException(status_code=404, detail="Interview not found")
 
     interview = doc.to_dict()
@@ -306,11 +284,9 @@ async def cancel_interview(interview_id: str):
     interview_ref.update({"status": "Cancelled", "applicantResponse": "Cancelled"})
 
     try:
-
         seeker_doc = db.collection("job_seeker").document(interview.get("candidateId")).get()
 
         if seeker_doc.exists:
-
             seeker = seeker_doc.to_dict()
 
             await send_interview_cancelled_email(
@@ -318,7 +294,6 @@ async def cancel_interview(interview_id: str):
             )
 
     except Exception as e:
-
         print("Cancel email error:", e)
 
     return {"message": "Interview cancelled successfully"}
@@ -330,7 +305,6 @@ async def cancel_interview(interview_id: str):
 
 
 class InterviewUpdate(BaseModel):
-
     stage: str
 
     date: str
@@ -353,7 +327,6 @@ class InterviewUpdate(BaseModel):
     def validate_update(cls, value):
 
         if not value.strip():
-
             raise ValueError("Field cannot be empty")
 
         return value
@@ -393,7 +366,6 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
     )
 
     try:
-
         # ======================================
         # Get Job Seeker
         # ======================================
@@ -406,7 +378,6 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
         application_doc = db.collection("application").document(candidate_id).get()
 
         if application_doc.exists:
-
             application_data = application_doc.to_dict()
 
             seeker_id = application_data.get("jobSeekerId", candidate_id)
@@ -414,7 +385,6 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
         seeker_doc = db.collection("job_seeker").document(seeker_id).get()
 
         if seeker_doc.exists:
-
             seeker = seeker_doc.to_dict()
 
             # ======================================
@@ -426,7 +396,6 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
             company_doc = db.collection("company").document(updated_data.get("companyId")).get()
 
             if company_doc.exists:
-
                 company = company_doc.to_dict()
 
                 company_address = company.get("address", "")
@@ -440,7 +409,6 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
             )
 
     except Exception as e:
-
         print("Reschedule email error:", e)
 
     return {"message": "Interview updated successfully"}
@@ -457,7 +425,6 @@ def get_applicant_interviews(request: Request):
     applicant_id = request.session.get("applicant_id")
 
     if not applicant_id:
-
         raise HTTPException(status_code=401, detail="Not logged in")
 
     result = []
@@ -465,7 +432,6 @@ def get_applicant_interviews(request: Request):
     docs = db.collection("interviews").where("candidateId", "==", applicant_id).stream()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         data["id"] = doc.id
@@ -473,11 +439,9 @@ def get_applicant_interviews(request: Request):
         company_id = data.get("companyId")
 
         if company_id:
-
             company_doc = db.collection("company").document(company_id).get()
 
             if company_doc.exists:
-
                 data["companyName"] = company_doc.to_dict().get("companyName", "Company")
 
         result.append(data)
@@ -491,12 +455,11 @@ def get_applicant_interviews(request: Request):
 
 
 @router.get("/api/applicant/interviews/filter")
-def filter_applicant_interviews(request: Request, status: Optional[str] = None):
+def filter_applicant_interviews(request: Request, status: str | None = None):
 
     applicant_id = request.session.get("applicant_id")
 
     if not applicant_id:
-
         raise HTTPException(status_code=401, detail="Not logged in")
 
     result = []
@@ -504,11 +467,9 @@ def filter_applicant_interviews(request: Request, status: Optional[str] = None):
     docs = db.collection("interviews").where("candidateId", "==", applicant_id).stream()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         if status and data.get("status") != status:
-
             continue
 
         data["id"] = doc.id
@@ -533,11 +494,9 @@ async def search_interview_records(request: Request, keyword: str = ""):
     session_cookie = request.cookies.get("session")
 
     if not session_cookie:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     try:
-
         signer = TimestampSigner("jobconnect-secret-key")
 
         unsigned = signer.unsign(session_cookie)
@@ -549,11 +508,9 @@ async def search_interview_records(request: Request, keyword: str = ""):
         company_id = session_data.get("company_id")
 
     except Exception:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     if not company_id:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     # ==========================================
@@ -567,7 +524,6 @@ async def search_interview_records(request: Request, keyword: str = ""):
     keyword = keyword.lower()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         candidate_name = data.get("candidateName", "").lower()
@@ -575,7 +531,6 @@ async def search_interview_records(request: Request, keyword: str = ""):
         position = data.get("position", "").lower()
 
         if keyword == "" or keyword in candidate_name or keyword in position:
-
             interviews.append({"id": doc.id, **data})
 
     return interviews
@@ -587,7 +542,7 @@ async def search_interview_records(request: Request, keyword: str = ""):
 
 
 @router.get("/employer/interviews")
-def get_employer_interviews(request: Request, status: Optional[str] = None):
+def get_employer_interviews(request: Request, status: str | None = None):
 
     print("==============================")
     print("SESSION:")
@@ -603,7 +558,6 @@ def get_employer_interviews(request: Request, status: Optional[str] = None):
     result = []
 
     for doc in docs:
-
         data = doc.to_dict()
 
         data["id"] = doc.id
@@ -611,11 +565,9 @@ def get_employer_interviews(request: Request, status: Optional[str] = None):
         candidate_id = data.get("candidateId")
 
         if candidate_id:
-
             seeker_doc = db.collection("job_seeker").document(candidate_id).get()
 
             if seeker_doc.exists:
-
                 seeker = seeker_doc.to_dict()
 
                 data["candidateName"] = seeker.get("name", "Applicant")
@@ -634,13 +586,11 @@ def get_employer_interviews(request: Request, status: Optional[str] = None):
 def search_employer_interviews(request: Request, keyword: str = ""):
 
     if request.session.get("user_type") != "employer":
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     company_id = request.session.get("company_id")
 
     if not company_id:
-
         raise HTTPException(status_code=401, detail="Not logged in")
 
     keyword = keyword.lower().strip()
@@ -650,7 +600,6 @@ def search_employer_interviews(request: Request, keyword: str = ""):
     docs = db.collection("interviews").where("companyId", "==", company_id).stream()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         data["id"] = doc.id
@@ -663,11 +612,9 @@ def search_employer_interviews(request: Request, keyword: str = ""):
         ]
 
         if keyword:
-
             matched = any(keyword in str(field).lower() for field in searchable_fields)
 
             if not matched:
-
                 continue
 
         result.append(data)
@@ -685,27 +632,21 @@ def get_current_user(request: Request):
     user_type = request.session.get("user_type")
 
     if user_type == "employer":
-
         company_id = request.session.get("company_id")
 
         if company_id:
-
             doc = db.collection("company").document(company_id).get()
 
             if doc.exists:
-
                 return doc.to_dict()
 
     elif user_type == "job_seeker":
-
         applicant_id = request.session.get("applicant_id")
 
         if applicant_id:
-
             doc = db.collection("job_seeker").document(applicant_id).get()
 
             if doc.exists:
-
                 return doc.to_dict()
 
     return None
@@ -722,7 +663,6 @@ async def schedule_list(request: Request):
     user = get_current_user(request)
 
     if user is None:
-
         return RedirectResponse("/login", status_code=303)
 
     return templates.TemplateResponse(
@@ -737,13 +677,10 @@ async def schedule_list(request: Request):
 
 @router.put("/api/interviews/{interview_id}/accept")
 async def accept_interview(interview_id: str):
-
     ref = db.collection("interviews").document(interview_id)
-
     doc = ref.get()
 
     if not doc.exists:
-
         raise HTTPException(status_code=404, detail="Interview not found")
 
     interview = doc.to_dict()
@@ -751,13 +688,11 @@ async def accept_interview(interview_id: str):
     ref.update({"status": "Accepted", "applicantResponse": "Accepted"})
 
     try:
+        company = {}
 
         company_doc = db.collection("company").document(interview.get("companyId")).get()
-
         if company_doc.exists:
-
             company = company_doc.to_dict()
-
             await send_employer_interview_notification(
                 company.get("email"),
                 company.get("companyName", "Employer"),
@@ -766,8 +701,27 @@ async def accept_interview(interview_id: str):
                 "Accepted",
             )
 
-    except Exception as e:
+        # ===== NEW: Send email to candidate =====
+        candidate_id = interview.get("candidateId")
+        if candidate_id:
+            seeker_doc = db.collection("job_seeker").document(candidate_id).get()
+            if seeker_doc.exists:
+                seeker = seeker_doc.to_dict()
 
+                # Import the send_interview_acceptance_email function or create one
+                from .email_service import send_interview_acceptance_email
+
+                await send_interview_acceptance_email(
+                    seeker.get("email"),
+                    seeker.get("name", "Applicant"),
+                    interview.get("position"),
+                    company.get("companyName", "Company"),
+                    interview.get("date"),
+                    interview.get("time"),
+                    interview.get("meetingLink", "To be provided"),
+                )
+
+    except Exception as e:
         print("Accept email error:", e)
 
     return {"message": "Interview accepted"}
@@ -786,7 +740,6 @@ async def decline_interview(interview_id: str):
     doc = ref.get()
 
     if not doc.exists:
-
         raise HTTPException(status_code=404, detail="Interview not found")
 
     interview = doc.to_dict()
@@ -794,11 +747,9 @@ async def decline_interview(interview_id: str):
     ref.update({"status": "Declined", "applicantResponse": "Declined"})
 
     try:
-
         company_doc = db.collection("company").document(interview.get("companyId")).get()
 
         if company_doc.exists:
-
             company = company_doc.to_dict()
 
             await send_employer_interview_notification(
@@ -810,14 +761,12 @@ async def decline_interview(interview_id: str):
             )
 
     except Exception as e:
-
         print("Decline email error:", e)
 
     return {"message": "Interview declined"}
 
 
 class RescheduleRequest(BaseModel):
-
     requestedDate: str
 
     requestedTime: str
@@ -839,7 +788,6 @@ async def reschedule_request(interview_id: str, request_data: RescheduleRequest)
     doc = ref.get()
 
     if not doc.exists:
-
         raise HTTPException(status_code=404, detail="Interview not found")
 
     interview = doc.to_dict()
@@ -855,11 +803,9 @@ async def reschedule_request(interview_id: str, request_data: RescheduleRequest)
     )
 
     try:
-
         company_doc = db.collection("company").document(interview.get("companyId")).get()
 
         if company_doc.exists:
-
             company = company_doc.to_dict()
 
             await send_employer_interview_notification(
@@ -874,7 +820,6 @@ async def reschedule_request(interview_id: str, request_data: RescheduleRequest)
             )
 
     except Exception as e:
-
         print("Reschedule email error:", e)
 
     return {"message": "Reschedule request sent"}
@@ -896,7 +841,6 @@ def search_applicant_interviews(request: Request, application_id: str, keyword: 
         applicant_id = application_id
 
     if not applicant_id:
-
         raise HTTPException(status_code=401, detail="Not logged in")
 
     keyword = keyword.lower().strip()
@@ -906,7 +850,6 @@ def search_applicant_interviews(request: Request, application_id: str, keyword: 
     docs = db.collection("interviews").where("candidateId", "==", applicant_id).stream()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         data["id"] = doc.id
@@ -919,17 +862,14 @@ def search_applicant_interviews(request: Request, application_id: str, keyword: 
         ]
 
         if keyword:
-
             matched = any(keyword in str(field).lower() for field in searchable_fields)
 
             if not matched:
-
                 continue
 
         result.append(data)
 
     if len(result) == 0:
-
         return {"message": "No interview records found"}
 
     return result

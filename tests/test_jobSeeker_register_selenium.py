@@ -1,9 +1,9 @@
 import time
-from pytest_bdd import scenarios, given, when, then
 
+from pytest_bdd import given, scenarios, then, when
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 scenarios("features/jobSeeker_register.feature")
 

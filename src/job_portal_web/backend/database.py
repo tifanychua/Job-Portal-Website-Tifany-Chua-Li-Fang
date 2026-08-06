@@ -1,10 +1,9 @@
-from pathlib import Path
 import json
 import os
+from pathlib import Path
 
 import firebase_admin
-
-from firebase_admin import credentials, firestore, storage, auth
+from firebase_admin import auth, credentials, firestore, storage
 
 # ==================================================
 # Firebase Configuration

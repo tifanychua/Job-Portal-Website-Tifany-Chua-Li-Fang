@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Request, HTTPException
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 import os
 from ..helper import get_unread_notification_count
 
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore
 
 router = APIRouter()
@@ -43,11 +43,9 @@ async def company_profile(request: Request):
 
     company_doc = db.collection("company").document(company_id).get()
     if company_doc.exists:
-
         company = company_doc.to_dict()
 
     else:
-
         company = {
             "companyName": "",
             "companyDescription": "",
@@ -73,7 +71,6 @@ async def company_profile(request: Request):
     company["industry_name"] = ""
 
     if company.get("industry_id"):
-
         industry_docs = (
             db.collection("industries")
             .where("industry_id", "==", company["industry_id"])
@@ -82,7 +79,6 @@ async def company_profile(request: Request):
         )
 
         for doc in industry_docs:
-
             company["industry_name"] = doc.to_dict().get("industry_name", "")
 
     # =====================================================
@@ -94,17 +90,14 @@ async def company_profile(request: Request):
     selected_ids = company.get("specialty_category_ids", [])
 
     if selected_ids:
-
         names = []
 
         category_docs = db.collection("skill_categories").stream()
 
         for doc in category_docs:
-
             category = doc.to_dict()
 
             if category.get("category_id") in selected_ids:
-
                 names.append(category.get("category_name"))
 
         company["specialty_category_name"] = ", ".join(names)
@@ -147,7 +140,6 @@ async def company_profile(request: Request):
     team_docs = db.collection("company_team").where("company_id", "==", company_id).stream()
 
     for doc in team_docs:
-
         team_members.append(doc.to_dict())
 
     # =====================================================
@@ -161,7 +153,6 @@ async def company_profile(request: Request):
     )
 
     for doc in document_docs:
-
         documents.append(doc.to_dict())
 
     # =====================================================

@@ -1,9 +1,9 @@
-from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend import job_apply
+from job_portal_web.backend.main import app
 
 # --------------------------------------------------
 # Fake Login
@@ -116,7 +116,6 @@ scenarios("features/jobApply.feature")
 
 
 class Context:
-
     def __init__(self):
         self.response = None
         self.application_id = None
@@ -158,7 +157,6 @@ def submit_application(client, context):
 def verify_application_created(context):
 
     if context.response.status_code in [200, 201]:
-
         print("✅ SUCCESS: Job application created successfully")
 
         data = context.response.json()
@@ -166,7 +164,6 @@ def verify_application_created(context):
         context.application_id = data.get("application_id")
 
     else:
-
         print("❌ FAILED:", context.response.status_code, context.response.text)
 
     assert context.response.status_code in [200, 201]
@@ -208,11 +205,9 @@ def process_application(client, context):
 def verify_saved(context):
 
     if context.response.status_code == 200:
-
         print("✅ SUCCESS: Application information stored in database")
 
     else:
-
         print("❌ FAILED:", context.response.status_code, context.response.text)
 
     assert context.response.status_code == 200

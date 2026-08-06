@@ -1,10 +1,13 @@
-from fastapi.testclient import TestClient
+from __future__ import annotations
+
+from uuid import uuid4
+
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from pytest_bdd import scenarios, given, when, then
-
-from job_portal_web.backend.main import app
 from job_portal_web.backend.database import db
+from job_portal_web.backend.main import app
 
 # ==================================================
 # LOAD FEATURE FILE
@@ -20,8 +23,8 @@ scenarios("features/decline_interview_invitation.feature")
 
 @pytest.fixture
 def client():
-
-    return TestClient(app)
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 # ==================================================
@@ -30,50 +33,29 @@ def client():
 
 
 class Context:
-
     def __init__(self):
-
-        self.interview_id = None
-
+        self.interview_id: str | None = None
         self.response = None
 
 
 @pytest.fixture
 def context():
-
     return Context()
 
 
 # ==================================================
-# TEST DATA
-# ==================================================
-
-TEST_INTERVIEW_ID = "TEST_DECLINE_INTERVIEW_001"
-
-
-def delete_test_interview():
-
-    db.collection("interviews").document(TEST_INTERVIEW_ID).delete()
-
-
-@pytest.fixture(autouse=True)
-def cleanup():
-
-    delete_test_interview()
-
-    yield
-
-    delete_test_interview()
-
-
-# ==================================================
-# CREATE INTERVIEW
+# TEST DATA HELPERS
 # ==================================================
 
 
-def create_test_interview(client):
+def create_test_interview() -> str:
+    """
+    Create a unique interview document for one test scenario.
+    """
 
-    db.collection("interviews").document(TEST_INTERVIEW_ID).set(
+    interview_id = f"TEST_DECLINE_{uuid4()}"
+
+    db.collection("interviews").document(interview_id).set(
         {
             "candidateId": "123",
             "companyId": "C000001",
@@ -88,10 +70,36 @@ def create_test_interview(client):
             "meetingLink": "https://meet.google.com/test",
             "notes": "Prepare portfolio",
             "status": "Scheduled",
+            "applicantResponse": "Pending",
         }
     )
 
-    return TEST_INTERVIEW_ID
+    return interview_id
+
+
+def delete_test_interview(interview_id: str | None) -> None:
+    """
+    Delete only the interview created by the current scenario.
+    """
+
+    if interview_id:
+        db.collection("interviews").document(interview_id).delete()
+
+
+# ==================================================
+# CLEANUP
+# ==================================================
+
+
+@pytest.fixture(autouse=True)
+def cleanup(context):
+    """
+    Clean up the unique interview after every scenario.
+    """
+
+    yield
+
+    delete_test_interview(context.interview_id)
 
 
 # ==================================================
@@ -100,23 +108,32 @@ def create_test_interview(client):
 
 
 @given("the job seeker has received an interview invitation")
-def job_seeker_received_invitation(client, context):
-
-    context.interview_id = create_test_interview(client)
+def job_seeker_received_invitation(context):
+    context.interview_id = create_test_interview()
 
 
 @when("the job seeker declines the interview")
 def job_seeker_declines(client, context):
+    assert context.interview_id is not None
 
     context.response = client.put(f"/api/interviews/{context.interview_id}/decline")
 
 
 @then('the interview status should be updated to "Declined"')
 def verify_declined_status(context):
-
+    assert context.response is not None
     assert context.response.status_code == 200
+    assert context.response.json()["message"] == "Interview declined"
 
-    assert context.response.json()["message"] == ("Interview declined")
+    document = db.collection("interviews").document(context.interview_id).get()
+
+    assert document.exists
+
+    data = document.to_dict()
+
+    assert data is not None
+    assert data["status"] == "Declined"
+    assert data["applicantResponse"] == "Declined"
 
 
 # ==================================================
@@ -126,25 +143,36 @@ def verify_declined_status(context):
 
 @given("the job seeker has declined the interview")
 def job_seeker_already_declined(client, context):
+    context.interview_id = create_test_interview()
 
-    context.interview_id = create_test_interview(client)
+    response = client.put(f"/api/interviews/{context.interview_id}/decline")
 
-    client.put(f"/api/interviews/{context.interview_id}/decline")
+    assert response.status_code == 200
 
 
 @when("the system processes the request")
-def system_processes_request(client, context):
+def system_processes_request(context):
+    """
+    Read the document directly from Firestore.
 
-    context.response = client.get(f"/api/interviews/{context.interview_id}")
+    The GET /api/interviews/{interview_id} endpoint requires
+    an authenticated session, which is unrelated to this scenario.
+    """
+
+    assert context.interview_id is not None
+
+    context.response = db.collection("interviews").document(context.interview_id).get()
 
 
 @then("the updated interview status should be saved in the database")
 def verify_database_status(context):
+    document = context.response
 
-    document = db.collection("interviews").document(context.interview_id).get()
-
-    assert document.exists is True
+    assert document is not None
+    assert document.exists
 
     data = document.to_dict()
 
+    assert data is not None
     assert data["status"] == "Declined"
+    assert data["applicantResponse"] == "Declined"

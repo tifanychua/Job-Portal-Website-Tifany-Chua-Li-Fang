@@ -1,9 +1,9 @@
-from fastapi.testclient import TestClient
-from pytest_bdd import scenarios, given, when, then
 import pytest
+from fastapi.testclient import TestClient
+from pytest_bdd import given, scenarios, then, when
 
-from job_portal_web.backend.main import app
 from job_portal_web.backend import job_application
+from job_portal_web.backend.main import app
 
 # ==================================================
 # Fake Login
@@ -44,7 +44,6 @@ def fake_login(monkeypatch):
 
 
 class FakeSnapshot:
-
     def __init__(self, data=None, exists=True):
         self._data = data or {}
         self.exists = exists
@@ -55,7 +54,6 @@ class FakeSnapshot:
 
 
 class FakeDocument:
-
     def __init__(self):
 
         self.data = {
@@ -88,7 +86,6 @@ class FakeDocument:
 
 
 class FakeCollection:
-
     def __init__(self):
         self.documents = {APPLICATION_ID: FakeDocument()}
 
@@ -107,7 +104,6 @@ class FakeCollection:
         snapshots = []
 
         for doc_id, doc in self.documents.items():
-
             snap = FakeSnapshot(doc.data, True)
             snap.id = doc_id
 
@@ -117,7 +113,6 @@ class FakeCollection:
 
 
 class FakeDB:
-
     def __init__(self):
 
         self.collections = {
@@ -136,13 +131,11 @@ class FakeDB:
 
 
 class FakeBlob:
-
     def generate_signed_url(self, **kwargs):
         return "https://example.com/resume.pdf"
 
 
 class FakeBucket:
-
     def blob(self, path):
         return FakeBlob()
 
@@ -306,7 +299,6 @@ scenarios("features/cancelApplication.feature")
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -330,7 +322,6 @@ def submitted_application():
     """
     Fake application already exists in Fake Firestore.
     """
-    pass
 
 
 @when("the job seeker selects the withdraw application option")
