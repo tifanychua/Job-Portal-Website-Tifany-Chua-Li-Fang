@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from job_portal_web.backend.database import db
+from job_portal_web.backend.notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -75,7 +76,11 @@ async def manage_experience(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="manageExperience.html",
-        context={"experience_list": experience_list, "user": user},
+        context={
+            "experience_list": experience_list,
+            "user": user,
+            "unread_notifications_count": get_unread_notifications_count(request),
+        },
     )
 
 

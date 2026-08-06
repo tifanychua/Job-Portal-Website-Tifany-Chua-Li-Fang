@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from job_portal_web.backend.database import db
+from job_portal_web.backend.notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -262,6 +263,7 @@ async def manage_skills(request: Request):
         context={
             "skills": skill_list,
             "user": user,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 

@@ -67,38 +67,45 @@
 
     <div class="detail-header-actions">
 
-<button class="btn btn-outline btn-save">
-    <i class="fa-regular fa-heart"></i> Save
+<button class="btn btn-outline btn-save" type="button" data-job-id="{{ job.id }}">
+    <i class="fa-regular fa-heart"></i> <span class="btn-save-label">Save</span>
 </button>
 
 
-{% if application_status == "Submitted" %}
+{% if job.status == 'Active' %}
 
-<button 
-    type="button"
-    class="btn btn-primary"
-    onclick="reviewApplication()">
+    {% if application_status == "Submitted" %}
 
-    Application Submitted
+    <button
+        type="button"
+        class="btn btn-primary"
+        onclick="reviewApplication()">
 
-</button>
-
-
-{% else %}
-
-
-<form action="/jobs/{{ job.id }}/apply" method="get">
-
-    <button 
-        type="submit" 
-        class="btn btn-primary">
-
-        Apply Now
+        Application Submitted
 
     </button>
 
-</form>
+    {% else %}
 
+    <form action="/jobs/{{ job.id }}/apply" method="get">
+
+        <button
+            type="submit"
+            class="btn btn-primary">
+
+            Apply Now
+
+        </button>
+
+    </form>
+
+    {% endif %}
+
+{% else %}
+
+    <span class="text-small" style="color:var(--color-text-secondary);">
+        This job is no longer accepting applications.
+    </span>
 
 {% endif %}
 
@@ -271,6 +278,77 @@ function reviewApplication(){
     }
 
 }
+
+// ============================== SAVE / UNSAVE THIS JOB ==============================
+
+(function () {
+
+    const btn = document.querySelector(".btn-save[data-job-id]");
+
+    if (!btn) return;
+
+    const jobId = btn.dataset.jobId;
+    const icon = btn.querySelector("i");
+    const label = btn.querySelector(".btn-save-label");
+
+    function setSavedState(saved) {
+
+        btn.dataset.saved = saved ? "true" : "false";
+
+        if (icon) {
+            icon.classList.toggle("fa-solid", saved);
+            icon.classList.toggle("fa-regular", !saved);
+        }
+
+        if (label) {
+            label.textContent = saved ? "Saved" : "Save";
+        }
+
+        btn.classList.toggle("saved", saved);
+
+    }
+
+    // Reflect current saved state on page load
+    fetch(`/api/saved-jobs/${jobId}/status`)
+        .then(res => res.json())
+        .then(data => setSavedState(data.saved))
+        .catch(() => {});
+
+    btn.addEventListener("click", function () {
+
+        const alreadySaved = btn.dataset.saved === "true";
+        const method = alreadySaved ? "DELETE" : "POST";
+
+        fetch(`/api/saved-jobs/${jobId}`, { method: method })
+            .then(res => {
+
+                if (res.status === 401) {
+                    window.location.href = "/login";
+                    return null;
+                }
+
+                return res.json();
+
+            })
+            .then(data => {
+
+                if (!data) return;
+
+                if (!data.success) {
+                    alert(data.message || "Something went wrong. Please try again.");
+                    return;
+                }
+
+                setSavedState(data.saved);
+
+            })
+            .catch(() => {
+                alert("Network error. Please try again.");
+            });
+
+    });
+
+})();
 
 </script>
 </body>

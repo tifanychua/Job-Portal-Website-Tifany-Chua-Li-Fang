@@ -31,6 +31,9 @@ from .routes.employer import router as employer_router
 from .routes.employerApplication import router as employer_application_router
 from .routes.jobSeekerProfile import router as jobSeekerProfile_router
 from .routes.skill import router as skill_router
+from .savedJob import router as saved_jobs_router
+from .notifications import router as notifications_router
+from .notifications import get_unread_notifications_count
 
 # ==================================================
 # APP
@@ -157,7 +160,9 @@ app.include_router(skill_router)
 
 app.include_router(editCompanyProfile_router)
 
+app.include_router(saved_jobs_router)
 
+app.include_router(notifications_router)
 # ==================================================
 # TEMPLATE HELPER
 # ==================================================
@@ -177,6 +182,9 @@ def render_template(request: Request, template: str, context=None):
     # Add company variable for employerHeader.html
     if request.session.get("user_type") == "employer":
         context["company"] = user
+
+    # Live unread-notification badge count for header.html / employerHeader.html
+    context.setdefault("unread_notifications_count", get_unread_notifications_count(request))
 
     return templates.TemplateResponse(request=request, name=template, context=context)
 

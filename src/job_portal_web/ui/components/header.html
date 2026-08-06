@@ -24,12 +24,13 @@
 
         {% if user %}
 
-            <i class="fa-regular fa-heart"></i>
-
-            <div class="notification">
+            <a href="/notifications" class="notification">
                 <i class="fa-regular fa-bell"></i>
-                <span class="badge">3</span>
-            </div>
+                {% set unread = unread_notifications_count if unread_notifications_count is defined else 0 %}
+                {% if unread > 0 %}
+                <span class="badge">{{ unread if unread <= 9 else '9+' }}</span>
+                {% endif %}
+            </a>
 
             <a href="/profile" class="profile">
 

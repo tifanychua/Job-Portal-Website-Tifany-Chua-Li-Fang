@@ -8,6 +8,7 @@ from firebase_admin import firestore
 
 from ..database import db
 from ..helper import get_company
+from ..notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -108,6 +109,7 @@ async def manage_jobs(request: Request):
                 context={
                     "request": request,
                     "company": company,
+                    "unread_notifications_count": get_unread_notifications_count(request),
                 },
             )
 
@@ -131,6 +133,7 @@ async def manage_jobs(request: Request):
             "request": request,
             "jobs": jobs,
             "company": company,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -167,7 +170,13 @@ async def edit_job(request: Request, job_id: str):
     return templates.TemplateResponse(
         request=request,
         name="editJob.html",
-        context={"request": request, "job": job, "categories": categories, "company": company},
+        context={
+            "request": request,
+            "job": job,
+            "categories": categories,
+            "company": company,
+            "unread_notifications_count": get_unread_notifications_count(request),
+        },
     )
 
 
@@ -241,6 +250,7 @@ async def review_job(
             "request": request,
             "job": job,
             "company": company,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -331,6 +341,7 @@ async def review_edit_job(
             "job": edited_job,
             "job_id": job_id,
             "company": company,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 

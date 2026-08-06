@@ -1,13 +1,12 @@
-from datetime import timedelta
-
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from datetime import timedelta
 from google.cloud.firestore_v1.base_query import FieldFilter
-
-from .database import bucket, db
-from .job_apply import UI_DIR, _get_currentjob_seeker, _get_screening_questions
+from .database import db, bucket
 from .job_information import _find_company
+from .job_apply import UI_DIR, _get_current_job_seeker, _get_screening_questions
+from .notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -99,13 +98,13 @@ def _get_resume_url(path):
 
 @router.get("/application", name="my_applications")
 def my_applications(request: Request, status: str = "all"):
-    applicant_id, applicant = _get_currentjob_seeker(request)
+    applicant_id, applicant = _get_current_job_seeker(request)
 
     if not applicant_id:
         return RedirectResponse(
             url="/login?next=/application",
             status_code=302,
-        )
+    )
 
     docs = (
         db.collection("application")
@@ -117,6 +116,7 @@ def my_applications(request: Request, status: str = "all"):
     counts = {key: 0 for key in STATUS_META}
 
     for doc in docs:
+
         data = doc.to_dict()
         data["id"] = doc.id
 
@@ -157,9 +157,11 @@ def my_applications(request: Request, status: str = "all"):
     user = None
 
     if request.session.get("user_type") == "job_seeker":
+
         uid = request.session.get("applicant_id")
 
         if uid:
+
             doc = db.collection("job_seeker").document(uid).get()
 
             if doc.exists:
@@ -177,6 +179,8 @@ def my_applications(request: Request, status: str = "all"):
             "active_filter": status,
             "filter_tabs": FILTER_TABS,
             "status_meta": STATUS_META,
+            "active_page": "application",
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -200,9 +204,11 @@ def my_applications_detail(request: Request, application_id: str):
     user = None
 
     if request.session.get("user_type") == "job_seeker":
+
         uid = request.session.get("applicant_id")
 
         if uid:
+
             doc = db.collection("job_seeker").document(uid).get()
 
             if doc.exists:
@@ -229,6 +235,7 @@ def my_applications_detail(request: Request, application_id: str):
             "request": request,
             "application": application,
             "user": user,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -241,6 +248,7 @@ def withdraw_application(application_id: str):
     doc = doc_ref.get()
 
     if not doc.exists:
+
         return RedirectResponse("/application", status_code=302)
 
     data = doc.to_dict()
@@ -248,6 +256,7 @@ def withdraw_application(application_id: str):
         raise HTTPException(status_code=409, detail="Application already cancelled")
 
     if data.get("status") == "Submitted":
+
         doc_ref.update({"status": "Cancelled"})
 
     return RedirectResponse(f"/application/{application_id}", status_code=302)
