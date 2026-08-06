@@ -11,8 +11,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from ..helper import (
-    get_company,
-    get_unread_notification_count
+    get_company
 )
 
 from firebase_admin import firestore
@@ -203,18 +202,17 @@ async def publish_job_confirm(
 
         "date": datetime.now(),
 
-        "description":
-            f"Published '{job['job_title']}'",
+        "type": "job_post",
+
+        "description": f"Published '{job['job_title']}'",
 
         "credit": -credit_used,
 
-        "balance":
-            available_credit - credit_used,
+        "balance": available_credit - credit_used,
 
-        "reference":
-            doc_ref.id
+        "reference": ""
 
-    })
+})
 
     request.session.pop("job", None)
 

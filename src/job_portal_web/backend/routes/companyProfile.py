@@ -1,5 +1,4 @@
 import os
-from ..helper import get_unread_notification_count
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
@@ -177,6 +176,5 @@ async def company_profile(request: Request):
             "gallery": gallery,
             "team_members": team_members,
             "documents": documents,
-            "unread_count": get_unread_notification_count(request),
         },
     )

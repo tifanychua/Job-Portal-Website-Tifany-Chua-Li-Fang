@@ -150,16 +150,20 @@
 
                     <td>
 
-                        <a href="/payment-receipt/{{ item.reference }}"
-                        class="reference">
+                        {% if item.credit > 0 %}
 
-                            <i class="fa-solid fa-receipt"></i>
+                            <a href="/payment-receipt/{{ item.reference }}" class="reference">
+                                <i class="fa-solid fa-receipt"></i>
+                                Receipt #{{ item.reference }}
+                            </a>
 
-                            Receipt #{{ item.reference }}
+                        {% else %}
 
-                        </a>
+                            <span class="no-reference">-</span>
 
-                    </td>
+                        {% endif %}
+
+</td>
 
                 </tr>
 
@@ -168,6 +172,15 @@
                 </tbody>
 
             </table>
+
+            {% if has_more %}
+            <div class="view-all-container">
+                <a href="/credit-history" class="view-all-btn">
+                    View All History
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+            {% endif %}
 
         </section>
 

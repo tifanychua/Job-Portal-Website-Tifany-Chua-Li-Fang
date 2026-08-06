@@ -93,34 +93,29 @@ async def employer_credit(request: Request):
     # ==========================================
 
     history_docs = (
-
         db.collection("credit_history")
-
         .where("company_id", "==", company_id)
-
         .stream()
-
     )
 
-    histories = []
+    all_histories = []
 
     for doc in history_docs:
 
         data = doc.to_dict()
 
-        histories.append({
+        all_histories.append({
 
             "date": data.get("date", ""),
-
             "description": data.get("description", ""),
-
             "credit": data.get("credit", 0),
-
             "balance": data.get("balance", 0),
-
             "reference": data.get("reference", "")
 
         })
+
+    histories = all_histories[:10]
+    has_more = len(all_histories) > 10
 
     # ==========================================
     # Render
@@ -145,6 +140,7 @@ async def employer_credit(request: Request):
             "expired_credit": expired_credit,
 
             "histories": histories,
+            "has_more": has_more,
 
             "current_plan": current_plan,
 

@@ -1,0 +1,1024 @@
+/* ==========================================================
+   Company Details
+   ========================================================== */
+
+body{
+    background:#F8FAFC;
+}
+
+/* ==========================================================
+   Hero
+   ========================================================== */
+
+.company-hero{
+    background:linear-gradient(180deg,#EEF2FF 0%,#F8FAFC 100%);
+    border-bottom:1px solid #E5E7EB;
+    padding:48px 0;
+}
+
+.hero-inner{
+    max-width:1400px;
+    margin:0 auto;
+    padding:0 40px;
+    box-sizing:border-box;
+}
+
+.company-header{
+    display:flex;
+    align-items:center;
+    gap:28px;
+}
+
+.company-logo{
+    width:120px;
+    height:120px;
+    flex-shrink:0;
+}
+
+.company-logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    background:#fff;
+    border:1px solid #E5E7EB;
+    border-radius:18px;
+    padding:14px;
+}
+
+.company-info{
+    flex:1;
+}
+
+.company-info h1{
+    margin:0;
+    font-size:38px;
+    font-weight:700;
+    color:#0F172A;
+}
+
+.company-rating{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:14px;
+}
+
+.company-rating i{
+    color:#F59E0B;
+}
+
+.company-rating strong{
+    font-size:20px;
+}
+
+.company-rating span{
+    color:#64748B;
+}
+
+.company-meta{
+    display:flex;
+    gap:24px;
+    flex-wrap:wrap;
+    margin-top:18px;
+}
+
+.company-meta span{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:#475569;
+}
+
+.company-meta i{
+    color:#2563EB;
+}
+
+.hero-action{
+    margin-left:auto;
+}
+
+/* ==========================================================
+   Button
+   ========================================================== */
+
+.btn-primary{
+    background:#2563EB;
+    color:#fff;
+    border:none;
+    border-radius:12px;
+    padding:14px 24px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:600;
+    transition:.25s;
+}
+
+.btn-primary:hover{
+    background:#1D4ED8;
+}
+
+/* ==========================================================
+   Tabs
+   ========================================================== */
+
+.company-tabs{
+    max-width:1400px;
+    margin:auto;
+    padding:0 40px;
+    display:flex;
+    gap:35px;
+    border-bottom:1px solid #E5E7EB;
+    background:#fff;
+}
+
+.company-tabs a{
+    padding:18px 0;
+    text-decoration:none;
+    color:#64748B;
+    font-weight:600;
+    position:relative;
+}
+
+.company-tabs a.active{
+    color:#2563EB;
+}
+
+.company-tabs a.active::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:-1px;
+    width:100%;
+    height:3px;
+    background:#2563EB;
+    border-radius:10px;
+}
+
+.company-tabs span{
+    background:#DBEAFE;
+    color:#2563EB;
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:12px;
+    margin-left:5px;
+}
+
+/* ==========================================================
+   Container
+   ========================================================== */
+
+.company-container{
+    max-width:1400px;
+    margin:35px auto;
+    padding:0 40px;
+    box-sizing:border-box;
+}
+
+/* ==========================================================
+   Card
+   ========================================================== */
+
+.card{
+
+    background:#fff;
+
+    border:1px solid #E5E7EB;
+
+    border-radius:18px;
+
+    padding:40px;
+
+    margin-bottom:32px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.05);
+
+}
+
+.card h2{
+    margin:0 0 28px;
+    font-size:30px;
+    color:#0F172A;
+}
+
+/* ==========================================================
+   Overview
+   ========================================================== */
+
+/* ==========================================================
+   Company Information
+========================================================== */
+
+.overview-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2, minmax(320px, 1fr));
+
+    column-gap:80px;
+
+    row-gap:32px;
+
+    margin-top:20px;
+
+}
+
+.overview-grid div{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.overview-grid label{
+
+    font-size:17px;
+
+    font-weight:700;
+
+    color:#0F172A;
+
+    margin-bottom:10px;
+
+}
+
+.overview-grid p{
+
+    margin:0;
+
+    font-size:16px;
+
+    color:#475569;
+
+    line-height:1.8;
+
+    word-break:break-word;
+
+}
+
+.overview-grid a{
+
+    color:#2563EB;
+
+    text-decoration:none;
+
+}
+
+.overview-grid a:hover{
+
+    text-decoration:underline;
+
+}
+
+/* ==========================================================
+   Section Header
+   ========================================================== */
+
+.section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.section-title a{
+    text-decoration:none;
+    color:#2563EB;
+    font-weight:600;
+}
+
+/* ==========================================================
+   Jobs
+   ========================================================== */
+
+.job-list{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.job-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border:1px solid #E5E7EB;
+    border-radius:14px;
+    padding:22px;
+    text-decoration:none;
+    color:inherit;
+    transition:.25s;
+}
+
+.job-card:hover{
+    border-color:#2563EB;
+    box-shadow:0 10px 20px rgba(37,99,235,.10);
+    transform:translateY(-2px);
+}
+
+.job-content h3{
+    margin:0 0 10px;
+    font-size:22px;
+    color:#0F172A;
+}
+
+.job-content p{
+    margin:6px 0;
+    color:#64748B;
+}
+
+.apply{
+    color:#2563EB;
+    font-weight:700;
+}
+
+/* ==========================================================
+   Reviews Page
+   ========================================================== */
+
+.review-summary{
+
+    display:grid;
+
+    grid-template-columns:280px 1fr;
+
+    gap:50px;
+
+    align-items:center;
+
+}
+
+/* ==========================================================
+   Overall Rating
+   ========================================================== */
+
+.overall{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
+
+    border-right:1px solid #E5E7EB;
+
+    padding-right:40px;
+
+}
+
+.overall h1{
+
+    font-size:72px;
+
+    color:#2563EB;
+
+    margin:0;
+
+    line-height:1;
+
+}
+
+.stars{
+
+    margin:18px 0;
+
+    display:flex;
+
+    gap:6px;
+
+}
+
+.stars i{
+
+    color:#F59E0B;
+
+    font-size:22px;
+
+}
+
+.overall p{
+
+    margin-top:12px;
+
+    color:#64748B;
+
+    line-height:1.7;
+
+}
+
+/* ==========================================================
+   Rating Bars
+   ========================================================== */
+
+.bars{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:22px;
+
+}
+
+.bars div{
+
+    display:grid;
+
+    grid-template-columns:180px 1fr 50px;
+
+    align-items:center;
+
+    gap:18px;
+
+}
+
+.bars span{
+
+    font-weight:500;
+
+    color:#334155;
+
+}
+
+.bars strong{
+
+    text-align:right;
+
+    color:#2563EB;
+
+    font-weight:700;
+
+}
+
+.bars progress{
+
+    width:100%;
+
+    height:10px;
+
+    appearance:none;
+
+    border:none;
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+}
+
+.bars progress::-webkit-progress-bar{
+
+    background:#E5E7EB;
+
+    border-radius:999px;
+
+}
+
+.bars progress::-webkit-progress-value{
+
+    background:#2563EB;
+
+    border-radius:999px;
+
+}
+
+.bars progress::-moz-progress-bar{
+
+    background:#2563EB;
+
+}
+
+/* ==========================================================
+   Review Card
+   ========================================================== */
+
+.review-card{
+
+    border:1px solid #E5E7EB;
+
+    border-radius:16px;
+
+    padding:24px;
+
+    margin-top:20px;
+
+    transition:.25s;
+
+    background:#fff;
+
+}
+
+.review-card:hover{
+
+    box-shadow:0 8px 20px rgba(0,0,0,.06);
+
+    transform:translateY(-2px);
+
+}
+
+.review-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    margin-bottom:18px;
+
+}
+
+.review-top strong{
+
+    font-size:20px;
+
+    color:#0F172A;
+
+}
+
+.review-top small{
+
+    color:#64748B;
+
+}
+
+.review-top span{
+
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    font-weight:700;
+
+}
+
+.review-card p{
+
+    color:#475569;
+
+}
+
+.card p{
+    margin-top: 8px;
+}
+
+/* ==========================================================
+   Empty State
+   ========================================================== */
+
+.empty-state{
+
+    text-align:center;
+
+    padding:70px 30px;
+
+    border:2px dashed #CBD5E1;
+
+    border-radius:18px;
+
+    background:#F8FAFC;
+
+}
+
+.empty-state i{
+
+    font-size:60px;
+
+    color:#CBD5E1;
+
+    margin-bottom:20px;
+
+}
+
+.empty-state h3{
+
+    margin:0;
+
+    font-size:28px;
+
+    color:#0F172A;
+
+}
+
+.empty-state p{
+
+    color:#64748B;
+
+    margin-top:12px;
+
+    line-height:1.8;
+
+}
+
+.empty-state .btn-primary{
+
+    margin-top:25px;
+
+}
+
+/* ==========================================================
+   Section Subtitle
+   ========================================================== */
+
+.section-subtitle{
+
+    margin-top:8px;
+
+    color:#64748B;
+
+    font-size:15px;
+
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+
+@media (max-width:900px){
+
+    .review-summary{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .overall{
+
+        border-right:none;
+
+        border-bottom:1px solid #E5E7EB;
+
+        padding-right:0;
+
+        padding-bottom:30px;
+
+    }
+
+    .bars div{
+
+        grid-template-columns:140px 1fr 40px;
+
+    }
+
+}
+
+@media (max-width:600px){
+
+    .bars div{
+
+        grid-template-columns:1fr;
+
+        gap:8px;
+
+    }
+
+    .bars strong{
+
+        text-align:left;
+
+    }
+
+}
+
+/* ==========================================================
+   Empty State
+   ========================================================== */
+
+.empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:#64748B;
+}
+
+.empty-state i{
+    font-size:46px;
+    color:#CBD5E1;
+    margin-bottom:15px;
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+
+@media (max-width:992px){
+
+    .company-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .hero-action{
+        margin-left:0;
+        margin-top:20px;
+    }
+
+    .overview-grid{
+        grid-template-columns:1fr;
+        gap:20px;
+    }
+
+    .review-summary{
+        grid-template-columns:1fr;
+    }
+
+    .bars div{
+        grid-template-columns:1fr;
+    }
+
+    .job-card{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+}
+
+@media (max-width:768px){
+
+    .hero-inner,
+    .company-container,
+    .company-tabs{
+        padding:0 20px;
+    }
+
+    .company-info h1{
+        font-size:30px;
+    }
+
+    .company-logo{
+        width:90px;
+        height:90px;
+    }
+
+    .card{
+        padding:22px;
+    }
+
+    .company-tabs{
+        overflow-x:auto;
+    }
+
+    .overview-grid{
+
+        grid-template-columns:1fr;
+
+        gap:24px;
+
+    }
+
+}
+
+/* ==========================================
+   Open Position Header
+========================================== */
+
+.section-title{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:26px;
+
+}
+
+.section-title h2{
+
+    margin:0;
+    font-size:32px;
+    color:#0F172A;
+
+}
+
+.job-count{
+
+    display:block;
+
+    margin-top:6px;
+
+    color:#64748B;
+
+    font-size:15px;
+
+}
+
+/* ==========================================
+   View All Button
+========================================== */
+
+.view-all-btn{
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    padding:12px 22px;
+
+    border:2px solid #2563EB;
+
+    border-radius:12px;
+
+    color:#2563EB;
+
+    text-decoration:none;
+
+    font-weight:600;
+
+    transition:.25s;
+
+    white-space:nowrap;
+
+}
+
+.view-all-btn:hover{
+
+    background:#2563EB;
+
+    color:#FFFFFF;
+
+    transform:translateY(-2px);
+
+    box-shadow:0 8px 18px rgba(37,99,235,.18);
+
+}
+
+.view-all-btn i{
+
+    font-size:14px;
+
+    transition:.25s;
+
+}
+
+.view-all-btn:hover i{
+
+    transform:translateX(4px);
+
+}
+
+#about{
+
+    display:block;
+
+}
+
+#jobs{
+
+    display:none;
+
+}
+
+#reviews-section{
+
+    display:none;
+
+}
+
+.review-card{
+
+    display:flex;
+
+    gap:36px;
+
+    background:#fff;
+
+    border:1px solid #e5e7eb;
+
+    border-radius:16px;
+
+    padding:28px;
+
+    margin-bottom:22px;
+
+}
+
+.review-left{
+
+    width:240px;
+
+    flex-shrink:0;
+
+}
+
+.review-stars{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:5px;
+
+    margin-bottom:12px;
+
+}
+
+.review-stars i{
+
+    color:#F59E0B;
+
+    font-size:18px;
+
+}
+
+.review-stars span{
+
+    font-weight:700;
+
+    color:#333;
+
+    margin-left:5px;
+
+}
+
+.review-left h4{
+
+    margin:12px 0 6px;
+
+    font-size:18px;
+
+}
+
+.review-role{
+
+    color:#555;
+
+    margin-bottom:15px;
+
+}
+
+.review-location,
+
+.review-period{
+
+    color:#666;
+
+    font-size:14px;
+
+    line-height:1.6;
+
+}
+
+.review-right{
+
+    flex:1;
+
+}
+
+.review-right h3{
+
+    margin-bottom:15px;
+
+    font-size:21px;
+
+    color:#222;
+
+}
+
+.review-section{
+
+    margin-top:22px;
+
+}
+
+.review-section strong{
+
+    display:block;
+
+    font-size: 20px;
+
+    color:#111827;
+
+}
+
+.review-section p{
+
+    color:#444;
+
+}
+
+.recommend-badge{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:8px 14px;
+
+    border-radius:30px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    margin-bottom:18px;
+
+}

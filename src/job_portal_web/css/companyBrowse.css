@@ -1,0 +1,324 @@
+/* ==========================================================
+   Company Browse
+========================================================== */
+
+/* ==========================
+   Main Container
+========================== */
+
+.page-container{
+    max-width:1400px;
+    margin:0 auto;
+    padding:36px 40px;
+    box-sizing:border-box;
+}
+
+/* ==========================
+   Results Header
+========================== */
+
+.results-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:24px;
+}
+
+.results-count{
+    font-size:16px;
+    color:#475569;
+}
+
+.results-count strong{
+    color:#2563EB;
+    font-weight:700;
+}
+
+/* ==========================
+   Company Grid
+========================== */
+
+.company-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fill,minmax(260px,260px));
+
+    gap:24px;
+
+    justify-content:flex-start;
+
+}
+
+/* ==========================
+   Company Card
+========================== */
+
+.company-card{
+
+    width:260px;
+    height:320px;
+
+    background:#FFFFFF;
+
+    border:2px solid #E5E7EB;
+
+    border-radius:22px;
+
+    padding:22px;
+
+    box-sizing:border-box;
+
+    display:flex;
+    flex-direction:column;
+
+    text-decoration:none;
+
+    color:inherit;
+
+    transition:all .25s ease;
+
+}
+
+.company-card:hover{
+
+    border-color:#2563EB;
+
+    box-shadow:0 10px 24px rgba(37,99,235,.15);
+
+    transform:translateY(-3px);
+
+}
+
+/* ==========================
+   Logo
+========================== */
+
+.company-logo{
+
+    width:72px;
+    height:72px;
+
+    margin:0 auto 18px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+}
+
+.company-logo img{
+
+    max-width:72px;
+    max-height:72px;
+
+    width:auto;
+    height:auto;
+
+    object-fit:contain;
+
+}
+
+/* ==========================
+   Company Name
+========================== */
+
+.company-card h3{
+
+    font-size:17px;
+
+    font-weight:700;
+
+    color:#1E293B;
+
+    line-height:25px;
+
+    height:50px;
+
+    margin:0 0 18px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    overflow:hidden;
+
+}
+
+/* ==========================
+   Rating
+========================== */
+
+.company-rating{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:8px;
+
+    min-height:26px;
+
+    margin-bottom:20px;
+
+}
+
+.company-rating i{
+
+    color:#F59E0B;
+
+    font-size:17px;
+
+}
+
+.rating-score{
+
+    font-size:16px;
+
+    font-weight:600;
+
+    color:#1E293B;
+
+}
+
+.review-count{
+
+    font-size:16px;
+
+    color:#64748B;
+
+}
+
+/* ==========================
+   Job Badge
+========================== */
+
+.job-pill{
+
+    margin-top:auto;
+
+    align-self:center;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:8px 18px;
+
+    background:#EAF4FF;
+
+    color:#2563EB;
+
+    border-radius:12px;
+
+    font-size:16px;
+
+    font-weight:700;
+
+}
+
+/* ==========================
+   Pagination
+========================== */
+
+.pagination{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:10px;
+
+    margin-top:40px;
+
+}
+
+.page-btn{
+
+    width:40px;
+    height:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:10px;
+
+    border:1px solid #E2E8F0;
+
+    background:#FFFFFF;
+
+    color:#334155;
+
+    text-decoration:none;
+
+    transition:.25s;
+
+}
+
+.page-btn:hover{
+
+    border-color:#2563EB;
+
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+}
+
+.page-btn.active{
+
+    background:#2563EB;
+
+    color:#FFFFFF;
+
+    border-color:#2563EB;
+
+}
+
+/* ==========================
+   Responsive
+========================== */
+
+@media(max-width:1200px){
+
+    .company-grid{
+
+        grid-template-columns:repeat(auto-fill,minmax(240px,240px));
+
+    }
+
+}
+
+@media(max-width:768px){
+
+    .page-container{
+
+        padding:20px;
+
+    }
+
+    .company-grid{
+
+        grid-template-columns:1fr;
+
+        justify-content:center;
+
+    }
+
+    .company-card{
+
+        width:100%;
+        max-width:320px;
+
+        margin:auto;
+
+    }
+
+}

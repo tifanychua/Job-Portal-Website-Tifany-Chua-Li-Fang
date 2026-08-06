@@ -7,10 +7,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-from .database import db
 from .helper import (
-    get_company,
-    get_unread_notification_count
+    get_company
 )
 
 # Routers
@@ -31,15 +29,15 @@ from .routes.editProfile import router as editProfile_router
 from .routes.employer import router as employer_router
 from .routes.employerApplication import router as employer_application_router
 from .routes.employerCredit import router as employer_credit_router
-from .routes.admin import router as admin_router
 from job_portal_web.backend.routes.education import router as education_router
 from job_portal_web.backend.routes.experience import router as experience_router
-from .routes.companyProfile import router as companyProfile_router
 from .routes.skill import router as skill_router
 from .routes.payment import router as payment_router
-from .routes.editCompanyProfile import router as editCompanyProfile_router
-from .routes.notification import router as notification_router
-import os
+from .applicant import router as applicant_router
+from .routes.jobSeekerProfile import router as jobSeekerProfile_router
+from .routes.companyBrowse import router as company_browse_router
+from .routes.companyDetails import router as company_details_router
+from .routes.writeCompanyReview import router as write_company_review_router
 
 # ==================================================
 # APP
@@ -170,7 +168,11 @@ app.include_router(employer_credit_router)
 
 app.include_router(payment_router)
 
-app.include_router(notification_router)
+app.include_router(company_browse_router)
+
+app.include_router(company_details_router)
+
+app.include_router(write_company_review_router)
 
 # ==================================================
 # TEMPLATE HELPER
@@ -192,8 +194,6 @@ def render_template(request: Request, template: str, context=None):
         company = get_company(request)
 
         context["company"] = company
-
-        context["unread_count"] = get_unread_notification_count(request)
 
     return templates.TemplateResponse(
         request=request,

@@ -1035,3 +1035,39 @@ button:disabled{
     }
 
 }
+
+.view-all-container{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:20px;
+}
+
+.view-all-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 18px;
+    background:#2563EB;
+    color:#fff;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:600;
+    transition:0.25s;
+}
+
+.view-all-btn:hover{
+    background:#1D4ED8;
+}
+
+.view-all-btn i{
+    transition:0.25s;
+}
+
+.view-all-btn:hover i{
+    transform:translateX(3px);
+}
+
+.no-reference{
+    color:#9CA3AF;
+    font-style:italic;
+}

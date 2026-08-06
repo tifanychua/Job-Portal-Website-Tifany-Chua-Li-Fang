@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Companies</title>
+
+    <link rel="stylesheet" href="/css/jobs.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/css/companyBrowse.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<!-- ===================================================== -->
+<!-- Hero -->
+<!-- ===================================================== -->
+
+<section class="hero">
+
+    <div class="hero-inner">
+
+        <h1 class="text-page-title">
+            Find Your Next Employer
+        </h1>
+
+        <p class="text-normal">
+            Discover companies, compare ratings and read employee reviews.
+        </p>
+
+        <form class="search-bar"
+              method="get"
+              action="/companies">
+
+            <div class="search-field">
+
+                <i class="fa-solid fa-magnifying-glass icon"></i>
+
+                <input
+                    type="text"
+                    name="keyword"
+                    value="{{ keyword }}"
+                    placeholder="Search company name">
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn-search text-button">
+
+                Search Companies
+
+            </button>
+
+        </form>
+
+    </div>
+
+</section>
+
+
+<!-- ===================================================== -->
+<!-- Company List -->
+<!-- ===================================================== -->
+
+<!-- Company List -->
+<div class="page-container">
+
+    <div class="results-header">
+        <div class="results-count">
+            Showing
+            <strong>{{ total_company }}</strong>
+            Companies
+        </div>
+    </div>
+
+    <div class="company-grid">
+
+        {% for company in companies %}
+
+        <a class="company-card" href="/company/{{ company.id }}">
+            <div class="company-logo">
+
+                <img
+                    src="{{ company.logo if company.logo else '/images/user.png' }}"
+                    alt="{{ company.company_name }}">
+
+            </div>
+
+            <h3>
+
+                {{ company.company_name }}
+
+            </h3>
+
+           <div class="company-rating">
+
+                <i class="fa-solid fa-star"></i>
+
+                {% if company.review_count > 0 %}
+
+                    <span class="rating-score">{{ company.rating }}</span>
+
+                    <span class="review-count">
+                        · {{ company.review_count }} Reviews
+                    </span>
+
+                {% else %}
+
+                    <span class="review-count">
+                        New Company
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+            <div class="job-pill">
+
+                {{ company.job_count }}
+
+                {% if company.job_count == 1 %}
+                    Job
+                {% else %}
+                    Jobs
+                {% endif %}
+
+            </div>
+
+        </a>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

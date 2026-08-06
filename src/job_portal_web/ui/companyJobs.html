@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>{{ company.companyName }} Jobs</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/jobs.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/css/companyDetails.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<!-- ===================================================== -->
+<!-- Hero -->
+<!-- ===================================================== -->
+
+<section class="company-hero">
+
+    <div class="hero-inner">
+
+        <div class="company-header">
+
+            <div class="company-logo">
+
+                <img
+                    src="{{ company.logo if company.logo else '/images/user.png' }}"
+                    alt="{{ company.companyName }}">
+
+            </div>
+
+            <div class="company-info">
+
+                <h1>
+
+                    {{ company.companyName }}
+
+                </h1>
+
+                <div class="company-rating">
+
+                    <i class="fa-solid fa-star"></i>
+
+                    <strong>
+
+                        {{ company.rating }}
+
+                    </strong>
+
+                    <span>
+
+                        ({{ company.review_count }} Reviews)
+
+                    </span>
+
+                </div>
+
+                <div class="company-meta">
+
+                    <span>
+
+                        <i class="fa-solid fa-briefcase"></i>
+
+                        {{ company.industry }}
+
+                    </span>
+
+                    <span>
+
+                        <i class="fa-solid fa-location-dot"></i>
+
+                        {{ company.city }},
+                        {{ company.state }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- Navigation -->
+<!-- ===================================================== -->
+
+<div class="company-tabs">
+
+    <a href="/company/{{ company.id }}">
+
+        About
+
+    </a>
+
+    <a
+        href="/company/{{ company.id }}/jobs"
+        class="active">
+
+        Jobs
+
+        <span>
+
+            {{ jobs|length }}
+
+        </span>
+
+    </a>
+
+    <a href="/company/{{ company.id }}/reviews">
+
+        Reviews
+
+        <span>
+
+            {{ company.review_count }}
+
+        </span>
+
+    </a>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- Job List -->
+<!-- ===================================================== -->
+
+<div class="company-container">
+
+<section class="card">
+
+    <div class="section-title">
+
+        <div>
+
+            <h2>
+
+                Open Positions
+
+            </h2>
+
+            <p class="section-subtitle">
+
+                {{ jobs|length }}
+
+                Available Position{% if jobs|length != 1 %}s{% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+    {% if jobs %}
+
+    <div class="job-list">
+
+        {% for job in jobs %}
+
+<a
+    href="/jobs/{{ job.id }}"
+    class="job-card">
+
+    <!-- ========================= -->
+    <!-- Left -->
+    <!-- ========================= -->
+
+    <div class="job-content">
+
+        <h3>
+
+            {{ job.job_title }}
+
+        </h3>
+
+        <div class="job-company">
+
+            {{ company.companyName }}
+
+        </div>
+
+        <div class="job-meta">
+
+            <span>
+
+                <i class="fa-solid fa-location-dot"></i>
+
+                {{ job.location or company.location }}
+
+            </span>
+
+            <span>
+
+                <i class="fa-solid fa-briefcase"></i>
+
+                {{ job.employment_type or "-" }}
+
+            </span>
+
+            {% if job.workplace_type %}
+
+            <span>
+
+                <i class="fa-solid fa-building"></i>
+
+                {{ job.workplace_type }}
+
+            </span>
+
+            {% endif %}
+
+        </div>
+
+        <div class="job-salary">
+
+            <i class="fa-solid fa-money-bill-wave"></i>
+
+            {% if job.salaryType == "fixed" %}
+
+                {{ job.salary_display }}
+
+            {% elif job.salaryType == "range" %}
+
+                RM {{ "{:,.0f}".format(job.minSalary) }}
+
+                -
+
+                RM {{ "{:,.0f}".format(job.maxSalary) }}
+
+            {% else %}
+
+                Negotiable
+
+            {% endif %}
+
+        </div>
+
+        {% if job.required_skills %}
+
+        <div class="job-skills">
+
+            {% for skill in job.required_skills[:5] %}
+
+            <span>
+
+                {{ skill }}
+
+            </span>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <!-- ========================= -->
+    <!-- Right -->
+    <!-- ========================= -->
+
+    <div class="job-right">
+
+        <span class="view-btn">
+
+            View Job
+
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </span>
+
+    </div>
+
+</a>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="empty-state">
+
+    <i class="fa-solid fa-briefcase"></i>
+
+    <h3>
+
+        No Open Positions
+
+    </h3>
+
+    <p>
+
+        This company doesn't have any active job postings at the moment.
+
+    </p>
+
+</div>
+
+{% endif %}
+
+</section>
+
+</div>
+
+</body>
+</html>

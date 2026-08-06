@@ -8,9 +8,8 @@ from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore, storage
 from pydantic import BaseModel
 from ..helper import (
-    get_company,
-    get_unread_notification_count
-)
+    get_company
+    )
 from ..database import db
 import os
 
