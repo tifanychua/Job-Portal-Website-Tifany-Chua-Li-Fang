@@ -1,5 +1,5 @@
 import os
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
@@ -11,6 +11,8 @@ from ..helper import (
     get_company
     )
 from ..database import db
+from ..helper import get_company
+from ..notifications import get_unread_notifications_count
 import os
 
 # ==================================================
@@ -349,6 +351,7 @@ async def view_applications(request: Request):
             "shortlisted_count": shortlisted_count,
             "offered_count": offered_count,
             "rejected_count": rejected_count,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -489,6 +492,44 @@ async def update_application_status(application_id: str, status_data: Applicatio
             "updated_on": firestore.SERVER_TIMESTAMP,
         }
     )
+    
+    # ==================================================
+    # Notify the Applicant
+    # ==================================================
+
+    job_seeker_id = application.get("job_seeker_id")
+    job_id = application.get("job_id")
+
+    if job_seeker_id:
+        job_title = "your application"
+
+        if job_id:
+            job_doc = db.collection("job_list").document(job_id).get()
+            if job_doc.exists:
+                job_title = job_doc.to_dict().get("job_title", job_title)
+
+        status_messages = {
+            "Reviewed": "is now being reviewed",
+            "Shortlisted": "has been shortlisted",
+            "Offered": "has received a job offer — congratulations!",
+            "Rejected": "was not successful this time",
+        }
+
+        db.collection("notification").document().set(
+            {
+                "user_id": job_seeker_id,
+                "user_type": "job_seeker",
+                "is_read": False,
+                "type": "application",
+                "title": "Application status updated",
+                "message": (
+                    f"Your application for {job_title} "
+                    f"{status_messages.get(firestore_status, 'has been updated')}."
+                ),
+                "link": f"/application/{application_id}",
+                "created_at": datetime.now(UTC),
+            }
+        )
 
     # ==================================================
     # Return Successful Result

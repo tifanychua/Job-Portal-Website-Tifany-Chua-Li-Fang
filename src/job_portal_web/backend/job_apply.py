@@ -13,6 +13,7 @@ from .job_information import (
     _find_company,
     _normalize_job,
 )
+from .notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -71,7 +72,7 @@ def _get_screening_questions(job):
     return questions
 
 
-def _get_currentjob_seeker(request: Request):
+def _get_current_job_seeker(request: Request):
     job_seeker_id = request.session.get("applicant_id")
 
     if not job_seeker_id:
@@ -109,7 +110,7 @@ def job_apply_form(request: Request, job_id: str):
 
     job = _load_job(job_id)
 
-    job_seeker_id, job_seeker = _get_currentjob_seeker(request)
+    job_seeker_id, job_seeker = _get_current_job_seeker(request)
 
     job_seeker = job_seeker or {
         "full_name": "Guest Applicant",
@@ -142,7 +143,7 @@ async def job_apply_submit(
 
     job = _load_job(job_id)
 
-    job_seeker_id, job_seeker = _get_currentjob_seeker(request)
+    job_seeker_id, job_seeker = _get_current_job_seeker(request)
 
     # ==============================
     # Check Login
@@ -209,6 +210,26 @@ async def job_apply_submit(
             "status": "Submitted",
             "created_at": datetime.now(UTC),
             "updated_on": datetime.now(UTC),
+        }
+    )
+    
+    # ==============================
+    # Notify the employer
+    # ==============================
+
+    db.collection("notification").document().set(
+        {
+            "user_id": job.get("company_id"),
+            "user_type": "employer",
+            "is_read": False,
+            "type": "application",
+            "title": "New application received",
+            "message": (
+                f"{job_seeker.get('name', 'A candidate')} applied for "
+                f"{job.get('job_title', 'your job posting')}."
+            ),
+            "link": "/applications",
+            "created_at": datetime.now(UTC),
         }
     )
 

@@ -202,6 +202,8 @@ input, select { font-family: inherit; }
 
 .bookmark-btn { color: var(--color-text-secondary); font-size: 18px; }
 .bookmark-btn:hover { color: var(--color-primary); }
+.bookmark-btn.saved { color: var(--color-danger); }
+.bookmark-btn.saved:hover { color: var(--color-danger); opacity: 0.85; }
 
 /* ---------- Responsive (shared) ---------- */
 @media (max-width: 700px) {

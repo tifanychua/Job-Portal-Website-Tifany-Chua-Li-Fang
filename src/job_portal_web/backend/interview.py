@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from itsdangerous import TimestampSigner
 from pydantic import BaseModel, field_validator
+from datetime import UTC, datetime, timedelta
 
 from .database import db
 from .email_service import (
@@ -15,6 +16,7 @@ from .email_service import (
     send_interview_email,
     send_interview_rescheduled_email,
 )
+from .notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -148,6 +150,22 @@ async def create_interview(interview: Interview):
         interview_data["candidateName"] = seeker.get("name", "")
 
         interview_ref = db.collection("interviews").add(interview_data)
+        db.collection("notification").document().set(
+            {
+                "user_id": real_candidate_id,
+                "user_type": "job_seeker",
+                "is_read": False,
+                "type": "interview",
+                "title": "Interview scheduled",
+                "message": (
+                    f"{company.get('companyName', 'An employer')} scheduled an interview "
+                    f"with you for {interview.position or 'a position'} on "
+                    f"{interview.date} at {interview.time}."
+                ),
+                "link": f"/my_interviews/detail/{interview_ref[1].id}",
+                "created_at": datetime.now(UTC),
+            }
+        )
 
         print("Interview created:", interview_ref[1].id)
 
@@ -282,7 +300,19 @@ async def cancel_interview(interview_id: str):
     interview = doc.to_dict()
 
     interview_ref.update({"status": "Cancelled", "applicantResponse": "Cancelled"})
-
+    
+    db.collection("notification").document().set(
+            {
+                "user_id": interview.get("candidateId"),
+                "user_type": "job_seeker",
+                "is_read": False,
+                "type": "interview",
+                "title": "Interview cancelled",
+                "message": f"Your interview for {interview.get('position', 'the position')} has been cancelled.",
+                "link": f"/my_interviews/detail/{interview_id}",
+                "created_at": datetime.now(UTC),
+            }
+        )
     try:
         seeker_doc = db.collection("job_seeker").document(interview.get("candidateId")).get()
 
@@ -364,6 +394,7 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
             "applicantResponse": "Pending",
         }
     )
+    
 
     try:
         # ======================================
@@ -385,6 +416,21 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
         seeker_doc = db.collection("job_seeker").document(seeker_id).get()
 
         if seeker_doc.exists:
+            db.collection("notification").document().set(
+                    {
+                        "user_id": seeker_id,
+                        "user_type": "job_seeker",
+                        "is_read": False,
+                        "type": "interview",
+                        "title": "Interview rescheduled",
+                        "message": (
+                            f"Your interview for {updated_data.get('position', 'the position')} "
+                            f"has been rescheduled to {updated_data.get('date')} at {updated_data.get('time')}."
+                        ),
+                        "link": f"/my_interviews/detail/{interview_id}",
+                        "created_at": datetime.now(UTC),
+                    }
+            )
             seeker = seeker_doc.to_dict()
 
             # ======================================
@@ -666,7 +712,13 @@ async def schedule_list(request: Request):
         return RedirectResponse("/login", status_code=303)
 
     return templates.TemplateResponse(
-        request=request, name="schedule_list.html", context={"request": request, "company": user}
+        request=request,
+        name="schedule_list.html",
+        context={
+            "request": request,
+            "company": user,
+            "unread_notifications_count": get_unread_notifications_count(request),
+        },
     )
 
 
@@ -720,6 +772,22 @@ async def accept_interview(interview_id: str):
                     interview.get("time"),
                     interview.get("meetingLink", "To be provided"),
                 )
+                
+        db.collection("notification").document().set(
+            {
+                "user_id": interview.get("companyId"),
+                "user_type": "employer",
+                "is_read": False,
+                "type": "interview",
+                "title": "Interview accepted",
+                "message": (
+                    f"{interview.get('candidateName', 'The candidate')} accepted the interview "
+                    f"for {interview.get('position', 'the position')}."
+                ),
+                "link": "/schedule_list",
+                "created_at": datetime.now(UTC),
+            }
+        )
 
     except Exception as e:
         print("Accept email error:", e)
@@ -759,6 +827,22 @@ async def decline_interview(interview_id: str):
                 interview.get("position"),
                 "Declined",
             )
+            
+        db.collection("notification").document().set(
+            {
+                "user_id": interview.get("companyId"),
+                "user_type": "employer",
+                "is_read": False,
+                "type": "interview",
+                "title": "Interview declined",
+                "message": (
+                    f"{interview.get('candidateName', 'The candidate')} declined the interview "
+                    f"for {interview.get('position', 'the position')}."
+                ),
+                "link": "/schedule_list",
+                "created_at": datetime.now(UTC),
+            }
+        )
 
     except Exception as e:
         print("Decline email error:", e)
@@ -818,6 +902,23 @@ async def reschedule_request(interview_id: str, request_data: RescheduleRequest)
                 request_data.requestedDate,
                 request_data.requestedTime,
             )
+            
+        db.collection("notification").document().set(
+            {
+                "user_id": interview.get("companyId"),
+                "user_type": "employer",
+                "is_read": False,
+                "type": "interview",
+                "title": "Reschedule requested",
+                "message": (
+                    f"{interview.get('candidateName', 'The candidate')} requested to reschedule "
+                    f"the interview for {interview.get('position', 'the position')} to "
+                    f"{request_data.requestedDate} at {request_data.requestedTime}."
+                ),
+                "link": "/schedule_list",
+                "created_at": datetime.now(UTC),
+            }
+        )
 
     except Exception as e:
         print("Reschedule email error:", e)
@@ -896,5 +997,94 @@ async def interview_schedule(request: Request, applicationId: str):
             "applicationId": applicationId,
             "companyId": request.session.get("company_id"),
             "company": user,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
+    
+    
+    
+    
+# ==================================================
+# SEND UPCOMING-INTERVIEW REMINDERS
+# (call this once a day via a cron job / scheduler — see note below)
+# ==================================================
+
+
+def send_interview_reminders(hours_before: int = 24):
+
+    now = datetime.now(UTC)
+    window_end = now + timedelta(hours=hours_before)
+
+    docs = (
+        db.collection("interviews")
+        .where("status", "in", ["Scheduled", "Accepted", "Rescheduled"])
+        .stream()
+    )
+
+    sent = 0
+
+    for doc in docs:
+        data = doc.to_dict()
+
+        if data.get("reminder_sent"):
+            continue
+
+        try:
+            interview_dt = datetime.strptime(
+                f"{data.get('date')} {data.get('time')}", "%Y-%m-%d %H:%M"
+            ).replace(tzinfo=UTC)
+        except (ValueError, TypeError):
+            continue
+
+        if not (now <= interview_dt <= window_end):
+            continue
+
+        position = data.get("position", "the position")
+
+        # Notify the interviewee (job seeker)
+        if data.get("candidateId"):
+            db.collection("notification").document().set(
+                {
+                    "user_id": data["candidateId"],
+                    "user_type": "job_seeker",
+                    "is_read": False,
+                    "type": "interview",
+                    "title": "Upcoming interview reminder",
+                    "message": (
+                        f"Your interview for {position} is coming up on "
+                        f"{data.get('date')} at {data.get('time')}."
+                    ),
+                    "link": f"/my_interviews/detail/{doc.id}",
+                    "created_at": now,
+                }
+            )
+
+        # Notify the interviewer (employer)
+        if data.get("companyId"):
+            db.collection("notification").document().set(
+                {
+                    "user_id": data["companyId"],
+                    "user_type": "employer",
+                    "is_read": False,
+                    "type": "interview",
+                    "title": "Upcoming interview reminder",
+                    "message": (
+                        f"Interview with {data.get('candidateName', 'a candidate')} for {position} "
+                        f"is coming up on {data.get('date')} at {data.get('time')}."
+                    ),
+                    "link": "/schedule_list",
+                    "created_at": now,
+                }
+            )
+
+        doc.reference.update({"reminder_sent": True})
+        sent += 1
+
+    return sent
+
+
+# Optional: an endpoint an external cron (or a Cowork/GitHub Actions scheduled job) can hit daily
+@router.post("/api/interviews/send-reminders")
+def trigger_interview_reminders():
+    count = send_interview_reminders()
+    return {"message": f"Sent reminders for {count} interview(s)."}

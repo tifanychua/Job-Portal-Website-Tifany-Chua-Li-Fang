@@ -1,0 +1,214 @@
+/* ==========================================================================
+   JobConnect — EMPLOYER NOTIFICATIONS PAGE
+   Loaded by: employer_notification.html
+   NOTE: employer pages only load /static/style.css (no base.css / profile.css),
+   so this file is self-contained and does not rely on CSS custom properties.
+   Colors match style.css: body #f5f7fb, primary #2563eb, cards white +
+   box-shadow 0 5px 15px rgba(0,0,0,.05), radius 15px.
+   Page uses employerHeader.html (fixed topbar + fixed sidebar), so the
+   content wrapper needs the same offset as schedule_list.css's .schedule-page.
+   ========================================================================== */
+
+.employer-notif-page {
+  margin-left: 180px;
+  padding-top: 65px;
+}
+
+.employer-notif-page main {
+  padding: 30px 35px;
+}
+
+.notif-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.notif-page-header-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.notif-bell-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #EAF1FF;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.notif-page-header p {
+  color: #777;
+  margin-top: 4px;
+}
+
+.notif-mark-all-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: background .2s ease;
+}
+.notif-mark-all-btn:hover { background: #f5f7fb; }
+.notif-mark-all-btn:disabled { opacity: .5; cursor: default; }
+
+/* ---------- Tabs ---------- */
+.notif-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
+}
+
+.notif-tab {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #777;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+}
+.notif-tab:hover { color: #333; }
+.notif-tab.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+/* ---------- List ---------- */
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: white;
+  border-radius: 15px;
+  padding: 18px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.05);
+  transition: box-shadow .2s ease;
+}
+.notif-item.unread { background: #F8FAFF; }
+
+.notif-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.notif-blue   { background: #DBEAFE; color: #1D4ED8; }
+.notif-green  { background: #DCFCE7; color: #15803D; }
+.notif-purple { background: #F3E8FF; color: #7E22CE; }
+.notif-orange { background: #FFEDD5; color: #C2410C; }
+.notif-gray   { background: #F1F5F9; color: #777; }
+
+.notif-body { flex: 1; cursor: pointer; }
+
+.notif-top-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notif-title { font-size: 15px; font-weight: 600; color: #222; }
+.notif-time { font-size: 12px; color: #999; white-space: nowrap; }
+.notif-message { font-size: 14px; color: #666; margin-top: 4px; }
+
+.notif-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
+.notif-action-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+}
+.notif-action-btn:hover { background: #FEE2E2; color: #dc2626; }
+
+/* ---------- Empty states ---------- */
+.notif-empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,.05);
+}
+
+.notif-empty-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  background: #f5f7fb;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.notif-empty h3 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.notif-empty p { color: #777; margin-bottom: 18px; }
+
+.notif-empty-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+}
+.notif-empty-btn:hover { background: #f5f7fb; }
+
+@media (max-width: 600px) {
+  .notif-top-row { flex-direction: column; gap: 2px; }
+}
