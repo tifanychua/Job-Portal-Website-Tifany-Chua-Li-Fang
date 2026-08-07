@@ -14,6 +14,7 @@ from .applicant import router as applicant_router
 
 # Routers
 from .auth import router as auth_router
+from .career_advice import router as career_advice_router
 from .chat import router as chat_router
 from .database import db
 from .homepage import router as home_router
@@ -157,7 +158,18 @@ app.include_router(skill_router)
 
 app.include_router(editCompanyProfile_router)
 
+# Career advice feature
+app.include_router(career_advice_router)
 
+app.include_router(education_router)
+
+app.include_router(experience_router)
+
+app.include_router(companyProfile_router)
+
+app.include_router(skill_router)
+
+app.include_router(editCompanyProfile_router)
 # ==================================================
 # TEMPLATE HELPER
 # ==================================================
