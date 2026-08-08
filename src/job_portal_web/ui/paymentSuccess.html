@@ -100,15 +100,11 @@
             <div class="receipt-row">
 
                 <span>
-
                     Payment Method
-
                 </span>
 
                 <strong>
-
-                    PayPal Sandbox
-
+                    {{ payment.payment_method }}
                 </strong>
 
             </div>
@@ -153,21 +149,26 @@
 
         <div class="button-group">
 
+            {% if order_id %}
+
+            <a href="/payment-receipt/{{ order_id }}"
+            class="secondary-btn">
+
+                <i class="fa-solid fa-receipt"></i>
+
+                View Receipt
+
+            </a>
+
+            {% endif %}
+
+
             <a href="/employer-credit"
-               class="secondary-btn">
+            class="primary-btn">
 
                 <i class="fa-solid fa-arrow-left"></i>
 
                 Back to Subscription
-
-            </a>
-
-            <a href="/publish-job"
-               class="primary-btn">
-
-                <i class="fa-solid fa-paper-plane"></i>
-
-                Post New Job
 
             </a>
 

@@ -42,7 +42,10 @@ from .notifications import get_unread_notifications_count
 from .routes.companyBrowse import router as company_browse_router
 from .routes.companyDetails import router as company_details_router
 from .routes.writeCompanyReview import router as write_company_review_router
-
+from .routes.adminTransaction import router as admin_transaction_router
+from .routes.employerPlans import (router as employer_plans_router)
+from .routes.stripePayment import (router as stripe_payment_router)
+from .routes.employerTransactions import (router as employer_transactions_router)
 # ==================================================
 # APP
 # ==================================================
@@ -180,6 +183,15 @@ app.include_router(company_details_router)
 app.include_router(write_company_review_router)
 
 app.include_router(notifications_router)
+
+app.include_router(admin_transaction_router)
+
+app.include_router(employer_plans_router)
+
+app.include_router(stripe_payment_router)
+
+app.include_router(employer_transactions_router)
+
 # ==================================================
 # TEMPLATE HELPER
 # ==================================================
@@ -196,14 +208,14 @@ def render_template(request: Request, template: str, context=None):
 
     # Employer information
     if request.session.get("user_type") == "employer":
-
         company = get_company(request)
-
-    # Live unread-notification badge count for header.html / employerHeader.html
-    context.setdefault("unread_notifications_count", get_unread_notifications_count(request))
-
-    return templates.TemplateResponse(request=request, name=template, context=context)
         context["company"] = company
+
+    # Live unread notification badge
+    context.setdefault(
+        "unread_notifications_count",
+        get_unread_notifications_count(request)
+    )
 
     return templates.TemplateResponse(
         request=request,

@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Subscription Plans</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+    <link rel="stylesheet"
+          href="/css/employerCredit.css">
+
+</head>
+
+
+<body>
+
+{% include "employerHeader.html" %}
+
+
+<div class="main-content">
+
+    <!-- ========================================= -->
+    <!-- HEADER -->
+    <!-- ========================================= -->
+
+    <div class="page-title plan-page-title">
+
+        <div>
+
+            <h1>
+                Subscription Plans
+            </h1>
+
+            <p>
+                Select the plan that best fits your
+                hiring needs.
+            </p>
+
+        </div>
+
+
+        <a href="/employer-credit"
+           class="back-credit-btn">
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back to Credits
+
+        </a>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- PLANS -->
+    <!-- ========================================= -->
+
+    <section class="packages">
+
+        {% for key, plan in plans.items() %}
+
+
+        <div class="
+            package-card
+
+            {% if current_plan == key %}
+                current-plan-card
+            {% endif %}
+        ">
+
+
+            {% if key == "business"
+                  and current_plan != key %}
+
+            <div class="popular-text">
+
+                Most Popular
+
+            </div>
+
+            {% endif %}
+
+
+            {% if current_plan == key %}
+
+            <div class="current-tag">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                CURRENT PLAN
+
+            </div>
+
+            {% endif %}
+
+
+            <h3>
+                {{ plan.name }}
+            </h3>
+
+
+            <div class="price">
+
+                <strong>
+
+                    RM {{ plan.price }}
+
+                </strong>
+
+                <span>
+                    /month
+                </span>
+
+            </div>
+
+
+            <ul>
+
+                <li>
+
+                    {{ plan.credits }}
+                    job posting credits
+
+                </li>
+
+                <li>
+
+                    Credits refresh every
+                    billing month
+
+                </li>
+
+                <li>
+
+                    {{ plan.description }}
+
+                </li>
+
+            </ul>
+
+
+            <!-- ================================= -->
+            <!-- Current -->
+            <!-- ================================= -->
+
+            {% if current_plan == key %}
+
+                <button
+                    class="current-plan-btn"
+                    disabled>
+
+                    <i class="fa-solid fa-check"></i>
+
+                    Current Plan
+
+                </button>
+
+
+            <!-- ================================= -->
+            <!-- Existing subscription -->
+            <!-- ================================= -->
+
+            {% elif current_plan %}
+
+                <button
+                    type="button"
+                    class="change-plan-button"
+                    onclick="openPlanChangeModal('{{ key }}')">
+
+                    Change Plan
+
+                </button>
+
+
+            <!-- ================================= -->
+            <!-- No subscription -->
+            <!-- ================================= -->
+
+            {% else %}
+
+                <form
+                    action="/employer/subscription/start/{{ key }}"
+                    method="post">
+
+                    <button type="submit">
+
+                        Select Plan
+
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+
+        </div>
+
+        {% endfor %}
+
+    </section>
+
+    <!-- ==========================================
+        CHANGE PLAN CONFIRMATION MODAL
+    ========================================== -->
+
+    <div id="changePlanModal"
+        class="plan-modal">
+
+        <div class="plan-modal-content">
+
+            <!-- Header -->
+
+            <div class="plan-modal-header">
+
+                <h2>
+                    Confirm plan changes
+                </h2>
+
+                <button
+                    type="button"
+                    class="modal-close"
+                    onclick="closePlanChangeModal()">
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+            </div>
+
+
+            <!-- New Plan -->
+
+            <div class="plan-summary-row">
+
+                <div>
+
+                    <strong id="modalPlanName">
+                        -
+                    </strong>
+
+                    <p>
+                        Billed monthly
+                    </p>
+
+                </div>
+
+                <strong id="modalPlanPrice">
+                    RM 0.00
+                </strong>
+
+            </div>
+
+
+            <!-- Proration Adjustment -->
+
+            <div
+                id="adjustmentRow"
+                class="plan-summary-row">
+
+                <div>
+
+                    <strong>
+                        Adjustment
+                    </strong>
+
+                    <p>
+                        Credit for the unused portion
+                        of your current subscription
+                    </p>
+
+                </div>
+
+                <strong
+                    id="modalAdjustment"
+                    class="adjustment-value">
+
+                    RM 0.00
+
+                </strong>
+
+            </div>
+
+
+            <hr>
+
+
+            <!-- Subtotal -->
+
+            <div class="plan-summary-row compact">
+
+                <strong>
+                    Subtotal
+                </strong>
+
+                <strong id="modalSubtotal">
+                    RM 0.00
+                </strong>
+
+            </div>
+
+
+            <!-- Total -->
+
+            <div class="plan-summary-row total-row">
+
+                <strong>
+                    Total due today
+                </strong>
+
+                <strong id="modalTotal">
+                    RM 0.00
+                </strong>
+
+            </div>
+
+
+            <hr>
+
+
+            <!-- Payment Method -->
+
+            <div class="payment-method-row">
+
+                <strong>
+                    Payment method
+                </strong>
+
+                <div class="saved-card">
+
+                    <i class="fa-regular fa-credit-card"></i>
+
+                    <span id="modalCard">
+                        Card on file
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- Footer -->
+
+            <div class="plan-modal-footer">
+
+                <button
+                    type="button"
+                    class="modal-cancel-btn"
+                    onclick="closePlanChangeModal()">
+
+                    Cancel
+
+                </button>
+
+
+                <form
+                    id="confirmPlanChangeForm"
+                    method="post">
+
+                    <input
+                        type="hidden"
+                        name="proration_date"
+                        id="prorationDate">
+
+
+                    <button
+                        type="submit"
+                        class="modal-pay-btn">
+
+                        Confirm & Pay
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const changePlanModal =
+        document.getElementById("changePlanModal");
+
+
+    // =====================================================
+    // Open Change Plan Modal
+    // =====================================================
+
+    async function openPlanChangeModal(planName) {
+
+        console.log("Change plan clicked:", planName);
+
+        // Show modal first
+        changePlanModal.classList.add("show");
+
+        document.body.classList.add("modal-open");
+
+
+        // Temporary loading values
+        document.getElementById(
+            "modalPlanName"
+        ).textContent = "Loading...";
+
+        document.getElementById(
+            "modalPlanPrice"
+        ).textContent = "RM 0.00";
+
+        document.getElementById(
+            "modalAdjustment"
+        ).textContent = "RM 0.00";
+
+        document.getElementById(
+            "modalSubtotal"
+        ).textContent = "RM 0.00";
+
+        document.getElementById(
+            "modalTotal"
+        ).textContent = "RM 0.00";
+
+        document.getElementById(
+            "modalCard"
+        ).textContent = "Loading...";
+
+
+        try {
+
+            // =============================================
+            // Call FastAPI Preview Route
+            // =============================================
+
+            const response = await fetch(
+                `/employer/subscription/preview/${planName}`
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok) {
+
+                console.error(
+                    "Preview error:",
+                    data
+                );
+
+                alert(
+                    data.detail
+                    ||
+                    "Unable to preview plan change."
+                );
+
+                closePlanChangeModal();
+
+                return;
+            }
+
+
+            console.log(
+                "Preview result:",
+                data
+            );
+
+
+            // =============================================
+            // Plan Name
+            // =============================================
+
+            document.getElementById(
+                "modalPlanName"
+            ).textContent =
+                data.plan_name;
+
+
+            // =============================================
+            // Plan Price
+            // =============================================
+
+            document.getElementById(
+                "modalPlanPrice"
+            ).textContent =
+                formatMoney(
+                    data.plan_price
+                );
+
+
+            // =============================================
+            // Adjustment
+            // =============================================
+
+            const adjustmentElement =
+                document.getElementById(
+                    "modalAdjustment"
+                );
+
+
+            adjustmentElement.textContent =
+                formatAdjustment(
+                    data.adjustment
+                );
+
+
+            if (
+                Number(
+                    data.adjustment
+                ) < 0
+            ) {
+
+                adjustmentElement.classList.add(
+                    "credit"
+                );
+
+            }
+            else {
+
+                adjustmentElement.classList.remove(
+                    "credit"
+                );
+
+            }
+
+
+            // =============================================
+            // Subtotal
+            // =============================================
+
+            document.getElementById(
+                "modalSubtotal"
+            ).textContent =
+                formatMoney(
+                    data.subtotal
+                );
+
+
+            // =============================================
+            // Total Due
+            // =============================================
+
+            document.getElementById(
+                "modalTotal"
+            ).textContent =
+                formatMoney(
+                    data.amount_due
+                );
+
+
+            // =============================================
+            // Card
+            // =============================================
+
+            document.getElementById(
+                "modalCard"
+            ).textContent =
+                data.card_display
+                ||
+                "Card on file";
+
+
+            // =============================================
+            // Store Proration Date
+            // =============================================
+
+            document.getElementById(
+                "prorationDate"
+            ).value =
+                data.proration_date;
+
+
+            // =============================================
+            // Change Form URL
+            // =============================================
+
+            document.getElementById(
+                "confirmPlanChangeForm"
+            ).action =
+                `/employer/subscription/change/${planName}`;
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Plan preview failed:",
+                error
+            );
+
+            alert(
+                "Unable to load the plan change preview."
+            );
+
+            closePlanChangeModal();
+
+        }
+
+    }
+
+
+    // =====================================================
+    // Close Modal
+    // =====================================================
+
+    function closePlanChangeModal() {
+
+        changePlanModal.classList.remove(
+            "show"
+        );
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+
+    }
+
+
+    // =====================================================
+    // Format Money
+    // =====================================================
+
+    function formatMoney(amount) {
+
+        const value = Number(
+            amount || 0
+        );
+
+        return (
+            "RM "
+            +
+            value.toFixed(2)
+        );
+
+    }
+
+
+    // =====================================================
+    // Format Adjustment
+    // =====================================================
+
+    function formatAdjustment(amount) {
+
+        const value = Number(
+            amount || 0
+        );
+
+
+        if (value < 0) {
+
+            return (
+                "-RM "
+                +
+                Math.abs(value).toFixed(2)
+            );
+
+        }
+
+
+        return (
+            "RM "
+            +
+            value.toFixed(2)
+        );
+
+    }
+
+
+    // =====================================================
+    // Close When Clicking Outside Modal
+    // =====================================================
+
+    changePlanModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target
+                ===
+                changePlanModal
+            ) {
+
+                closePlanChangeModal();
+
+            }
+
+        }
+    );
+
+
+    // =====================================================
+    // Close With Escape
+    // =====================================================
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closePlanChangeModal();
+
+            }
+
+        }
+    );
+
+
+    // =====================================================
+    // Prevent Double Submit
+    // =====================================================
+
+    const confirmPlanForm =
+        document.getElementById(
+            "confirmPlanChangeForm"
+        );
+
+
+    confirmPlanForm.addEventListener(
+        "submit",
+        function() {
+
+            const button =
+                confirmPlanForm.querySelector(
+                    ".modal-pay-btn"
+                );
+
+
+            button.disabled = true;
+
+
+            button.innerHTML =
+                `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Processing...
+                `;
+
+        }
+    );
+
+</script>
+
+</body>
+</html>

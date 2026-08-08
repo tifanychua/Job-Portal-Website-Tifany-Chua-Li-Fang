@@ -346,7 +346,7 @@ async def create_order(
     # Save Pending Payment
     # ==========================================
 
-    db.collection("payment").document(order_id).set({
+    db.collection("payment").document(invoice_id).set({
 
         "paypal_order_id": order_id,
 

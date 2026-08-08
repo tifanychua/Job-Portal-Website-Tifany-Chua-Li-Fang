@@ -34,27 +34,24 @@ body{
 
 .page-title{
 
-    margin-bottom:30px;
+    margin-bottom: 28px;
 
 }
 
 .page-title h1{
 
-    font-size:46px;
-
-    font-weight:700;
-
-    color:#162447;
-
-    margin-bottom:8px;
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #172554;
 
 }
 
 .page-title p{
 
-    font-size:17px;
-
-    color:#64748B;
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
 
 }
 
@@ -485,319 +482,292 @@ tbody tr:hover{
 }
 
 /* ==========================================
-   Packages
-   ========================================== */
+   PACKAGE GRID
+========================================== */
 
 .packages{
-
     display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-
-    gap:30px;
-
+    grid-template-columns:repeat(3,1fr);
+    gap:28px;
     margin-top:30px;
-
 }
 
+
 /* ==========================================
-   Package Card
-   ========================================== */
+   PACKAGE CARD
+========================================== */
 
 .package-card{
-
     position:relative;
 
     display:flex;
-
     flex-direction:column;
 
-    background:#fff;
+    min-height:560px;
+
+    background:#FFFFFF;
+
+    border:1px solid #E2E8F0;
 
     border-radius:22px;
 
-    padding:34px;
+    padding:42px 42px 40px;
 
     box-shadow:0 10px 30px rgba(15,23,42,.06);
 
-    transition:.3s;
-
-    min-height:450px;
-
+    transition:.25s;
 }
 
 .package-card:hover{
+    transform:translateY(-4px);
 
-    transform:translateY(-6px);
-
-    box-shadow:0 18px 40px rgba(15,23,42,.12);
-
+    box-shadow:
+        0 16px 36px rgba(15,23,42,.10);
 }
 
-.package-card.active{
-
-    border:2px solid #2563EB;
-
-    box-shadow:0 18px 40px rgba(37,99,235,.15);
-
-}
 
 /* ==========================================
-   Popular
-   ========================================== */
+   CURRENT PLAN CARD
+========================================== */
 
+.package-card.current-plan-card{
+    background:#F8FAFC;
+
+    border:1.5px solid #CBD5E1;
+
+    box-shadow:0 8px 24px rgba(15,23,42,.04);
+}
+
+.package-card.current-plan-card:hover{
+    transform:none;
+
+    box-shadow:0 8px 24px rgba(15,23,42,.04);
+}
+
+
+/* ==========================================
+   BADGES
+========================================== */
+
+.current-tag,
 .popular-text{
-
     position:absolute;
 
-    top:-14px;
-
+    top:-16px;
     left:50%;
 
     transform:translateX(-50%);
 
-    background:#2563EB;
+    height:36px;
 
-    color:#fff;
+    padding:0 18px;
 
-    padding:7px 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    gap:7px;
 
     border-radius:999px;
 
     font-size:12px;
+    font-weight:700;
 
-    font-weight:600;
-
+    white-space:nowrap;
 }
 
-/* ==========================================
-   Active Tag
-   ========================================== */
 
+/* Current Plan */
 .current-tag{
-
-    position:absolute;
-
-    top:18px;
-
-    right:18px;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:6px;
-
-    padding:6px 14px;
-
-    background:#22C55E;
-
-    color:#fff;
-
-    border-radius:18px;
-
-    font-size:12px;
-
-    font-weight:600;
-
+    background:#64748B;
+    color:#FFFFFF;
 }
 
-.current-tag i{
 
-    font-size:11px;
-
+/* Most Popular */
+.popular-text{
+    background:#2563EB;
+    color:#FFFFFF;
 }
+
 
 /* ==========================================
-   Package Title
-   ========================================== */
+   PLAN TITLE
+========================================== */
 
 .package-card h3{
-
-    margin-top:8px;
-
-    margin-bottom:18px;
+    margin-top:12px;
+    margin-bottom:25px;
 
     text-align:center;
 
     font-size:28px;
-
     font-weight:700;
 
     color:#162447;
-
 }
 
+.package-card.current-plan-card h3{
+    color:#475569;
+}
+
+
 /* ==========================================
-   Price
-   ========================================== */
+   PRICE
+========================================== */
 
 .price{
-
     display:flex;
 
     justify-content:center;
-
     align-items:flex-end;
 
     gap:8px;
 
-    margin-bottom:30px;
-
+    margin-bottom:48px;
 }
 
 .price strong{
-
-    font-size:52px;
-
+    font-size:58px;
     font-weight:700;
 
-    color:#2563EB;
+    line-height:1;
 
+    color:#2563EB;
 }
 
 .price span{
+    margin-bottom:7px;
 
-    font-size:18px;
+    font-size:17px;
 
     color:#64748B;
-
-    margin-bottom:8px;
-
 }
 
+
+/* Current Plan Price */
+.package-card.current-plan-card .price strong{
+    color:#64748B;
+}
+
+
 /* ==========================================
-   Features
-   ========================================== */
+   FEATURES
+========================================== */
 
 .package-card ul{
-
     flex:1;
 
     list-style:none;
 
     margin:0;
-
     padding:0;
-
 }
 
 .package-card li{
-
     position:relative;
 
-    padding-left:38px;
+    padding-left:42px;
 
-    margin:18px 0;
+    margin-bottom:22px;
 
     font-size:15px;
 
     color:#475569;
 
+    line-height:1.5;
 }
 
 .package-card li::before{
-
     content:"✓";
 
     position:absolute;
 
     left:0;
+    top:-2px;
 
-    top:0;
-
-    width:24px;
-
-    height:24px;
+    width:28px;
+    height:28px;
 
     display:flex;
-
     align-items:center;
-
     justify-content:center;
+
+    border-radius:50%;
 
     background:#ECFDF5;
 
     color:#22C55E;
 
-    border-radius:50%;
-
-    font-size:13px;
-
     font-weight:700;
-
 }
 
+.package-card.current-plan-card li{
+    color:#64748B;
+}
+
+
 /* ==========================================
-   Package Buttons
-   ========================================== */
+   BUTTON
+========================================== */
 
 .package-card button{
-
     width:100%;
+    height:54px;
 
-    height:52px;
+    margin-top:30px;
 
     border:none;
-
     border-radius:12px;
 
     background:#2563EB;
 
-    color:#fff;
+    color:#FFFFFF;
 
     font-size:15px;
-
     font-weight:600;
 
     cursor:pointer;
 
-    transition:.25s;
-
-    margin-top:25px;
-
+    transition:.2s;
 }
 
 .package-card button:hover{
-
     background:#1D4ED8;
-
-    transform:translateY(-2px);
-
-    box-shadow:0 10px 20px rgba(37,99,235,.25);
-
 }
 
-/* ==========================================
-   Current Plan Button
-   ========================================== */
 
-.current-plan-btn{
+/* Current Plan Button */
+.package-card .current-plan-btn{
+    background:#CBD5E1 !important;
 
-    background:#22C55E !important;
+    color:#475569 !important;
 
     cursor:default !important;
-
 }
 
-.current-plan-btn:hover{
-
-    background:#22C55E !important;
+.package-card .current-plan-btn:hover{
+    background:#CBD5E1 !important;
 
     transform:none !important;
 
     box-shadow:none !important;
-
 }
 
+
 /* ==========================================
-   Disabled Button
-   ========================================== */
+   RESPONSIVE
+========================================== */
 
-button:disabled{
+@media(max-width:1200px){
 
-    opacity:1;
+    .packages{
+        grid-template-columns:1fr;
+    }
 
+    .package-card{
+        min-height:auto;
+    }
 }
 
 /* ==========================================
@@ -1070,4 +1040,1664 @@ button:disabled{
 .no-reference{
     color:#9CA3AF;
     font-style:italic;
+}
+
+/* ==========================================
+   Credit Page Header
+========================================== */
+
+.credit-page-header,
+.plan-page-title{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:25px;
+
+}
+
+
+/* ==========================================
+   Manage Plan
+========================================== */
+
+.manage-plan-btn,
+.back-credit-btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:9px;
+
+    height:46px;
+
+    padding:0 20px;
+
+    border-radius:10px;
+
+    text-decoration:none;
+
+    font-size:14px;
+
+    font-weight:600;
+
+}
+
+.manage-plan-btn{
+
+    background:#2563EB;
+
+    color:white;
+
+}
+
+.manage-plan-btn:hover{
+
+    background:#1D4ED8;
+
+}
+
+.back-credit-btn{
+
+    background:white;
+
+    color:#334155;
+
+    border:1px solid #CBD5E1;
+
+}
+
+
+/* ==========================================
+   Current Subscription
+========================================== */
+
+.current-subscription-card{
+
+    background:#ffffff;
+
+    border-radius:22px;
+
+    padding:28px 30px;
+
+    margin-bottom:35px;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.06);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:30px;
+
+}
+
+.subscription-label{
+
+    display:block;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:#64748B;
+
+    margin-bottom:8px;
+
+}
+
+.subscription-info h2{
+
+    font-size:26px;
+
+    color:#162447;
+
+    margin-bottom:8px;
+
+}
+
+.subscription-info p{
+
+    margin-top:10px;
+
+    color:#64748B;
+
+}
+
+.subscription-status{
+
+    display:inline-flex;
+
+    padding:5px 12px;
+
+    border-radius:20px;
+
+    background:#DCFCE7;
+
+    color:#166534;
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+
+.change-plan-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;  /* space between icon and word */
+
+    min-width: 175px;
+
+    height: 52px;
+
+    padding: 0 24px;
+
+    background: #2563EB;
+
+    color: white;
+
+    border-radius: 12px;
+
+    text-decoration: none;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    transition: 0.2s;
+}
+
+
+.change-plan-btn i {
+
+    font-size: 16px;
+
+    flex-shrink: 0;
+}
+
+
+.change-plan-btn span {
+
+    display: inline-block;
+}
+
+
+.change-plan-btn:hover {
+
+    background: #1D4ED8;
+
+    transform: translateY(-1px);
+}
+
+
+/* ==========================================
+   Recent Transaction Header
+========================================== */
+
+.history-title-row{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:25px;
+
+}
+
+.history-title-row h2{
+
+    margin-bottom:5px;
+
+}
+
+.history-title-row p{
+
+    color:#64748B;
+
+    font-size:14px;
+
+}
+
+
+/* ==========================================
+   CURRENT PLAN - GREY
+========================================== */
+
+.package-card.current-plan-card{
+
+    background:#F1F5F9;
+
+    border:2px solid #CBD5E1;
+
+    box-shadow:none;
+
+}
+
+.package-card.current-plan-card:hover{
+
+    transform:none;
+
+    box-shadow:none;
+
+}
+
+.package-card.current-plan-card h3{
+
+    color:#64748B;
+
+}
+
+.package-card.current-plan-card .price strong{
+
+    color:#64748B;
+
+}
+
+.package-card.current-plan-card li{
+
+    color:#64748B;
+
+}
+
+.package-card.current-plan-card .current-tag{
+
+    background:#64748B;
+
+}
+
+.package-card.current-plan-card
+.current-plan-btn{
+
+    background:#94A3B8 !important;
+
+    cursor:default;
+
+}
+
+
+/* ==========================================
+   Transaction Status
+========================================== */
+
+.transaction-status{
+
+    padding:5px 12px;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+
+.transaction-status.completed{
+
+    background:#DCFCE7;
+
+    color:#166534;
+
+}
+
+.transaction-status.pending{
+
+    background:#FEF3C7;
+
+    color:#92400E;
+
+}
+
+.transaction-status.failed{
+
+    background:#FEE2E2;
+
+    color:#B91C1C;
+
+}
+
+.empty-history{
+
+    text-align:center;
+
+    padding:35px;
+
+    color:#94A3B8;
+
+}
+
+/* ==========================================
+   PLAN PAGE HEADER
+========================================== */
+
+.plan-page-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:25px;
+}
+
+
+/* ==========================================
+   BACK BUTTON
+========================================== */
+
+.back-credit-btn{
+    height:46px;
+
+    padding:0 20px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:9px;
+
+    background:#FFFFFF;
+
+    color:#334155;
+
+    border:1px solid #CBD5E1;
+
+    border-radius:10px;
+
+    text-decoration:none;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    transition:.2s;
+}
+
+.back-credit-btn:hover{
+    background:#F8FAFC;
+}
+
+
+/* ==========================================
+   INFORMATION
+========================================== */
+
+.plan-information{
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:14px;
+
+    margin-bottom:28px;
+
+    padding:18px 20px;
+
+    background:#EFF6FF;
+
+    border:1px solid #BFDBFE;
+
+    border-radius:12px;
+}
+
+.plan-information-icon{
+    color:#2563EB;
+
+    font-size:18px;
+
+    margin-top:2px;
+}
+
+.plan-information strong{
+    color:#1E3A8A;
+
+    font-size:14px;
+}
+
+.plan-information p{
+    margin-top:4px;
+
+    color:#475569;
+
+    font-size:13px;
+
+    line-height:1.6;
+}
+
+
+/* ==========================================
+   MODAL
+========================================== */
+
+.plan-modal{
+    position:fixed;
+
+    inset:0;
+
+    z-index:9999;
+
+    display:none;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:20px;
+}
+
+.plan-modal.show{
+    display:flex;
+}
+
+
+/* ==========================================
+   OVERLAY
+========================================== */
+
+.plan-modal-overlay{
+    position:absolute;
+
+    inset:0;
+
+    background:rgba(15,23,42,.45);
+
+    backdrop-filter:blur(2px);
+}
+
+
+/* ==========================================
+   MODAL CONTENT
+========================================== */
+
+.plan-modal-content{
+    position:relative;
+
+    z-index:1;
+
+    width:100%;
+
+    max-width:610px;
+
+    background:#FFFFFF;
+
+    border-radius:18px;
+
+    padding:28px;
+
+    box-shadow:
+        0 24px 60px rgba(15,23,42,.22);
+}
+
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.plan-modal-header{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:25px;
+}
+
+.plan-modal-header h2{
+    font-size:22px;
+
+    color:#111827;
+
+    font-weight:700;
+}
+
+.modal-close{
+    width:38px;
+
+    height:38px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:transparent;
+
+    color:#334155;
+
+    font-size:19px;
+
+    cursor:pointer;
+}
+
+.modal-close:hover{
+    background:#F1F5F9;
+}
+
+
+/* ==========================================
+   LOADING
+========================================== */
+
+.plan-modal-loading{
+    min-height:160px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:14px;
+
+    color:#64748B;
+}
+
+.plan-modal-loading i{
+    font-size:27px;
+
+    color:#2563EB;
+}
+
+
+/* ==========================================
+   ERROR
+========================================== */
+
+.plan-modal-error{
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:15px 16px;
+
+    background:#FEF2F2;
+
+    color:#B91C1C;
+
+    border:1px solid #FECACA;
+
+    border-radius:10px;
+
+    font-size:14px;
+}
+
+
+/* ==========================================
+   SUMMARY ROW
+========================================== */
+
+.plan-summary-row{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:30px;
+
+    padding:14px 0;
+}
+
+.plan-summary-row > div{
+    min-width:0;
+}
+
+.plan-summary-row strong{
+    color:#111827;
+
+    font-size:15px;
+}
+
+.plan-summary-row p{
+    margin-top:5px;
+
+    color:#6B7280;
+
+    font-size:13px;
+
+    line-height:1.5;
+}
+
+.plan-summary-row.compact{
+    align-items:center;
+
+    padding:8px 0;
+}
+
+.summary-price{
+    white-space:nowrap;
+}
+
+
+/* ==========================================
+   ADJUSTMENT
+========================================== */
+
+.adjustment-value{
+    white-space:nowrap;
+}
+
+.adjustment-value.credit{
+    color:#16A34A;
+}
+
+
+/* ==========================================
+   TOTAL
+========================================== */
+
+.total-row{
+    align-items:center;
+
+    padding-top:13px;
+}
+
+.total-row strong{
+    font-size:17px;
+}
+
+#modalTotal{
+    font-size:20px;
+
+    color:#111827;
+}
+
+
+/* ==========================================
+   DIVIDER
+========================================== */
+
+.modal-divider{
+    height:1px;
+
+    background:#E5E7EB;
+
+    margin:10px 0;
+}
+
+
+/* ==========================================
+   PAYMENT METHOD
+========================================== */
+
+.payment-method-row{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:20px;
+
+    padding:14px 0 6px;
+}
+
+.payment-method-row strong{
+    color:#111827;
+
+    font-size:15px;
+}
+
+.payment-method-row p{
+    margin-top:4px;
+
+    color:#6B7280;
+
+    font-size:12px;
+}
+
+.saved-card{
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:10px 13px;
+
+    background:#F8FAFC;
+
+    border:1px solid #E2E8F0;
+
+    border-radius:10px;
+
+    color:#334155;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    white-space:nowrap;
+}
+
+.saved-card i{
+    color:#2563EB;
+}
+
+
+/* ==========================================
+   FOOTER
+========================================== */
+
+.plan-modal-footer{
+    display:flex;
+
+    justify-content:flex-end;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin-top:28px;
+}
+
+.plan-modal-footer form{
+    margin:0;
+}
+
+
+/* ==========================================
+   CANCEL BUTTON
+========================================== */
+
+.modal-cancel-btn{
+    height:44px;
+
+    padding:0 20px;
+
+    background:#FFFFFF;
+
+    color:#334155;
+
+    border:1px solid #CBD5E1;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    cursor:pointer;
+}
+
+.modal-cancel-btn:hover{
+    background:#F8FAFC;
+}
+
+
+/* ==========================================
+   CONFIRM BUTTON
+========================================== */
+
+.modal-pay-btn{
+    min-width:135px;
+
+    height:44px;
+
+    padding:0 20px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    background:#111827;
+
+    color:#FFFFFF;
+
+    border:none;
+
+    border-radius:10px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.modal-pay-btn:hover{
+    background:#000000;
+}
+
+.modal-pay-btn:disabled{
+    cursor:not-allowed;
+
+    opacity:.65;
+}
+
+
+/* ==========================================
+   BODY LOCK
+========================================== */
+
+body.modal-open{
+    overflow:hidden;
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:650px){
+
+    .plan-modal-content{
+        padding:22px;
+    }
+
+    .plan-summary-row{
+        gap:15px;
+    }
+
+    .payment-method-row{
+        align-items:flex-start;
+
+        flex-direction:column;
+    }
+
+    .saved-card{
+        width:100%;
+    }
+
+    .plan-modal-footer{
+        flex-direction:column-reverse;
+    }
+
+    .modal-cancel-btn,
+    .plan-modal-footer form,
+    .modal-pay-btn{
+        width:100%;
+    }
+
+}
+
+.subscription-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+
+/* Cancel Subscription */
+
+.cancel-subscription-btn{
+    height:52px;
+    padding:0 22px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+
+    background:#FFFFFF;
+
+    color:#DC2626;
+
+    border:1px solid #FCA5A5;
+    border-radius:12px;
+
+    font-size:14px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.cancel-subscription-btn:hover{
+    background:#FEF2F2;
+    border-color:#EF4444;
+}
+
+
+/* Scheduled Cancellation */
+
+.cancellation-scheduled{
+    height:46px;
+    padding:0 16px;
+
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+
+    background:#FFF7ED;
+
+    color:#C2410C;
+
+    border:1px solid #FED7AA;
+    border-radius:10px;
+
+    font-size:13px;
+    font-weight:600;
+}
+
+
+/* Resume */
+
+.resume-subscription-btn{
+    height:46px;
+    padding:0 18px;
+
+    border:none;
+    border-radius:10px;
+
+    background:#2563EB;
+    color:#FFFFFF;
+
+    font-size:14px;
+    font-weight:600;
+
+    cursor:pointer;
+}
+
+
+/* ==========================================
+   CANCEL MODAL
+========================================== */
+
+.cancel-subscription-modal{
+    position:fixed;
+    inset:0;
+
+    z-index:9999;
+
+    display:none;
+
+    align-items:center;
+    justify-content:center;
+
+    padding:20px;
+}
+
+.cancel-subscription-modal.show{
+    display:flex;
+}
+
+
+.cancel-subscription-overlay{
+    position:absolute;
+    inset:0;
+
+    background:rgba(15,23,42,.45);
+
+    backdrop-filter:blur(2px);
+}
+
+
+.cancel-subscription-content{
+    position:relative;
+    z-index:1;
+
+    width:100%;
+    max-width:520px;
+
+    padding:28px;
+
+    background:#FFFFFF;
+
+    border-radius:18px;
+
+    box-shadow:
+        0 24px 60px rgba(15,23,42,.22);
+}
+
+
+.cancel-subscription-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+
+.cancel-subscription-header h2{
+    color:#111827;
+
+    font-size:22px;
+    font-weight:700;
+}
+
+
+.cancel-modal-close{
+    width:38px;
+    height:38px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:none;
+    border-radius:50%;
+
+    background:transparent;
+
+    font-size:18px;
+
+    cursor:pointer;
+}
+
+
+.cancel-modal-close:hover{
+    background:#F1F5F9;
+}
+
+
+.cancel-warning-icon{
+    width:58px;
+    height:58px;
+
+    margin:25px auto 18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:#FEF2F2;
+
+    color:#DC2626;
+
+    font-size:24px;
+}
+
+
+.cancel-message{
+    text-align:center;
+}
+
+
+.cancel-message h3{
+    color:#111827;
+
+    font-size:18px;
+
+    margin-bottom:8px;
+}
+
+
+.cancel-message p{
+    color:#64748B;
+
+    font-size:14px;
+
+    line-height:1.6;
+}
+
+
+.cancel-period-box{
+    margin-top:22px;
+
+    padding:17px;
+
+    text-align:center;
+
+    background:#F8FAFC;
+
+    border:1px solid #E2E8F0;
+
+    border-radius:12px;
+}
+
+
+.cancel-period-box span{
+    display:block;
+
+    color:#64748B;
+
+    font-size:13px;
+}
+
+
+.cancel-period-box strong{
+    display:block;
+
+    margin:5px 0;
+
+    color:#111827;
+
+    font-size:17px;
+}
+
+
+.cancel-period-box p{
+    color:#64748B;
+
+    font-size:12px;
+}
+
+
+.cancel-note{
+    display:flex;
+    align-items:flex-start;
+
+    gap:10px;
+
+    margin-top:18px;
+
+    padding:13px 14px;
+
+    background:#EFF6FF;
+
+    border-radius:10px;
+
+    color:#1E40AF;
+
+    font-size:13px;
+}
+
+
+.cancel-subscription-footer{
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    margin-top:26px;
+}
+
+
+.cancel-subscription-footer form{
+    margin:0;
+}
+
+
+.keep-plan-btn,
+.confirm-cancel-btn{
+    height:44px;
+
+    padding:0 19px;
+
+    border-radius:10px;
+
+    font-size:14px;
+    font-weight:600;
+
+    cursor:pointer;
+}
+
+
+.keep-plan-btn{
+    background:#FFFFFF;
+
+    color:#334155;
+
+    border:1px solid #CBD5E1;
+}
+
+
+.confirm-cancel-btn{
+    background:#DC2626;
+
+    color:#FFFFFF;
+
+    border:none;
+}
+
+
+.confirm-cancel-btn:hover{
+    background:#B91C1C;
+}
+
+/* ==========================================
+   PAYMENT MANAGEMENT
+========================================== */
+
+.payment-management-card{
+
+    background:#FFFFFF;
+
+    border-radius:22px;
+
+    padding:26px 30px;
+
+    margin-bottom:35px;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.06);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:30px;
+}
+
+
+.payment-management-info{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+}
+
+
+.payment-section-icon{
+
+    width:52px;
+
+    height:52px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-shrink:0;
+
+    border-radius:14px;
+
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+    font-size:21px;
+}
+
+
+.payment-management-info h3{
+
+    margin-top:4px;
+
+    color:#162447;
+
+    font-size:17px;
+
+    font-weight:600;
+}
+
+
+.payment-management-info p{
+
+    margin-top:5px;
+
+    color:#64748B;
+
+    font-size:13px;
+}
+
+
+/* Current card */
+
+.current-payment-card{
+
+    margin-top:6px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+}
+
+
+.current-payment-card strong{
+
+    display:block;
+
+    color:#162447;
+
+    font-size:16px;
+
+    font-weight:600;
+}
+
+
+.current-payment-card span{
+
+    display:block;
+
+    margin-top:3px;
+
+    color:#64748B;
+
+    font-size:12px;
+}
+
+
+/* Manage Button */
+
+.manage-payment-btn{
+
+    height:48px;
+
+    padding:0 21px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:9px;
+
+    background:#FFFFFF;
+
+    color:#2563EB;
+
+    border:1px solid #BFDBFE;
+
+    border-radius:11px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+
+.manage-payment-btn:hover{
+
+    background:#EFF6FF;
+
+    border-color:#93C5FD;
+}
+
+
+/* Cancelling Status */
+
+.subscription-status.cancelling{
+
+    background:#FFF7ED;
+
+    color:#C2410C;
+}
+
+
+@media(max-width:800px){
+
+    .payment-management-card{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+
+    .manage-payment-btn{
+
+        width:100%;
+
+    }
+
+
+    .payment-management-card form{
+
+        width:100%;
+
+    }
+
+}
+
+/* ==========================================
+   RECENT TRANSACTION CARD FIX
+========================================== */
+
+.recent-transaction-card{
+    padding:28px 30px;
+
+    overflow:visible;
+}
+
+
+/* Header */
+
+.recent-transaction-card .history-title-row{
+    margin-bottom:18px;
+}
+
+
+.recent-transaction-card .history-title-row h2{
+    margin:0 0 4px;
+
+    font-size:26px;
+
+    color:#162447;
+}
+
+
+.recent-transaction-card .history-title-row p{
+    margin:0;
+
+    font-size:13px;
+
+    color:#64748B;
+}
+
+
+/* ==========================================
+   TABLE WRAPPER
+========================================== */
+
+.recent-table-wrapper{
+    width:100%;
+
+    overflow-x:auto;
+}
+
+
+/* ==========================================
+   TABLE
+========================================== */
+
+.recent-transaction-table{
+    width:100%;
+
+    min-width:850px;
+
+    border-collapse:collapse;
+}
+
+
+.recent-transaction-table thead{
+    border-bottom:1px solid #E2E8F0;
+}
+
+
+.recent-transaction-table th{
+    padding:13px 14px;
+
+    text-align:left;
+
+    color:#64748B;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    white-space:nowrap;
+}
+
+
+.recent-transaction-table td{
+    padding:16px 14px;
+
+    color:#334155;
+
+    font-size:13px;
+
+    vertical-align:middle;
+
+    border-bottom:1px solid #EEF2F7;
+}
+
+
+.recent-transaction-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+
+.recent-transaction-table tbody tr:hover{
+    background:#F8FAFC;
+}
+
+
+/* ==========================================
+   PLAN
+========================================== */
+
+.recent-plan-name{
+    color:#162447;
+
+    font-size:13px;
+
+    font-weight:600;
+}
+
+
+/* ==========================================
+   PRICE
+========================================== */
+
+.recent-price{
+    color:#162447;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    white-space:nowrap;
+}
+
+
+/* ==========================================
+   RECEIPT
+========================================== */
+
+.recent-receipt-btn{
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    padding:7px 11px;
+
+    border-radius:8px;
+
+    color:#2563EB;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    text-decoration:none;
+
+    white-space:nowrap;
+
+    transition:.2s;
+}
+
+
+.recent-receipt-btn:hover{
+    background:#DBEAFE;
+
+    color:#1D4ED8;
+}
+
+
+.recent-receipt-btn i{
+    font-size:12px;
+}
+
+
+.no-receipt{
+    color:#CBD5E1;
+}
+
+
+/* ==========================================
+   VIEW ALL
+========================================== */
+
+.recent-transaction-card .view-all-btn{
+    height:42px;
+
+    padding:0 16px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    border-radius:9px;
+
+    font-size:13px;
+}
+
+
+/* ==========================================
+   EMPTY
+========================================== */
+
+.recent-transaction-card .empty-history{
+    padding:35px 20px;
+
+    text-align:center;
+
+    color:#94A3B8;
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:900px){
+
+    .recent-transaction-card{
+        padding:22px;
+    }
+
+
+    .recent-transaction-card .history-title-row{
+        align-items:flex-start;
+
+        flex-direction:column;
+
+        gap:15px;
+    }
+
 }

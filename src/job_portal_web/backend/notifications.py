@@ -138,24 +138,117 @@ def _format_relative(ts):
     return ts.strftime("%d %b %Y")
 
 
+# =====================================================
+# JOB EXPIRY NOTIFICATIONS
+# =====================================================
 
+def check_job_expiry_notifications():
 
-def get_unread_notifications_count(request):
-    user_id, user_type, _ = _get_current_user(request)
+    from datetime import datetime, timezone, timedelta
+
+    MYT = timezone(timedelta(hours=8))
+
+    today = datetime.now(MYT).date()
+
+    jobs = db.collection("job_list").stream()
+
+    for job in jobs:
+
+        data = job.to_dict()
+
+        # Only Active jobs
+        if data.get("status") != "Active":
+            continue
+
+        company_id = data.get("company_id")
+        job_title = data.get("job_title", "Job")
+
+        expiry = data.get("expiry_date")
+
+        if not expiry:
+            continue
+
+        expiry_date = expiry.date()
+        days_left = (expiry_date - today).days
+
+        # -------------------------
+        # Decide notification type
+        # -------------------------
+        if days_left == 3:
+            event = "expire_3_days"
+            title = "Job Posting Expiring Soon"
+            message = f'Your job posting "{job_title}" will expire in 3 days.'
+
+        elif days_left == 0:
+            event = "expire_today"
+            title = "Job Posting Expires Today"
+            message = f'Your job posting "{job_title}" expires today.'
+
+        elif days_left < 0:
+            event = "expired"
+            title = "Job Posting Expired"
+            message = f'Your job posting "{job_title}" has expired.'
+
+            # Optional: mark the job as expired
+            job.reference.update({
+                "status": "Expired"
+            })
+
+        else:
+            continue
+
+        # -------------------------
+        # Check duplicate
+        # -------------------------
+        exists = (
+            db.collection("notification")
+            .where(filter=FieldFilter("user_id", "==", company_id))
+            .where(filter=FieldFilter("job_id", "==", job.id))
+            .where(filter=FieldFilter("event", "==", event))
+            .stream()
+        )
+
+        if any(exists):
+            continue
+
+        # -------------------------
+        # Create notification
+        # -------------------------
+        db.collection("notification").add({
+            "user_id": company_id,
+            "job_id": job.id,
+            "event": event,
+            "type": "job_alert",
+            "title": title,
+            "message": message,
+            "link": "/manage-jobs",
+            "is_read": False,
+            "created_at": datetime.now(MYT)
+        })
+
+# =====================================================
+# UNREAD COUNT
+# =====================================================
+
+def get_unread_notifications_count(request: Request):
+
+    user_id, _, _ = _get_current_user(request)
+
     if not user_id:
         return 0
+
     docs = (
         db.collection("notification")
         .where(filter=FieldFilter("user_id", "==", user_id))
         .where(filter=FieldFilter("is_read", "==", False))
         .stream()
     )
+
     return sum(1 for _ in docs)
 
 # =====================================================
 # PAGE — Notifications list
 # =====================================================
-
 
 @router.get("/notifications", name="notifications_page")
 def notifications_page(request: Request):
@@ -202,6 +295,8 @@ def employer_notifications_page(request: Request):
 
     if not user_id:
         return RedirectResponse("/login", status_code=303)
+
+    check_job_expiry_notifications()
 
     notifications = _load_notifications(user_id)
 

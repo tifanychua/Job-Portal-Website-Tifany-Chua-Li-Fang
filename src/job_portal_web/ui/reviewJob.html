@@ -377,6 +377,29 @@
 
             <div class="summary">
 
+                <div
+                    id="creditWarning"
+                    class="credit-warning"
+                    style="display:none;">
+
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                    <div>
+
+                        <strong>
+                            Insufficient job posting credits
+                        </strong>
+
+                        <p>
+                            You do not have enough credits for the selected
+                            posting duration. If you continue, this job will
+                            be saved as a draft and will not be published.
+                        </p>
+
+                    </div>
+
+                </div>
+
                 <div>
                     <label>Available Credits</label>
                     <strong>{{ company.available_credit }}</strong>
@@ -472,30 +495,73 @@
                 "input[name='duration']:checked"
             );
 
+        const requiredCredit =
+            Number(
+                selected.dataset.credit
+            );
+
+        const availableCredit =
+            Number(
+                "{{ company.available_credit|default(0) }}"
+            );
+
         credit.textContent =
-            selected.dataset.credit;
+            requiredCredit;
 
         const date = new Date();
 
         date.setDate(
-            date.getDate() + Number(selected.value)
+            date.getDate()
+            + Number(
+                selected.value
+            )
         );
 
         expiry.textContent =
             date.toLocaleDateString();
 
+
+        // ==========================================
+        // Credit Warning
+        // ==========================================
+
+        const warning =
+            document.getElementById(
+                "creditWarning"
+            );
+
+        const publishButton =
+            document.querySelector(
+                ".modal-footer .publish-btn"
+            );
+
+        if (
+            availableCredit
+            < requiredCredit
+        ){
+
+            warning.style.display =
+                "flex";
+
+            publishButton.innerHTML =
+                `
+                <i class="fa-solid fa-file"></i>
+                Save as Draft
+                `;
+
+        }
+        else{
+
+            warning.style.display =
+                "none";
+
+            publishButton.innerHTML =
+                `
+                <i class="fa-solid fa-paper-plane"></i>
+                Publish Job
+                `;
+        }
     }
-
-    radios.forEach(r => {
-
-        r.addEventListener(
-            "change",
-            update
-        );
-
-    });
-
-    update();
 
     function submitPublish(){
 
@@ -504,14 +570,19 @@
                 "input[name='duration']:checked"
             );
 
-        document.getElementById("durationInput").value =
+        document.getElementById(
+            "durationInput"
+        ).value =
             selected.value;
 
-        document.getElementById("creditInput").value =
+        document.getElementById(
+            "creditInput"
+        ).value =
             selected.dataset.credit;
 
-        document.getElementById("publishForm").submit();
-
+        document.getElementById(
+            "publishForm"
+        ).submit();
     }
 </script>
 

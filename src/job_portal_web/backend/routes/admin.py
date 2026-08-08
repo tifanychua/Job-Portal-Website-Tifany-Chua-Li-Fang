@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from ..database import db
+from ..email_service import send_company_verification_email
 
 router = APIRouter()
 
@@ -82,14 +83,31 @@ def review_company(request: Request, company_id: str):
 
 
 @router.post("/admin/company/{company_id}/approve")
-def approve_company(company_id: str):
+async def approve_company(company_id: str):
 
     company_ref = db.collection("company").document(company_id)
 
-    company_ref.update({"status": "Active"})
+    company_doc = company_ref.get()
 
-    return RedirectResponse(url="/admin/company-requests", status_code=303)
+    if not company_doc.exists:
+        raise HTTPException(status_code=404, detail="Company not found")
 
+    company = company_doc.to_dict()
+
+    company_ref.update({
+        "status": "Active"
+    })
+
+    await send_company_verification_email(
+        email=company["email"],
+        company_name=company["companyName"],   # <-- companyName
+        status="Approved"
+    )
+
+    return RedirectResponse(
+        url="/admin/company-requests",
+        status_code=303
+    )
 
 # ==================================
 # Reject Company
@@ -97,14 +115,31 @@ def approve_company(company_id: str):
 
 
 @router.post("/admin/company/{company_id}/reject")
-def reject_company(company_id: str):
+async def reject_company(company_id: str):
 
     company_ref = db.collection("company").document(company_id)
 
-    company_ref.update({"status": "Rejected"})
+    company_doc = company_ref.get()
 
-    return RedirectResponse(url="/admin/company-requests", status_code=303)
+    if not company_doc.exists:
+        raise HTTPException(status_code=404, detail="Company not found")
 
+    company = company_doc.to_dict()
+
+    company_ref.update({
+        "status": "Rejected"
+    })
+
+    await send_company_verification_email(
+        email=company["email"],
+        company_name=company["companyName"],   # <-- companyName
+        status="Rejected"
+    )
+
+    return RedirectResponse(
+        url="/admin/company-requests",
+        status_code=303
+    )
 
 # ==================================
 # Deactivate Company

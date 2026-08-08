@@ -8,3 +8,11 @@ dist/
 .cache/
 src/job_portal_web/backend/firebase_key.json.hypothesis/
 src/job_portal_web/backend/firebase_key.json
+
+
+# Environment secrets
+.env
+**/.env
+
+# Generated reports
+generated_reports/

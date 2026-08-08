@@ -346,3 +346,98 @@ JobConnect Team
 
     fm = FastMail(conf)
     await fm.send_message(message)
+
+async def send_company_verification_email(
+    email: str,
+    company_name: str,
+    status: str,
+    reason: str | None = None,
+):
+
+    reason_text = ""
+
+    if reason:
+        reason_text = f"""
+
+Reason:
+{reason}
+"""
+
+    if status == "Approved":
+        subject = "Company Verification Approved - JobConnect"
+
+        body = f"""
+Dear {company_name},
+
+Congratulations!
+
+Your company verification has been approved.
+
+You can now:
+
+• Publish job postings
+• Manage applicants
+• Access all employer features
+
+Thank you for choosing JobConnect.
+
+Regards,
+
+JobConnect Team
+"""
+
+    elif status == "Rejected":
+        subject = "Company Verification Rejected - JobConnect"
+
+        body = f"""
+Dear {company_name},
+
+Unfortunately, your company verification request has been rejected.
+
+{reason_text}
+
+Please update your company information and submit your verification again.
+
+Regards,
+
+JobConnect Team
+"""
+
+    else:
+        subject = "Company Verification Status Updated - JobConnect"
+
+        body = f"""
+Dear {company_name},
+
+Your company verification status has been updated.
+
+Current Status:
+{status}
+
+{reason_text}
+
+Regards,
+
+JobConnect Team
+"""
+
+    message = MessageSchema(
+        subject=subject,
+        recipients=[email],
+        body=body,
+        subtype=MessageType.plain,
+    )
+
+    print("===== SEND COMPANY VERIFICATION EMAIL =====")
+    print("To:", email)
+    print("Status:", status)
+
+    fm = FastMail(conf)
+
+    try:
+        await fm.send_message(message)
+        print("✅ Company verification email sent successfully")
+    except Exception as e:
+        print("FastMail Error:", type(e))
+        print("FastMail Error:", repr(e))
+        raise
