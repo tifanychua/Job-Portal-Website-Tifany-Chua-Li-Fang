@@ -92,6 +92,11 @@
             method="GET"
             action="/admin/transactions/report">
 
+            <input
+                type="hidden"
+                name="generate"
+                value="1">
+
             <div class="report-filter-grid">
 
 
@@ -165,7 +170,7 @@
 
                 <div>
 
-                    <label>
+                    <!-- <label>
                         Payment Method
                     </label>
 
@@ -189,7 +194,7 @@
                             Credit Card
                         </option>
 
-                    </select>
+                    </select> -->
 
                 </div>
 
@@ -228,6 +233,7 @@
     <!-- REPORT PREVIEW -->
     <!-- ========================================= -->
 
+    {% if generated %}
     <div class="report-preview-card">
 
         <div class="report-preview-header">
@@ -246,7 +252,7 @@
 
 
             <a
-                href="/admin/transactions/report/download?from_date={{ from_date }}&to_date={{ to_date }}&status={{ current_status }}&payment_method={{ current_payment_method }}"
+                href="/admin/transactions/report/download?from_date={{ from_date }}&to_date={{ to_date }}&status={{ current_status }}"
                 class="download-report-btn">
 
                 <i class="fa-solid fa-download"></i>
@@ -387,6 +393,7 @@
         </div>
 
     </div>
+    {% endif %}
 
 </main>
 

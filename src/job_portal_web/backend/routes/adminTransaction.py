@@ -1,27 +1,35 @@
 from datetime import datetime, timezone
 import math
+import os
+
+from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse
+from fastapi.templating import Jinja2Templates
+
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.styles import (
+    getSampleStyleSheet,
+    ParagraphStyle,
+)
 from reportlab.lib.units import mm
+
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,
     Spacer,
     Table,
     TableStyle,
+    HRFlowable,
 )
-import os
-from fastapi import APIRouter, Request
-from fastapi.templating import Jinja2Templates
 
 from ..database import db
 
 router = APIRouter()
 
-templates = Jinja2Templates(directory="src/job_portal_web/ui")
-
+templates = Jinja2Templates(
+    directory="src/job_portal_web/ui"
+)
 
 # =====================================================
 # Transaction Management
@@ -31,7 +39,6 @@ templates = Jinja2Templates(directory="src/job_portal_web/ui")
 def transaction_management(
     request: Request,
     status: str = "",
-    payment_method: str = "",
     keyword: str = "",
     page: int = 1,
 ):
@@ -46,7 +53,7 @@ def transaction_management(
     # Clean filter values
     keyword_lower = keyword.strip().lower()
     status_filter = status.strip().upper()
-    payment_method_filter = payment_method.strip().lower()
+    # payment_method_filter = payment_method.strip().lower()
 
     # =====================================================
     # Get ALL payments
@@ -105,19 +112,6 @@ def transaction_management(
         if status_filter:
 
             if payment_status != status_filter:
-                continue
-
-        # =================================================
-        # PAYMENT METHOD FILTER
-        # =================================================
-
-        stored_payment_method = str(
-            data.get("payment_method", "")
-        ).strip().lower()
-
-        if payment_method_filter:
-
-            if stored_payment_method != payment_method_filter:
                 continue
 
         # =================================================
@@ -256,7 +250,6 @@ def transaction_management(
             "current_year": current_year,
 
             "current_status": status,
-            "current_payment_method": payment_method,
             "keyword": keyword,
 
             "current_page": page,
@@ -275,7 +268,7 @@ def transaction_report_page(
     from_date: str = "",
     to_date: str = "",
     status: str = "",
-    payment_method: str = "",
+    generate: str = "",
 ):
 
     transactions = []
@@ -325,19 +318,6 @@ def transaction_report_page(
         ).upper()
 
         if status and payment_status != status.upper():
-            continue
-
-        # -----------------------------------------
-        # Payment method
-        # -----------------------------------------
-        stored_method = str(
-            data.get("payment_method", "")
-        ).upper()
-
-        if (
-            payment_method
-            and stored_method != payment_method.upper()
-        ):
             continue
 
         # -----------------------------------------
@@ -415,7 +395,8 @@ def transaction_report_page(
             "from_date": from_date,
             "to_date": to_date,
             "current_status": status,
-            "current_payment_method": payment_method,
+
+            "generated": generate == "1",
         },
     )
 
@@ -428,27 +409,7 @@ def download_transaction_report(
     from_date: str = "",
     to_date: str = "",
     status: str = "",
-    payment_method: str = "",
 ):
-
-    from reportlab.lib import colors
-    from reportlab.lib.enums import TA_LEFT, TA_RIGHT
-    from reportlab.lib.pagesizes import A4, landscape
-    from reportlab.lib.styles import (
-        getSampleStyleSheet,
-        ParagraphStyle
-    )
-    from reportlab.lib.units import mm
-    from reportlab.platypus import (
-        SimpleDocTemplate,
-        Paragraph,
-        Spacer,
-        Table,
-        TableStyle,
-        HRFlowable
-    )
-
-    import os
 
     # =====================================================
     # LOAD TRANSACTIONS
@@ -511,11 +472,6 @@ def download_transaction_report(
         method = str(
             data.get("payment_method", "-")
         ).strip()
-
-        if payment_method:
-
-            if method.upper() != payment_method.strip().upper():
-                continue
 
         # =================================================
         # PAYMENT DATE
@@ -635,12 +591,6 @@ def download_transaction_report(
         status.title()
         if status
         else "All Status"
-    )
-
-    payment_method_display = (
-        payment_method
-        if payment_method
-        else "All Payment Methods"
     )
 
     generated_date = datetime.now().strftime(
@@ -1004,22 +954,22 @@ def download_transaction_report(
 
         [
             Paragraph(
-                "Payment Method",
-                metadata_label_style
-            ),
-
-            Paragraph(
-                payment_method_display,
-                metadata_value_style
-            ),
-
-            Paragraph(
                 "Prepared By",
                 metadata_label_style
             ),
 
             Paragraph(
                 "JobConnect Administration",
+                metadata_value_style
+            ),
+
+            Paragraph(
+                "",
+                metadata_label_style
+            ),
+
+            Paragraph(
+                "",
                 metadata_value_style
             ),
         ],

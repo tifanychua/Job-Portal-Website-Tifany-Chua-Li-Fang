@@ -47,7 +47,14 @@
         <!-- Company Profile (Always Show) -->
         <li>
             <a href="/company-profile"
-               class="{% if request.url.path == '/company-profile' %}active{% endif %}">
+                class="
+                {% if
+                        request.url.path == '/company-profile'
+                        or request.url.path == '/edit-company-profile'
+                    %}
+                        active
+                    {% endif %}
+                    ">
                 <i class="fa-regular fa-user"></i>
                 <span>Company Profile</span>
             </a>
@@ -94,7 +101,9 @@
 
         <!-- Messages -->
         <li>
-        <a href="/messages">                <i class="fa-regular fa-envelope"></i>
+        <a href="/messages"
+               class="{% if request.url.path == '/messages' %}active{% endif %}">               
+            <i class="fa-regular fa-envelope"></i>
                 <span>Messages</span>
             </a>
         </li>
@@ -102,7 +111,15 @@
         <!-- Job Posting Credits -->
         <li>
             <a href="/employer-credit"
-            class="{% if request.url.path == '/employer-credit' %}active{% endif %}">
+            class="{% 
+                if 
+                request.url.path == '/employer-credit' 
+                or request.url.path == '/employer-plans'
+                or request.url.path == '/employer-transactions'
+                %}
+                active
+                {% endif %}
+                ">
                 <i class="fa-regular fa-credit-card"></i>
                 <span>Subscription</span>
             </a>

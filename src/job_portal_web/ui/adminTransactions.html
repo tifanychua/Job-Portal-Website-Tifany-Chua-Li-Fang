@@ -171,13 +171,13 @@
 
 
             <!-- Payment Method -->
-            <select id="paymentMethodFilter">
+            <!-- <select id="paymentMethodFilter">
 
                 <option value="">All Payment Methods</option>
                 <option value="PAYPAL">PayPal</option>
                 <option value="CREDIT CARD">Credit Card</option>
 
-            </select>
+            </select> -->
 
 
             <!-- Date Filter Button -->
@@ -515,9 +515,7 @@
 
         <a
             class="page-btn"
-            href="/admin/transactions?page={{ current_page - 1 }}&status={{ current_status }}&payment_method={{ current_payment_method }}&keyword={{ keyword }}">
-            <i class="fa-solid fa-chevron-left"></i>
-        </a>
+                href="/admin/transactions?page={{ current_page - 1 }}&status={{ current_status }}&keyword={{ keyword }}"        </a>
 
         {% endif %}
 
@@ -527,9 +525,7 @@
 
             <a
                 class="page-btn {% if page_number == current_page %}active{% endif %}"
-                href="/admin/transactions?page={{ page_number }}&status={{ current_status }}&payment_method={{ current_payment_method }}&keyword={{ keyword }}">
-
-                {{ page_number }}
+                href="/admin/transactions?page={{ current_page - 1 }}&status={{ current_status }}&keyword={{ keyword }}"                {{ page_number }}
 
             </a>
 
@@ -541,8 +537,7 @@
 
         <a
             class="page-btn"
-            href="/admin/transactions?page={{ current_page + 1 }}&status={{ current_status }}&payment_method={{ current_payment_method }}&keyword={{ keyword }}">
-            <i class="fa-solid fa-chevron-right"></i>
+            href="/admin/transactions?page={{ current_page + 1 }}&status={{ current_status }}&keyword={{ keyword }}"            <i class="fa-solid fa-chevron-right"></i>
         </a>
 
         {% endif %}
@@ -565,8 +560,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const statusFilter =
         document.getElementById("statusFilter");
 
-    const paymentMethodFilter =
-        document.getElementById("paymentMethodFilter");
+    //const paymentMethodFilter =
+        //document.getElementById("paymentMethodFilter");
 
     const dateFilterBtn =
         document.getElementById("dateFilterBtn");
@@ -670,8 +665,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const selectedStatus =
             statusFilter.value.toUpperCase();
 
-        const selectedPaymentMethod =
-            paymentMethodFilter.value.toUpperCase();
+        //const selectedPaymentMethod =
+            //paymentMethodFilter.value.toUpperCase();
 
         const rows =
             document.querySelectorAll(".transaction-row");
@@ -687,8 +682,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const rowStatus =
                 (row.dataset.status || "").toUpperCase();
 
-            const rowPaymentMethod =
-                (row.dataset.paymentMethod || "").toUpperCase();
+            //const rowPaymentMethod =
+                //(row.dataset.paymentMethod || "").toUpperCase();
 
             const rowDate =
                 row.dataset.date || "";
@@ -704,9 +699,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 rowStatus === selectedStatus;
 
 
-            const matchesPaymentMethod =
-                selectedPaymentMethod === "" ||
-                rowPaymentMethod === selectedPaymentMethod;
+            //const matchesPaymentMethod =
+               // selectedPaymentMethod === "" ||
+                //rowPaymentMethod === selectedPaymentMethod;
 
 
             const matchesFromDate =
@@ -728,7 +723,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (
                 matchesSearch &&
                 matchesStatus &&
-                matchesPaymentMethod &&
+                //matchesPaymentMethod &&
                 matchesFromDate &&
                 matchesToDate
             ) {
@@ -773,10 +768,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // Payment Method
-    paymentMethodFilter.addEventListener(
-        "change",
-        filterTransactions
-    );
+    //paymentMethodFilter.addEventListener(
+    //    "change",
+    //    filterTransactions
+    //);
 
 
     // Open / close date panel

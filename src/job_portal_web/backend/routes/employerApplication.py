@@ -67,21 +67,23 @@ def get_current_company(request: Request):
 # View All Applications
 # ==================================================
 
+@router.get(
+    "/applications",
+    response_class=HTMLResponse
+)
+async def view_applications(
+    request: Request,
+    page: int = 1
+):
 
-@router.get("/applications", response_class=HTMLResponse)
-async def view_applications(request: Request):
+    import math
 
-    import os
-    import time
-
-    start = time.time()
 
     # ==================================================
-    # Get current company
+    # Get Current Company
     # ==================================================
 
     if os.getenv("PYTEST_CURRENT_TEST"):
-        print("PYTEST MODE - bypass company login")
 
         company_id = "C000001"
 
@@ -91,452 +93,906 @@ async def view_applications(request: Request):
         }
 
     else:
-        company_id, company = get_current_company(request)
+
+        company_id, company = (
+            get_current_company(
+                request
+            )
+        )
+
 
     # ==================================================
-    # Get Experience Filter
-    # ==================================================
-
-    experience_filter = request.query_params.get("experience")
-
-    status_filter = request.query_params.get("status")
-
-    # ==================================================
-    # Load all jobs ONCE
+    # Load Employer Jobs
     # ==================================================
 
     jobs = []
     jobs_map = {}
 
-    for job_doc in db.collection("job_list").stream():
+
+    for job_doc in (
+        db.collection("job_list")
+        .stream()
+    ):
+
         job = job_doc.to_dict()
 
-        jobs_map[job_doc.id] = job
+        jobs_map[
+            job_doc.id
+        ] = job
+
 
         if (
-            job.get("company_id") == company_id
-            and str(job.get("status", "")).strip().lower() != "deleted"
+            job.get("company_id")
+            == company_id
+            and
+            str(
+                job.get(
+                    "status",
+                    ""
+                )
+            ).strip().lower()
+            != "deleted"
         ):
-            jobs.append(
-                {
-                    "job_id": job_doc.id,
-                    "job_title": job.get("job_title", "Untitled Job"),
-                }
-            )
+
+            jobs.append({
+
+                "job_id":
+                    job_doc.id,
+
+                "job_title":
+                    job.get(
+                        "job_title",
+                        "Untitled Job"
+                    ),
+            })
+
+
+    jobs.sort(
+        key=lambda item:
+            item["job_title"].lower()
+    )
+
 
     # ==================================================
-    # Load all job seekers ONCE
+    # Load Job Seekers
     # ==================================================
 
     job_seekers = {}
 
-    for doc in db.collection("job_seeker").stream():
-        job_seekers[doc.id] = doc.to_dict()
+
+    for doc in (
+        db.collection(
+            "job_seeker"
+        )
+        .stream()
+    ):
+
+        job_seekers[
+            doc.id
+        ] = doc.to_dict()
+
 
     # ==================================================
-    # Load all applications ONCE
+    # Load Applications
     # ==================================================
 
-    applications = []
+    all_applications = []
 
-    for application_doc in db.collection("application").stream():
-        application = application_doc.to_dict()
 
-        status = str(application.get("status", "")).strip().lower()
+    for application_doc in (
+        db.collection(
+            "application"
+        )
+        .stream()
+    ):
 
-        if status == "cancelled":
+        application = (
+            application_doc.to_dict()
+        )
+
+
+        status = str(
+            application.get(
+                "status",
+                ""
+            )
+            or ""
+        ).strip().lower()
+
+
+        # Do not show cancelled
+        if status in {
+            "cancelled",
+            "canceled"
+        }:
+
             continue
 
-        job_id = application.get("job_id")
+
+        job_id = (
+            application.get(
+                "job_id"
+            )
+        )
+
 
         if not job_id:
+
             continue
 
-        # Lookup job from memory
-        job = jobs_map.get(job_id)
+
+        job = (
+            jobs_map.get(
+                job_id
+            )
+        )
+
 
         if not job:
+
             continue
 
-        if job.get("company_id") != company_id:
+
+        # Only current employer
+        if (
+            job.get("company_id")
+            != company_id
+        ):
+
             continue
 
-        application["application_id"] = application_doc.id
-        application["status"] = status.title()
-        application["job_title"] = job.get("job_title", "Unknown Position")
 
-        # Default applicant info
-        application["applicant_name"] = "Unknown Applicant"
-        application["applicant_email"] = "No email provided"
-        application["experience"] = "Not provided"
-        application["skills"] = []
+        # ==================================================
+        # Application Basic Data
+        # ==================================================
 
-        # Lookup job seeker from memory
-        job_seeker = job_seekers.get(application.get("job_seeker_id"))
+        application[
+            "application_id"
+        ] = application_doc.id
+
+
+        application[
+            "status"
+        ] = status.title()
+
+
+        application[
+            "job_title"
+        ] = job.get(
+            "job_title",
+            "Unknown Position"
+        )
+
+
+        application[
+            "applicant_name"
+        ] = "Unknown Applicant"
+
+
+        application[
+            "applicant_email"
+        ] = "No email provided"
+
+
+        application[
+            "experience"
+        ] = "Not provided"
+
+
+        application[
+            "skills"
+        ] = []
+
+
+        # ==================================================
+        # Job Seeker
+        # ==================================================
+
+        job_seeker_id = (
+            application.get(
+                "job_seeker_id"
+            )
+        )
+
+
+        job_seeker = (
+            job_seekers.get(
+                job_seeker_id
+            )
+        )
+
 
         if job_seeker:
-            application["applicant_name"] = job_seeker.get("name") or "Unknown Applicant"
 
-            application["applicant_email"] = job_seeker.get("email") or "No email provided"
+            application[
+                "applicant_name"
+            ] = (
+                job_seeker.get(
+                    "name"
+                )
+                or
+                "Unknown Applicant"
+            )
+
+
+            application[
+                "applicant_email"
+            ] = (
+                job_seeker.get(
+                    "email"
+                )
+                or
+                "No email provided"
+            )
+
+
+            # ==============================================
+            # Experience
+            # ==============================================
 
             experience_docs = (
-                db.collection("job_seeker_experience")
-                .where("applicant_id", "==", application["job_seeker_id"])
+                db.collection(
+                    "job_seeker_experience"
+                )
+                .where(
+                    "applicant_id",
+                    "==",
+                    job_seeker_id
+                )
                 .stream()
             )
+
 
             experiences = []
 
+
             for doc in experience_docs:
+
                 exp = doc.to_dict()
-                experiences.append(exp.get("job_title"))
 
-            application["experience"] = ", ".join(experiences) if experiences else "Not provided"
+                job_title = (
+                    exp.get(
+                        "job_title"
+                    )
+                )
 
+                if job_title:
+
+                    experiences.append(
+                        job_title
+                    )
+
+
+            application[
+                "experience"
+            ] = (
+                ", ".join(
+                    experiences
+                )
+                if experiences
+                else "Not provided"
+            )
+
+
+            # ==============================================
+            # Skills
+            # ==============================================
 
             skill_docs = (
-                db.collection("job_seeker_skill")
-                .where("applicant_id", "==", application["job_seeker_id"])
+                db.collection(
+                    "job_seeker_skill"
+                )
+                .where(
+                    "applicant_id",
+                    "==",
+                    job_seeker_id
+                )
                 .stream()
             )
 
+
             skills = []
+
 
             for doc in skill_docs:
 
-                data = doc.to_dict()
+                data = (
+                    doc.to_dict()
+                )
 
-                skill_id = data.get("skill_id")
+
+                skill_id = (
+                    data.get(
+                        "skill_id"
+                    )
+                )
+
 
                 if not skill_id:
+
                     continue
 
+
                 skill_doc = (
-                    db.collection("skills")
-                    .document(skill_id)
+                    db.collection(
+                        "skills"
+                    )
+                    .document(
+                        skill_id
+                    )
                     .get()
                 )
 
+
                 if skill_doc.exists:
-                    skills.append(
-                        skill_doc.to_dict().get("skill_name")
+
+                    skill_name = (
+                        skill_doc.to_dict()
+                        .get(
+                            "skill_name"
+                        )
                     )
 
-            application["skills"] = skills
-            experience_docs = (
-                db.collection("job_seeker_experience")
-                .where("applicant_id", "==", application["job_seeker_id"])
-                .stream()
-            )
 
-            experiences = []
+                    if skill_name:
 
-            for doc in experience_docs:
-                exp = doc.to_dict()
-                experiences.append(exp.get("job_title"))
+                        skills.append(
+                            skill_name
+                        )
 
-            application["experience"] = ", ".join(experiences) if experiences else "Not provided"
 
-            skill_docs = (
-                db.collection("job_seeker_skill")
-                .where("applicant_id", "==", application["job_seeker_id"])
-                .stream()
-            )
+            application[
+                "skills"
+            ] = skills
 
-            skills = []
-
-            for doc in skill_docs:
-                data = doc.to_dict()
-
-                skill_id = data.get("skill_id")
-
-                if not skill_id:
-                    continue
-
-                skill_doc = db.collection("skills").document(skill_id).get()
-
-                if skill_doc.exists:
-                    skills.append(skill_doc.to_dict().get("skill_name"))
-
-            application["skills"] = skills
-
-        applications.append(application)
-
-    # ==================================================
-    # Experience Filter
-    # ==================================================
-
-    no_experience_message = None
-
-    if experience_filter:
-        filtered = []
-
-        for application in applications:
-            applicant_experience = str(application.get("experience", "")).strip().lower()
-
-            if applicant_experience == experience_filter.strip().lower():
-                filtered.append(application)
-
-        applications = filtered
-
-        if len(applications) == 0:
-            no_experience_message = "No applicants found for this experience level"
 
         # ==================================================
-        # No Experience Message
+        # Sort Date
+        #
+        # Latest status update first.
+        # If never updated, use created_at.
         # ==================================================
 
-        no_experience_message = None
+        sort_date = (
+            application.get(
+                "updated_on"
+            )
+            or
+            application.get(
+                "updated_at"
+            )
+            or
+            application.get(
+                "created_at"
+            )
+        )
 
-        if experience_filter and len(applications) == 0:
-            no_experience_message = "No applicants found for this experience level"
+
+        application[
+            "_sort_date"
+        ] = sort_date
+
+
+        all_applications.append(
+            application
+        )
+
 
     # ==================================================
-    # Status Filter
+    # DESCENDING ORDER
     # ==================================================
 
-    no_status_message = None
+    all_applications.sort(
 
-    if status_filter:
-        filtered = []
+        key=lambda application: (
 
-        for application in applications:
-            applicant_status = str(application.get("status", "")).strip().lower()
+            application.get(
+                "_sort_date"
+            )
 
-            selected_status = status_filter.strip().lower()
+            or
 
-            # "New" in the UI is stored as "Submitted"
-            if selected_status == "new":
-                selected_status = "submitted"
+            datetime.min.replace(
+                tzinfo=UTC
+            )
 
-            if applicant_status == selected_status:
-                filtered.append(application)
+        ),
 
-        applications = filtered
+        reverse=True
+    )
 
-        if len(applications) == 0:
-            no_status_message = "No applicants found for this application status"
 
     # ==================================================
     # Statistics
+    #
+    # Must calculate BEFORE pagination
     # ==================================================
 
-    total_count = len(applications)
-
-    new_count = sum(1 for a in applications if a["status"].lower() == "submitted")
-
-    reviewed_count = sum(1 for a in applications if a["status"].lower() == "reviewed")
-
-    shortlisted_count = sum(1 for a in applications if a["status"].lower() == "shortlisted")
-
-    offered_count = sum(1 for a in applications if a["status"].lower() == "offered")
-
-    rejected_count = sum(1 for a in applications if a["status"].lower() == "rejected")
-
-    print("Route time:", time.time() - start)
-
-    return templates.TemplateResponse(
-        request=request,
-        name="viewApplication.html",
-        context={
-            "request": request,
-            "company": company,
-            "applications": applications,
-            "jobs": jobs,
-            "no_experience_message": no_experience_message,
-            "no_status_message": no_status_message,
-            "total_count": total_count,
-            "new_count": new_count,
-            "reviewed_count": reviewed_count,
-            "shortlisted_count": shortlisted_count,
-            "offered_count": offered_count,
-            "rejected_count": rejected_count,
-            "unread_notifications_count": get_unread_notifications_count(request),
-        },
+    total_count = len(
+        all_applications
     )
 
 
-# ==================================================
-# View Applicant Resume
-# ==================================================
+    new_count = sum(
+        1
+        for a in all_applications
+        if a["status"].lower()
+        == "submitted"
+    )
 
 
-@router.get("/application/resume/{application_id}")
-async def view_resume(application_id: str):
+    reviewed_count = sum(
+        1
+        for a in all_applications
+        if a["status"].lower()
+        == "reviewed"
+    )
 
-    # Retrieve application document
-    application_doc = db.collection("application").document(application_id).get()
 
-    # Check whether application exists
-    if not application_doc.exists:
-        raise HTTPException(status_code=404, detail="Application not found.")
+    shortlisted_count = sum(
+        1
+        for a in all_applications
+        if a["status"].lower()
+        == "shortlisted"
+    )
 
-    # Convert Firestore document
-    # into a Python dictionary
-    application = application_doc.to_dict()
 
-    # Get resume path
-    resume_path = application.get("resume_path")
+    offered_count = sum(
+        1
+        for a in all_applications
+        if a["status"].lower()
+        == "offered"
+    )
 
-    # Check whether resume path exists
-    if not resume_path:
-        raise HTTPException(status_code=404, detail="Resume is not available.")
 
-    # Get Firebase Storage bucket
-    bucket = storage.bucket()
+    rejected_count = sum(
+        1
+        for a in all_applications
+        if a["status"].lower()
+        == "rejected"
+    )
 
-    # Retrieve the resume file
-    resume_blob = bucket.blob(resume_path)
 
-    # Check whether the resume exists
-    if not resume_blob.exists():
-        raise HTTPException(
-            status_code=404, detail=("Resume file was not found in Firebase Storage.")
+    # ==================================================
+    # Pagination
+    # ==================================================
+
+    PER_PAGE = 20
+
+
+    total_applications = len(
+        all_applications
+    )
+
+
+    total_pages = max(
+        1,
+        math.ceil(
+            total_applications
+            /
+            PER_PAGE
+        )
+    )
+
+
+    if page < 1:
+
+        page = 1
+
+
+    if page > total_pages:
+
+        page = total_pages
+
+
+    start_index = (
+        page - 1
+    ) * PER_PAGE
+
+
+    end_index = (
+        start_index
+        +
+        PER_PAGE
+    )
+
+
+    applications = (
+        all_applications[
+            start_index:end_index
+        ]
+    )
+
+
+    for application in applications:
+
+        application.pop(
+            "_sort_date",
+            None
         )
 
-    # Generate a temporary URL
-    # that is valid for one hour
-    resume_url = resume_blob.generate_signed_url(
-        expiration=timedelta(hours=1), method="GET", version="v4"
+
+    # ==================================================
+    # Showing Information
+    # ==================================================
+
+    if total_applications > 0:
+
+        showing_from = (
+            start_index
+            +
+            1
+        )
+
+
+        showing_to = min(
+            end_index,
+            total_applications
+        )
+
+
+    else:
+
+        showing_from = 0
+        showing_to = 0
+
+
+    # ==================================================
+    # Render
+    # ==================================================
+
+    return templates.TemplateResponse(
+
+        request=request,
+
+        name="viewApplication.html",
+
+        context={
+
+            "request":
+                request,
+
+            "company":
+                company,
+
+            "applications":
+                applications,
+
+            "jobs":
+                jobs,
+
+            "total_count":
+                total_count,
+
+            "new_count":
+                new_count,
+
+            "reviewed_count":
+                reviewed_count,
+
+            "shortlisted_count":
+                shortlisted_count,
+
+            "offered_count":
+                offered_count,
+
+            "rejected_count":
+                rejected_count,
+
+            "current_page":
+                page,
+
+            "total_pages":
+                total_pages,
+
+            "total_applications":
+                total_applications,
+
+            "showing_from":
+                showing_from,
+
+            "showing_to":
+                showing_to,
+
+            "unread_notifications_count":
+                get_unread_notifications_count(
+                    request
+                ),
+        },
     )
-
-    # Redirect to the PDF
-    return RedirectResponse(url=resume_url)
-
 
 # ==================================================
 # Update Application Status
 # ==================================================
 
-
-@router.put("/application/{application_id}/status")
-async def update_application_status(application_id: str, status_data: ApplicationStatusUpdate):
-
-    # ==================================================
-    # Normalize Received Status
-    # ==================================================
-
-    received_status = status_data.status.strip().lower()
+@router.put(
+    "/application/{application_id}/status"
+)
+async def update_application_status(
+    application_id: str,
+    status_data: ApplicationStatusUpdate
+):
 
     # ==================================================
-    # Map UI Status to Firestore Status
+    # Normalize Status
+    # ==================================================
+
+    received_status = (
+        status_data.status
+        .strip()
+        .lower()
+    )
+
+
+    # ==================================================
+    # Status Mapping
     # ==================================================
 
     status_mapping = {
-        # New application
-        "new": "Submitted",
-        "submitted": "Submitted",
-        # Reviewed application
-        "reviewed": "Reviewed",
-        # Other statuses
-        "shortlisted": "Shortlisted",
-        "offered": "Offered",
-        "rejected": "Rejected",
+
+        "new":
+            "Submitted",
+
+        "submitted":
+            "Submitted",
+
+        "reviewed":
+            "Reviewed",
+
+        "shortlisted":
+            "Shortlisted",
+
+        "offered":
+            "Offered",
+
+        "rejected":
+            "Rejected",
     }
+
 
     # ==================================================
     # Validate Status
     # ==================================================
 
-    if received_status not in status_mapping:
-        raise HTTPException(
-            status_code=400, detail=("Invalid application status: " + status_data.status)
-        )
+    if (
+        received_status
+        not in status_mapping
+    ):
 
-    # Get the correct Firestore value
-
-    firestore_status = status_mapping[received_status]
-
-    # ==================================================
-    # Retrieve Application
-    # ==================================================
-
-    application_ref = db.collection("application").document(application_id)
-
-    application_doc = application_ref.get()
-
-    # ==================================================
-    # Check Whether Application Exists
-    # ==================================================
-
-    if not application_doc.exists:
-        raise HTTPException(status_code=404, detail=("Application not found."))
-
-    # ==================================================
-    # Prevent changing final statuses
-    # ==================================================
-
-    application = application_doc.to_dict()
-
-    current_status = str(application.get("status", "")).strip().lower()
-
-    # During pytest, allow changing status repeatedly
-    if not os.getenv("PYTEST_CURRENT_TEST") and current_status in ["offered", "rejected"]:
         raise HTTPException(
             status_code=400,
             detail=(
-                "This application has already been "
-                f"{current_status} and its status cannot be changed."
-            ),
+                "Invalid application status: "
+                +
+                status_data.status
+            )
         )
 
-    # ==================================================
-    # Update Firestore Status and Time
-    # ==================================================
 
-    application_ref.update(
-        {
-            # Update application status
-            "status": firestore_status,
-            # Store the current server date and time
-            "updated_on": firestore.SERVER_TIMESTAMP,
-        }
+    firestore_status = (
+        status_mapping[
+            received_status
+        ]
     )
-    
+
+
     # ==================================================
-    # Notify the Applicant
+    # Get Application
     # ==================================================
 
-    job_seeker_id = application.get("job_seeker_id")
-    job_id = application.get("job_id")
+    application_ref = (
+        db.collection(
+            "application"
+        )
+        .document(
+            application_id
+        )
+    )
+
+
+    application_doc = (
+        application_ref.get()
+    )
+
+
+    if not application_doc.exists:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Application not found."
+        )
+
+
+    application = (
+        application_doc.to_dict()
+    )
+
+
+    # ==================================================
+    # Current Status
+    # ==================================================
+
+    current_status = str(
+        application.get(
+            "status",
+            ""
+        )
+        or ""
+    ).strip().lower()
+
+
+    # ==================================================
+    # Prevent Final Status Changes
+    #
+    # Offered / Rejected cannot be changed again
+    # ==================================================
+
+    if (
+        not os.getenv(
+            "PYTEST_CURRENT_TEST"
+        )
+        and
+        current_status
+        in {
+            "offered",
+            "rejected"
+        }
+    ):
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "This application has already "
+                f"been {current_status} and its "
+                "status cannot be changed."
+            )
+        )
+
+
+    # ==================================================
+    # Update Status
+    #
+    # updated_on is IMPORTANT because your
+    # Applications page sorts using this field.
+    # ==================================================
+
+    application_ref.update({
+
+        "status":
+            firestore_status,
+
+        "updated_on":
+            firestore.SERVER_TIMESTAMP,
+    })
+
+
+    # ==================================================
+    # Applicant Notification
+    # ==================================================
+
+    job_seeker_id = (
+        application.get(
+            "job_seeker_id"
+        )
+    )
+
+
+    job_id = (
+        application.get(
+            "job_id"
+        )
+    )
+
 
     if job_seeker_id:
-        job_title = "your application"
 
-        if job_id:
-            job_doc = db.collection("job_list").document(job_id).get()
-            if job_doc.exists:
-                job_title = job_doc.to_dict().get("job_title", job_title)
-
-        status_messages = {
-            "Reviewed": "is now being reviewed",
-            "Shortlisted": "has been shortlisted",
-            "Offered": "has received a job offer — congratulations!",
-            "Rejected": "was not successful this time",
-        }
-
-        db.collection("notification").document().set(
-            {
-                "user_id": job_seeker_id,
-                "user_type": "job_seeker",
-                "is_read": False,
-                "type": "application",
-                "title": "Application status updated",
-                "message": (
-                    f"Your application for {job_title} "
-                    f"{status_messages.get(firestore_status, 'has been updated')}."
-                ),
-                "link": f"/application/{application_id}",
-                "created_at": datetime.now(UTC),
-            }
+        job_title = (
+            "your application"
         )
 
+
+        if job_id:
+
+            job_doc = (
+                db.collection(
+                    "job_list"
+                )
+                .document(
+                    job_id
+                )
+                .get()
+            )
+
+
+            if job_doc.exists:
+
+                job_title = (
+                    job_doc
+                    .to_dict()
+                    .get(
+                        "job_title",
+                        job_title
+                    )
+                )
+
+
+        status_messages = {
+
+            "Submitted":
+                "has been submitted",
+
+            "Reviewed":
+                "is now being reviewed",
+
+            "Shortlisted":
+                "has been shortlisted",
+
+            "Offered":
+                (
+                    "has received a job offer "
+                    "— congratulations!"
+                ),
+
+            "Rejected":
+                (
+                    "was not successful "
+                    "this time"
+                ),
+        }
+
+
+        db.collection(
+            "notification"
+        ).document().set({
+
+            "user_id":
+                job_seeker_id,
+
+            "user_type":
+                "job_seeker",
+
+            "is_read":
+                False,
+
+            "type":
+                "application",
+
+            "title":
+                "Application status updated",
+
+            "message":
+                (
+                    f"Your application for "
+                    f"{job_title} "
+                    f"{status_messages.get(
+                        firestore_status,
+                        'has been updated'
+                    )}."
+                ),
+
+            "link":
+                f"/application/{application_id}",
+
+            "created_at":
+                datetime.now(UTC),
+        })
+
+
     # ==================================================
-    # Return Successful Result
+    # Success
     # ==================================================
 
     return {
-        "success": True,
-        "message": "Application status updated successfully.",
-        "status": firestore_status,
+
+        "success":
+            True,
+
+        "message":
+            (
+                "Application status updated "
+                "successfully."
+            ),
+
+        "status":
+            firestore_status,
     }
