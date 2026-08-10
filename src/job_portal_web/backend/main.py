@@ -32,6 +32,7 @@ from .routes.employer import router as employer_router
 from .routes.employerApplication import router as employer_application_router
 from .routes.jobSeekerProfile import router as jobSeekerProfile_router
 from .routes.skill import router as skill_router
+from .admin_users import router as admin_users_router
 
 # ==================================================
 # APP
@@ -170,6 +171,8 @@ app.include_router(companyProfile_router)
 app.include_router(skill_router)
 
 app.include_router(editCompanyProfile_router)
+
+app.include_router(admin_users_router)
 # ==================================================
 # TEMPLATE HELPER
 # ==================================================
@@ -299,7 +302,17 @@ def schedule_list_page(request: Request):
         return RedirectResponse("/login", status_code=303)
 
     return render_template(request, "schedule_list.html", {"active_page": "schedule_list"})
+@app.get("/login")
+def login_page(request: Request):
+    return render_template(request, "login.html")
 
+
+@app.get("/career-advice")
+def view_career_advice(request: Request):
+    return templates.TemplateResponse(
+        "jobSeekerCareerAdvice.html",
+        {"request": request}
+    )
 
 # ==================================================
 # RUN
@@ -311,6 +324,3 @@ if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
 
 
-@app.get("/login")
-def login_page(request: Request):
-    return render_template(request, "login.html")

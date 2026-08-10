@@ -2,12 +2,13 @@ import os
 from datetime import UTC, datetime
 from urllib.parse import quote
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from firebase_admin import auth, firestore
 from pydantic import BaseModel
 
+from .admin_users import ensure_account_can_log_in
 from .database import db
 from .email_service import send_password_reset_email
 
@@ -145,6 +146,16 @@ async def firebase_login(request: Request, data: LoginToken):
     job = db.collection("job_seeker").document(uid).get()
 
     if job.exists:
+        job_data = job.to_dict() or {}
+
+        try:
+            ensure_account_can_log_in(job_data)
+        except HTTPException as error:
+            return JSONResponse(
+                {"error": error.detail},
+                status_code=error.status_code,
+            )
+
         request.session["user_type"] = "job_seeker"
         request.session["applicant_id"] = uid
         return {"redirect": "/"}
@@ -153,7 +164,16 @@ async def firebase_login(request: Request, data: LoginToken):
     company = db.collection("company").document(uid).get()
 
     if company.exists:
-        company_data = company.to_dict()
+        company_data = company.to_dict() or {}
+
+        try:
+            ensure_account_can_log_in(company_data)
+        except HTTPException as error:
+            return JSONResponse(
+                {"error": error.detail},
+                status_code=error.status_code,
+            )
+
         status = company_data.get("status")
 
         if status in ["Pending", "Active"]:
@@ -236,6 +256,7 @@ async def firebase_register_job_seeker(data: JobSeekerRegisterRequest):
                 "phone": data.phone,
                 "profileImage": "",
                 "status": "Active",
+                "accountStatus": "Active",
                 "createdAt": firestore.SERVER_TIMESTAMP,
             }
         )
@@ -285,6 +306,7 @@ async def firebase_register_employer(data: EmployerRegisterRequest):
             },
             "logo": "companyLogo.png",
             "status": "Pending",
+            "accountStatus": "Active",
             "createdAt": firestore.SERVER_TIMESTAMP,
         }
 

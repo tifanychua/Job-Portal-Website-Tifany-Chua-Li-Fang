@@ -24,6 +24,57 @@
     <link rel="stylesheet"
           href="/css/adminCareerAdvice.css">
 
+    <!-- Quill rich-text editor -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
+
+    <style>
+        .career-rich-text-editor {
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        .career-rich-text-editor:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px #dbeafe;
+        }
+
+        .career-rich-text-editor .ql-toolbar.ql-snow {
+            border: 0;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .career-rich-text-editor .ql-container.ql-snow {
+            min-height: 320px;
+            border: 0;
+            color: #334155;
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        .career-rich-text-editor .ql-editor {
+            min-height: 320px;
+            padding: 18px;
+            line-height: 1.75;
+        }
+
+        .career-rich-text-editor .ql-editor.ql-blank::before {
+            left: 18px;
+            color: #94a3b8;
+            font-style: normal;
+        }
+
+        .rich-text-help {
+            display: block;
+            margin-top: 8px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -336,7 +387,7 @@
 
             <div class="form-group">
 
-                <label for="content">
+                <label for="contentEditor">
                     Post Content
                 </label>
 
@@ -346,9 +397,19 @@
                           placeholder="Write the complete career advice here">{{ post.get("content", "") if post else "" }}</textarea>
 
 
-                <small>
-                    Category, summary and at least 50 content
-                    characters are required before publishing.
+                <div id="richTextEditorWrapper"
+                     class="career-rich-text-editor">
+
+                    <div id="contentEditor"></div>
+
+                </div>
+
+
+                <small class="rich-text-help">
+                    Use the toolbar to format paragraphs, headings,
+                    bold text, lists, links and quotations. Category,
+                    summary and at least 50 text characters are required
+                    before publishing.
                 </small>
 
             </div>
@@ -398,6 +459,9 @@
 </main>
 
 
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+
+
 <script>
 
 /* ================================== */
@@ -436,6 +500,172 @@ const contentInput =
     document.getElementById(
         "content"
     );
+
+
+const contentEditorElement =
+    document.getElementById(
+        "contentEditor"
+    );
+
+
+const richTextEditorWrapper =
+    document.getElementById(
+        "richTextEditorWrapper"
+    );
+
+
+let contentEditor = null;
+
+
+if (typeof Quill !== "undefined") {
+
+    contentEditor = new Quill(
+        contentEditorElement,
+        {
+            theme: "snow",
+
+            placeholder:
+                "Write the complete career advice here",
+
+            formats: [
+                "header",
+                "bold",
+                "italic",
+                "underline",
+                "list",
+                "blockquote",
+                "link"
+            ],
+
+            modules: {
+                toolbar: [
+                    [
+                        {
+                            header: [
+                                1,
+                                2,
+                                3,
+                                false
+                            ]
+                        }
+                    ],
+                    [
+                        "bold",
+                        "italic",
+                        "underline"
+                    ],
+                    [
+                        { list: "ordered" },
+                        { list: "bullet" }
+                    ],
+                    [
+                        "blockquote",
+                        "link"
+                    ],
+                    ["clean"]
+                ]
+            }
+        }
+    );
+
+
+    const existingContent =
+        contentInput.value.trim();
+
+
+    if (existingContent) {
+
+        const containsHtml =
+            /<[a-z][\s\S]*>/i.test(
+                existingContent
+            );
+
+
+        if (containsHtml) {
+
+            contentEditor.clipboard.dangerouslyPasteHTML(
+                existingContent
+            );
+
+        }
+        else {
+
+            contentEditor.setText(
+                existingContent
+            );
+
+        }
+
+    }
+
+
+    contentInput.hidden = true;
+
+}
+else {
+
+    richTextEditorWrapper.hidden = true;
+
+}
+
+
+function getContentText() {
+
+    if (contentEditor) {
+
+        return contentEditor
+            .getText()
+            .trim();
+
+    }
+
+
+    return contentInput.value.trim();
+
+}
+
+
+function getContentHtml() {
+
+    const contentText =
+        getContentText();
+
+
+    if (!contentText) {
+
+        return "";
+
+    }
+
+
+    if (contentEditor) {
+
+        return contentEditor
+            .getSemanticHTML()
+            .trim();
+
+    }
+
+
+    return contentInput.value.trim();
+
+}
+
+
+function focusContentEditor() {
+
+    if (contentEditor) {
+
+        contentEditor.focus();
+
+    }
+    else {
+
+        contentInput.focus();
+
+    }
+
+}
 
 
 const categoryInput =
@@ -771,7 +1001,7 @@ function validateForm(action) {
 
 
     const content =
-        contentInput.value.trim();
+        getContentText();
 
 
     if (!title) {
@@ -825,7 +1055,7 @@ function validateForm(action) {
                 "error"
             );
 
-            contentInput.focus();
+            focusContentEditor();
 
             return false;
 
@@ -839,7 +1069,7 @@ function validateForm(action) {
                 "error"
             );
 
-            contentInput.focus();
+            focusContentEditor();
 
             return false;
 
@@ -929,7 +1159,7 @@ async function submitPost(action) {
                             summaryInput.value.trim(),
 
                         content:
-                            contentInput.value.trim(),
+                            getContentHtml(),
 
                         imageUrl:
                             imageUrl,

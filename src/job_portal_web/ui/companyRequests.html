@@ -1,511 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Company Registration Requests</title>
 
-
-    <!-- Font Awesome -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-
-    <!-- Header Sidebar CSS -->
-    <link rel="stylesheet"
-          href="/css/employerHeader.css">
-
-
-    <!-- Admin Page CSS -->
-    <link rel="stylesheet"
-          href="/css/adminCompany.css">
-
-
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/adminCompany.css">
 </head>
-
-
 <body>
-
-
-{% include "adminHeader.html" %}
-
-
-
-<main class="main-content">
-
-
-    <!-- ============================= -->
-    <!-- PAGE HEADER -->
-    <!-- ============================= -->
-
-    <div class="page-header">
-
-
-        <div>
-
-            <h1>
-                Company Registration Requests
-            </h1>
-
-
-            <p>
-                Review pending company registrations before granting employer access.
-            </p>
-
-
-        </div>
-
-
-    </div>
-
-
-
-
-
-    <!-- ============================= -->
-    <!-- SEARCH BAR -->
-    <!-- ============================= -->
-
-
-    <div class="toolbar">
-
-<div class="filter-box">
-
-    <i class="fa-solid fa-filter"></i>
-
-
-    <select id="statusFilter"
-            onchange="filterStatus()">
-
-
-        <option value="Pending"
-        {% if current_status == "Pending" %}
-        selected
-        {% endif %}>
-            Pending
-        </option>
-
-
-        <option value="Active"
-        {% if current_status == "Active" %}
-        selected
-        {% endif %}>
-            Active
-        </option>
-
-
-        <option value="Rejected"
-        {% if current_status == "Rejected" %}
-        selected
-        {% endif %}>
-            Rejected
-        </option>
-
-
-        <option value="Deactivated"
-        {% if current_status == "Deactivated" %}
-        selected
-        {% endif %}>
-            Deactivated
-        </option>
-
-
-        <option value="All"
-        {% if current_status == "All" %}
-        selected
-        {% endif %}>
-            All Companies
-        </option>
-
-
-    </select>
-
-
-</div>
-
-
-
-
-
-    <div class="search-box">
-
-
-        <i class="fa-solid fa-magnifying-glass"></i>
-
-
-        <input 
-            type="text"
-            id="companySearch"
-            placeholder="Search company...">
-
-
-    </div>
-
-
-</div>
-
-
-
-
-
-    <!-- ============================= -->
-    <!-- COMPANY TABLE -->
-    <!-- ============================= -->
-
-
-    <div class="table-card">
-
-
-        <table id="companyTable">
-
-
-            <thead>
-
-
-                <tr>
-
-                    <th>
-                        Company
-                    </th>
-
-
-                    <th>
-                        Email
-                    </th>
-
-
-                    <th>
-                        Registration No.
-                    </th>
-
-
-                    <th>
-                        Industry
-                    </th>
-
-
-                    <th>
-                        Date Submitted
-                    </th>
-
-
-                    <th>
-                        Status
-                    </th>
-
-
-                    <th>
-                        Action
-                    </th>
-
-
-                </tr>
-
-
-            </thead>
-
-
-
-
-
-            <tbody>
-
-
+    {% include "adminHeader.html" %}
+
+    {% set selected_status = current_status|default("Pending") %}
+
+    <main class="admin-company-page">
+        <header class="company-page-header">
+            <div>
+                <p class="company-page-eyebrow">
+                    <i class="fa-solid fa-building-shield"></i>
+                    Employer administration
+                </p>
+                <h1>Company Registration Requests</h1>
+                <p>Review company registrations and monitor employer account approval statuses.</p>
+            </div>
+
+            <a class="company-refresh-button"
+               href="/admin/company-requests?status={{ selected_status|urlencode }}">
+                <i class="fa-solid fa-rotate-right"></i>
+                Refresh
+            </a>
+        </header>
+
+        <section class="company-view-summary" aria-label="Current company view">
+            <div class="company-summary-icon {{ selected_status|lower }}">
+                {% if selected_status == "Pending" %}
+                    <i class="fa-regular fa-clock"></i>
+                {% elif selected_status == "Active" %}
+                    <i class="fa-solid fa-circle-check"></i>
+                {% elif selected_status == "Rejected" %}
+                    <i class="fa-solid fa-circle-xmark"></i>
+                {% elif selected_status == "Deactivated" %}
+                    <i class="fa-solid fa-ban"></i>
+                {% else %}
+                    <i class="fa-solid fa-building"></i>
+                {% endif %}
+            </div>
+
+            <div class="company-summary-copy">
+                <span>Current view</span>
+                <strong>{{ selected_status if selected_status != "All" else "All companies" }}</strong>
+            </div>
+
+            <div class="company-summary-count">
+                <strong id="visibleCompanyCount">{{ companies|length }}</strong>
+                <span id="visibleCompanyLabel">{{ "company" if companies|length == 1 else "companies" }}</span>
+            </div>
+        </section>
+
+        <section class="company-panel">
+            <div class="company-toolbar">
+                <label class="company-search-box" for="companySearch">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input
+                        type="search"
+                        id="companySearch"
+                        placeholder="Search by company, email, registration number or industry"
+                        autocomplete="off">
+                    <button id="clearCompanySearch"
+                            class="clear-company-search"
+                            type="button"
+                            aria-label="Clear search"
+                            hidden>
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </label>
+
+                <label class="company-status-filter" for="statusFilter">
+                    <i class="fa-solid fa-filter"></i>
+                    <select id="statusFilter">
+                        {% for status in ["Pending", "Active", "Rejected", "Deactivated", "All"] %}
+                            <option value="{{ status }}"
+                                    {% if selected_status == status %}selected{% endif %}>
+                                {{ "All Companies" if status == "All" else status }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+
+            <div class="company-list-heading">
+                <div>
+                    <h2>Registered companies</h2>
+                    <p id="companyResultInformation">
+                        Showing {{ companies|length }} {{ "company" if companies|length == 1 else "companies" }}
+                    </p>
+                </div>
+                <span class="selected-filter-badge {{ selected_status|lower }}">
+                    <span></span>
+                    {{ selected_status if selected_status != "All" else "All statuses" }}
+                </span>
+            </div>
 
             {% if companies %}
-
-
-
-                {% for company in companies %}
-
-
-
-                <tr class="company-row">
-
-
-                    <!-- Company Name -->
-
-                    <td>
-
-                        {{ company.companyName }}
-
-                    </td>
-
-
-
-
-
-                    <!-- Email -->
-
-                    <td>
-
-                        {{ company.businessEmail }}
-
-                    </td>
-
-
-
-
-
-                    <!-- Registration Number -->
-
-                    <td>
-
-                        {{ company.registrationNumber }}
-
-                    </td>
-
-
-
-
-
-                    <!-- Industry -->
-
-                    <td>
-
-                        {{ company.industry }}
-
-                    </td>
-
-
-
-
-
-                    <!-- Submitted Date -->
-
-                    <td>
-
-
-                        {% if company.createdAt %}
-
-                            {{ company.createdAt.strftime("%d %b %Y") }}
-
-
-                        {% else %}
-
-                            -
-
-                        {% endif %}
-
-
-                    </td>
-
-
-
-
-
-                    <!-- Status -->
-
-                    <td>
-
-
-                        {% if company.status == "Pending" %}
-
-
-                            <span class="status pending">
-                                Pending
-                            </span>
-
-
-
-                        {% elif company.status == "Active" %}
-
-
-<span class="status approved">
-    Active
-</span>
-
-
-{% elif company.status == "Deactivated" %}
-
-
-<span class="status deactivated">
-    Deactivated
-</span>
-
-
-
-                        {% elif company.status == "Rejected" %}
-
-
-                            <span class="status rejected">
-                                Rejected
-                            </span>
-
-
-
-                        {% endif %}
-
-
-                    </td>
-
-
-
-
-
-                    <!-- Action -->
-
-                    <td>
-
-
-                        <a href="/admin/company/{{ company.company_id }}"
-                           class="review-btn">
-
-
-                            <i class="fa-solid fa-eye"></i>
-
-
-                            Review
-
-
-                        </a>
-
-
-                    </td>
-
-
-
-                </tr>
-
-
-
-                {% endfor %}
-
-
-
-
-
+                <div class="company-table-wrapper">
+                    <table id="companyTable" class="company-table">
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Contact</th>
+                                <th>Registration No.</th>
+                                <th>Industry</th>
+                                <th>Date Submitted</th>
+                                <th>Status</th>
+                                <th class="company-action-heading">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for company in companies %}
+                                {% set contact = company.get("contactPerson", {}) or {} %}
+                                {% set company_name = company.get("companyName") or "Unnamed Company" %}
+                                {% set company_email = company.get("businessEmail") or contact.get("email") or "-" %}
+                                {% set company_status = company.get("status", "Unknown") %}
+                                {% set company_id = company.get("company_id", company.get("id", "")) %}
+                                {% set logo_url = company.get("logo", "") %}
+
+                                <tr class="company-row"
+                                    data-search="{{ (company_name ~ ' ' ~ company_email ~ ' ' ~ company.get('registrationNumber', '') ~ ' ' ~ company.get('industry', ''))|lower }}">
+                                    <td data-label="Company">
+                                        <div class="company-identity">
+                                            {% if logo_url and logo_url != "default.jpg" %}
+                                                <img class="company-list-logo"
+                                                     src="{{ logo_url }}"
+                                                     alt="{{ company_name }} logo"
+                                                     onerror="this.hidden=true; this.nextElementSibling.hidden=false;">
+                                                <span class="company-list-logo company-logo-fallback" hidden>
+                                                    {{ company_name[:1]|upper }}
+                                                </span>
+                                            {% else %}
+                                                <span class="company-list-logo company-logo-fallback">
+                                                    {{ company_name[:1]|upper }}
+                                                </span>
+                                            {% endif %}
+
+                                            <div>
+                                                <strong>{{ company_name }}</strong>
+                                                <span>{{ company.get("companySize") or "Company profile" }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td data-label="Contact">
+                                        <div class="company-contact">
+                                            <i class="fa-regular fa-envelope"></i>
+                                            <span title="{{ company_email }}">{{ company_email }}</span>
+                                        </div>
+                                    </td>
+
+                                    <td data-label="Registration No.">
+                                        <span class="registration-number">
+                                            {{ company.get("registrationNumber") or "-" }}
+                                        </span>
+                                    </td>
+
+                                    <td data-label="Industry">
+                                        <span class="industry-name">
+                                            {{ company.get("industry") or "Not specified" }}
+                                        </span>
+                                    </td>
+
+                                    <td data-label="Date Submitted">
+                                        <span class="submitted-date">
+                                            <i class="fa-regular fa-calendar"></i>
+                                            {% if company.get("createdAt") %}
+                                                {{ company.createdAt.strftime("%d %b %Y") }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </span>
+                                    </td>
+
+                                    <td data-label="Status">
+                                        <span class="company-status-badge {{ company_status|lower }}">
+                                            <span class="company-status-dot"></span>
+                                            {{ company_status }}
+                                        </span>
+                                    </td>
+
+                                    <td data-label="Action" class="company-action-cell">
+                                        <a href="/admin/company/{{ company_id }}"
+                                           class="company-review-button">
+                                            <i class="fa-regular fa-eye"></i>
+                                            Review
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="companySearchEmptyState" class="company-empty-state" hidden>
+                    <span><i class="fa-solid fa-building-circle-xmark"></i></span>
+                    <h2>No matching companies</h2>
+                    <p>Try a different company name, email, registration number or industry.</p>
+                    <button id="resetCompanySearch" type="button">Clear search</button>
+                </div>
             {% else %}
-
-
-
-                <tr>
-
-
-                    <td colspan="7"
-                        style="text-align:center;padding:40px;">
-
-
-                        No company registration requests found.
-
-
-                    </td>
-
-
-                </tr>
-
-
-
+                <div class="company-empty-state">
+                    <span><i class="fa-regular fa-building"></i></span>
+                    <h2>No company requests found</h2>
+                    <p>There are currently no companies under the {{ selected_status|lower }} status.</p>
+                    {% if selected_status != "All" %}
+                        <a href="/admin/company-requests?status=All">View all companies</a>
+                    {% endif %}
+                </div>
             {% endif %}
+        </section>
+    </main>
 
+    <script>
+        (() => {
+            const statusFilter = document.getElementById("statusFilter");
+            const searchInput = document.getElementById("companySearch");
+            const clearButton = document.getElementById("clearCompanySearch");
+            const resetButton = document.getElementById("resetCompanySearch");
+            const rows = [...document.querySelectorAll(".company-row")];
+            const tableWrapper = document.querySelector(".company-table-wrapper");
+            const searchEmptyState = document.getElementById("companySearchEmptyState");
+            const resultInformation = document.getElementById("companyResultInformation");
+            const visibleCount = document.getElementById("visibleCompanyCount");
+            const visibleLabel = document.getElementById("visibleCompanyLabel");
 
+            statusFilter?.addEventListener("change", () => {
+                const status = encodeURIComponent(statusFilter.value);
+                window.location.href = `/admin/company-requests?status=${status}`;
+            });
 
-            </tbody>
+            function filterCompanies() {
+                const term = searchInput.value.trim().toLowerCase();
+                let count = 0;
 
+                rows.forEach((row) => {
+                    const visible = row.dataset.search.includes(term);
+                    row.hidden = !visible;
+                    if (visible) count += 1;
+                });
 
+                clearButton.hidden = term.length === 0;
+                if (tableWrapper) tableWrapper.hidden = count === 0;
+                if (searchEmptyState) searchEmptyState.hidden = count !== 0;
 
-        </table>
-
-
-
-    </div>
-
-
-
-
-</main>
-
-
-
-
-
-
-<!-- ============================= -->
-<!-- SEARCH SCRIPT -->
-<!-- ============================= -->
-
-
-<script>
-
-
-const searchInput = document.getElementById(
-    "companySearch"
-);
-
-
-searchInput.addEventListener(
-    "keyup",
-    function(){
-
-
-        let keyword = this.value.toLowerCase();
-
-
-
-        let rows = document.querySelectorAll(
-            ".company-row"
-        );
-
-
-
-        rows.forEach(
-            function(row){
-
-
-                let companyName =
-                    row.cells[0]
-                    .textContent
-                    .toLowerCase();
-
-
-
-                if(companyName.includes(keyword)){
-
-
-                    row.style.display = "";
-
-
-                }
-                else{
-
-
-                    row.style.display = "none";
-
-
-                }
-
-
+                const label = count === 1 ? "company" : "companies";
+                if (resultInformation) resultInformation.textContent = `Showing ${count} ${label}`;
+                if (visibleCount) visibleCount.textContent = count;
+                if (visibleLabel) visibleLabel.textContent = label;
             }
-        );
 
+            function clearSearch() {
+                searchInput.value = "";
+                filterCompanies();
+                searchInput.focus();
+            }
 
-
-    }
-);
-
-function filterStatus(){
-
-    let status = document.getElementById(
-        "statusFilter"
-    ).value;
-
-
-    window.location.href =
-        "/admin/company-requests?status=" + status;
-
-}
-
-
-</script>
-
-
-
+            searchInput?.addEventListener("input", filterCompanies);
+            clearButton?.addEventListener("click", clearSearch);
+            resetButton?.addEventListener("click", clearSearch);
+        })();
+    </script>
 </body>
-
 </html>

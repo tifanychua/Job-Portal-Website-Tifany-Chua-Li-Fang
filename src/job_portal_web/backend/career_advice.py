@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from hashlib import sha256
 from io import BytesIO
 from pathlib import Path
 from typing import Literal
@@ -22,6 +23,7 @@ TEMPLATE_DIRECTORY = PROJECT_DIRECTORY / "ui"
 templates = Jinja2Templates(directory=str(TEMPLATE_DIRECTORY))
 
 COLLECTION_NAME = "career_advice"
+SAVED_COLLECTION_NAME = "saved_career_advice"
 MAX_IMAGE_SIZE = 5 * 1024 * 1024
 ALLOWED_IMAGE_TYPES = {
     "image/jpeg": "jpg",
@@ -59,6 +61,90 @@ def admin_id(request: Request):
         or request.session.get("user_id")
         or request.session.get("userId")
     )
+
+
+def is_job_seeker(request: Request) -> bool:
+    role = request.session.get("user_type") or request.session.get("userType")
+    normalized_role = (
+        str(role or "")
+        .strip()
+        .lower()
+        .replace("-", "_")
+        .replace(" ", "_")
+    )
+    return normalized_role in {"job_seeker", "jobseeker"}
+
+
+def job_seeker_id(request: Request):
+    if not is_job_seeker(request):
+        return None
+
+    return (
+        request.session.get("applicant_id")
+        or request.session.get("job_seeker_id")
+        or request.session.get("user_id")
+        or request.session.get("userId")
+    )
+
+
+def get_current_job_seeker(request: Request):
+    """Get the logged-in job seeker's Firestore profile for the shared header."""
+    seeker_id = job_seeker_id(request)
+    if not seeker_id:
+        return None
+
+    seeker_document = (
+        db.collection("job_seeker")
+        .document(str(seeker_id))
+        .get()
+    )
+
+    if not seeker_document.exists:
+        return None
+
+    user = seeker_document.to_dict() or {}
+    user["id"] = seeker_document.id
+    return user
+
+
+def require_job_seeker(request: Request) -> str:
+    seeker_id = job_seeker_id(request)
+    if not seeker_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Please log in as a job seeker to save career advice.",
+        )
+    return str(seeker_id)
+
+
+def saved_article_document_id(seeker_id: str, post_id: str) -> str:
+    value = f"{seeker_id}:{post_id}".encode("utf-8")
+    return sha256(value).hexdigest()
+
+
+def get_saved_article_reference(seeker_id: str, post_id: str):
+    document_id = saved_article_document_id(seeker_id, post_id)
+    return db.collection(SAVED_COLLECTION_NAME).document(document_id)
+
+
+def get_saved_article_ids(seeker_id: str | None) -> set[str]:
+    if not seeker_id:
+        return set()
+
+    snapshots = (
+        db.collection(SAVED_COLLECTION_NAME)
+        .where("jobSeekerId", "==", str(seeker_id))
+        .stream()
+    )
+
+    saved_ids = set()
+    for snapshot in snapshots:
+        record = snapshot.to_dict() or {}
+        career_advice_id = record.get("careerAdviceId")
+        if career_advice_id:
+            saved_ids.add(str(career_advice_id))
+
+    return saved_ids
 
 
 def clean_payload(payload: CareerAdvicePayload) -> dict:
@@ -569,8 +655,63 @@ def publish_career_advice_draft(post_id: str, request: Request):
     return {"success": True, "message": "Draft published successfully."}
 
 
+@router.post("/api/career-advice/{post_id}/save")
+def save_career_advice(post_id: str, request: Request):
+    seeker_id = require_job_seeker(request)
+    post_snapshot = get_post_snapshot(post_id)
+    post = post_snapshot.to_dict() or {}
+
+    if post.get("status") != "Published":
+        raise HTTPException(
+            status_code=404,
+            detail="Career advice post not found.",
+        )
+
+    saved_reference = get_saved_article_reference(seeker_id, post_id)
+    if saved_reference.get().exists:
+        return {
+            "success": True,
+            "saved": True,
+            "message": "Career advice is already saved.",
+        }
+
+    saved_reference.set(
+        {
+            "jobSeekerId": seeker_id,
+            "careerAdviceId": post_id,
+            "savedAt": now_utc(),
+        }
+    )
+
+    return JSONResponse(
+        status_code=201,
+        content={
+            "success": True,
+            "saved": True,
+            "message": "Career advice saved successfully.",
+        },
+    )
+
+
+@router.delete("/api/career-advice/{post_id}/save")
+def remove_saved_career_advice(post_id: str, request: Request):
+    seeker_id = require_job_seeker(request)
+    saved_reference = get_saved_article_reference(seeker_id, post_id)
+
+    # Firestore delete is idempotent, so repeated requests remain safe.
+    saved_reference.delete()
+
+    return {
+        "success": True,
+        "saved": False,
+        "message": "Career advice removed from saved articles.",
+    }
+
+
 @router.get("/career-advice", response_class=HTMLResponse)
 def published_career_advice_page(request: Request):
+    user = get_current_job_seeker(request)
+
     snapshots = (
         db.collection(COLLECTION_NAME)
         .where("status", "==", "Published")
@@ -582,21 +723,86 @@ def published_career_advice_page(request: Request):
         reverse=True,
     )
 
+    saved_ids = get_saved_article_ids(job_seeker_id(request))
+    for post in posts:
+        post["is_saved"] = post["id"] in saved_ids
+
     return templates.TemplateResponse(
         request=request,
-        name="viewCareerAdvice.html",
-        context={"posts": posts, "active_page": "career_advice"},
+        name="jobSeekerCareerAdvice.html",
+        context={
+            "user": user,
+            "posts": posts,
+            "active_page": "career_advice",
+        },
+    )
+
+@router.get("/job-seeker/career-advice/{post_id}")
+def job_seeker_view_career_advice(
+    request: Request,
+    post_id: str,
+):
+    user = get_current_job_seeker(request)
+
+    post_document = (
+        db.collection("career_advice")
+        .document(post_id)
+        .get()
+    )
+
+    if not post_document.exists:
+        raise HTTPException(
+            status_code=404,
+            detail="Career advice not found",
+        )
+
+    post = post_document.to_dict()
+    post["id"] = post_document.id
+
+    # Job seekers should only access published articles
+    if post.get("status") != "Published":
+        raise HTTPException(
+            status_code=404,
+            detail="Career advice not found",
+        )
+
+    seeker_id = job_seeker_id(request)
+    post["is_saved"] = bool(
+        seeker_id
+        and get_saved_article_reference(str(seeker_id), post_id).get().exists
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="jobSeekerCareerAdviceDetails.html",
+        context={
+            "user": user,
+            "post": post,
+            "active_page": "career_advice",
+        },
     )
 
 
 @router.get("/career-advice/{post_id}", response_class=HTMLResponse)
 def career_advice_details_page(request: Request, post_id: str):
+    user = get_current_job_seeker(request)
+
     post = snapshot_to_dict(get_post_snapshot(post_id))
     if post.get("status") != "Published":
         raise HTTPException(status_code=404, detail="Career advice post not found.")
 
+    seeker_id = job_seeker_id(request)
+    post["is_saved"] = bool(
+        seeker_id
+        and get_saved_article_reference(str(seeker_id), post_id).get().exists
+    )
+
     return templates.TemplateResponse(
         request=request,
         name="careerAdviceDetails.html",
-        context={"post": post, "active_page": "career_advice"},
+        context={
+            "user": user,
+            "post": post,
+            "active_page": "career_advice",
+        },
     )

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Advice | JobConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/jobSeekerCareerAdvice.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    {% include "components/header.html" %}
+
+    <main class="career-advice-page">
+        <div class="career-advice-container">
+            <section class="career-intro" aria-labelledby="careerAdviceTitle">
+                <div class="career-intro-copy">
+                    <span class="career-eyebrow">
+                        <i class="fa-solid fa-compass"></i>
+                        Career resources
+                    </span>
+                    <h1 id="careerAdviceTitle">Build a career with confidence</h1>
+                    <p>Expert guidance for every stage of your job search—from creating a strong application to growing in your new role.</p>
+                </div>
+
+                <div class="career-stat" aria-label="Published article count">
+                    <span class="career-stat-icon"><i class="fa-regular fa-newspaper"></i></span>
+                    <span>
+                        <strong>{{ posts|length }}</strong>
+                        <small>Published articles</small>
+                    </span>
+                </div>
+            </section>
+
+            <section class="career-discovery" aria-label="Find career advice">
+                <div class="career-search-wrap">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input id="adviceSearch" type="search" placeholder="Search articles by title, topic, or keyword" autocomplete="off">
+                    <button id="clearSearch" class="clear-search" type="button" aria-label="Clear search" hidden>
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div id="categoryFilters" class="career-filter-list" aria-label="Filter by category">
+                    <button class="career-filter active" type="button" data-category="">
+                        All articles
+                        <span>{{ posts|length }}</span>
+                    </button>
+                </div>
+            </section>
+
+            <section class="career-results" aria-labelledby="latestAdviceTitle">
+                <header class="career-results-header">
+                    <div>
+                        <h2 id="latestAdviceTitle">Latest career advice</h2>
+                        <p id="resultInformation" aria-live="polite">
+                            {{ posts|length }} {{ "article" if posts|length == 1 else "articles" }} available
+                        </p>
+                    </div>
+                </header>
+
+                {% if posts %}
+                <div id="adviceGrid" class="career-grid">
+                    {% for post in posts %}
+                    <article
+                        class="career-card"
+                        data-category="{{ post.category|default('Career Guidance')|lower }}"
+                        data-category-label="{{ post.category|default('Career Guidance') }}"
+                        data-search="{{ (post.title|default('') ~ ' ' ~ post.summary|default('') ~ ' ' ~ post.category|default(''))|lower }}"
+                    >
+                        <div class="career-card-media">
+                            {% if post.image_url or post.imageUrl %}
+                            <img src="{{ post.image_url or post.imageUrl }}" alt="" loading="lazy">
+                            {% else %}
+                            <div class="career-card-placeholder" aria-hidden="true">
+                                <i class="fa-regular fa-lightbulb"></i>
+                            </div>
+                            {% endif %}
+
+                            <span class="career-category">{{ post.category|default('Career Guidance') }}</span>
+
+                            <button
+                                class="career-save {% if post.is_saved or post.isSaved %}saved{% endif %}"
+                                type="button"
+                                data-id="{{ post.id }}"
+                                data-saved="{{ 'true' if post.is_saved or post.isSaved else 'false' }}"
+                                aria-label="{% if post.is_saved or post.isSaved %}Remove from saved advice{% else %}Save career advice{% endif %}"
+                                title="{% if post.is_saved or post.isSaved %}Remove from saved advice{% else %}Save career advice{% endif %}"
+                            >
+                                <i class="{% if post.is_saved or post.isSaved %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+                            </button>
+                        </div>
+
+                        <div class="career-card-content">
+                            <div class="career-card-date">
+                                <i class="fa-regular fa-calendar"></i>
+                                <span>{{ post.published_at|default(post.publishedAt|default('Recently published')) }}</span>
+                            </div>
+
+                            <h3>{{ post.title }}</h3>
+                            <p>{{ post.summary|default('Discover practical insights and guidance to support your career journey.') }}</p>
+
+                            <a class="career-read-link" href="/job-seeker/career-advice/{{ post.id }}">
+                                Read article
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="career-empty-state">
+                    <span><i class="fa-regular fa-newspaper"></i></span>
+                    <h2>No career advice available</h2>
+                    <p>Published career advice articles will appear here.</p>
+                </div>
+                {% endif %}
+
+                <div id="noResults" class="career-empty-state" hidden>
+                    <span><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <h2>No matching articles</h2>
+                    <p>Try another keyword or choose a different category.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <script>
+        (() => {
+            const page = document.querySelector(".career-advice-page");
+            if (!page) return;
+
+            const searchInput = page.querySelector("#adviceSearch");
+            const clearSearch = page.querySelector("#clearSearch");
+            const filterList = page.querySelector("#categoryFilters");
+            const cards = [...page.querySelectorAll(".career-card")];
+            const resultInformation = page.querySelector("#resultInformation");
+            const noResults = page.querySelector("#noResults");
+            let activeCategory = "";
+
+            const categories = new Map();
+            cards.forEach((card) => {
+                const key = card.dataset.category;
+                const current = categories.get(key);
+                categories.set(key, {
+                    label: card.dataset.categoryLabel,
+                    count: current ? current.count + 1 : 1
+                });
+            });
+
+            [...categories.entries()]
+                .sort((a, b) => a[1].label.localeCompare(b[1].label))
+                .forEach(([key, category]) => {
+                    const button = document.createElement("button");
+                    button.className = "career-filter";
+                    button.type = "button";
+                    button.dataset.category = key;
+                    button.innerHTML = `${category.label}<span>${category.count}</span>`;
+                    filterList.appendChild(button);
+                });
+
+            function filterAdvice() {
+                const term = searchInput.value.trim().toLowerCase();
+                let count = 0;
+
+                cards.forEach((card) => {
+                    const categoryMatch = !activeCategory || card.dataset.category === activeCategory;
+                    const searchMatch = !term || card.dataset.search.includes(term);
+                    const visible = categoryMatch && searchMatch;
+                    card.hidden = !visible;
+                    if (visible) count += 1;
+                });
+
+                resultInformation.textContent = `${count} ${count === 1 ? "article" : "articles"} available`;
+                noResults.hidden = count !== 0 || cards.length === 0;
+                clearSearch.hidden = searchInput.value.length === 0;
+            }
+
+            filterList.addEventListener("click", (event) => {
+                const button = event.target.closest(".career-filter");
+                if (!button) return;
+                activeCategory = button.dataset.category;
+                filterList.querySelectorAll(".career-filter").forEach((item) => {
+                    item.classList.toggle("active", item === button);
+                });
+                filterAdvice();
+            });
+
+            searchInput.addEventListener("input", filterAdvice);
+            clearSearch.addEventListener("click", () => {
+                searchInput.value = "";
+                searchInput.focus();
+                filterAdvice();
+            });
+
+            page.addEventListener("click", async (event) => {
+                const button = event.target.closest(".career-save");
+                if (!button) return;
+
+                const saved = button.dataset.saved === "true";
+                button.disabled = true;
+
+                try {
+                    const response = await fetch(`/api/career-advice/${encodeURIComponent(button.dataset.id)}/save`, {
+                        method: saved ? "DELETE" : "POST"
+                    });
+                    if (!response.ok) throw new Error();
+
+                    const newSavedState = !saved;
+                    button.dataset.saved = String(newSavedState);
+                    button.classList.toggle("saved", newSavedState);
+                    button.querySelector("i").className = `${newSavedState ? "fa-solid" : "fa-regular"} fa-bookmark`;
+                    button.setAttribute("aria-label", newSavedState ? "Remove from saved advice" : "Save career advice");
+                    button.title = button.getAttribute("aria-label");
+                } catch {
+                    alert("Unable to update saved career advice. Please try again.");
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | JobConnect Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/adminUserManagement.css">
+</head>
+<body>
+    {% include "adminHeader.html" %}
+
+    <main class="admin-users-page">
+        <section class="users-page-header" aria-labelledby="userManagementTitle">
+            <div>
+                <p class="users-eyebrow">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Platform administration
+                </p>
+                <h1 id="userManagementTitle">User Management</h1>
+                <p>Review registered accounts and control access to the JobConnect platform.</p>
+            </div>
+
+            <a class="refresh-users-button" href="/admin/users">
+                <i class="fa-solid fa-rotate-right"></i>
+                Refresh accounts
+            </a>
+        </section>
+
+        <section class="account-statistics" aria-label="Account statistics">
+            <article class="account-stat-card total">
+                <span class="stat-card-icon"><i class="fa-solid fa-users"></i></span>
+                <div>
+                    <span class="stat-card-label">Registered accounts</span>
+                    <strong>{{ counts.total }}</strong>
+                </div>
+            </article>
+
+            <article class="account-stat-card active">
+                <span class="stat-card-icon"><i class="fa-solid fa-circle-check"></i></span>
+                <div>
+                    <span class="stat-card-label">Active</span>
+                    <strong>{{ counts.active }}</strong>
+                </div>
+            </article>
+
+            <article class="account-stat-card suspended">
+                <span class="stat-card-icon"><i class="fa-solid fa-pause"></i></span>
+                <div>
+                    <span class="stat-card-label">Suspended</span>
+                    <strong>{{ counts.suspended }}</strong>
+                </div>
+            </article>
+
+            <article class="account-stat-card deactivated">
+                <span class="stat-card-icon"><i class="fa-solid fa-user-slash"></i></span>
+                <div>
+                    <span class="stat-card-label">Deactivated</span>
+                    <strong>{{ counts.deactivated }}</strong>
+                </div>
+            </article>
+        </section>
+
+        <section class="users-panel">
+            <div class="users-toolbar">
+                <label class="user-search-box" for="userSearch">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input
+                        id="userSearch"
+                        type="search"
+                        placeholder="Search name, email or account ID"
+                        autocomplete="off"
+                    >
+                </label>
+
+                <label class="user-filter-box" for="accountTypeFilter">
+                    <i class="fa-solid fa-user-tag"></i>
+                    <select id="accountTypeFilter">
+                        <option value="all">All account types</option>
+                        <option value="job_seeker">Job seekers</option>
+                        <option value="employer">Employers</option>
+                    </select>
+                </label>
+
+                <label class="user-filter-box" for="accountStatusFilter">
+                    <i class="fa-solid fa-filter"></i>
+                    <select id="accountStatusFilter">
+                        <option value="all">All statuses</option>
+                        <option value="active">Active</option>
+                        <option value="suspended">Suspended</option>
+                        <option value="deactivated">Deactivated</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="users-list-heading">
+                <div>
+                    <h2>Registered accounts</h2>
+                    <p id="userResultCount" aria-live="polite">
+                        {{ accounts|length }} {{ "account" if accounts|length == 1 else "accounts" }} found
+                    </p>
+                </div>
+            </div>
+
+            {% if accounts %}
+            <div class="users-table-wrapper">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Account</th>
+                            <th scope="col">Account type</th>
+                            <th scope="col">Contact</th>
+                            <th scope="col">Registered</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="actions-column">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        {% for account in accounts %}
+                        <tr
+                            class="user-account-row"
+                            data-id="{{ account.id }}"
+                            data-name="{{ account.name|lower }}"
+                            data-email="{{ account.email|lower }}"
+                            data-account-type="{{ account.account_type }}"
+                            data-status="{{ account.status|lower }}"
+                        >
+                            <td>
+                                <div class="user-identity">
+                                    {% if account.image_url %}
+                                    <img
+                                        class="user-avatar"
+                                        src="{{ account.image_url }}"
+                                        alt=""
+                                        onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+                                    >
+                                    <span class="user-avatar user-avatar-fallback" hidden>
+                                        {{ account.name[:1]|upper }}
+                                    </span>
+                                    {% else %}
+                                    <span class="user-avatar user-avatar-fallback">
+                                        {{ account.name[:1]|upper }}
+                                    </span>
+                                    {% endif %}
+
+                                    <div class="user-identity-text">
+                                        <strong title="{{ account.name }}">{{ account.name }}</strong>
+                                        <span title="{{ account.id }}">ID: {{ account.id }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="account-type-badge {{ account.account_type }}">
+                                    <i class="fa-solid {{ 'fa-user' if account.account_type == 'job_seeker' else 'fa-building' }}"></i>
+                                    {{ account.account_type_label }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="user-contact">
+                                    <span><i class="fa-regular fa-envelope"></i>{{ account.email }}</span>
+                                    <span><i class="fa-solid fa-phone"></i>{{ account.phone }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="registered-date">{{ account.created_display }}</span>
+                            </td>
+                            <td>
+                                <span class="account-status-badge {{ account.status|lower }}">
+                                    <span class="status-dot"></span>
+                                    {{ account.status }}
+                                </span>
+                            </td>
+                            <td class="actions-cell">
+                                <div class="account-actions">
+                                    {% if account.status == "Active" %}
+                                    <button
+                                        type="button"
+                                        class="account-action-button suspend"
+                                        data-action="Suspended"
+                                        data-account-id="{{ account.id }}"
+                                        data-account-type="{{ account.account_type }}"
+                                        data-account-name="{{ account.name }}"
+                                    >
+                                        <i class="fa-solid fa-pause"></i>
+                                        Suspend
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="account-action-button deactivate"
+                                        data-action="Deactivated"
+                                        data-account-id="{{ account.id }}"
+                                        data-account-type="{{ account.account_type }}"
+                                        data-account-name="{{ account.name }}"
+                                    >
+                                        <i class="fa-solid fa-user-slash"></i>
+                                        Deactivate
+                                    </button>
+                                    {% elif account.status == "Suspended" %}
+                                    <button
+                                        type="button"
+                                        class="account-action-button reactivate"
+                                        data-action="Active"
+                                        data-account-id="{{ account.id }}"
+                                        data-account-type="{{ account.account_type }}"
+                                        data-account-name="{{ account.name }}"
+                                    >
+                                        <i class="fa-solid fa-user-check"></i>
+                                        Reactivate
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="account-action-button deactivate"
+                                        data-action="Deactivated"
+                                        data-account-id="{{ account.id }}"
+                                        data-account-type="{{ account.account_type }}"
+                                        data-account-name="{{ account.name }}"
+                                    >
+                                        <i class="fa-solid fa-user-slash"></i>
+                                        Deactivate
+                                    </button>
+                                    {% else %}
+                                    <button
+                                        type="button"
+                                        class="account-action-button reactivate"
+                                        data-action="Active"
+                                        data-account-id="{{ account.id }}"
+                                        data-account-type="{{ account.account_type }}"
+                                        data-account-name="{{ account.name }}"
+                                    >
+                                        <i class="fa-solid fa-user-check"></i>
+                                        Reactivate
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="noFilteredUsers" class="users-empty-state" hidden>
+                <span><i class="fa-solid fa-user-magnifying-glass"></i></span>
+                <h2>No matching accounts</h2>
+                <p>Try another name, email, account type or status.</p>
+                <button type="button" id="clearUserFilters">Clear filters</button>
+            </div>
+            {% else %}
+            <div class="users-empty-state">
+                <span><i class="fa-solid fa-users"></i></span>
+                <h2>No registered accounts</h2>
+                <p>Registered job seekers and employers will appear here.</p>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <div id="accountActionModal" class="account-modal" hidden>
+        <div class="account-modal-backdrop" data-close-modal></div>
+        <section class="account-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+            <button type="button" class="modal-close-button" data-close-modal aria-label="Close dialog">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <span id="modalActionIcon" class="modal-action-icon"></span>
+            <h2 id="accountModalTitle">Update account</h2>
+            <p id="accountModalDescription"></p>
+
+            <label id="accountReasonGroup" class="account-reason-group" for="accountActionReason">
+                <span>Reason <strong>*</strong></span>
+                <textarea
+                    id="accountActionReason"
+                    rows="4"
+                    maxlength="300"
+                    placeholder="Provide a clear reason for this action"
+                ></textarea>
+                <small><span id="reasonCharacterCount">0</span>/300 characters</small>
+            </label>
+
+            <p id="modalErrorMessage" class="modal-error-message" hidden></p>
+
+            <div class="account-modal-actions">
+                <button type="button" class="modal-cancel-button" data-close-modal>Cancel</button>
+                <button type="button" id="confirmAccountAction" class="modal-confirm-button">Confirm</button>
+            </div>
+        </section>
+    </div>
+
+    <div id="userToast" class="user-toast" role="status" aria-live="polite" hidden></div>
+
+    <script>
+        (() => {
+            const searchInput = document.getElementById("userSearch");
+            const typeFilter = document.getElementById("accountTypeFilter");
+            const statusFilter = document.getElementById("accountStatusFilter");
+            const rows = [...document.querySelectorAll(".user-account-row")];
+            const resultCount = document.getElementById("userResultCount");
+            const noFilteredUsers = document.getElementById("noFilteredUsers");
+            const tableWrapper = document.querySelector(".users-table-wrapper");
+            const clearFiltersButton = document.getElementById("clearUserFilters");
+
+            const modal = document.getElementById("accountActionModal");
+            const modalTitle = document.getElementById("accountModalTitle");
+            const modalDescription = document.getElementById("accountModalDescription");
+            const modalIcon = document.getElementById("modalActionIcon");
+            const reasonGroup = document.getElementById("accountReasonGroup");
+            const reasonInput = document.getElementById("accountActionReason");
+            const reasonCount = document.getElementById("reasonCharacterCount");
+            const modalError = document.getElementById("modalErrorMessage");
+            const confirmButton = document.getElementById("confirmAccountAction");
+            const toast = document.getElementById("userToast");
+
+            let selectedAction = null;
+
+            function filterAccounts() {
+                if (!searchInput || !typeFilter || !statusFilter) return;
+
+                const query = searchInput.value.trim().toLowerCase();
+                const selectedType = typeFilter.value;
+                const selectedStatus = statusFilter.value;
+                let visibleCount = 0;
+
+                rows.forEach((row) => {
+                    const searchableText = `${row.dataset.name} ${row.dataset.email} ${row.dataset.id}`;
+                    const matchesQuery = !query || searchableText.includes(query);
+                    const matchesType = selectedType === "all" || row.dataset.accountType === selectedType;
+                    const matchesStatus = selectedStatus === "all" || row.dataset.status === selectedStatus;
+                    const visible = matchesQuery && matchesType && matchesStatus;
+
+                    row.hidden = !visible;
+                    if (visible) visibleCount += 1;
+                });
+
+                if (resultCount) {
+                    resultCount.textContent = `${visibleCount} ${visibleCount === 1 ? "account" : "accounts"} found`;
+                }
+
+                if (noFilteredUsers) noFilteredUsers.hidden = visibleCount !== 0;
+                if (tableWrapper) tableWrapper.hidden = visibleCount === 0 && rows.length > 0;
+            }
+
+            function clearFilters() {
+                searchInput.value = "";
+                typeFilter.value = "all";
+                statusFilter.value = "all";
+                filterAccounts();
+                searchInput.focus();
+            }
+
+            [searchInput, typeFilter, statusFilter].forEach((control) => {
+                if (!control) return;
+                control.addEventListener(control.tagName === "INPUT" ? "input" : "change", filterAccounts);
+            });
+
+            if (clearFiltersButton) clearFiltersButton.addEventListener("click", clearFilters);
+
+            function modalConfiguration(status) {
+                if (status === "Suspended") {
+                    return {
+                        title: "Suspend account",
+                        icon: '<i class="fa-solid fa-pause"></i>',
+                        className: "suspend",
+                        confirmText: "Suspend account"
+                    };
+                }
+
+                if (status === "Deactivated") {
+                    return {
+                        title: "Deactivate account",
+                        icon: '<i class="fa-solid fa-user-slash"></i>',
+                        className: "deactivate",
+                        confirmText: "Deactivate account"
+                    };
+                }
+
+                return {
+                    title: "Reactivate account",
+                    icon: '<i class="fa-solid fa-user-check"></i>',
+                    className: "reactivate",
+                    confirmText: "Reactivate account"
+                };
+            }
+
+            function openAccountModal(button) {
+                selectedAction = {
+                    accountId: button.dataset.accountId,
+                    accountType: button.dataset.accountType,
+                    accountName: button.dataset.accountName,
+                    status: button.dataset.action
+                };
+
+                const configuration = modalConfiguration(selectedAction.status);
+                const needsReason = selectedAction.status !== "Active";
+
+                modalTitle.textContent = configuration.title;
+                modalDescription.textContent = `You are about to ${configuration.title.toLowerCase()} for ${selectedAction.accountName}.`;
+                modalIcon.innerHTML = configuration.icon;
+                modalIcon.className = `modal-action-icon ${configuration.className}`;
+                confirmButton.textContent = configuration.confirmText;
+                confirmButton.className = `modal-confirm-button ${configuration.className}`;
+                reasonGroup.hidden = !needsReason;
+                reasonInput.value = "";
+                reasonCount.textContent = "0";
+                modalError.hidden = true;
+                modal.hidden = false;
+                document.body.classList.add("modal-open");
+
+                window.setTimeout(() => {
+                    if (needsReason) reasonInput.focus();
+                    else confirmButton.focus();
+                }, 0);
+            }
+
+            function closeAccountModal() {
+                modal.hidden = true;
+                document.body.classList.remove("modal-open");
+                selectedAction = null;
+            }
+
+            document.querySelectorAll(".account-action-button").forEach((button) => {
+                button.addEventListener("click", () => openAccountModal(button));
+            });
+
+            document.querySelectorAll("[data-close-modal]").forEach((button) => {
+                button.addEventListener("click", closeAccountModal);
+            });
+
+            reasonInput.addEventListener("input", () => {
+                reasonCount.textContent = String(reasonInput.value.length);
+            });
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape" && !modal.hidden) closeAccountModal();
+            });
+
+            function errorMessage(data) {
+                if (typeof data.detail === "string") return data.detail;
+                if (Array.isArray(data.detail)) return data.detail.map((item) => item.msg || item).join(" ");
+                return data.message || "Unable to update this account.";
+            }
+
+            function showToast(message) {
+                toast.textContent = message;
+                toast.hidden = false;
+                window.setTimeout(() => { toast.hidden = true; }, 2600);
+            }
+
+            confirmButton.addEventListener("click", async () => {
+                if (!selectedAction) return;
+
+                const reason = reasonInput.value.trim();
+                if (selectedAction.status !== "Active" && !reason) {
+                    modalError.textContent = "Please provide a reason before continuing.";
+                    modalError.hidden = false;
+                    reasonInput.focus();
+                    return;
+                }
+
+                confirmButton.disabled = true;
+                modalError.hidden = true;
+
+                try {
+                    const endpoint = `/api/admin/users/${encodeURIComponent(selectedAction.accountType)}/${encodeURIComponent(selectedAction.accountId)}/status`;
+                    const response = await fetch(endpoint, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ status: selectedAction.status, reason })
+                    });
+                    const data = await response.json();
+
+                    if (!response.ok) throw new Error(errorMessage(data));
+
+                    closeAccountModal();
+                    showToast(data.message);
+                    window.setTimeout(() => window.location.reload(), 650);
+                } catch (error) {
+                    modalError.textContent = error.message;
+                    modalError.hidden = false;
+                } finally {
+                    confirmButton.disabled = false;
+                }
+            });
+
+            filterAccounts();
+        })();
+    </script>
+</body>
+</html>
