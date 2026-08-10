@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from types import SimpleNamespace
 
 import pytest
@@ -27,48 +26,31 @@ def load_stripe_module():
 
     if not matches:
         raise ImportError(
-            "Could not find the Stripe route module in "
-            "src/job_portal_web/backend/routes."
+            "Could not find the Stripe route module in " "src/job_portal_web/backend/routes."
         )
 
-    module_name = (
-        "job_portal_web.backend.routes."
-        + matches[0].stem
-    )
+    module_name = "job_portal_web.backend.routes." + matches[0].stem
 
-    fake_database = types.ModuleType(
-        "job_portal_web.backend.database"
-    )
+    fake_database = types.ModuleType("job_portal_web.backend.database")
     fake_database.db = None
 
-    original_database = sys.modules.get(
-        "job_portal_web.backend.database"
-    )
+    original_database = sys.modules.get("job_portal_web.backend.database")
 
-    sys.modules[
-        "job_portal_web.backend.database"
-    ] = fake_database
+    sys.modules["job_portal_web.backend.database"] = fake_database
 
     try:
         return importlib.import_module(module_name)
     finally:
         if original_database is not None:
-            sys.modules[
-                "job_portal_web.backend.database"
-            ] = original_database
+            sys.modules["job_portal_web.backend.database"] = original_database
         else:
-            sys.modules.pop(
-                "job_portal_web.backend.database",
-                None
-            )
+            sys.modules.pop("job_portal_web.backend.database", None)
 
 
 stripe_module = load_stripe_module()
 
 
-scenarios(
-    "features/subscriptionPayment.feature"
-)
+scenarios("features/subscriptionPayment.feature")
 
 COMPANY_ID = "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
 CUSTOMER_ID = "cus_test"
@@ -102,9 +84,7 @@ class FakeDocumentReference:
         self.document_id = document_id
 
     def get(self):
-        data = self.collection.documents.get(
-            self.document_id
-        )
+        data = self.collection.documents.get(self.document_id)
 
         return FakeDocumentSnapshot(
             self.document_id,
@@ -121,9 +101,7 @@ class FakeDocumentReference:
         current.update(data)
 
     def set(self, data):
-        self.collection.documents[
-            self.document_id
-        ] = data.copy()
+        self.collection.documents[self.document_id] = data.copy()
 
 
 class FakeQuery:
@@ -152,9 +130,7 @@ class FakeQuery:
 
         return FakeQuery(
             self.collection,
-            self.filters + [
-                (field, operator, value)
-            ],
+            self.filters + [(field, operator, value)],
             self.limit_count,
         )
 
@@ -168,19 +144,11 @@ class FakeQuery:
     def stream(self):
         results = []
 
-        for document_id, data in (
-            self.collection.documents.items()
-        ):
+        for document_id, data in self.collection.documents.items():
             matched = True
 
-            for field, operator, expected in (
-                self.filters
-            ):
-                if (
-                    operator == "=="
-                    and data.get(field)
-                    != expected
-                ):
+            for field, operator, expected in self.filters:
+                if operator == "==" and data.get(field) != expected:
                     matched = False
                     break
 
@@ -199,9 +167,7 @@ class FakeQuery:
                 )
 
         if self.limit_count is not None:
-            results = results[
-                :self.limit_count
-            ]
+            results = results[: self.limit_count]
 
         return iter(results)
 
@@ -211,11 +177,7 @@ class FakeCollection:
         self,
         documents=None,
     ):
-        self.documents = (
-            documents.copy()
-            if documents
-            else {}
-        )
+        self.documents = documents.copy() if documents else {}
         self.added = []
 
     def document(self, document_id):
@@ -246,12 +208,8 @@ class FakeDB:
         payments=None,
     ):
         self.collections = {
-            "company": FakeCollection(
-                companies or {}
-            ),
-            "payment": FakeCollection(
-                payments or {}
-            ),
+            "company": FakeCollection(companies or {}),
+            "payment": FakeCollection(payments or {}),
             "credit_history": FakeCollection(),
         }
 
@@ -298,32 +256,23 @@ def default_company(
 ):
     return {
         COMPANY_ID: {
-            "stripe_customer_id":
-                CUSTOMER_ID,
-            "stripe_subscription_id":
-                SUBSCRIPTION_ID,
-            "available_credit":
-                available_credit,
-            "expired_credit":
-                expired_credit,
-            "subscription_plan":
-                "starter",
+            "stripe_customer_id": CUSTOMER_ID,
+            "stripe_subscription_id": SUBSCRIPTION_ID,
+            "available_credit": available_credit,
+            "expired_credit": expired_credit,
+            "subscription_plan": "starter",
         }
     }
 
 
 def subscription_for_plan(plan_name):
     return SimpleNamespace(
-        metadata={
-            "plan": plan_name
-        },
+        metadata={"plan": plan_name},
         items=SimpleNamespace(
             data=[
                 SimpleNamespace(
-                    current_period_start=
-                        1782864000,
-                    current_period_end=
-                        1785542400,
+                    current_period_start=1782864000,
+                    current_period_end=1785542400,
                 )
             ]
         ),
@@ -349,6 +298,7 @@ def paid_invoice(
 # NORMAL PYTEST TESTS
 # ============================================================
 
+
 def test_checkout_completed_updates_company(
     monkeypatch,
 ):
@@ -364,18 +314,10 @@ def test_checkout_completed_updates_company(
         )
     )
 
-    company = db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = db.collection("company").documents[COMPANY_ID]
 
-    assert (
-        company["stripe_customer_id"]
-        == CUSTOMER_ID
-    )
-    assert (
-        company["stripe_subscription_id"]
-        == "sub_new"
-    )
+    assert company["stripe_customer_id"] == CUSTOMER_ID
+    assert company["stripe_subscription_id"] == "sub_new"
 
 
 @pytest.mark.parametrize(
@@ -402,34 +344,19 @@ def test_paid_invoice_adds_plan_credits(
     monkeypatch.setattr(
         stripe_module.stripe.Subscription,
         "retrieve",
-        lambda subscription_id:
-            subscription_for_plan(
-                plan_name
-            ),
+        lambda subscription_id: subscription_for_plan(plan_name),
     )
 
-    stripe_module.handle_invoice_paid(
-        paid_invoice()
-    )
+    stripe_module.handle_invoice_paid(paid_invoice())
 
-    company = db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = db.collection("company").documents[COMPANY_ID]
 
-    assert (
-        company["total_credit"]
-        == credits
-    )
-    assert (
-        company["available_credit"]
-        == credits
-    )
+    assert company["total_credit"] == credits
+    assert company["available_credit"] == credits
     assert company["used_credit"] == 0
     assert company["expired_credit"] == 6
 
-    payment = db.collection(
-        "payment"
-    ).documents["in_test"]
+    payment = db.collection("payment").documents["in_test"]
 
     assert payment["status"] == "COMPLETED"
     assert payment["payment_method"] == "Card"
@@ -442,24 +369,14 @@ def test_duplicate_completed_invoice_is_ignored(
     db = install_db(
         monkeypatch,
         companies=default_company(),
-        payments={
-            "in_test": {
-                "status": "COMPLETED"
-            }
-        },
+        payments={"in_test": {"status": "COMPLETED"}},
     )
 
-    before = db.collection(
-        "company"
-    ).documents[COMPANY_ID].copy()
+    before = db.collection("company").documents[COMPANY_ID].copy()
 
-    stripe_module.handle_invoice_paid(
-        paid_invoice()
-    )
+    stripe_module.handle_invoice_paid(paid_invoice())
 
-    after = db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    after = db.collection("company").documents[COMPANY_ID]
 
     assert after == before
 
@@ -472,20 +389,11 @@ def test_failed_invoice_updates_status(
         companies=default_company(),
     )
 
-    stripe_module.handle_invoice_failed(
-        SimpleNamespace(
-            customer=CUSTOMER_ID
-        )
-    )
+    stripe_module.handle_invoice_failed(SimpleNamespace(customer=CUSTOMER_ID))
 
-    company = db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = db.collection("company").documents[COMPANY_ID]
 
-    assert (
-        company["subscription_status"]
-        == "PAYMENT_FAILED"
-    )
+    assert company["subscription_status"] == "PAYMENT_FAILED"
 
 
 def test_subscription_deleted_expires_remaining(
@@ -499,36 +407,23 @@ def test_subscription_deleted_expires_remaining(
         ),
     )
 
-    stripe_module.handle_subscription_deleted(
-        SimpleNamespace(
-            customer=CUSTOMER_ID
-        )
-    )
+    stripe_module.handle_subscription_deleted(SimpleNamespace(customer=CUSTOMER_ID))
 
-    company = db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = db.collection("company").documents[COMPANY_ID]
 
     assert company["subscription_plan"] == ""
-    assert (
-        company["subscription_status"]
-        == "CANCELLED"
-    )
+    assert company["subscription_status"] == "CANCELLED"
     assert company["available_credit"] == 0
     assert company["expired_credit"] == 8
-    assert (
-        company["cancel_at_period_end"]
-        is False
-    )
+    assert company["cancel_at_period_end"] is False
 
 
 # ============================================================
 # BDD GIVEN
 # ============================================================
 
-@given(
-    "a company exists for the Stripe customer"
-)
+
+@given("a company exists for the Stripe customer")
 def company_exists(
     monkeypatch,
     context,
@@ -539,9 +434,7 @@ def company_exists(
     )
 
 
-@given(
-    "checkout data does not contain a customer"
-)
+@given("checkout data does not contain a customer")
 def checkout_without_customer(
     monkeypatch,
     context,
@@ -550,14 +443,10 @@ def checkout_without_customer(
         monkeypatch,
         companies=default_company(),
     )
-    context.session = SimpleNamespace(
-        subscription=SUBSCRIPTION_ID
-    )
+    context.session = SimpleNamespace(subscription=SUBSCRIPTION_ID)
 
 
-@given(
-    "a company exists with unused credits"
-)
+@given("a company exists with unused credits")
 def company_with_unused_credits(
     monkeypatch,
     context,
@@ -582,16 +471,11 @@ def set_plan(
     monkeypatch.setattr(
         stripe_module.stripe.Subscription,
         "retrieve",
-        lambda subscription_id:
-            subscription_for_plan(
-                plan_name
-            ),
+        lambda subscription_id: subscription_for_plan(plan_name),
     )
 
 
-@given(
-    "Stripe returns a starter subscription"
-)
+@given("Stripe returns a starter subscription")
 def starter_plan(
     monkeypatch,
     context,
@@ -603,9 +487,7 @@ def starter_plan(
     )
 
 
-@given(
-    "Stripe returns a business subscription"
-)
+@given("Stripe returns a business subscription")
 def business_plan(
     monkeypatch,
     context,
@@ -617,9 +499,7 @@ def business_plan(
     )
 
 
-@given(
-    "Stripe returns an enterprise subscription"
-)
+@given("Stripe returns an enterprise subscription")
 def enterprise_plan(
     monkeypatch,
     context,
@@ -631,9 +511,7 @@ def enterprise_plan(
     )
 
 
-@given(
-    "the invoice was already processed successfully"
-)
+@given("the invoice was already processed successfully")
 def already_processed(
     monkeypatch,
     context,
@@ -641,18 +519,12 @@ def already_processed(
     context.db = install_db(
         monkeypatch,
         companies=default_company(),
-        payments={
-            "in_test": {
-                "status": "COMPLETED"
-            }
-        },
+        payments={"in_test": {"status": "COMPLETED"}},
     )
     context.invoice = paid_invoice()
 
 
-@given(
-    "a paid invoice does not contain an invoice ID"
-)
+@given("a paid invoice does not contain an invoice ID")
 def missing_invoice_id(
     monkeypatch,
     context,
@@ -661,14 +533,10 @@ def missing_invoice_id(
         monkeypatch,
         companies=default_company(),
     )
-    context.invoice = paid_invoice(
-        invoice_id=None
-    )
+    context.invoice = paid_invoice(invoice_id=None)
 
 
-@given(
-    "a paid invoice does not contain a customer"
-)
+@given("a paid invoice does not contain a customer")
 def missing_customer(
     monkeypatch,
     context,
@@ -677,14 +545,10 @@ def missing_customer(
         monkeypatch,
         companies=default_company(),
     )
-    context.invoice = paid_invoice(
-        customer_id=None
-    )
+    context.invoice = paid_invoice(customer_id=None)
 
 
-@given(
-    "Stripe returns an unknown subscription plan"
-)
+@given("Stripe returns an unknown subscription plan")
 def unknown_plan(
     monkeypatch,
     context,
@@ -698,9 +562,7 @@ def unknown_plan(
     )
 
 
-@given(
-    "a company exists with remaining credits"
-)
+@given("a company exists with remaining credits")
 def company_remaining_credits(
     monkeypatch,
     context,
@@ -718,289 +580,153 @@ def company_remaining_credits(
 # BDD WHEN
 # ============================================================
 
-@when(
-    "checkout completed is handled"
-)
+
+@when("checkout completed is handled")
 def handle_checkout(context):
-    session = (
-        context.session
-        or SimpleNamespace(
-            customer=CUSTOMER_ID,
-            subscription=SUBSCRIPTION_ID,
-        )
+    session = context.session or SimpleNamespace(
+        customer=CUSTOMER_ID,
+        subscription=SUBSCRIPTION_ID,
     )
 
-    stripe_module.handle_checkout_completed(
-        session
-    )
+    stripe_module.handle_checkout_completed(session)
 
 
-@when(
-    "a paid invoice is handled"
-)
+@when("a paid invoice is handled")
 def handle_paid(context):
-    stripe_module.handle_invoice_paid(
-        context.invoice
-    )
+    stripe_module.handle_invoice_paid(context.invoice)
 
 
-@when(
-    "the duplicate paid invoice is handled"
-)
+@when("the duplicate paid invoice is handled")
 def handle_duplicate(context):
-    stripe_module.handle_invoice_paid(
-        context.invoice
-    )
+    stripe_module.handle_invoice_paid(context.invoice)
 
 
-@when(
-    "the paid invoice is handled"
-)
+@when("the paid invoice is handled")
 def handle_invalid_invoice(context):
-    stripe_module.handle_invoice_paid(
-        context.invoice
-    )
+    stripe_module.handle_invoice_paid(context.invoice)
 
 
-@when(
-    "a failed invoice is handled"
-)
+@when("a failed invoice is handled")
 def handle_failed(context):
-    stripe_module.handle_invoice_failed(
-        SimpleNamespace(
-            customer=CUSTOMER_ID
-        )
-    )
+    stripe_module.handle_invoice_failed(SimpleNamespace(customer=CUSTOMER_ID))
 
 
-@when(
-    "a subscription update is handled"
-)
+@when("a subscription update is handled")
 def handle_subscription_update(context):
     stripe_module.handle_subscription_updated(
         SimpleNamespace(
             customer=CUSTOMER_ID,
-            metadata={
-                "plan": "business"
-            },
+            metadata={"plan": "business"},
             status="active",
             cancel_at_period_end=True,
         )
     )
 
 
-@when(
-    "a subscription deletion is handled"
-)
+@when("a subscription deletion is handled")
 def handle_subscription_delete(context):
-    stripe_module.handle_subscription_deleted(
-        SimpleNamespace(
-            customer=CUSTOMER_ID
-        )
-    )
+    stripe_module.handle_subscription_deleted(SimpleNamespace(customer=CUSTOMER_ID))
 
 
 # ============================================================
 # BDD THEN
 # ============================================================
 
-@then(
-    "the company Stripe identifiers should be updated"
-)
+
+@then("the company Stripe identifiers should be updated")
 def verify_checkout_update(context):
-    company = context.db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = context.db.collection("company").documents[COMPANY_ID]
 
-    assert (
-        company["stripe_customer_id"]
-        == CUSTOMER_ID
-    )
-    assert (
-        company["stripe_subscription_id"]
-        == SUBSCRIPTION_ID
-    )
+    assert company["stripe_customer_id"] == CUSTOMER_ID
+    assert company["stripe_subscription_id"] == SUBSCRIPTION_ID
 
 
-@then(
-    "no company update should occur"
-)
+@then("no company update should occur")
 def verify_no_checkout_update(context):
-    company = context.db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = context.db.collection("company").documents[COMPANY_ID]
 
-    assert (
-        company["stripe_subscription_id"]
-        == SUBSCRIPTION_ID
-    )
+    assert company["stripe_subscription_id"] == SUBSCRIPTION_ID
 
 
 def expected_credits(context):
-    return stripe_module.PLANS[
-        context.plan_name
-    ]["credits"]
+    return stripe_module.PLANS[context.plan_name]["credits"]
 
 
-@then(
-    "the company should receive starter credits"
-)
+@then("the company should receive starter credits")
 def verify_starter_credits(context):
-    assert (
-        context.db.collection(
-            "company"
-        ).documents[COMPANY_ID]
-        ["available_credit"]
-        == 10
-    )
+    assert context.db.collection("company").documents[COMPANY_ID]["available_credit"] == 10
 
 
-@then(
-    "the company should receive business credits"
-)
+@then("the company should receive business credits")
 def verify_business_credits(context):
-    assert (
-        context.db.collection(
-            "company"
-        ).documents[COMPANY_ID]
-        ["available_credit"]
-        == 30
-    )
+    assert context.db.collection("company").documents[COMPANY_ID]["available_credit"] == 30
 
 
-@then(
-    "the company should receive enterprise credits"
-)
+@then("the company should receive enterprise credits")
 def verify_enterprise_credits(context):
-    assert (
-        context.db.collection(
-            "company"
-        ).documents[COMPANY_ID]
-        ["available_credit"]
-        == 60
-    )
+    assert context.db.collection("company").documents[COMPANY_ID]["available_credit"] == 60
 
 
-@then(
-    "the previous unused credits should become expired"
-)
+@then("the previous unused credits should become expired")
 def verify_expired(context):
-    assert (
-        context.db.collection(
-            "company"
-        ).documents[COMPANY_ID]
-        ["expired_credit"]
-        == 6
-    )
+    assert context.db.collection("company").documents[COMPANY_ID]["expired_credit"] == 6
 
 
-@then(
-    "a completed card payment should be saved"
-)
+@then("a completed card payment should be saved")
 def verify_payment_saved(context):
-    payment = context.db.collection(
-        "payment"
-    ).documents["in_test"]
+    payment = context.db.collection("payment").documents["in_test"]
 
     assert payment["status"] == "COMPLETED"
     assert payment["payment_method"] == "Card"
 
 
-@then(
-    "company credits should not be updated again"
-)
+@then("company credits should not be updated again")
 def verify_duplicate_ignored(context):
-    company = context.db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = context.db.collection("company").documents[COMPANY_ID]
 
     assert company["available_credit"] == 4
     assert company["expired_credit"] == 2
 
 
-@then(
-    "no payment should be saved"
-)
+@then("no payment should be saved")
 def verify_no_payment(context):
-    assert (
-        context.db.collection(
-            "payment"
-        ).documents
-        == {}
-    )
+    assert context.db.collection("payment").documents == {}
 
 
-@then(
-    "the company credits should remain unchanged"
-)
+@then("the company credits should remain unchanged")
 def verify_unknown_plan(context):
-    company = context.db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = context.db.collection("company").documents[COMPANY_ID]
 
     assert company["available_credit"] == 4
     assert company["expired_credit"] == 2
 
 
-@then(
-    "the company subscription status should become payment failed"
-)
+@then("the company subscription status should become payment failed")
 def verify_failed_status(context):
     assert (
-        context.db.collection(
-            "company"
-        ).documents[COMPANY_ID]
-        ["subscription_status"]
+        context.db.collection("company").documents[COMPANY_ID]["subscription_status"]
         == "PAYMENT_FAILED"
     )
 
 
-@then(
-    "the company subscription status and cancellation flag should be updated"
-)
+@then("the company subscription status and cancellation flag should be updated")
 def verify_subscription_update(context):
-    company = context.db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = context.db.collection("company").documents[COMPANY_ID]
 
-    assert (
-        company["subscription_status"]
-        == "ACTIVE"
-    )
-    assert (
-        company["cancel_at_period_end"]
-        is True
-    )
-    assert (
-        company["subscription_plan"]
-        == "business"
-    )
+    assert company["subscription_status"] == "ACTIVE"
+    assert company["cancel_at_period_end"] is True
+    assert company["subscription_plan"] == "business"
 
 
-@then(
-    "the subscription should be cancelled"
-)
+@then("the subscription should be cancelled")
 def verify_cancelled(context):
-    company = context.db.collection(
-        "company"
-    ).documents[COMPANY_ID]
+    company = context.db.collection("company").documents[COMPANY_ID]
 
     assert company["subscription_plan"] == ""
-    assert (
-        company["subscription_status"]
-        == "CANCELLED"
-    )
+    assert company["subscription_status"] == "CANCELLED"
     assert company["available_credit"] == 0
 
 
-@then(
-    "remaining credits should become expired"
-)
+@then("remaining credits should become expired")
 def verify_remaining_expired(context):
-    assert (
-        context.db.collection(
-            "company"
-        ).documents[COMPANY_ID]
-        ["expired_credit"]
-        == 8
-    )
+    assert context.db.collection("company").documents[COMPANY_ID]["expired_credit"] == 8

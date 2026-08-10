@@ -7,10 +7,10 @@ import pytest
 from fastapi import HTTPException
 from pytest_bdd import given, scenarios, then, when
 
-
 # ============================================================
 # LOAD ACTUAL ROUTE WITHOUT REAL FIREBASE CONNECTION
 # ============================================================
+
 
 def load_review_module():
     routes_dir = Path("src/job_portal_web/backend/routes")
@@ -21,26 +21,18 @@ def load_review_module():
             errors="ignore",
         )
 
-        if (
-            "def write_company_review(" in text
-            and "def submit_company_review(" in text
-        ):
+        if "def write_company_review(" in text and "def submit_company_review(" in text:
             import firebase_admin.firestore as firestore_module
 
             original_client = firestore_module.client
             firestore_module.client = lambda: None
 
             try:
-                return importlib.import_module(
-                    "job_portal_web.backend.routes."
-                    + path.stem
-                )
+                return importlib.import_module("job_portal_web.backend.routes." + path.stem)
             finally:
                 firestore_module.client = original_client
 
-    raise ImportError(
-        "Could not find the company review route file."
-    )
+    raise ImportError("Could not find the company review route file.")
 
 
 review_module = load_review_module()
@@ -55,6 +47,7 @@ COMPANY_ID = "company001"
 # ============================================================
 # FAKE FIRESTORE
 # ============================================================
+
 
 class FakeSnapshot:
 
@@ -83,9 +76,7 @@ class FakeDocument:
         self.document_id = document_id
 
     def get(self):
-        data = self.collection.documents.get(
-            self.document_id
-        )
+        data = self.collection.documents.get(self.document_id)
 
         if data is None:
             return FakeSnapshot(
@@ -107,11 +98,7 @@ class FakeCollection:
         self,
         documents=None,
     ):
-        self.documents = (
-            documents.copy()
-            if documents
-            else {}
-        )
+        self.documents = documents.copy() if documents else {}
 
         self.added = []
 
@@ -128,17 +115,11 @@ class FakeCollection:
         self,
         data,
     ):
-        self.added.append(
-            data.copy()
-        )
+        self.added.append(data.copy())
 
-        document_id = (
-            f"REVIEW{len(self.added):03d}"
-        )
+        document_id = f"REVIEW{len(self.added):03d}"
 
-        self.documents[
-            document_id
-        ] = data.copy()
+        self.documents[document_id] = data.copy()
 
         return (
             FakeDocument(
@@ -158,20 +139,9 @@ class FakeDB:
         reviews=None,
     ):
         self.collections = {
-            "company":
-                FakeCollection(
-                    companies or {}
-                ),
-
-            "job_seeker":
-                FakeCollection(
-                    applicants or {}
-                ),
-
-            "company_review":
-                FakeCollection(
-                    reviews or {}
-                ),
+            "company": FakeCollection(companies or {}),
+            "job_seeker": FakeCollection(applicants or {}),
+            "company_review": FakeCollection(reviews or {}),
         }
 
     def collection(
@@ -184,6 +154,7 @@ class FakeDB:
 # ============================================================
 # FAKE TEMPLATE
 # ============================================================
+
 
 class FakeTemplates:
 
@@ -203,6 +174,7 @@ class FakeTemplates:
 # FAKE REQUEST
 # ============================================================
 
+
 class FakeRequest:
 
     def __init__(
@@ -211,19 +183,17 @@ class FakeRequest:
         applicant_id=APPLICANT_ID,
     ):
         self.session = {
-            "user_type":
-                user_type,
+            "user_type": user_type,
         }
 
         if applicant_id is not None:
-            self.session[
-                "applicant_id"
-            ] = applicant_id
+            self.session["applicant_id"] = applicant_id
 
 
 # ============================================================
 # BDD CONTEXT
 # ============================================================
+
 
 class Context:
 
@@ -243,21 +213,15 @@ def context():
 # DEFAULT DATA
 # ============================================================
 
+
 @pytest.fixture
 def companies():
     return {
         COMPANY_ID: {
-            "companyName":
-                "ABC Technology Sdn Bhd",
-
-            "city":
-                "Kuala Lumpur",
-
-            "state":
-                "Kuala Lumpur",
-
-            "status":
-                "Active",
+            "companyName": "ABC Technology Sdn Bhd",
+            "city": "Kuala Lumpur",
+            "state": "Kuala Lumpur",
+            "status": "Active",
         }
     }
 
@@ -266,14 +230,9 @@ def companies():
 def applicants():
     return {
         APPLICANT_ID: {
-            "uid":
-                APPLICANT_ID,
-
-            "company_name":
-                "ABC Technology Sdn. Bhd.",
-
-            "email":
-                "hr@abctech.com",
+            "uid": APPLICANT_ID,
+            "company_name": "ABC Technology Sdn. Bhd.",
+            "email": "hr@abctech.com",
         }
     }
 
@@ -281,6 +240,7 @@ def applicants():
 # ============================================================
 # INSTALL FAKE DB
 # ============================================================
+
 
 def install_fake_db(
     monkeypatch,
@@ -326,16 +286,14 @@ def setup_db(
 # HELPERS
 # ============================================================
 
+
 def open_review_page(
     request=None,
     company_id=COMPANY_ID,
 ):
     return asyncio.run(
         review_module.write_company_review(
-            request=(
-                request
-                or FakeRequest()
-            ),
+            request=(request or FakeRequest()),
             company_id=company_id,
         )
     )
@@ -367,71 +325,28 @@ def submit_review(
 ):
     return asyncio.run(
         review_module.submit_company_review(
-            request=(
-                request
-                or FakeRequest()
-            ),
+            request=(request or FakeRequest()),
             company_id=company_id,
-
-            overall_rating=
-                overall_rating,
-
-            job_title=
-                job_title,
-
-            department=
-                department,
-
-            employment_type=
-                employment_type,
-
-            location=
-                location,
-
-            start_date=
-                start_date,
-
-            end_date=
-                end_date,
-
-            still_working=
-                still_working,
-
-            recommend=
-                recommend,
-
-            pros=
-                pros,
-
-            cons=
-                cons,
-
-            review_title=
-                review_title,
-
-            additional_comments=
-                additional_comments,
-
-            work_environment=
-                work_environment,
-
-            management=
-                management,
-
-            career_growth=
-                career_growth,
-
-            work_life_balance=
-                work_life_balance,
-
-            benefits=
-                benefits,
-
-            company_culture=
-                company_culture,
-
-            learning_opportunities=
-                learning_opportunities,
+            overall_rating=overall_rating,
+            job_title=job_title,
+            department=department,
+            employment_type=employment_type,
+            location=location,
+            start_date=start_date,
+            end_date=end_date,
+            still_working=still_working,
+            recommend=recommend,
+            pros=pros,
+            cons=cons,
+            review_title=review_title,
+            additional_comments=additional_comments,
+            work_environment=work_environment,
+            management=management,
+            career_growth=career_growth,
+            work_life_balance=work_life_balance,
+            benefits=benefits,
+            company_culture=company_culture,
+            learning_opportunities=learning_opportunities,
         )
     )
 
@@ -439,19 +354,13 @@ def submit_review(
 def latest_review(
     context,
 ):
-    return (
-        context.db.collection(
-            "company_review"
-        ).added[-1]
-    )
+    return context.db.collection("company_review").added[-1]
 
 
 def disable_pytest_login_bypass(
     monkeypatch,
 ):
-    original_getenv = (
-        review_module.os.getenv
-    )
+    original_getenv = review_module.os.getenv
 
     def fake_getenv(
         key,
@@ -476,27 +385,17 @@ def disable_pytest_login_bypass(
 # DIRECT PYTEST TESTS
 # ============================================================
 
+
 def test_write_review_page(
     setup_db,
 ):
     response = open_review_page()
 
-    assert (
-        response["template"]
-        == "writeCompanyReview.html"
-    )
+    assert response["template"] == "writeCompanyReview.html"
 
-    assert (
-        response["context"]
-        ["company"]["id"]
-        == COMPANY_ID
-    )
+    assert response["context"]["company"]["id"] == COMPANY_ID
 
-    assert (
-        response["context"]
-        ["applicant_id"]
-        == APPLICANT_ID
-    )
+    assert response["context"]["applicant_id"] == APPLICANT_ID
 
 
 def test_submit_complete_review(
@@ -504,25 +403,15 @@ def test_submit_complete_review(
 ):
     response = submit_review()
 
-    added = (
-        setup_db.collection(
-            "company_review"
-        ).added
-    )
+    added = setup_db.collection("company_review").added
 
     assert len(added) == 1
 
     review = added[0]
 
-    assert (
-        review["company_id"]
-        == COMPANY_ID
-    )
+    assert review["company_id"] == COMPANY_ID
 
-    assert (
-        review["applicant_id"]
-        == APPLICANT_ID
-    )
+    assert review["applicant_id"] == APPLICANT_ID
 
     assert review["status"] == "Active"
     assert review["overall_rating"] == 5
@@ -530,10 +419,7 @@ def test_submit_complete_review(
 
     assert response.status_code == 303
 
-    assert (
-        response.headers["location"]
-        == f"/company/{COMPANY_ID}/reviews"
-    )
+    assert response.headers["location"] == f"/company/{COMPANY_ID}/reviews"
 
 
 def test_former_employee(
@@ -544,21 +430,11 @@ def test_former_employee(
         end_date="2025-12-31",
     )
 
-    review = (
-        setup_db.collection(
-            "company_review"
-        ).added[0]
-    )
+    review = setup_db.collection("company_review").added[0]
 
-    assert (
-        review["still_working"]
-        is False
-    )
+    assert review["still_working"] is False
 
-    assert (
-        review["end_date"]
-        == "2025-12-31"
-    )
+    assert review["end_date"] == "2025-12-31"
 
 
 def test_optional_fields_empty(
@@ -571,19 +447,12 @@ def test_optional_fields_empty(
         additional_comments="",
     )
 
-    review = (
-        setup_db.collection(
-            "company_review"
-        ).added[0]
-    )
+    review = setup_db.collection("company_review").added[0]
 
     assert review["end_date"] == ""
     assert review["pros"] == ""
     assert review["cons"] == ""
-    assert (
-        review["additional_comments"]
-        == ""
-    )
+    assert review["additional_comments"] == ""
 
 
 def test_company_not_found_on_open(
@@ -596,16 +465,11 @@ def test_company_not_found_on_open(
         applicants,
     )
 
-    with pytest.raises(
-        HTTPException
-    ) as exc:
+    with pytest.raises(HTTPException) as exc:
         open_review_page()
 
     assert exc.value.status_code == 404
-    assert (
-        exc.value.detail
-        == "Company not found"
-    )
+    assert exc.value.detail == "Company not found"
 
 
 def test_company_not_found_on_submit(
@@ -618,9 +482,7 @@ def test_company_not_found_on_submit(
         applicants,
     )
 
-    with pytest.raises(
-        HTTPException
-    ) as exc:
+    with pytest.raises(HTTPException) as exc:
         submit_review()
 
     assert exc.value.status_code == 404
@@ -630,21 +492,15 @@ def test_non_job_seeker_access_denied(
     monkeypatch,
     setup_db,
 ):
-    disable_pytest_login_bypass(
-        monkeypatch
-    )
+    disable_pytest_login_bypass(monkeypatch)
 
     request = FakeRequest(
         user_type="employer",
         applicant_id=None,
     )
 
-    with pytest.raises(
-        HTTPException
-    ) as exc:
-        open_review_page(
-            request=request
-        )
+    with pytest.raises(HTTPException) as exc:
+        open_review_page(request=request)
 
     assert exc.value.status_code == 403
     assert exc.value.detail == "Access denied"
@@ -654,21 +510,15 @@ def test_missing_applicant_id_requires_login(
     monkeypatch,
     setup_db,
 ):
-    disable_pytest_login_bypass(
-        monkeypatch
-    )
+    disable_pytest_login_bypass(monkeypatch)
 
     request = FakeRequest(
         user_type="job_seeker",
         applicant_id=None,
     )
 
-    with pytest.raises(
-        HTTPException
-    ) as exc:
-        open_review_page(
-            request=request
-        )
+    with pytest.raises(HTTPException) as exc:
+        open_review_page(request=request)
 
     assert exc.value.status_code == 401
     assert exc.value.detail == "Please login."
@@ -678,9 +528,8 @@ def test_missing_applicant_id_requires_login(
 # BDD GIVEN
 # ============================================================
 
-@given(
-    "a job seeker is logged in"
-)
+
+@given("a job seeker is logged in")
 def job_seeker_logged_in(
     context,
 ):
@@ -688,9 +537,7 @@ def job_seeker_logged_in(
     context.request = FakeRequest()
 
 
-@given(
-    "the company exists"
-)
+@given("the company exists")
 def company_exists(
     monkeypatch,
     companies,
@@ -707,9 +554,7 @@ def company_exists(
         )
 
 
-@given(
-    "the applicant profile exists"
-)
+@given("the applicant profile exists")
 def applicant_exists(
     monkeypatch,
     companies,
@@ -724,10 +569,9 @@ def applicant_exists(
             companies,
             applicants,
         )
-        
-@given(
-    "the applicant profile does not exist"
-)
+
+
+@given("the applicant profile does not exist")
 def applicant_missing(
     monkeypatch,
     companies,
@@ -741,9 +585,7 @@ def applicant_missing(
     )
 
 
-@given(
-    "the requested company does not exist"
-)
+@given("the requested company does not exist")
 def company_missing(
     monkeypatch,
     applicants,
@@ -756,17 +598,14 @@ def company_missing(
         applicants,
     )
 
-@given(
-    "the user is not a job seeker"
-)
+
+@given("the user is not a job seeker")
 def non_job_seeker(
     monkeypatch,
     setup_db,
     context,
 ):
-    disable_pytest_login_bypass(
-        monkeypatch
-    )
+    disable_pytest_login_bypass(monkeypatch)
 
     if context.db is None:
         context.db = setup_db
@@ -777,17 +616,13 @@ def non_job_seeker(
     )
 
 
-@given(
-    "the user session is job seeker without applicant ID"
-)
+@given("the user session is job seeker without applicant ID")
 def job_seeker_without_id(
     monkeypatch,
     setup_db,
     context,
 ):
-    disable_pytest_login_bypass(
-        monkeypatch
-    )
+    disable_pytest_login_bypass(monkeypatch)
 
     if context.db is None:
         context.db = setup_db
@@ -797,65 +632,49 @@ def job_seeker_without_id(
         applicant_id=None,
     )
 
+
 # ============================================================
 # BDD WHEN
 # ============================================================
 
-@when(
-    "the job seeker opens the write company review page"
-)
+
+@when("the job seeker opens the write company review page")
 def open_page(
     context,
 ):
-    context.response = open_review_page(
-        request=context.request
-    )
+    context.response = open_review_page(request=context.request)
 
 
-@when(
-    "the job seeker opens the write company review page expecting an error"
-)
+@when("the job seeker opens the write company review page expecting an error")
 def open_page_error(
     context,
 ):
     try:
-        context.response = open_review_page(
-            request=context.request
-        )
+        context.response = open_review_page(request=context.request)
 
     except HTTPException as exc:
         context.error = exc
 
 
-@when(
-    "the user tries to open the write company review page"
-)
+@when("the user tries to open the write company review page")
 def unauthorized_open(
     context,
 ):
     try:
-        context.response = open_review_page(
-            request=context.request
-        )
+        context.response = open_review_page(request=context.request)
 
     except HTTPException as exc:
         context.error = exc
 
 
-@when(
-    "the job seeker submits a complete company review"
-)
+@when("the job seeker submits a complete company review")
 def submit_complete(
     context,
 ):
-    context.response = submit_review(
-        request=context.request
-    )
+    context.response = submit_review(request=context.request)
 
 
-@when(
-    "the job seeker submits a review as a current employee"
-)
+@when("the job seeker submits a review as a current employee")
 def submit_current_employee(
     context,
 ):
@@ -866,9 +685,7 @@ def submit_current_employee(
     )
 
 
-@when(
-    "the job seeker submits a review as a former employee"
-)
+@when("the job seeker submits a review as a former employee")
 def submit_former_employee(
     context,
 ):
@@ -879,9 +696,7 @@ def submit_former_employee(
     )
 
 
-@when(
-    "the job seeker submits a review with empty optional fields"
-)
+@when("the job seeker submits a review with empty optional fields")
 def submit_optional_empty(
     context,
 ):
@@ -894,16 +709,12 @@ def submit_optional_empty(
     )
 
 
-@when(
-    "the job seeker submits a company review expecting an error"
-)
+@when("the job seeker submits a company review expecting an error")
 def submit_company_error(
     context,
 ):
     try:
-        context.response = submit_review(
-            request=context.request
-        )
+        context.response = submit_review(request=context.request)
 
     except HTTPException as exc:
         context.error = exc
@@ -913,240 +724,125 @@ def submit_company_error(
 # BDD THEN
 # ============================================================
 
-@then(
-    "the write company review page should be displayed"
-)
+
+@then("the write company review page should be displayed")
 def review_page_displayed(
     context,
 ):
-    assert (
-        context.response["template"]
-        == "writeCompanyReview.html"
-    )
+    assert context.response["template"] == "writeCompanyReview.html"
 
 
-@then(
-    "the company information should be available"
-)
+@then("the company information should be available")
 def company_info_available(
     context,
 ):
-    company = (
-        context.response["context"]
-        ["company"]
-    )
+    company = context.response["context"]["company"]
 
     assert company["id"] == COMPANY_ID
 
-    assert (
-        company["companyName"]
-        == "ABC Technology Sdn Bhd"
-    )
+    assert company["companyName"] == "ABC Technology Sdn Bhd"
 
 
-@then(
-    "the applicant information should be available"
-)
+@then("the applicant information should be available")
 def applicant_info_available(
     context,
 ):
-    user = (
-        context.response["context"]
-        ["user"]
-    )
+    user = context.response["context"]["user"]
 
     assert user is not None
 
-    assert (
-        user["company_name"]
-        == "ABC Technology Sdn. Bhd."
-    )
+    assert user["company_name"] == "ABC Technology Sdn. Bhd."
 
 
-@then(
-    "the review page should still be displayed safely"
-)
+@then("the review page should still be displayed safely")
 def missing_user_safe(
     context,
 ):
-    assert (
-        context.response["template"]
-        == "writeCompanyReview.html"
-    )
+    assert context.response["template"] == "writeCompanyReview.html"
 
-    assert (
-        context.response["context"]
-        ["user"]
-        is None
-    )
+    assert context.response["context"]["user"] is None
 
 
-@then(
-    "the company review should be saved"
-)
+@then("the company review should be saved")
 def review_saved(
     context,
 ):
-    assert (
-        len(
-            context.db.collection(
-                "company_review"
-            ).added
-        )
-        == 1
-    )
+    assert len(context.db.collection("company_review").added) == 1
 
 
-@then(
-    "the saved review should contain the correct company and applicant IDs"
-)
+@then("the saved review should contain the correct company and applicant IDs")
 def correct_ids(
     context,
 ):
-    review = latest_review(
-        context
-    )
+    review = latest_review(context)
 
-    assert (
-        review["company_id"]
-        == COMPANY_ID
-    )
+    assert review["company_id"] == COMPANY_ID
 
-    assert (
-        review["applicant_id"]
-        == APPLICANT_ID
-    )
+    assert review["applicant_id"] == APPLICANT_ID
 
 
-@then(
-    "the review status should be active"
-)
+@then("the review status should be active")
 def active_status(
     context,
 ):
-    assert (
-        latest_review(
-            context
-        )["status"]
-        == "Active"
-    )
+    assert latest_review(context)["status"] == "Active"
 
 
-@then(
-    "the job seeker should be redirected to the company reviews page"
-)
+@then("the job seeker should be redirected to the company reviews page")
 def redirected_to_reviews(
     context,
 ):
-    assert (
-        context.response.status_code
-        == 303
-    )
+    assert context.response.status_code == 303
 
-    assert (
-        context.response.headers[
-            "location"
-        ]
-        ==
-        f"/company/{COMPANY_ID}/reviews"
-    )
+    assert context.response.headers["location"] == f"/company/{COMPANY_ID}/reviews"
 
 
-@then(
-    "the overall rating should be saved correctly"
-)
+@then("the overall rating should be saved correctly")
 def overall_rating_saved(
     context,
 ):
-    assert (
-        latest_review(
-            context
-        )["overall_rating"]
-        == 5
-    )
+    assert latest_review(context)["overall_rating"] == 5
 
 
-@then(
-    "the employment information should be saved correctly"
-)
+@then("the employment information should be saved correctly")
 def employment_saved(
     context,
 ):
-    review = latest_review(
-        context
-    )
+    review = latest_review(context)
 
-    assert (
-        review["job_title"]
-        == "Software Engineer"
-    )
+    assert review["job_title"] == "Software Engineer"
 
-    assert (
-        review["department"]
-        == "IT"
-    )
+    assert review["department"] == "IT"
 
-    assert (
-        review["employment_type"]
-        == "Full-time"
-    )
+    assert review["employment_type"] == "Full-time"
 
-    assert (
-        review["location"]
-        == "Kuala Lumpur"
-    )
+    assert review["location"] == "Kuala Lumpur"
 
-    assert (
-        review["start_date"]
-        == "2024-01-01"
-    )
+    assert review["start_date"] == "2024-01-01"
 
 
-@then(
-    "the review title recommendation pros cons and comments should be saved correctly"
-)
+@then("the review title recommendation pros cons and comments should be saved correctly")
 def review_content_saved(
     context,
 ):
-    review = latest_review(
-        context
-    )
+    review = latest_review(context)
 
-    assert (
-        review["recommend"]
-        == "Yes"
-    )
+    assert review["recommend"] == "Yes"
 
-    assert (
-        review["pros"]
-        == "Good working environment"
-    )
+    assert review["pros"] == "Good working environment"
 
-    assert (
-        review["cons"]
-        == "Busy during deadlines"
-    )
+    assert review["cons"] == "Busy during deadlines"
 
-    assert (
-        review["review_title"]
-        == "Good company to grow"
-    )
+    assert review["review_title"] == "Good company to grow"
 
-    assert (
-        review["additional_comments"]
-        == "Supportive team"
-    )
+    assert review["additional_comments"] == "Supportive team"
 
 
-@then(
-    "all category ratings should be saved correctly"
-)
+@then("all category ratings should be saved correctly")
 def category_ratings_saved(
     context,
 ):
-    review = latest_review(
-        context
-    )
+    review = latest_review(context)
 
     assert review["work_environment"] == 5
     assert review["management"] == 4
@@ -1155,139 +851,80 @@ def category_ratings_saved(
     assert review["benefits"] == 4
     assert review["company_culture"] == 5
 
-    assert (
-        review[
-            "learning_opportunities"
-        ]
-        == 5
-    )
+    assert review["learning_opportunities"] == 5
 
 
-@then(
-    "still working should be true"
-)
+@then("still working should be true")
 def still_working_true(
     context,
 ):
-    assert (
-        latest_review(
-            context
-        )["still_working"]
-        is True
-    )
+    assert latest_review(context)["still_working"] is True
 
 
-@then(
-    "still working should be false"
-)
+@then("still working should be false")
 def still_working_false(
     context,
 ):
-    review = latest_review(
-        context
-    )
+    review = latest_review(context)
 
-    assert (
-        review["still_working"]
-        is False
-    )
+    assert review["still_working"] is False
 
-    assert (
-        review["end_date"]
-        == "2025-12-31"
-    )
+    assert review["end_date"] == "2025-12-31"
 
 
-@then(
-    "the optional review fields should be saved as empty values"
-)
+@then("the optional review fields should be saved as empty values")
 def optional_fields_empty(
     context,
 ):
-    review = latest_review(
-        context
-    )
+    review = latest_review(context)
 
     assert review["end_date"] == ""
     assert review["pros"] == ""
     assert review["cons"] == ""
 
-    assert (
-        review["additional_comments"]
-        == ""
-    )
+    assert review["additional_comments"] == ""
 
 
-@then(
-    "the review creation time should be recorded"
-)
+@then("the review creation time should be recorded")
 def creation_time_recorded(
     context,
 ):
-    review = latest_review(
-        context
-    )
+    review = latest_review(context)
 
-    assert (
-        isinstance(
-            review["created_at"],
-            datetime,
-        )
+    assert isinstance(
+        review["created_at"],
+        datetime,
     )
 
 
-@then(
-    "company not found should be returned"
-)
+@then("company not found should be returned")
 def company_not_found(
     context,
 ):
     assert context.error is not None
 
-    assert (
-        context.error.status_code
-        == 404
-    )
+    assert context.error.status_code == 404
 
-    assert (
-        context.error.detail
-        == "Company not found"
-    )
+    assert context.error.detail == "Company not found"
 
 
-@then(
-    "access denied should be returned"
-)
+@then("access denied should be returned")
 def access_denied(
     context,
 ):
     assert context.error is not None
 
-    assert (
-        context.error.status_code
-        == 403
-    )
+    assert context.error.status_code == 403
 
-    assert (
-        context.error.detail
-        == "Access denied"
-    )
+    assert context.error.detail == "Access denied"
 
 
-@then(
-    "login required should be returned"
-)
+@then("login required should be returned")
 def login_required(
     context,
 ):
     assert context.error is not None
 
-    assert (
-        context.error.status_code
-        == 401
-    )
+    assert context.error.status_code == 401
 
-    assert (
-        context.error.detail
-        == "Please login."
-    )
+    assert context.error.detail == "Please login."

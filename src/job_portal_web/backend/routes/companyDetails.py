@@ -109,7 +109,7 @@ def get_company_jobs(company_id: str):
             try:
                 salary = float(str(salary).replace(",", ""))
                 job["salary_display"] = f"RM {salary:,.0f}"
-            except:
+            except (ValueError, TypeError):
                 job["salary_display"] = "Negotiable"
 
         elif salary_type == "range":
@@ -121,10 +121,11 @@ def get_company_jobs(company_id: str):
                 minimum = float(str(minimum).replace(",", ""))
                 maximum = float(str(maximum).replace(",", ""))
 
-                job["salary_display"] = f"RM {minimum:,.0f} - RM {maximum:,.0f}"
+                job["salary_display"] = (
+                    f"RM {minimum:,.0f} - RM {maximum:,.0f}"
+                )
 
-            except:
-
+            except (ValueError, TypeError):
                 job["salary_display"] = "Negotiable"
 
         else:

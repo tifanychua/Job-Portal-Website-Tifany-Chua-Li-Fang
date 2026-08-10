@@ -57,7 +57,6 @@ def get_current_company(request: Request):
     return company_id, company
 
 
-
 # ==================================================
 # View All Applications
 # ==================================================
@@ -475,9 +474,20 @@ async def update_application_status(application_id: str, status_data: Applicatio
             "Submitted": "has been submitted",
             "Reviewed": "is now being reviewed",
             "Shortlisted": "has been shortlisted",
-            "Offered": ("has received a job offer " "— congratulations!"),
-            "Rejected": ("was not successful " "this time"),
+            "Offered": (
+                "has received a job offer "
+                "— congratulations!"
+            ),
+            "Rejected": (
+                "was not successful "
+                "this time"
+            ),
         }
+
+        status_message = status_messages.get(
+            firestore_status,
+            "has been updated"
+        )
 
         db.collection("notification").document().set(
             {
@@ -486,15 +496,15 @@ async def update_application_status(application_id: str, status_data: Applicatio
                 "is_read": False,
                 "type": "application",
                 "title": "Application status updated",
-                "message": (f"Your application for " f"{job_title} " f"{status_messages.get(
-                        firestore_status,
-                        'has been updated'
-                    )}."),
+                "message": (
+                    f"Your application for "
+                    f"{job_title} "
+                    f"{status_message}."
+                ),
                 "link": f"/application/{application_id}",
                 "created_at": datetime.now(UTC),
             }
         )
-
     # ==================================================
     # Success
     # ==================================================

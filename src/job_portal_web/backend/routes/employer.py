@@ -1141,7 +1141,6 @@ async def publish_draft_job(
 
     required_credit = CREDIT_RULES[duration]
 
-
     # =================================================
     # Company Credit
     # =================================================

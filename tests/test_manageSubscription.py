@@ -24,10 +24,7 @@ def load_subscription_module():
             firestore_module.client = lambda: None
 
             try:
-                return importlib.import_module(
-                    "job_portal_web.backend.routes."
-                    + path.stem
-                )
+                return importlib.import_module("job_portal_web.backend.routes." + path.stem)
             finally:
                 firestore_module.client = original_client
 
@@ -117,52 +114,58 @@ def run_action(context, action):
 
 @given("an employer has an active Stripe subscription")
 def active_subscription(context):
-    context.company.update({
-        "stripe_subscription_id": "sub_test",
-        "stripe_customer_id": "cus_test",
-        "cancel_at_period_end": False,
-    })
+    context.company.update(
+        {
+            "stripe_subscription_id": "sub_test",
+            "stripe_customer_id": "cus_test",
+            "cancel_at_period_end": False,
+        }
+    )
 
 
 @given("an employer has no Stripe subscription")
 def no_subscription(context):
-    context.company.update({
-        "stripe_subscription_id": "",
-        "stripe_customer_id": "cus_test",
-    })
+    context.company.update(
+        {
+            "stripe_subscription_id": "",
+            "stripe_customer_id": "cus_test",
+        }
+    )
 
 
-@given(
-    "an employer has a Stripe subscription scheduled for cancellation"
-)
+@given("an employer has a Stripe subscription scheduled for cancellation")
 def scheduled_subscription(context):
-    context.company.update({
-        "stripe_subscription_id": "sub_test",
-        "stripe_customer_id": "cus_test",
-        "cancel_at_period_end": True,
-    })
+    context.company.update(
+        {
+            "stripe_subscription_id": "sub_test",
+            "stripe_customer_id": "cus_test",
+            "cancel_at_period_end": True,
+        }
+    )
 
 
 @given("an employer has a Stripe customer")
 def stripe_customer(context):
-    context.company.update({
-        "stripe_customer_id": "cus_test",
-    })
+    context.company.update(
+        {
+            "stripe_customer_id": "cus_test",
+        }
+    )
 
 
 @given("an employer has no Stripe customer")
 def no_customer(context):
-    context.company.update({
-        "stripe_customer_id": "",
-    })
+    context.company.update(
+        {
+            "stripe_customer_id": "",
+        }
+    )
 
 
 @given("Stripe fails to cancel the subscription")
 def stripe_cancel_failure(monkeypatch):
     def fail(*args, **kwargs):
-        raise stripe.error.StripeError(
-            "Cancellation failed"
-        )
+        raise stripe.error.StripeError("Cancellation failed")
 
     monkeypatch.setattr(
         subscription_module.stripe.Subscription,
@@ -174,9 +177,7 @@ def stripe_cancel_failure(monkeypatch):
 @given("Stripe fails to create the billing portal")
 def portal_failure(monkeypatch):
     def fail(*args, **kwargs):
-        raise stripe.error.StripeError(
-            "Portal failed"
-        )
+        raise stripe.error.StripeError("Portal failed")
 
     monkeypatch.setattr(
         subscription_module.stripe.billing_portal.Session,
@@ -189,11 +190,10 @@ def portal_failure(monkeypatch):
 def cancel(monkeypatch, context):
     if context.error is None:
         # Do not overwrite the failure mock installed by the Given.
-        current = (
-            subscription_module.stripe.Subscription.modify
-        )
+        current = subscription_module.stripe.Subscription.modify
 
         if getattr(current, "__name__", "") != "fail":
+
             def modify(subscription_id, **kwargs):
                 context.modify_kwargs = {
                     "subscription_id": subscription_id,
@@ -236,20 +236,16 @@ def resume(monkeypatch, context):
 
 @when("the employer manages the payment method")
 def manage_payment(monkeypatch, context):
-    current = (
-        subscription_module.stripe.billing_portal.Session.create
-    )
+    current = subscription_module.stripe.billing_portal.Session.create
 
     if getattr(current, "__name__", "") != "fail":
+
         def create(**kwargs):
             context.portal_kwargs = kwargs
             return type(
                 "Portal",
                 (),
-                {
-                    "url":
-                    "https://billing.stripe.test/session"
-                },
+                {"url": "https://billing.stripe.test/session"},
             )()
 
         monkeypatch.setattr(
@@ -267,41 +263,26 @@ def manage_payment(monkeypatch, context):
 @then("Stripe should schedule cancellation at period end")
 def scheduled(context):
     assert context.modify_kwargs is not None
-    assert (
-        context.modify_kwargs["subscription_id"]
-        == "sub_test"
-    )
-    assert (
-        context.modify_kwargs["cancel_at_period_end"]
-        is True
-    )
+    assert context.modify_kwargs["subscription_id"] == "sub_test"
+    assert context.modify_kwargs["cancel_at_period_end"] is True
 
 
 @then("the cancellation flag should be saved")
 def flag_saved(context):
-    assert (
-        context.company["cancel_at_period_end"]
-        is True
-    )
+    assert context.company["cancel_at_period_end"] is True
 
 
 @then("the employer should be redirected to the credit page")
 def cancel_redirect(context):
     assert context.response.status_code == 303
-    assert (
-        context.response.headers["location"]
-        == "/employer-credit?cancel=scheduled"
-    )
+    assert context.response.headers["location"] == "/employer-credit?cancel=scheduled"
 
 
 @then("no active subscription error should be returned")
 def no_active_error(context):
     assert context.error is not None
     assert context.error.status_code == 400
-    assert (
-        context.error.detail
-        == "No active subscription found."
-    )
+    assert context.error.detail == "No active subscription found."
 
 
 @then("the Stripe cancellation error should be returned")
@@ -314,27 +295,18 @@ def cancel_error(context):
 @then("Stripe should remove scheduled cancellation")
 def remove_cancel(context):
     assert context.modify_kwargs is not None
-    assert (
-        context.modify_kwargs["cancel_at_period_end"]
-        is False
-    )
+    assert context.modify_kwargs["cancel_at_period_end"] is False
 
 
 @then("the cancellation flag should be cleared")
 def flag_cleared(context):
-    assert (
-        context.company["cancel_at_period_end"]
-        is False
-    )
+    assert context.company["cancel_at_period_end"] is False
 
 
 @then("the employer should be redirected after resuming")
 def resume_redirect(context):
     assert context.response.status_code == 303
-    assert (
-        context.response.headers["location"]
-        == "/employer-credit?subscription=resumed"
-    )
+    assert context.response.headers["location"] == "/employer-credit?subscription=resumed"
 
 
 @then("no subscription error should be returned")
@@ -350,15 +322,10 @@ def portal_created(context):
     assert context.portal_kwargs["customer"] == "cus_test"
 
 
-@then(
-    "the employer should be redirected to the Stripe billing portal"
-)
+@then("the employer should be redirected to the Stripe billing portal")
 def portal_redirect(context):
     assert context.response.status_code == 303
-    assert (
-        context.response.headers["location"]
-        == "https://billing.stripe.test/session"
-    )
+    assert context.response.headers["location"] == "https://billing.stripe.test/session"
 
 
 @then("Stripe customer not found should be returned")

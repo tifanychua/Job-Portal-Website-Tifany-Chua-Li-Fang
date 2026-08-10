@@ -85,10 +85,7 @@ def transaction_management(
 
                 company_name = company_data.get("companyName", "")
 
-                company_email = company_data.get(
-                    "businessEmail",
-                    ""
-                )
+                company_email = company_data.get("businessEmail", "")
 
         data["company_name"] = company_name
         data["company_email"] = company_email

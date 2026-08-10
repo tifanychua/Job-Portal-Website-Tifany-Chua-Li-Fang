@@ -8,15 +8,13 @@ import pytest
 from fastapi import HTTPException
 from pytest_bdd import given, scenarios, then, when
 
-
 # ============================================================
 # LOAD ACTUAL RECEIPT ROUTE WITHOUT REAL FIREBASE CONNECTION
 # ============================================================
 
+
 def load_receipt_module():
-    routes_dir = Path(
-        "src/job_portal_web/backend/routes"
-    )
+    routes_dir = Path("src/job_portal_web/backend/routes")
 
     for path in routes_dir.glob("*.py"):
         text = path.read_text(
@@ -35,10 +33,7 @@ def load_receipt_module():
             firestore_module.client = lambda: None
 
             try:
-                return importlib.import_module(
-                    "job_portal_web.backend.routes."
-                    + path.stem
-                )
+                return importlib.import_module("job_portal_web.backend.routes." + path.stem)
             finally:
                 firestore_module.client = original_client
 
@@ -49,38 +44,26 @@ def load_receipt_module():
             errors="ignore",
         )
 
-        if (
-            "def payment_receipt(" in text
-            and "def download_receipt(" in text
-        ):
+        if "def payment_receipt(" in text and "def download_receipt(" in text:
             import firebase_admin.firestore as firestore_module
 
             original_client = firestore_module.client
             firestore_module.client = lambda: None
 
             try:
-                return importlib.import_module(
-                    "job_portal_web.backend.routes."
-                    + path.stem
-                )
+                return importlib.import_module("job_portal_web.backend.routes." + path.stem)
             finally:
                 firestore_module.client = original_client
 
-    raise ImportError(
-        "Could not find the payment receipt route file."
-    )
+    raise ImportError("Could not find the payment receipt route file.")
 
 
 receipt_module = load_receipt_module()
 
-scenarios(
-    "features/paymentReceipt.feature"
-)
+scenarios("features/paymentReceipt.feature")
 
 
-COMPANY_ID = (
-    "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
-)
+COMPANY_ID = "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
 
 OTHER_COMPANY_ID = "OTHER-COMPANY"
 
@@ -90,6 +73,7 @@ ORDER_ID = "in_test_receipt"
 # ============================================================
 # FAKE FIRESTORE
 # ============================================================
+
 
 class FakeSnapshot:
 
@@ -118,11 +102,7 @@ class FakeDocument:
         self.document_id = document_id
 
     def get(self):
-        data = (
-            self.collection
-            .documents
-            .get(self.document_id)
-        )
+        data = self.collection.documents.get(self.document_id)
 
         if data is None:
             return FakeSnapshot(
@@ -144,11 +124,7 @@ class FakeCollection:
         self,
         documents=None,
     ):
-        self.documents = (
-            documents.copy()
-            if documents
-            else {}
-        )
+        self.documents = documents.copy() if documents else {}
 
     def document(
         self,
@@ -168,15 +144,8 @@ class FakeDB:
         payments=None,
     ):
         self.collections = {
-            "company":
-                FakeCollection(
-                    companies or {}
-                ),
-
-            "payment":
-                FakeCollection(
-                    payments or {}
-                ),
+            "company": FakeCollection(companies or {}),
+            "payment": FakeCollection(payments or {}),
         }
 
     def collection(
@@ -189,6 +158,7 @@ class FakeDB:
 # ============================================================
 # FAKE TEMPLATE / REQUEST
 # ============================================================
+
 
 class FakeTemplates:
 
@@ -208,17 +178,15 @@ class FakeRequest:
 
     def __init__(self):
         self.session = {
-            "user_type":
-                "employer",
-
-            "company_id":
-                COMPANY_ID,
+            "user_type": "employer",
+            "company_id": COMPANY_ID,
         }
 
 
 # ============================================================
 # BDD CONTEXT
 # ============================================================
+
 
 class Context:
 
@@ -237,12 +205,12 @@ def context():
 # DEFAULT DATA
 # ============================================================
 
+
 @pytest.fixture
 def companies():
     return {
         COMPANY_ID: {
-            "companyName":
-                "ABC Technology Sdn Bhd",
+            "companyName": "ABC Technology Sdn Bhd",
         }
     }
 
@@ -251,33 +219,20 @@ def companies():
 def payments():
     return {
         ORDER_ID: {
-            "company_id":
-                COMPANY_ID,
-
-            "package":
-                "Business Pack",
-
-            "credits":
+            "company_id": COMPANY_ID,
+            "package": "Business Pack",
+            "credits": 30,
+            "payment_method": "Card",
+            "status": "COMPLETED",
+            "amount": 129.00,
+            "completed_at": datetime(
+                2026,
+                8,
+                10,
+                9,
                 30,
-
-            "payment_method":
-                "Card",
-
-            "status":
-                "COMPLETED",
-
-            "amount":
-                129.00,
-
-            "completed_at":
-                datetime(
-                    2026,
-                    8,
-                    10,
-                    9,
-                    30,
-                    tzinfo=timezone.utc,
-                ),
+                tzinfo=timezone.utc,
+            ),
         }
     }
 
@@ -285,6 +240,7 @@ def payments():
 # ============================================================
 # INSTALL FAKE DB
 # ============================================================
+
 
 def install_fake_db(
     monkeypatch,
@@ -334,6 +290,7 @@ def setup_db(
 # HELPERS
 # ============================================================
 
+
 def open_receipt(
     order_id=ORDER_ID,
 ):
@@ -380,15 +337,13 @@ def capture_download_error(
 # DIRECT PYTEST TESTS
 # ============================================================
 
+
 def test_valid_receipt_page(
     setup_db,
 ):
     response = open_receipt()
 
-    assert (
-        response["template"]
-        == "paymentReceipt.html"
-    )
+    assert response["template"] == "paymentReceipt.html"
 
 
 def test_receipt_information(
@@ -400,35 +355,17 @@ def test_receipt_information(
 
     assert data["order_id"] == ORDER_ID
 
-    assert (
-        data["company"]["companyName"]
-        == "ABC Technology Sdn Bhd"
-    )
+    assert data["company"]["companyName"] == "ABC Technology Sdn Bhd"
 
-    assert (
-        data["payment"]["package"]
-        == "Business Pack"
-    )
+    assert data["payment"]["package"] == "Business Pack"
 
-    assert (
-        data["payment"]["credits"]
-        == 30
-    )
+    assert data["payment"]["credits"] == 30
 
-    assert (
-        data["payment"]["payment_method"]
-        == "Card"
-    )
+    assert data["payment"]["payment_method"] == "Card"
 
-    assert (
-        data["payment"]["status"]
-        == "COMPLETED"
-    )
+    assert data["payment"]["status"] == "COMPLETED"
 
-    assert (
-        data["payment"]["amount"]
-        == 129.00
-    )
+    assert data["payment"]["amount"] == 129.00
 
 
 def test_completed_date_formatted(
@@ -436,13 +373,7 @@ def test_completed_date_formatted(
 ):
     response = open_receipt()
 
-    assert (
-        response["context"]
-        ["payment"]
-        ["completed_at"]
-        ==
-        "10 Aug 2026, 09:30 AM"
-    )
+    assert response["context"]["payment"]["completed_at"] == "10 Aug 2026, 09:30 AM"
 
 
 def test_missing_payment_method_defaults_card(
@@ -451,20 +382,11 @@ def test_missing_payment_method_defaults_card(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                COMPANY_ID,
-
-            "package":
-                "Starter Pack",
-
-            "credits":
-                10,
-
-            "status":
-                "COMPLETED",
-
-            "amount":
-                49.00,
+            "company_id": COMPANY_ID,
+            "package": "Starter Pack",
+            "credits": 10,
+            "status": "COMPLETED",
+            "amount": 49.00,
         }
     }
 
@@ -476,12 +398,7 @@ def test_missing_payment_method_defaults_card(
 
     response = open_receipt()
 
-    assert (
-        response["context"]
-        ["payment"]
-        ["payment_method"]
-        == "Card"
-    )
+    assert response["context"]["payment"]["payment_method"] == "Card"
 
 
 def test_receipt_not_found(
@@ -494,16 +411,11 @@ def test_receipt_not_found(
         {},
     )
 
-    with pytest.raises(
-        HTTPException
-    ) as exc:
+    with pytest.raises(HTTPException) as exc:
         open_receipt()
 
     assert exc.value.status_code == 404
-    assert (
-        exc.value.detail
-        == "Receipt not found."
-    )
+    assert exc.value.detail == "Receipt not found."
 
 
 def test_other_company_cannot_view(
@@ -512,23 +424,12 @@ def test_other_company_cannot_view(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                OTHER_COMPANY_ID,
-
-            "package":
-                "Business Pack",
-
-            "credits":
-                30,
-
-            "payment_method":
-                "Card",
-
-            "status":
-                "COMPLETED",
-
-            "amount":
-                129.00,
+            "company_id": OTHER_COMPANY_ID,
+            "package": "Business Pack",
+            "credits": 30,
+            "payment_method": "Card",
+            "status": "COMPLETED",
+            "amount": 129.00,
         }
     }
 
@@ -538,9 +439,7 @@ def test_other_company_cannot_view(
         payments,
     )
 
-    with pytest.raises(
-        HTTPException
-    ) as exc:
+    with pytest.raises(HTTPException) as exc:
         open_receipt()
 
     assert exc.value.status_code == 403
@@ -561,23 +460,12 @@ def test_non_completed_receipt_rejected(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                COMPANY_ID,
-
-            "package":
-                "Business Pack",
-
-            "credits":
-                30,
-
-            "payment_method":
-                "Card",
-
-            "status":
-                status,
-
-            "amount":
-                129.00,
+            "company_id": COMPANY_ID,
+            "package": "Business Pack",
+            "credits": 30,
+            "payment_method": "Card",
+            "status": status,
+            "amount": 129.00,
         }
     }
 
@@ -587,19 +475,12 @@ def test_non_completed_receipt_rejected(
         payments,
     )
 
-    with pytest.raises(
-        HTTPException
-    ) as exc:
+    with pytest.raises(HTTPException) as exc:
         open_receipt()
 
     assert exc.value.status_code == 400
 
-    assert (
-        exc.value.detail
-        ==
-        "Receipt is only available "
-        "for completed payments."
-    )
+    assert exc.value.detail == "Receipt is only available " "for completed payments."
 
 
 def test_pdf_download(
@@ -607,28 +488,19 @@ def test_pdf_download(
 ):
     response = download_receipt()
 
-    assert (
-        response.media_type
-        == "application/pdf"
-    )
+    assert response.media_type == "application/pdf"
 
-    assert (
-        response.filename
-        == f"Receipt_{ORDER_ID}.pdf"
-    )
+    assert response.filename == f"Receipt_{ORDER_ID}.pdf"
 
-    assert os.path.exists(
-        response.path
-    )
+    assert os.path.exists(response.path)
 
 
 # ============================================================
 # BDD GIVEN
 # ============================================================
 
-@given(
-    "a completed card payment exists for the current company"
-)
+
+@given("a completed card payment exists for the current company")
 def completed_payment(
     setup_db,
     context,
@@ -636,9 +508,7 @@ def completed_payment(
     context.db = setup_db
 
 
-@given(
-    "a completed card payment has no completed date"
-)
+@given("a completed card payment has no completed date")
 def completed_without_date(
     monkeypatch,
     companies,
@@ -646,23 +516,12 @@ def completed_without_date(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                COMPANY_ID,
-
-            "package":
-                "Business Pack",
-
-            "credits":
-                30,
-
-            "payment_method":
-                "Card",
-
-            "status":
-                "COMPLETED",
-
-            "amount":
-                129.00,
+            "company_id": COMPANY_ID,
+            "package": "Business Pack",
+            "credits": 30,
+            "payment_method": "Card",
+            "status": "COMPLETED",
+            "amount": 129.00,
         }
     }
 
@@ -673,9 +532,7 @@ def completed_without_date(
     )
 
 
-@given(
-    "a completed payment has no payment method"
-)
+@given("a completed payment has no payment method")
 def payment_without_method(
     monkeypatch,
     companies,
@@ -683,20 +540,11 @@ def payment_without_method(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                COMPANY_ID,
-
-            "package":
-                "Starter Pack",
-
-            "credits":
-                10,
-
-            "status":
-                "COMPLETED",
-
-            "amount":
-                49.00,
+            "company_id": COMPANY_ID,
+            "package": "Starter Pack",
+            "credits": 10,
+            "status": "COMPLETED",
+            "amount": 49.00,
         }
     }
 
@@ -707,9 +555,7 @@ def payment_without_method(
     )
 
 
-@given(
-    "the requested receipt does not exist"
-)
+@given("the requested receipt does not exist")
 def receipt_missing(
     monkeypatch,
     companies,
@@ -722,9 +568,7 @@ def receipt_missing(
     )
 
 
-@given(
-    "a completed payment belongs to another company"
-)
+@given("a completed payment belongs to another company")
 def other_company_payment(
     monkeypatch,
     companies,
@@ -732,23 +576,12 @@ def other_company_payment(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                OTHER_COMPANY_ID,
-
-            "package":
-                "Business Pack",
-
-            "credits":
-                30,
-
-            "payment_method":
-                "Card",
-
-            "status":
-                "COMPLETED",
-
-            "amount":
-                129.00,
+            "company_id": OTHER_COMPANY_ID,
+            "package": "Business Pack",
+            "credits": 30,
+            "payment_method": "Card",
+            "status": "COMPLETED",
+            "amount": 129.00,
         }
     }
 
@@ -759,9 +592,7 @@ def other_company_payment(
     )
 
 
-@given(
-    "a pending card payment exists for the current company"
-)
+@given("a pending card payment exists for the current company")
 def pending_payment(
     monkeypatch,
     companies,
@@ -769,23 +600,12 @@ def pending_payment(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                COMPANY_ID,
-
-            "package":
-                "Business Pack",
-
-            "credits":
-                30,
-
-            "payment_method":
-                "Card",
-
-            "status":
-                "PENDING",
-
-            "amount":
-                129.00,
+            "company_id": COMPANY_ID,
+            "package": "Business Pack",
+            "credits": 30,
+            "payment_method": "Card",
+            "status": "PENDING",
+            "amount": 129.00,
         }
     }
 
@@ -796,9 +616,7 @@ def pending_payment(
     )
 
 
-@given(
-    "a failed card payment exists for the current company"
-)
+@given("a failed card payment exists for the current company")
 def failed_payment(
     monkeypatch,
     companies,
@@ -806,23 +624,12 @@ def failed_payment(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                COMPANY_ID,
-
-            "package":
-                "Business Pack",
-
-            "credits":
-                30,
-
-            "payment_method":
-                "Card",
-
-            "status":
-                "FAILED",
-
-            "amount":
-                129.00,
+            "company_id": COMPANY_ID,
+            "package": "Business Pack",
+            "credits": 30,
+            "payment_method": "Card",
+            "status": "FAILED",
+            "amount": 129.00,
         }
     }
 
@@ -833,18 +640,12 @@ def failed_payment(
     )
 
 
-@given(
-    "the current company record does not exist"
-)
+@given("the current company record does not exist")
 def company_record_missing(
     monkeypatch,
     context,
 ):
-    payments = (
-        context.db.collection(
-            "payment"
-        ).documents.copy()
-    )
+    payments = context.db.collection("payment").documents.copy()
 
     context.db = install_fake_db(
         monkeypatch,
@@ -853,9 +654,7 @@ def company_record_missing(
     )
 
 
-@given(
-    "a completed card payment has no package"
-)
+@given("a completed card payment has no package")
 def no_package(
     monkeypatch,
     companies,
@@ -863,20 +662,11 @@ def no_package(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                COMPANY_ID,
-
-            "credits":
-                30,
-
-            "payment_method":
-                "Card",
-
-            "status":
-                "COMPLETED",
-
-            "amount":
-                129.00,
+            "company_id": COMPANY_ID,
+            "credits": 30,
+            "payment_method": "Card",
+            "status": "COMPLETED",
+            "amount": 129.00,
         }
     }
 
@@ -887,9 +677,7 @@ def no_package(
     )
 
 
-@given(
-    "a completed card payment has no amount"
-)
+@given("a completed card payment has no amount")
 def no_amount(
     monkeypatch,
     companies,
@@ -897,20 +685,11 @@ def no_amount(
 ):
     payments = {
         ORDER_ID: {
-            "company_id":
-                COMPANY_ID,
-
-            "package":
-                "Business Pack",
-
-            "credits":
-                30,
-
-            "payment_method":
-                "Card",
-
-            "status":
-                "COMPLETED",
+            "company_id": COMPANY_ID,
+            "package": "Business Pack",
+            "credits": 30,
+            "payment_method": "Card",
+            "status": "COMPLETED",
         }
     }
 
@@ -925,60 +704,45 @@ def no_amount(
 # BDD WHEN
 # ============================================================
 
-@when(
-    "the employer opens the payment receipt"
-)
+
+@when("the employer opens the payment receipt")
 def open_payment_receipt(
     context,
 ):
     context.response = open_receipt()
 
 
-@when(
-    "the employer opens the payment receipt expecting an error"
-)
+@when("the employer opens the payment receipt expecting an error")
 def open_payment_receipt_error(
     context,
 ):
-    capture_open_error(
-        context
-    )
+    capture_open_error(context)
 
 
-@when(
-    "the employer downloads the payment receipt"
-)
+@when("the employer downloads the payment receipt")
 def download_payment_receipt(
     context,
 ):
     context.response = download_receipt()
 
 
-@when(
-    "the employer downloads the payment receipt expecting an error"
-)
+@when("the employer downloads the payment receipt expecting an error")
 def download_payment_receipt_error(
     context,
 ):
-    capture_download_error(
-        context
-    )
+    capture_download_error(context)
 
 
 # ============================================================
 # BDD THEN
 # ============================================================
 
-@then(
-    "the payment receipt page should be displayed"
-)
+
+@then("the payment receipt page should be displayed")
 def receipt_page_displayed(
     context,
 ):
-    assert (
-        context.response["template"]
-        == "paymentReceipt.html"
-    )
+    assert context.response["template"] == "paymentReceipt.html"
 
 
 @then(
@@ -989,10 +753,7 @@ def receipt_information(
 ):
     data = context.response["context"]
 
-    assert (
-        data["company"]["companyName"]
-        == "ABC Technology Sdn Bhd"
-    )
+    assert data["company"]["companyName"] == "ABC Technology Sdn Bhd"
 
     payment = data["payment"]
 
@@ -1003,79 +764,44 @@ def receipt_information(
     assert payment["amount"] == 129.00
 
 
-@then(
-    "the receipt number should match the payment ID"
-)
+@then("the receipt number should match the payment ID")
 def receipt_number(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["order_id"]
-        == ORDER_ID
-    )
+    assert context.response["context"]["order_id"] == ORDER_ID
 
 
-@then(
-    "the purchase date should be formatted correctly"
-)
+@then("the purchase date should be formatted correctly")
 def purchase_date(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["payment"]
-        ["completed_at"]
-        ==
-        "10 Aug 2026, 09:30 AM"
-    )
+    assert context.response["context"]["payment"]["completed_at"] == "10 Aug 2026, 09:30 AM"
 
 
-@then(
-    "the purchase date should be represented with a dash"
-)
+@then("the purchase date should be represented with a dash")
 def missing_date_dash(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["payment"]
-        ["completed_at"]
-        == "-"
-    )
+    assert context.response["context"]["payment"]["completed_at"] == "-"
 
 
-@then(
-    "the payment method should default to Card"
-)
+@then("the payment method should default to Card")
 def default_card(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["payment"]
-        ["payment_method"]
-        == "Card"
-    )
+    assert context.response["context"]["payment"]["payment_method"] == "Card"
 
 
-@then(
-    "receipt not found should be returned"
-)
+@then("receipt not found should be returned")
 def receipt_not_found(
     context,
 ):
     assert context.error is not None
     assert context.error.status_code == 404
-    assert (
-        context.error.detail
-        == "Receipt not found."
-    )
+    assert context.error.detail == "Receipt not found."
 
 
-@then(
-    "receipt access should be denied"
-)
+@then("receipt access should be denied")
 def access_denied(
     context,
 ):
@@ -1084,85 +810,52 @@ def access_denied(
     assert context.error.detail == "Access denied."
 
 
-@then(
-    "completed payment receipt should be required"
-)
+@then("completed payment receipt should be required")
 def completed_required(
     context,
 ):
     assert context.error is not None
     assert context.error.status_code == 400
-    assert (
-        context.error.detail
-        ==
-        "Receipt is only available "
-        "for completed payments."
-    )
+    assert context.error.detail == "Receipt is only available " "for completed payments."
 
 
-@then(
-    "company not found should be returned"
-)
+@then("company not found should be returned")
 def company_not_found(
     context,
 ):
     assert context.error is not None
     assert context.error.status_code == 404
-    assert (
-        context.error.detail
-        == "Company not found."
-    )
+    assert context.error.detail == "Company not found."
 
 
-@then(
-    "the system should return a PDF receipt"
-)
+@then("the system should return a PDF receipt")
 def valid_pdf(
     context,
 ):
     assert context.response is not None
-    assert os.path.exists(
-        context.response.path
-    )
+    assert os.path.exists(context.response.path)
 
 
-@then(
-    "the downloaded receipt filename should contain the receipt number"
-)
+@then("the downloaded receipt filename should contain the receipt number")
 def pdf_filename(
     context,
 ):
-    assert (
-        context.response.filename
-        == f"Receipt_{ORDER_ID}.pdf"
-    )
+    assert context.response.filename == f"Receipt_{ORDER_ID}.pdf"
 
 
-@then(
-    "the downloaded receipt content type should be application pdf"
-)
+@then("the downloaded receipt content type should be application pdf")
 def pdf_content_type(
     context,
 ):
-    assert (
-        context.response.media_type
-        == "application/pdf"
-    )
+    assert context.response.media_type == "application/pdf"
 
 
-@then(
-    "the PDF receipt should still be generated successfully"
-)
+@then("the PDF receipt should still be generated successfully")
 def pdf_generated_safely(
     context,
 ):
     assert context.response is not None
 
-    assert (
-        context.response.media_type
-        == "application/pdf"
-    )
+    assert context.response.media_type == "application/pdf"
 
-    assert os.path.exists(
-        context.response.path
-    )
+    assert os.path.exists(context.response.path)

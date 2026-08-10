@@ -29,40 +29,25 @@ def load_stripe_module():
 
     if not matches:
         raise ImportError(
-            "Could not find the Stripe route module in "
-            "src/job_portal_web/backend/routes."
+            "Could not find the Stripe route module in " "src/job_portal_web/backend/routes."
         )
 
-    module_name = (
-        "job_portal_web.backend.routes."
-        + matches[0].stem
-    )
+    module_name = "job_portal_web.backend.routes." + matches[0].stem
 
-    fake_database = types.ModuleType(
-        "job_portal_web.backend.database"
-    )
+    fake_database = types.ModuleType("job_portal_web.backend.database")
     fake_database.db = None
 
-    original_database = sys.modules.get(
-        "job_portal_web.backend.database"
-    )
+    original_database = sys.modules.get("job_portal_web.backend.database")
 
-    sys.modules[
-        "job_portal_web.backend.database"
-    ] = fake_database
+    sys.modules["job_portal_web.backend.database"] = fake_database
 
     try:
         return importlib.import_module(module_name)
     finally:
         if original_database is not None:
-            sys.modules[
-                "job_portal_web.backend.database"
-            ] = original_database
+            sys.modules["job_portal_web.backend.database"] = original_database
         else:
-            sys.modules.pop(
-                "job_portal_web.backend.database",
-                None
-            )
+            sys.modules.pop("job_portal_web.backend.database", None)
 
 
 stripe_module = load_stripe_module()
@@ -101,9 +86,7 @@ class FakeDocumentReference:
         self.document_id = document_id
 
     def get(self):
-        data = self.collection.documents.get(
-            self.document_id
-        )
+        data = self.collection.documents.get(self.document_id)
 
         return FakeDocumentSnapshot(
             self.document_id,
@@ -117,11 +100,7 @@ class FakeCollection:
         self,
         documents=None,
     ):
-        self.documents = (
-            documents.copy()
-            if documents
-            else {}
-        )
+        self.documents = documents.copy() if documents else {}
 
     def document(self, document_id):
         return FakeDocumentReference(
@@ -137,12 +116,8 @@ class FakeDB:
         payments=None,
     ):
         self.collections = {
-            "company": FakeCollection(
-                companies or {}
-            ),
-            "payment": FakeCollection(
-                payments or {}
-            ),
+            "company": FakeCollection(companies or {}),
+            "payment": FakeCollection(payments or {}),
         }
 
     def collection(self, name):
@@ -213,10 +188,8 @@ def company_data(
 ):
     return {
         COMPANY_ID: {
-            "companyName":
-                "ABC Technology Sdn Bhd",
-            "stripe_customer_id":
-                customer_id,
+            "companyName": "ABC Technology Sdn Bhd",
+            "stripe_customer_id": customer_id,
         }
     }
 
@@ -224,11 +197,7 @@ def company_data(
 def subscription_object(
     plan_name="business",
 ):
-    return SimpleNamespace(
-        metadata={
-            "plan": plan_name
-        }
-    )
+    return SimpleNamespace(metadata={"plan": plan_name})
 
 
 def invoice_object(
@@ -249,16 +218,8 @@ def checkout_session(
 ):
     return SimpleNamespace(
         customer=customer_id,
-        subscription=(
-            subscription
-            if subscription is not None
-            else subscription_object()
-        ),
-        invoice=(
-            invoice
-            if invoice is not None
-            else invoice_object()
-        ),
+        subscription=(subscription if subscription is not None else subscription_object()),
+        invoice=(invoice if invoice is not None else invoice_object()),
         payment_status=payment_status,
     )
 
@@ -282,6 +243,7 @@ def open_success_error(context):
 # ============================================================
 # NORMAL PYTEST TESTS
 # ============================================================
+
 
 def test_saved_firestore_payment_is_used(
     monkeypatch,
@@ -313,25 +275,18 @@ def test_saved_firestore_payment_is_used(
     monkeypatch.setattr(
         stripe_module.stripe.checkout.Session,
         "retrieve",
-        lambda *args, **kwargs:
-            checkout_session(),
+        lambda *args, **kwargs: checkout_session(),
     )
 
     response = open_success()
 
-    assert (
-        response["template"]
-        == "paymentSuccess.html"
-    )
+    assert response["template"] == "paymentSuccess.html"
 
     payment = response["context"]["payment"]
 
     assert payment["package"] == "Business Pack"
     assert payment["status"] == "COMPLETED"
-    assert (
-        payment["completed_at"]
-        == "10 Aug 2026, 09:30 AM"
-    )
+    assert payment["completed_at"] == "10 Aug 2026, 09:30 AM"
 
 
 def test_fallback_payment_uses_card(
@@ -346,8 +301,7 @@ def test_fallback_payment_uses_card(
     monkeypatch.setattr(
         stripe_module.stripe.checkout.Session,
         "retrieve",
-        lambda *args, **kwargs:
-            checkout_session(),
+        lambda *args, **kwargs: checkout_session(),
     )
 
     response = open_success()
@@ -366,19 +320,14 @@ def test_customer_mismatch_is_forbidden(
 ):
     install_db(
         monkeypatch,
-        companies=company_data(
-            customer_id="cus_other"
-        ),
+        companies=company_data(customer_id="cus_other"),
         payments={},
     )
 
     monkeypatch.setattr(
         stripe_module.stripe.checkout.Session,
         "retrieve",
-        lambda *args, **kwargs:
-            checkout_session(
-                customer_id=CUSTOMER_ID
-            ),
+        lambda *args, **kwargs: checkout_session(customer_id=CUSTOMER_ID),
     )
 
     with pytest.raises(HTTPException) as exc:
@@ -400,8 +349,7 @@ def test_missing_company_is_404(
     monkeypatch.setattr(
         stripe_module.stripe.checkout.Session,
         "retrieve",
-        lambda *args, **kwargs:
-            checkout_session(),
+        lambda *args, **kwargs: checkout_session(),
     )
 
     with pytest.raises(HTTPException) as exc:
@@ -414,9 +362,8 @@ def test_missing_company_is_404(
 # BDD GIVEN
 # ============================================================
 
-@given(
-    "the current company exists with the matching Stripe customer"
-)
+
+@given("the current company exists with the matching Stripe customer")
 def matching_company(
     monkeypatch,
     context,
@@ -428,25 +375,19 @@ def matching_company(
     )
 
 
-@given(
-    "the current company exists with a different Stripe customer"
-)
+@given("the current company exists with a different Stripe customer")
 def different_customer_company(
     monkeypatch,
     context,
 ):
     context.db = install_db(
         monkeypatch,
-        companies=company_data(
-            customer_id="cus_other"
-        ),
+        companies=company_data(customer_id="cus_other"),
         payments={},
     )
 
 
-@given(
-    "the current company does not exist"
-)
+@given("the current company does not exist")
 def missing_company(
     monkeypatch,
     context,
@@ -468,14 +409,11 @@ def install_checkout_session(
     monkeypatch.setattr(
         stripe_module.stripe.checkout.Session,
         "retrieve",
-        lambda *args, **kwargs:
-            session,
+        lambda *args, **kwargs: session,
     )
 
 
-@given(
-    "Stripe returns a valid checkout session"
-)
+@given("Stripe returns a valid checkout session")
 def valid_checkout(
     monkeypatch,
     context,
@@ -487,9 +425,7 @@ def valid_checkout(
     )
 
 
-@given(
-    "Stripe returns a valid checkout session with an amount paid"
-)
+@given("Stripe returns a valid checkout session with an amount paid")
 def checkout_with_amount(
     monkeypatch,
     context,
@@ -497,24 +433,16 @@ def checkout_with_amount(
     install_checkout_session(
         monkeypatch,
         context,
-        checkout_session(
-            invoice=invoice_object(
-                amount_paid=12950
-            )
-        ),
+        checkout_session(invoice=invoice_object(amount_paid=12950)),
     )
 
 
-@given(
-    "Stripe returns a session containing a subscription ID"
-)
+@given("Stripe returns a session containing a subscription ID")
 def checkout_with_subscription_id(
     monkeypatch,
     context,
 ):
-    session = checkout_session(
-        subscription="sub_string"
-    )
+    session = checkout_session(subscription="sub_string")
 
     install_checkout_session(
         monkeypatch,
@@ -525,16 +453,11 @@ def checkout_with_subscription_id(
     monkeypatch.setattr(
         stripe_module.stripe.Subscription,
         "retrieve",
-        lambda subscription_id:
-            subscription_object(
-                "business"
-            ),
+        lambda subscription_id: subscription_object("business"),
     )
 
 
-@given(
-    "Stripe returns a valid checkout session without invoice"
-)
+@given("Stripe returns a valid checkout session without invoice")
 def checkout_without_invoice(
     monkeypatch,
     context,
@@ -553,15 +476,11 @@ def checkout_without_invoice(
     )
 
 
-@given(
-    "a completed Firestore payment exists"
-)
+@given("a completed Firestore payment exists")
 def completed_payment(
     context,
 ):
-    context.db.collection(
-        "payment"
-    ).documents[INVOICE_ID] = {
+    context.db.collection("payment").documents[INVOICE_ID] = {
         "package": "Business Pack",
         "credits": 30,
         "amount": 129.00,
@@ -570,15 +489,11 @@ def completed_payment(
     }
 
 
-@given(
-    "a Firestore payment with completed date exists"
-)
+@given("a Firestore payment with completed date exists")
 def payment_with_date(
     context,
 ):
-    context.db.collection(
-        "payment"
-    ).documents[INVOICE_ID] = {
+    context.db.collection("payment").documents[INVOICE_ID] = {
         "package": "Business Pack",
         "credits": 30,
         "amount": 129.00,
@@ -595,18 +510,12 @@ def payment_with_date(
     }
 
 
-@given(
-    "no Firestore payment exists"
-)
+@given("no Firestore payment exists")
 def no_firestore_payment(context):
-    context.db.collection(
-        "payment"
-    ).documents.clear()
+    context.db.collection("payment").documents.clear()
 
 
-@given(
-    "Stripe checkout session retrieval fails"
-)
+@given("Stripe checkout session retrieval fails")
 def checkout_retrieval_fails(
     monkeypatch,
     context,
@@ -620,9 +529,7 @@ def checkout_retrieval_fails(
     )
 
     def fail(*args, **kwargs):
-        raise stripe.error.StripeError(
-            "Stripe unavailable"
-        )
+        raise stripe.error.StripeError("Stripe unavailable")
 
     monkeypatch.setattr(
         stripe_module.stripe.checkout.Session,
@@ -635,16 +542,13 @@ def checkout_retrieval_fails(
 # BDD WHEN
 # ============================================================
 
-@when(
-    "the employer opens the payment success page"
-)
+
+@when("the employer opens the payment success page")
 def open_payment_success(context):
     context.response = open_success()
 
 
-@when(
-    "the employer opens the payment success page expecting an error"
-)
+@when("the employer opens the payment success page expecting an error")
 def open_payment_success_error(context):
     open_success_error(context)
 
@@ -653,35 +557,23 @@ def open_payment_success_error(context):
 # BDD THEN
 # ============================================================
 
-@then(
-    "the payment success page should be displayed"
-)
+
+@then("the payment success page should be displayed")
 def verify_page(context):
-    assert (
-        context.response["template"]
-        == "paymentSuccess.html"
-    )
+    assert context.response["template"] == "paymentSuccess.html"
 
 
-@then(
-    "the saved Firestore payment should be used"
-)
+@then("the saved Firestore payment should be used")
 def verify_saved_payment(context):
-    payment = context.response[
-        "context"
-    ]["payment"]
+    payment = context.response["context"]["payment"]
 
     assert payment["package"] == "Business Pack"
     assert payment["status"] == "COMPLETED"
 
 
-@then(
-    "a fallback card payment should be displayed"
-)
+@then("a fallback card payment should be displayed")
 def verify_fallback(context):
-    payment = context.response[
-        "context"
-    ]["payment"]
+    payment = context.response["context"]["payment"]
 
     assert payment["package"] == "Business Pack"
     assert payment["credits"] == 30
@@ -689,72 +581,44 @@ def verify_fallback(context):
     assert payment["status"] == "PAID"
 
 
-@then(
-    "the fallback payment amount should be converted from cents"
-)
+@then("the fallback payment amount should be converted from cents")
 def verify_amount(context):
-    assert (
-        context.response["context"]
-        ["payment"]["amount"]
-        == 129.50
-    )
+    assert context.response["context"]["payment"]["amount"] == 129.50
 
 
-@then(
-    "the completed payment date should be formatted for display"
-)
+@then("the completed payment date should be formatted for display")
 def verify_date(context):
-    assert (
-        context.response["context"]
-        ["payment"]["completed_at"]
-        == "10 Aug 2026, 09:30 AM"
-    )
+    assert context.response["context"]["payment"]["completed_at"] == "10 Aug 2026, 09:30 AM"
 
 
-@then(
-    "access to the payment success page should be denied"
-)
+@then("access to the payment success page should be denied")
 def verify_forbidden(context):
     assert context.error is not None
     assert context.error.status_code == 403
     assert context.error.detail == "Access denied"
 
 
-@then(
-    "company not found should be returned"
-)
+@then("company not found should be returned")
 def verify_missing_company(context):
     assert context.error is not None
     assert context.error.status_code == 404
     assert context.error.detail == "Company not found"
 
 
-@then(
-    "a Stripe payment success error should be returned"
-)
+@then("a Stripe payment success error should be returned")
 def verify_stripe_error(context):
     assert context.error is not None
     assert context.error.status_code == 400
 
 
-@then(
-    "the subscription should be retrieved and the plan should be displayed"
-)
+@then("the subscription should be retrieved and the plan should be displayed")
 def verify_subscription_retrieval(context):
-    payment = context.response[
-        "context"
-    ]["payment"]
+    payment = context.response["context"]["payment"]
 
     assert payment["package"] == "Business Pack"
     assert payment["credits"] == 30
 
 
-@then(
-    "the order ID should use the session ID"
-)
+@then("the order ID should use the session ID")
 def verify_order_id_fallback(context):
-    assert (
-        context.response["context"]
-        ["order_id"]
-        == SESSION_ID
-    )
+    assert context.response["context"]["order_id"] == SESSION_ID

@@ -6,10 +6,10 @@ import pytest
 from fastapi import HTTPException
 from pytest_bdd import given, scenarios, then, when
 
-
 # ============================================================
 # LOAD ACTUAL ROUTE WITHOUT REAL FIREBASE CONNECTION
 # ============================================================
+
 
 def load_transaction_module():
     routes_dir = Path("src/job_portal_web/backend/routes")
@@ -27,16 +27,11 @@ def load_transaction_module():
             firestore_module.client = lambda: None
 
             try:
-                return importlib.import_module(
-                    "job_portal_web.backend.routes."
-                    + path.stem
-                )
+                return importlib.import_module("job_portal_web.backend.routes." + path.stem)
             finally:
                 firestore_module.client = original_client
 
-    raise ImportError(
-        "Could not find the employer transaction route file."
-    )
+    raise ImportError("Could not find the employer transaction route file.")
 
 
 transaction_module = load_transaction_module()
@@ -46,14 +41,13 @@ scenarios("features/viewEmployerTransactions.feature")
 
 COMPANY_ID = "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
 
-TEMPLATE_PATH = Path(
-    "src/job_portal_web/ui/employerTransactions.html"
-)
+TEMPLATE_PATH = Path("src/job_portal_web/ui/employerTransactions.html")
 
 
 # ============================================================
 # FAKE FIRESTORE
 # ============================================================
+
 
 class FakeSnapshot:
 
@@ -82,9 +76,7 @@ class FakeDocument:
         self.document_id = document_id
 
     def get(self):
-        data = self.collection.documents.get(
-            self.document_id
-        )
+        data = self.collection.documents.get(self.document_id)
 
         if data is None:
             return FakeSnapshot(
@@ -127,7 +119,8 @@ class FakeQuery:
 
         return FakeQuery(
             self.documents,
-            self.filters + [
+            self.filters
+            + [
                 (
                     field,
                     operator,
@@ -139,9 +132,7 @@ class FakeQuery:
     def stream(self):
         result = []
 
-        for document_id, data in (
-            self.documents.items()
-        ):
+        for document_id, data in self.documents.items():
             matched = True
 
             for (
@@ -150,11 +141,7 @@ class FakeQuery:
                 expected,
             ) in self.filters:
 
-                if (
-                    operator == "=="
-                    and data.get(field)
-                    != expected
-                ):
+                if operator == "==" and data.get(field) != expected:
                     matched = False
                     break
 
@@ -176,11 +163,7 @@ class FakeCollection:
         self,
         documents=None,
     ):
-        self.documents = (
-            documents.copy()
-            if documents
-            else {}
-        )
+        self.documents = documents.copy() if documents else {}
 
     def document(
         self,
@@ -196,9 +179,7 @@ class FakeCollection:
         *args,
         **kwargs,
     ):
-        return FakeQuery(
-            self.documents
-        ).where(
+        return FakeQuery(self.documents).where(
             *args,
             **kwargs,
         )
@@ -212,12 +193,8 @@ class FakeDB:
         payments=None,
     ):
         self.collections = {
-            "company": FakeCollection(
-                companies or {}
-            ),
-            "payment": FakeCollection(
-                payments or {}
-            ),
+            "company": FakeCollection(companies or {}),
+            "payment": FakeCollection(payments or {}),
         }
 
     def collection(
@@ -230,6 +207,7 @@ class FakeDB:
 # ============================================================
 # FAKE TEMPLATE / REQUEST
 # ============================================================
+
 
 class FakeTemplates:
 
@@ -258,6 +236,7 @@ class FakeRequest:
 # CONTEXT
 # ============================================================
 
+
 class Context:
 
     def __init__(self):
@@ -275,12 +254,12 @@ def context():
 # DEFAULT TEST DATA
 # ============================================================
 
+
 @pytest.fixture
 def companies():
     return {
         COMPANY_ID: {
-            "companyName":
-                "ABC Technology Sdn Bhd",
+            "companyName": "ABC Technology Sdn Bhd",
         }
     }
 
@@ -314,7 +293,6 @@ def payments():
                 tzinfo=timezone.utc,
             ),
         },
-
         "TXN002": {
             "company_id": COMPANY_ID,
             "package": "Business Pack",
@@ -332,7 +310,6 @@ def payments():
                 tzinfo=timezone.utc,
             ),
         },
-
         "TXN003": {
             "company_id": COMPANY_ID,
             "package": "Enterprise Pack",
@@ -350,7 +327,6 @@ def payments():
                 tzinfo=timezone.utc,
             ),
         },
-
         "OTHER001": {
             "company_id": "OTHER-COMPANY",
             "package": "Enterprise Pack",
@@ -372,6 +348,7 @@ def payments():
 # ============================================================
 # INSTALL FAKE DB
 # ============================================================
+
 
 def install_fake_db(
     monkeypatch,
@@ -421,6 +398,7 @@ def setup_db(
 # HELPERS
 # ============================================================
 
+
 def open_transactions(
     page=1,
     status="",
@@ -441,9 +419,7 @@ def create_payments(count):
         1,
         count + 1,
     ):
-        result[
-            f"TXN{number:03d}"
-        ] = {
+        result[f"TXN{number:03d}"] = {
             "company_id": COMPANY_ID,
             "package": "Starter Pack",
             "payment_method": "Card",
@@ -464,24 +440,20 @@ def create_payments(count):
 
 
 def read_template():
-    return TEMPLATE_PATH.read_text(
-        encoding="utf-8"
-    )
+    return TEMPLATE_PATH.read_text(encoding="utf-8")
 
 
 # ============================================================
 # DIRECT PYTEST TESTS
 # ============================================================
 
+
 def test_transaction_page(
     setup_db,
 ):
     response = open_transactions()
 
-    assert (
-        response["template"]
-        == "employerTransactions.html"
-    )
+    assert response["template"] == "employerTransactions.html"
 
 
 def test_only_current_company_transactions(
@@ -489,11 +461,7 @@ def test_only_current_company_transactions(
 ):
     response = open_transactions()
 
-    ids = {
-        item["transaction_id"]
-        for item
-        in response["context"]["transactions"]
-    }
+    ids = {item["transaction_id"] for item in response["context"]["transactions"]}
 
     assert ids == {
         "TXN001",
@@ -533,15 +501,9 @@ def test_search(
     keyword,
     expected,
 ):
-    response = open_transactions(
-        keyword=keyword
-    )
+    response = open_transactions(keyword=keyword)
 
-    assert (
-        response["context"]
-        ["total_transactions"]
-        == expected
-    )
+    assert response["context"]["total_transactions"] == expected
 
 
 @pytest.mark.parametrize(
@@ -562,15 +524,9 @@ def test_status_filter(
     status,
     expected,
 ):
-    response = open_transactions(
-        status=status
-    )
+    response = open_transactions(status=status)
 
-    assert (
-        response["context"]
-        ["total_transactions"]
-        == expected
-    )
+    assert response["context"]["total_transactions"] == expected
 
 
 def test_search_and_filter(
@@ -581,31 +537,17 @@ def test_search_and_filter(
         status="COMPLETED",
     )
 
-    assert (
-        response["context"]
-        ["total_transactions"]
-        == 1
-    )
+    assert response["context"]["total_transactions"] == 1
 
-    assert (
-        response["context"]
-        ["transactions"][0]
-        ["transaction_id"]
-        == "TXN001"
-    )
+    assert response["context"]["transactions"][0]["transaction_id"] == "TXN001"
 
 
 def test_completed_date_priority(
     setup_db,
 ):
-    response = open_transactions(
-        keyword="TXN001"
-    )
+    response = open_transactions(keyword="TXN001")
 
-    transaction = (
-        response["context"]
-        ["transactions"][0]
-    )
+    transaction = response["context"]["transactions"][0]
 
     assert transaction["date"] == "10 Jan 2026"
     assert transaction["time"] == "11:30 AM"
@@ -614,14 +556,9 @@ def test_completed_date_priority(
 def test_created_date_fallback(
     setup_db,
 ):
-    response = open_transactions(
-        keyword="TXN002"
-    )
+    response = open_transactions(keyword="TXN002")
 
-    transaction = (
-        response["context"]
-        ["transactions"][0]
-    )
+    transaction = response["context"]["transactions"][0]
 
     assert transaction["date"] == "15 Feb 2026"
     assert transaction["time"] == "12:00 PM"
@@ -630,20 +567,11 @@ def test_created_date_fallback(
 def test_newest_first(
     setup_db,
 ):
-    transactions = (
-        open_transactions()
-        ["context"]["transactions"]
-    )
+    transactions = open_transactions()["context"]["transactions"]
 
-    assert (
-        transactions[0]["transaction_id"]
-        == "TXN003"
-    )
+    assert transactions[0]["transaction_id"] == "TXN003"
 
-    assert (
-        transactions[-1]["transaction_id"]
-        == "TXN001"
-    )
+    assert transactions[-1]["transaction_id"] == "TXN001"
 
 
 def test_21_transactions_two_pages(
@@ -658,19 +586,9 @@ def test_21_transactions_two_pages(
 
     response = open_transactions()
 
-    assert (
-        response["context"]
-        ["total_pages"]
-        == 2
-    )
+    assert response["context"]["total_pages"] == 2
 
-    assert (
-        len(
-            response["context"]
-            ["transactions"]
-        )
-        == 20
-    )
+    assert len(response["context"]["transactions"]) == 20
 
 
 def test_page_two_remaining_records(
@@ -683,23 +601,11 @@ def test_page_two_remaining_records(
         create_payments(25),
     )
 
-    response = open_transactions(
-        page=2
-    )
+    response = open_transactions(page=2)
 
-    assert (
-        len(
-            response["context"]
-            ["transactions"]
-        )
-        == 5
-    )
+    assert len(response["context"]["transactions"]) == 5
 
-    assert (
-        response["context"]
-        ["current_page"]
-        == 2
-    )
+    assert response["context"]["current_page"] == 2
 
 
 def test_page_boundaries(
@@ -712,23 +618,11 @@ def test_page_boundaries(
         create_payments(25),
     )
 
-    assert (
-        open_transactions(page=0)
-        ["context"]["current_page"]
-        == 1
-    )
+    assert open_transactions(page=0)["context"]["current_page"] == 1
 
-    assert (
-        open_transactions(page=-10)
-        ["context"]["current_page"]
-        == 1
-    )
+    assert open_transactions(page=-10)["context"]["current_page"] == 1
 
-    assert (
-        open_transactions(page=999)
-        ["context"]["current_page"]
-        == 2
-    )
+    assert open_transactions(page=999)["context"]["current_page"] == 2
 
 
 def test_missing_company(
@@ -741,9 +635,7 @@ def test_missing_company(
         payments,
     )
 
-    with pytest.raises(
-        HTTPException
-    ) as exc:
+    with pytest.raises(HTTPException) as exc:
         open_transactions()
 
     assert exc.value.status_code == 404
@@ -754,6 +646,7 @@ def test_missing_company(
 # BDD GIVEN
 # ============================================================
 
+
 @given("an employer company exists")
 def employer_company_exists(
     setup_db,
@@ -761,54 +654,42 @@ def employer_company_exists(
     pass
 
 
-@given(
-    "payments belonging to different companies exist"
-)
+@given("payments belonging to different companies exist")
 def different_company_payments(
     setup_db,
 ):
     pass
 
 
-@given(
-    "an employer company has payment transactions"
-)
+@given("an employer company has payment transactions")
 def employer_has_transactions(
     setup_db,
 ):
     pass
 
 
-@given(
-    "completed pending and failed payments exist"
-)
+@given("completed pending and failed payments exist")
 def different_statuses(
     setup_db,
 ):
     pass
 
 
-@given(
-    "a transaction has both completed and created dates"
-)
+@given("a transaction has both completed and created dates")
 def transaction_both_dates(
     setup_db,
 ):
     pass
 
 
-@given(
-    "a transaction has only a created date"
-)
+@given("a transaction has only a created date")
 def transaction_created_only(
     setup_db,
 ):
     pass
 
 
-@given(
-    "a transaction has no completed or created date"
-)
+@given("a transaction has no completed or created date")
 def no_transaction_date(
     monkeypatch,
     companies,
@@ -852,9 +733,7 @@ def no_package(
     )
 
 
-@given(
-    "a transaction has no payment method"
-)
+@given("a transaction has no payment method")
 def no_payment_method(
     monkeypatch,
     companies,
@@ -918,9 +797,7 @@ def no_credits(
     )
 
 
-@given(
-    "transactions exist with different payment dates"
-)
+@given("transactions exist with different payment dates")
 def transactions_different_dates(
     setup_db,
 ):
@@ -975,9 +852,7 @@ def twenty_five(
     )
 
 
-@given(
-    "the employer company has no payment transactions"
-)
+@given("the employer company has no payment transactions")
 def no_payments(
     monkeypatch,
     companies,
@@ -989,9 +864,7 @@ def no_payments(
     )
 
 
-@given(
-    "the current employer company does not exist"
-)
+@given("the current employer company does not exist")
 def company_missing(
     monkeypatch,
     payments,
@@ -1003,9 +876,7 @@ def company_missing(
     )
 
 
-@given(
-    "the transaction history template is available"
-)
+@given("the transaction history template is available")
 def template_available(
     context,
 ):
@@ -1016,150 +887,99 @@ def template_available(
 # BDD WHEN
 # ============================================================
 
-@when(
-    "the employer opens the transaction history page"
-)
+
+@when("the employer opens the transaction history page")
 def open_transaction_history(
     context,
 ):
     context.response = open_transactions()
 
 
-@when(
-    "the employer searches using a transaction ID"
-)
+@when("the employer searches using a transaction ID")
 def search_transaction_id(
     context,
 ):
-    context.response = open_transactions(
-        keyword="TXN001"
-    )
+    context.response = open_transactions(keyword="TXN001")
 
 
-@when(
-    "the employer searches using a plan name"
-)
+@when("the employer searches using a plan name")
 def search_plan(
     context,
 ):
-    context.response = open_transactions(
-        keyword="Starter"
-    )
+    context.response = open_transactions(keyword="Starter")
 
 
-@when(
-    "the employer searches using the payment method"
-)
+@when("the employer searches using the payment method")
 def search_method(
     context,
 ):
-    context.response = open_transactions(
-        keyword="Card"
-    )
+    context.response = open_transactions(keyword="Card")
 
 
-@when(
-    "the employer searches using lowercase text"
-)
+@when("the employer searches using lowercase text")
 def search_lowercase(
     context,
 ):
-    context.response = open_transactions(
-        keyword="starter"
-    )
+    context.response = open_transactions(keyword="starter")
 
 
-@when(
-    "the employer searches with surrounding spaces"
-)
+@when("the employer searches with surrounding spaces")
 def search_spaces(
     context,
 ):
-    context.response = open_transactions(
-        keyword="   TXN001   "
-    )
+    context.response = open_transactions(keyword="   TXN001   ")
 
 
-@when(
-    "the employer searches for a transaction that does not exist"
-)
+@when("the employer searches for a transaction that does not exist")
 def search_missing(
     context,
 ):
-    context.response = open_transactions(
-        keyword="NOT-FOUND"
-    )
+    context.response = open_transactions(keyword="NOT-FOUND")
 
 
-@when(
-    "the employer searches without a keyword"
-)
+@when("the employer searches without a keyword")
 def search_empty(
     context,
 ):
-    context.response = open_transactions(
-        keyword=""
-    )
+    context.response = open_transactions(keyword="")
 
 
-@when(
-    "the employer filters by completed status"
-)
+@when("the employer filters by completed status")
 def filter_completed(
     context,
 ):
-    context.response = open_transactions(
-        status="COMPLETED"
-    )
+    context.response = open_transactions(status="COMPLETED")
 
 
-@when(
-    "the employer filters by pending status"
-)
+@when("the employer filters by pending status")
 def filter_pending(
     context,
 ):
-    context.response = open_transactions(
-        status="PENDING"
-    )
+    context.response = open_transactions(status="PENDING")
 
 
-@when(
-    "the employer filters by failed status"
-)
+@when("the employer filters by failed status")
 def filter_failed(
     context,
 ):
-    context.response = open_transactions(
-        status="FAILED"
-    )
+    context.response = open_transactions(status="FAILED")
 
 
-@when(
-    "the employer filters using lowercase completed status"
-)
+@when("the employer filters using lowercase completed status")
 def filter_lowercase(
     context,
 ):
-    context.response = open_transactions(
-        status="completed"
-    )
+    context.response = open_transactions(status="completed")
 
 
-@when(
-    "the employer filters using an invalid status"
-)
+@when("the employer filters using an invalid status")
 def filter_invalid(
     context,
 ):
-    context.response = open_transactions(
-        status="INVALID"
-    )
+    context.response = open_transactions(status="INVALID")
 
 
-@when(
-    "the employer searches and filters by status"
-)
+@when("the employer searches and filters by status")
 def search_and_filter_step(
     context,
 ):
@@ -1169,53 +989,35 @@ def search_and_filter_step(
     )
 
 
-@when(
-    "the employer opens transaction page two"
-)
+@when("the employer opens transaction page two")
 def page_two(
     context,
 ):
-    context.response = open_transactions(
-        page=2
-    )
+    context.response = open_transactions(page=2)
 
 
-@when(
-    "transaction page zero is requested"
-)
+@when("transaction page zero is requested")
 def page_zero(
     context,
 ):
-    context.response = open_transactions(
-        page=0
-    )
+    context.response = open_transactions(page=0)
 
 
-@when(
-    "a negative transaction page is requested"
-)
+@when("a negative transaction page is requested")
 def negative_page(
     context,
 ):
-    context.response = open_transactions(
-        page=-5
-    )
+    context.response = open_transactions(page=-5)
 
 
-@when(
-    "a transaction page above the final page is requested"
-)
+@when("a transaction page above the final page is requested")
 def page_above_final(
     context,
 ):
-    context.response = open_transactions(
-        page=999
-    )
+    context.response = open_transactions(page=999)
 
 
-@when(
-    "the employer opens the transaction history page expecting an error"
-)
+@when("the employer opens the transaction history page expecting an error")
 def open_error(
     context,
 ):
@@ -1226,9 +1028,7 @@ def open_error(
         context.error = exc
 
 
-@when(
-    "the transaction history template is inspected"
-)
+@when("the transaction history template is inspected")
 def inspect_template(
     context,
 ):
@@ -1240,30 +1040,19 @@ def inspect_template(
 # BDD THEN
 # ============================================================
 
-@then(
-    "the transaction history page should be displayed"
-)
+
+@then("the transaction history page should be displayed")
 def page_displayed(
     context,
 ):
-    assert (
-        context.response["template"]
-        == "employerTransactions.html"
-    )
+    assert context.response["template"] == "employerTransactions.html"
 
 
-@then(
-    "only the current company transactions should be displayed"
-)
+@then("only the current company transactions should be displayed")
 def current_company_only(
     context,
 ):
-    ids = {
-        item["transaction_id"]
-        for item
-        in context.response["context"]
-        ["transactions"]
-    }
+    ids = {item["transaction_id"] for item in context.response["context"]["transactions"]}
 
     assert ids == {
         "TXN001",
@@ -1272,9 +1061,7 @@ def current_company_only(
     }
 
 
-@then(
-    "each transaction should contain the required transaction information"
-)
+@then("each transaction should contain the required transaction information")
 def required_transaction_fields(
     context,
 ):
@@ -1292,31 +1079,18 @@ def required_transaction_fields(
         "stripe_invoice_id",
     }
 
-    for transaction in (
-        context.response["context"]
-        ["transactions"]
-    ):
-        assert required.issubset(
-            transaction.keys()
-        )
+    for transaction in context.response["context"]["transactions"]:
+        assert required.issubset(transaction.keys())
 
 
-@then(
-    "only completed payment amounts should contribute to total spent"
-)
+@then("only completed payment amounts should contribute to total spent")
 def completed_spent_only(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["total_spent"]
-        == 49.00
-    )
+    assert context.response["context"]["total_spent"] == 49.00
 
 
-@then(
-    "the completed pending and failed counts should be correct"
-)
+@then("the completed pending and failed counts should be correct")
 def status_counts(
     context,
 ):
@@ -1327,133 +1101,77 @@ def status_counts(
     assert data["failed_count"] == 1
 
 
-@then(
-    "only the matching transaction should be displayed"
-)
+@then("only the matching transaction should be displayed")
 def matching_id(
     context,
 ):
-    transactions = (
-        context.response["context"]
-        ["transactions"]
-    )
+    transactions = context.response["context"]["transactions"]
 
     assert len(transactions) == 1
-    assert (
-        transactions[0]["transaction_id"]
-        == "TXN001"
-    )
+    assert transactions[0]["transaction_id"] == "TXN001"
 
 
-@then(
-    "transactions matching the plan should be displayed"
-)
+@then("transactions matching the plan should be displayed")
 def matching_plan(
     context,
 ):
-    transactions = (
-        context.response["context"]
-        ["transactions"]
-    )
+    transactions = context.response["context"]["transactions"]
 
     assert len(transactions) == 1
-    assert (
-        transactions[0]["package"]
-        == "Starter Pack"
-    )
+    assert transactions[0]["package"] == "Starter Pack"
 
 
-@then(
-    "transactions matching the payment method should be displayed"
-)
+@then("transactions matching the payment method should be displayed")
 def matching_method(
     context,
 ):
-    transactions = (
-        context.response["context"]
-        ["transactions"]
-    )
+    transactions = context.response["context"]["transactions"]
 
     assert len(transactions) == 3
 
-    assert all(
-        item["payment_method"] == "Card"
-        for item in transactions
-    )
+    assert all(item["payment_method"] == "Card" for item in transactions)
 
 
-@then(
-    "the transaction search should be case insensitive"
-)
+@then("the transaction search should be case insensitive")
 def search_case_insensitive(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["total_transactions"]
-        == 1
-    )
+    assert context.response["context"]["total_transactions"] == 1
 
 
-@then(
-    "the surrounding search spaces should be ignored"
-)
+@then("the surrounding search spaces should be ignored")
 def spaces_ignored(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["total_transactions"]
-        == 1
-    )
+    assert context.response["context"]["total_transactions"] == 1
 
 
-@then(
-    "the transaction result should be empty"
-)
+@then("the transaction result should be empty")
 def empty_result(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["transactions"]
-        == []
-    )
+    assert context.response["context"]["transactions"] == []
 
 
-@then(
-    "all current company transactions should remain available"
-)
+@then("all current company transactions should remain available")
 def all_transactions(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["total_transactions"]
-        == 3
-    )
+    assert context.response["context"]["total_transactions"] == 3
 
 
 def assert_only_status(
     context,
     expected,
 ):
-    transactions = (
-        context.response["context"]
-        ["transactions"]
-    )
+    transactions = context.response["context"]["transactions"]
 
     assert len(transactions) == 1
 
-    assert all(
-        item["status"] == expected
-        for item in transactions
-    )
+    assert all(item["status"] == expected for item in transactions)
 
 
-@then(
-    "only completed transactions should be displayed"
-)
+@then("only completed transactions should be displayed")
 def only_completed(
     context,
 ):
@@ -1463,9 +1181,7 @@ def only_completed(
     )
 
 
-@then(
-    "only pending transactions should be displayed"
-)
+@then("only pending transactions should be displayed")
 def only_pending(
     context,
 ):
@@ -1475,9 +1191,7 @@ def only_pending(
     )
 
 
-@then(
-    "only failed transactions should be displayed"
-)
+@then("only failed transactions should be displayed")
 def only_failed(
     context,
 ):
@@ -1487,9 +1201,7 @@ def only_failed(
     )
 
 
-@then(
-    "the status filter should be case insensitive"
-)
+@then("the status filter should be case insensitive")
 def filter_case_insensitive(
     context,
 ):
@@ -1499,57 +1211,35 @@ def filter_case_insensitive(
     )
 
 
-@then(
-    "no transactions should match the invalid status"
-)
+@then("no transactions should match the invalid status")
 def invalid_status_empty(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["transactions"]
-        == []
-    )
+    assert context.response["context"]["transactions"] == []
 
 
-@then(
-    "only transactions matching both criteria should be displayed"
-)
+@then("only transactions matching both criteria should be displayed")
 def combined_filter(
     context,
 ):
-    transactions = (
-        context.response["context"]
-        ["transactions"]
-    )
+    transactions = context.response["context"]["transactions"]
 
     assert len(transactions) == 1
-    assert (
-        transactions[0]["transaction_id"]
-        == "TXN001"
-    )
-    assert (
-        transactions[0]["status"]
-        == "COMPLETED"
-    )
+    assert transactions[0]["transaction_id"] == "TXN001"
+    assert transactions[0]["status"] == "COMPLETED"
 
 
 @then("the completed date should be used")
 def completed_date(
     context,
 ):
-    transaction = (
-        context.response["context"]
-        ["transactions"][0]
-    )
+    transaction = context.response["context"]["transactions"][0]
 
     # Default data includes multiple records,
     # locate the completed transaction explicitly.
     transaction = next(
         item
-        for item in
-        context.response["context"]
-        ["transactions"]
+        for item in context.response["context"]["transactions"]
         if item["transaction_id"] == "TXN001"
     )
 
@@ -1563,170 +1253,94 @@ def created_date(
 ):
     transaction = next(
         item
-        for item in
-        context.response["context"]
-        ["transactions"]
+        for item in context.response["context"]["transactions"]
         if item["transaction_id"] == "TXN002"
     )
 
     assert transaction["date"] == "15 Feb 2026"
 
 
-@then(
-    "the missing transaction date should be represented safely"
-)
+@then("the missing transaction date should be represented safely")
 def missing_date_safe(
     context,
 ):
-    transaction = (
-        context.response["context"]
-        ["transactions"][0]
-    )
+    transaction = context.response["context"]["transactions"][0]
 
     assert transaction["date"] == "-"
     assert transaction["time"] == ""
 
 
-@then(
-    "the missing package should be represented with a dash"
-)
+@then("the missing package should be represented with a dash")
 def missing_package_safe(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["transactions"][0]
-        ["package"]
-        == "-"
-    )
+    assert context.response["context"]["transactions"][0]["package"] == "-"
 
 
-@then(
-    "the missing payment method should be represented with a dash"
-)
+@then("the missing payment method should be represented with a dash")
 def missing_method_safe(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["transactions"][0]
-        ["payment_method"]
-        == "-"
-    )
+    assert context.response["context"]["transactions"][0]["payment_method"] == "-"
 
 
-@then(
-    "the missing amount should default to zero"
-)
+@then("the missing amount should default to zero")
 def missing_amount_zero(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["transactions"][0]
-        ["amount"]
-        == 0
-    )
+    assert context.response["context"]["transactions"][0]["amount"] == 0
 
 
-@then(
-    "the missing credits should default to zero"
-)
+@then("the missing credits should default to zero")
 def missing_credits_zero(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["transactions"][0]
-        ["credits"]
-        == 0
-    )
+    assert context.response["context"]["transactions"][0]["credits"] == 0
 
 
-@then(
-    "the newest transaction should be displayed first"
-)
+@then("the newest transaction should be displayed first")
 def newest_first(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["transactions"][0]
-        ["transaction_id"]
-        == "TXN003"
-    )
+    assert context.response["context"]["transactions"][0]["transaction_id"] == "TXN003"
 
 
-@then(
-    "only one transaction page should be required"
-)
+@then("only one transaction page should be required")
 def one_page(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["total_pages"]
-        == 1
-    )
+    assert context.response["context"]["total_pages"] == 1
 
 
-@then(
-    "two transaction pages should be required"
-)
+@then("two transaction pages should be required")
 def two_pages(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["total_pages"]
-        == 2
-    )
+    assert context.response["context"]["total_pages"] == 2
 
 
-@then(
-    "five transactions should be displayed on page two"
-)
+@then("five transactions should be displayed on page two")
 def five_on_second_page(
     context,
 ):
-    assert (
-        len(
-            context.response["context"]
-            ["transactions"]
-        )
-        == 5
-    )
+    assert len(context.response["context"]["transactions"]) == 5
 
 
-@then(
-    "the current transaction page should be one"
-)
+@then("the current transaction page should be one")
 def page_is_one(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["current_page"]
-        == 1
-    )
+    assert context.response["context"]["current_page"] == 1
 
 
-@then(
-    "the final transaction page should be used"
-)
+@then("the final transaction page should be used")
 def final_page(
     context,
 ):
-    assert (
-        context.response["context"]
-        ["current_page"]
-        == 2
-    )
+    assert context.response["context"]["current_page"] == 2
 
 
-@then(
-    "the transaction list should be empty"
-)
+@then("the transaction list should be empty")
 def transaction_list_empty(
     context,
 ):
@@ -1747,56 +1361,32 @@ def company_not_found(
 ):
     assert context.error is not None
     assert context.error.status_code == 404
-    assert (
-        context.error.detail
-        == "Company not found"
-    )
+    assert context.error.detail == "Company not found"
 
 
-@then(
-    "completed transactions should provide a receipt link"
-)
+@then("completed transactions should provide a receipt link")
 def receipt_link(
     context,
 ):
-    assert (
-        '/payment-receipt/{{ transaction.transaction_id }}'
-        in context.html
-    )
+    assert "/payment-receipt/{{ transaction.transaction_id }}" in context.html
 
-    assert (
-        'transaction.status == "COMPLETED"'
-        in context.html
-    )
+    assert 'transaction.status == "COMPLETED"' in context.html
 
 
-@then(
-    "search and status filter controls should exist"
-)
+@then("search and status filter controls should exist")
 def filter_controls(
     context,
 ):
-    assert (
-        'id="transactionSearch"'
-        in context.html
-    )
-    assert (
-        'id="statusFilter"'
-        in context.html
-    )
+    assert 'id="transactionSearch"' in context.html
+    assert 'id="statusFilter"' in context.html
 
     assert 'value="COMPLETED"' in context.html
     assert 'value="PENDING"' in context.html
     assert 'value="FAILED"' in context.html
 
 
-@then(
-    "the no transactions message should exist"
-)
+@then("the no transactions message should exist")
 def empty_state(
     context,
 ):
-    assert (
-        "No transactions found"
-        in context.html
-    )
+    assert "No transactions found" in context.html

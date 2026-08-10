@@ -225,14 +225,9 @@ def start_subscription(request: Request, plan_name: str):
 # Change Existing Plan
 # =====================================================
 
-@router.post(
-    "/employer/subscription/change/{plan_name}"
-)
-def change_subscription(
-    request: Request,
-    plan_name: str,
-    proration_date: int = Form(...)
-):
+
+@router.post("/employer/subscription/change/{plan_name}")
+def change_subscription(request: Request, plan_name: str, proration_date: int = Form(...)):
 
     company_id = get_current_company_id(request)
 
@@ -296,8 +291,6 @@ def change_subscription(
     #
     # You DON'T manually calculate it.
     # =================================================
-
-
 
     # Don't manually change Firestore plan here.
     #

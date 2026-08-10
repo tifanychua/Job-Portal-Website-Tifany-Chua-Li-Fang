@@ -13,20 +13,14 @@ def load_subscription_module():
     for path in routes_dir.glob("*.py"):
         text = path.read_text(encoding="utf-8", errors="ignore")
 
-        if (
-            "def change_subscription(" in text
-            and "def preview_subscription_change(" in text
-        ):
+        if "def change_subscription(" in text and "def preview_subscription_change(" in text:
             import firebase_admin.firestore as firestore_module
 
             original_client = firestore_module.client
             firestore_module.client = lambda: None
 
             try:
-                return importlib.import_module(
-                    "job_portal_web.backend.routes."
-                    + path.stem
-                )
+                return importlib.import_module("job_portal_web.backend.routes." + path.stem)
             finally:
                 firestore_module.client = original_client
 
@@ -91,11 +85,9 @@ def common_setup(monkeypatch, context):
 
 def call_preview(context, plan):
     try:
-        context.response = (
-            subscription_module.preview_subscription_change(
-                FakeRequest(),
-                plan,
-            )
+        context.response = subscription_module.preview_subscription_change(
+            FakeRequest(),
+            plan,
         )
     except HTTPException as exc:
         context.error = exc
@@ -103,26 +95,16 @@ def call_preview(context, plan):
 
 def call_change(context, plan):
     try:
-        context.response = (
-            subscription_module.change_subscription(
-                FakeRequest(),
-                plan,
-            )
+        context.response = subscription_module.change_subscription(
+            FakeRequest(),
+            plan,
         )
     except HTTPException as exc:
         context.error = exc
 
 
 def active_subscription():
-    return {
-        "items": {
-            "data": [
-                {
-                    "id": "si_test"
-                }
-            ]
-        }
-    }
+    return {"items": {"data": [{"id": "si_test"}]}}
 
 
 @given("the employer currently uses the starter plan")
@@ -134,9 +116,7 @@ def starter_company(context):
     }
 
 
-@given(
-    "the employer currently uses the starter plan without a Stripe subscription"
-)
+@given("the employer currently uses the starter plan without a Stripe subscription")
 def starter_without_subscription(context):
     context.company = {
         "subscription_plan": "starter",
@@ -159,24 +139,14 @@ def stripe_without_items(monkeypatch):
     monkeypatch.setattr(
         subscription_module.stripe.Subscription,
         "retrieve",
-        lambda subscription_id: {
-            "items": {"data": []}
-        },
+        lambda subscription_id: {"items": {"data": []}},
     )
 
 
 def install_preview(monkeypatch, adjustment=-3000):
-    proration_parent = SimpleNamespace(
-        subscription_item_details=SimpleNamespace(
-            proration=True
-        )
-    )
+    proration_parent = SimpleNamespace(subscription_item_details=SimpleNamespace(proration=True))
 
-    normal_parent = SimpleNamespace(
-        subscription_item_details=SimpleNamespace(
-            proration=False
-        )
-    )
+    normal_parent = SimpleNamespace(subscription_item_details=SimpleNamespace(proration=False))
 
     preview = SimpleNamespace(
         amount_due=9900,
@@ -211,9 +181,7 @@ def install_card(monkeypatch):
     )
 
     customer = SimpleNamespace(
-        invoice_settings=SimpleNamespace(
-            default_payment_method=payment_method
-        )
+        invoice_settings=SimpleNamespace(default_payment_method=payment_method)
     )
 
     monkeypatch.setattr(
@@ -230,9 +198,7 @@ def preview_business(monkeypatch, context):
     call_preview(context, "business")
 
 
-@when(
-    "the employer previews the business plan with an unused subscription credit"
-)
+@when("the employer previews the business plan with an unused subscription credit")
 def preview_proration(monkeypatch, context):
     install_preview(monkeypatch, adjustment=-3000)
     install_card(monkeypatch)
@@ -330,40 +296,21 @@ def no_item(context):
 def modified_with_proration(context):
     assert context.modify_args is not None
     assert context.modify_args["subscription_id"] == "sub_test"
-    assert (
-        context.modify_args["proration_behavior"]
-        == "always_invoice"
-    )
-    assert (
-        context.modify_args["payment_behavior"]
-        == "pending_if_incomplete"
-    )
-    assert (
-        context.modify_args["items"][0]["price"]
-        == "price_business_test"
-    )
+    assert context.modify_args["proration_behavior"] == "always_invoice"
+    assert context.modify_args["payment_behavior"] == "pending_if_incomplete"
+    assert context.modify_args["items"][0]["price"] == "price_business_test"
 
 
-@then(
-    "the employer should be redirected while the plan change is processing"
-)
+@then("the employer should be redirected while the plan change is processing")
 def processing_redirect(context):
     assert context.response.status_code == 303
-    assert (
-        context.response.headers["location"]
-        == "/employer-credit?plan_change=processing"
-    )
+    assert context.response.headers["location"] == "/employer-credit?plan_change=processing"
 
 
-@then(
-    "the employer should be redirected back to subscription plans"
-)
+@then("the employer should be redirected back to subscription plans")
 def same_plan_redirect(context):
     assert context.response.status_code == 303
-    assert (
-        context.response.headers["location"]
-        == "/employer-plans"
-    )
+    assert context.response.headers["location"] == "/employer-plans"
 
 
 @then("starting a Stripe subscription first should be required")

@@ -30,41 +30,26 @@ def load_stripe_module():
 
     if not matches:
         raise ImportError(
-            "Could not find the Stripe route module in "
-            "src/job_portal_web/backend/routes."
+            "Could not find the Stripe route module in " "src/job_portal_web/backend/routes."
         )
 
-    module_name = (
-        "job_portal_web.backend.routes."
-        + matches[0].stem
-    )
+    module_name = "job_portal_web.backend.routes." + matches[0].stem
 
     # Prevent the route import from requiring a real Firebase connection.
-    fake_database = types.ModuleType(
-        "job_portal_web.backend.database"
-    )
+    fake_database = types.ModuleType("job_portal_web.backend.database")
     fake_database.db = None
 
-    original_database = sys.modules.get(
-        "job_portal_web.backend.database"
-    )
+    original_database = sys.modules.get("job_portal_web.backend.database")
 
-    sys.modules[
-        "job_portal_web.backend.database"
-    ] = fake_database
+    sys.modules["job_portal_web.backend.database"] = fake_database
 
     try:
         return importlib.import_module(module_name)
     finally:
         if original_database is not None:
-            sys.modules[
-                "job_portal_web.backend.database"
-            ] = original_database
+            sys.modules["job_portal_web.backend.database"] = original_database
         else:
-            sys.modules.pop(
-                "job_portal_web.backend.database",
-                None
-            )
+            sys.modules.pop("job_portal_web.backend.database", None)
 
 
 stripe_module = load_stripe_module()
@@ -75,9 +60,7 @@ scenarios("features/stripeWebhook.feature")
 
 class FakeRequest:
     def __init__(self):
-        self.headers = {
-            "stripe-signature": "test-signature"
-        }
+        self.headers = {"stripe-signature": "test-signature"}
 
     async def body(self):
         return b'{"id":"evt_test"}'
@@ -97,11 +80,7 @@ def context():
 
 
 def run_webhook():
-    return asyncio.run(
-        stripe_module.stripe_webhook(
-            FakeRequest()
-        )
-    )
+    return asyncio.run(stripe_module.stripe_webhook(FakeRequest()))
 
 
 def process_error(context):
@@ -114,6 +93,7 @@ def process_error(context):
 # ============================================================
 # NORMAL PYTEST TESTS
 # ============================================================
+
 
 @pytest.mark.parametrize(
     "event_type,handler_name",
@@ -158,9 +138,7 @@ def test_webhook_routes_known_events(
         "construct_event",
         lambda **kwargs: {
             "type": event_type,
-            "data": {
-                "object": event_object
-            },
+            "data": {"object": event_object},
         },
     )
 
@@ -175,9 +153,7 @@ def test_webhook_routes_known_events(
     response = run_webhook()
 
     assert called == [event_object]
-    assert json.loads(response.body) == {
-        "received": True
-    }
+    assert json.loads(response.body) == {"received": True}
 
 
 def test_unknown_webhook_event_is_acknowledged(
@@ -194,17 +170,13 @@ def test_unknown_webhook_event_is_acknowledged(
         "construct_event",
         lambda **kwargs: {
             "type": "customer.created",
-            "data": {
-                "object": {"id": "cus_1"}
-            },
+            "data": {"object": {"id": "cus_1"}},
         },
     )
 
     response = run_webhook()
 
-    assert json.loads(response.body) == {
-        "received": True
-    }
+    assert json.loads(response.body) == {"received": True}
 
 
 def test_missing_webhook_secret(
@@ -279,9 +251,8 @@ def test_invalid_signature(
 # BDD STEPS
 # ============================================================
 
-@given(
-    "a valid Stripe webhook secret is configured"
-)
+
+@given("a valid Stripe webhook secret is configured")
 def valid_secret(monkeypatch):
     monkeypatch.setattr(
         stripe_module,
@@ -290,9 +261,7 @@ def valid_secret(monkeypatch):
     )
 
 
-@given(
-    "the Stripe webhook secret is missing"
-)
+@given("the Stripe webhook secret is missing")
 def missing_secret(monkeypatch):
     monkeypatch.setattr(
         stripe_module,
@@ -315,9 +284,7 @@ def install_event(
         "construct_event",
         lambda **kwargs: {
             "type": event_type,
-            "data": {
-                "object": event_object
-            },
+            "data": {"object": event_object},
         },
     )
 
@@ -333,16 +300,11 @@ def install_event(
         monkeypatch.setattr(
             stripe_module,
             handler,
-            lambda obj, name=handler:
-                context.called.append(
-                    (name, obj)
-                ),
+            lambda obj, name=handler: context.called.append((name, obj)),
         )
 
 
-@given(
-    "Stripe returns a checkout completed event"
-)
+@given("Stripe returns a checkout completed event")
 def checkout_event(
     monkeypatch,
     context,
@@ -354,9 +316,7 @@ def checkout_event(
     )
 
 
-@given(
-    "Stripe returns an invoice paid event"
-)
+@given("Stripe returns an invoice paid event")
 def invoice_paid_event(
     monkeypatch,
     context,
@@ -368,9 +328,7 @@ def invoice_paid_event(
     )
 
 
-@given(
-    "Stripe returns an invoice failed event"
-)
+@given("Stripe returns an invoice failed event")
 def invoice_failed_event(
     monkeypatch,
     context,
@@ -382,9 +340,7 @@ def invoice_failed_event(
     )
 
 
-@given(
-    "Stripe returns a subscription updated event"
-)
+@given("Stripe returns a subscription updated event")
 def subscription_updated_event(
     monkeypatch,
     context,
@@ -396,9 +352,7 @@ def subscription_updated_event(
     )
 
 
-@given(
-    "Stripe returns a subscription deleted event"
-)
+@given("Stripe returns a subscription deleted event")
 def subscription_deleted_event(
     monkeypatch,
     context,
@@ -410,9 +364,7 @@ def subscription_deleted_event(
     )
 
 
-@given(
-    "Stripe returns an unknown event"
-)
+@given("Stripe returns an unknown event")
 def unknown_event(
     monkeypatch,
     context,
@@ -424,9 +376,7 @@ def unknown_event(
     )
 
 
-@given(
-    "Stripe rejects the webhook payload"
-)
+@given("Stripe rejects the webhook payload")
 def reject_payload(monkeypatch):
     def invalid(**kwargs):
         raise ValueError("bad payload")
@@ -438,9 +388,7 @@ def reject_payload(monkeypatch):
     )
 
 
-@given(
-    "Stripe rejects the webhook signature"
-)
+@given("Stripe rejects the webhook signature")
 def reject_signature(monkeypatch):
     def invalid(**kwargs):
         raise stripe.error.SignatureVerificationError(
@@ -455,23 +403,17 @@ def reject_signature(monkeypatch):
     )
 
 
-@when(
-    "the Stripe webhook is processed"
-)
+@when("the Stripe webhook is processed")
 def process_webhook(context):
     context.response = run_webhook()
 
 
-@when(
-    "the Stripe webhook is processed expecting an error"
-)
+@when("the Stripe webhook is processed expecting an error")
 def process_webhook_error(context):
     process_error(context)
 
 
-@then(
-    "the checkout completed handler should be called"
-)
+@then("the checkout completed handler should be called")
 def checkout_handler_called(context):
     assert context.called == [
         (
@@ -481,9 +423,7 @@ def checkout_handler_called(context):
     ]
 
 
-@then(
-    "the invoice paid handler should be called"
-)
+@then("the invoice paid handler should be called")
 def invoice_paid_called(context):
     assert context.called == [
         (
@@ -493,9 +433,7 @@ def invoice_paid_called(context):
     ]
 
 
-@then(
-    "the invoice failed handler should be called"
-)
+@then("the invoice failed handler should be called")
 def invoice_failed_called(context):
     assert context.called == [
         (
@@ -505,9 +443,7 @@ def invoice_failed_called(context):
     ]
 
 
-@then(
-    "the subscription updated handler should be called"
-)
+@then("the subscription updated handler should be called")
 def subscription_updated_called(context):
     assert context.called == [
         (
@@ -517,9 +453,7 @@ def subscription_updated_called(context):
     ]
 
 
-@then(
-    "the subscription deleted handler should be called"
-)
+@then("the subscription deleted handler should be called")
 def subscription_deleted_called(context):
     assert context.called == [
         (
@@ -529,51 +463,31 @@ def subscription_deleted_called(context):
     ]
 
 
-@then(
-    "no subscription handler should be called"
-)
+@then("no subscription handler should be called")
 def no_handler_called(context):
     assert context.called == []
 
 
-@then(
-    "the webhook response should confirm receipt"
-)
+@then("the webhook response should confirm receipt")
 def webhook_received(context):
-    assert json.loads(
-        context.response.body
-    ) == {
-        "received": True
-    }
+    assert json.loads(context.response.body) == {"received": True}
 
 
-@then(
-    "the webhook should return a configuration error"
-)
+@then("the webhook should return a configuration error")
 def configuration_error(context):
     assert context.error is not None
     assert context.error.status_code == 500
 
 
-@then(
-    "the webhook should return invalid payload"
-)
+@then("the webhook should return invalid payload")
 def invalid_payload_error(context):
     assert context.error is not None
     assert context.error.status_code == 400
-    assert (
-        context.error.detail
-        == "Invalid Stripe payload"
-    )
+    assert context.error.detail == "Invalid Stripe payload"
 
 
-@then(
-    "the webhook should return invalid signature"
-)
+@then("the webhook should return invalid signature")
 def invalid_signature_error(context):
     assert context.error is not None
     assert context.error.status_code == 400
-    assert (
-        context.error.detail
-        == "Invalid Stripe signature"
-    )
+    assert context.error.detail == "Invalid Stripe signature"
