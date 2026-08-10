@@ -7,9 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-from .helper import (
-    get_company
-)
+from .helper import get_company
 
 # Routers
 from .auth import router as auth_router
@@ -35,7 +33,6 @@ from .routes.skill import router as skill_router
 from .routes.payment import router as payment_router
 from .applicant import router as applicant_router
 from .routes.jobSeekerProfile import router as jobSeekerProfile_router
-from .routes.skill import router as skill_router
 from .savedJob import router as saved_jobs_router
 from .notifications import router as notifications_router
 from .notifications import get_unread_notifications_count
@@ -43,9 +40,11 @@ from .routes.companyBrowse import router as company_browse_router
 from .routes.companyDetails import router as company_details_router
 from .routes.writeCompanyReview import router as write_company_review_router
 from .routes.adminTransaction import router as admin_transaction_router
-from .routes.employerPlans import (router as employer_plans_router)
-from .routes.stripePayment import (router as stripe_payment_router)
-from .routes.employerTransactions import (router as employer_transactions_router)
+from .routes.employerPlans import router as employer_plans_router
+from .routes.stripePayment import router as stripe_payment_router
+from .routes.employerTransactions import router as employer_transactions_router
+from .privacy import router as privacy_router
+
 # ==================================================
 # APP
 # ==================================================
@@ -192,6 +191,8 @@ app.include_router(stripe_payment_router)
 
 app.include_router(employer_transactions_router)
 
+
+app.include_router(privacy_router)
 # ==================================================
 # TEMPLATE HELPER
 # ==================================================
@@ -212,16 +213,10 @@ def render_template(request: Request, template: str, context=None):
         context["company"] = company
 
     # Live unread notification badge
-    context.setdefault(
-        "unread_notifications_count",
-        get_unread_notifications_count(request)
-    )
+    context.setdefault("unread_notifications_count", get_unread_notifications_count(request))
 
-    return templates.TemplateResponse(
-        request=request,
-        name=template,
-        context=context
-    )
+    return templates.TemplateResponse(request=request, name=template, context=context)
+
 
 # ==================================================
 # PAGE ROUTES

@@ -105,7 +105,9 @@ def saved_jobs_page(request: Request):
 
         saved_at = saved.get("saved_at")
 
-        job["saved_at_display"] = saved_at.strftime("%d %b %Y") if hasattr(saved_at, "strftime") else "—"
+        job["saved_at_display"] = (
+            saved_at.strftime("%d %b %Y") if hasattr(saved_at, "strftime") else "—"
+        )
 
         job["saved_at_sort"] = saved_at.isoformat() if hasattr(saved_at, "isoformat") else ""
 
@@ -194,9 +196,24 @@ def unsave_job(request: Request, job_id: str):
 
     doc_id = _saved_doc_id(job_seeker_id, job_id)
 
-    db.collection("saved_job").document(doc_id).delete()
+    saved_ref = db.collection("saved_job").document(doc_id)
 
-    return JSONResponse(content={"success": True, "saved": False, "message": "Job removed from saved list."})
+    if not saved_ref.get().exists:
+
+        return JSONResponse(
+            status_code=404,
+            content={
+                "success": False,
+                "saved": False,
+                "message": "This job is not in your saved list.",
+            },
+        )
+
+    saved_ref.delete()
+
+    return JSONResponse(
+        content={"success": True, "saved": False, "message": "Job removed from saved list."}
+    )
 
 
 # =====================================================

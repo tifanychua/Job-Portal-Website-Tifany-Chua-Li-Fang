@@ -71,11 +71,7 @@ async def profile(request: Request):
     # Load Education
     # ===========================
 
-    education_docs = (
-        db.collection("education")
-        .where("applicant_id", "==", applicant_id)
-        .stream()
-    )
+    education_docs = db.collection("education").where("applicant_id", "==", applicant_id).stream()
 
     applicant["education"] = []
 
@@ -87,9 +83,7 @@ async def profile(request: Request):
     # ===========================
 
     experience_docs = (
-        db.collection("job_seeker_experience")
-        .where("applicant_id", "==", applicant_id)
-        .stream()
+        db.collection("job_seeker_experience").where("applicant_id", "==", applicant_id).stream()
     )
 
     applicant["experience_list"] = []
@@ -104,9 +98,7 @@ async def profile(request: Request):
     applicant["skills"] = []
 
     skill_docs = (
-        db.collection("job_seeker_skill")
-        .where("applicant_id", "==", applicant_id)
-        .stream()
+        db.collection("job_seeker_skill").where("applicant_id", "==", applicant_id).stream()
     )
 
     for doc in skill_docs:

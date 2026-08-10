@@ -347,6 +347,7 @@ JobConnect Team
     fm = FastMail(conf)
     await fm.send_message(message)
 
+
 async def send_company_verification_email(
     email: str,
     company_name: str,

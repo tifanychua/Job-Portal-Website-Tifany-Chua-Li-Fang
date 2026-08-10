@@ -94,20 +94,16 @@ async def approve_company(company_id: str):
 
     company = company_doc.to_dict()
 
-    company_ref.update({
-        "status": "Active"
-    })
+    company_ref.update({"status": "Active"})
 
     await send_company_verification_email(
         email=company["email"],
-        company_name=company["companyName"],   # <-- companyName
-        status="Approved"
+        company_name=company["companyName"],  # <-- companyName
+        status="Approved",
     )
 
-    return RedirectResponse(
-        url="/admin/company-requests",
-        status_code=303
-    )
+    return RedirectResponse(url="/admin/company-requests", status_code=303)
+
 
 # ==================================
 # Reject Company
@@ -126,20 +122,16 @@ async def reject_company(company_id: str):
 
     company = company_doc.to_dict()
 
-    company_ref.update({
-        "status": "Rejected"
-    })
+    company_ref.update({"status": "Rejected"})
 
     await send_company_verification_email(
         email=company["email"],
-        company_name=company["companyName"],   # <-- companyName
-        status="Rejected"
+        company_name=company["companyName"],  # <-- companyName
+        status="Rejected",
     )
 
-    return RedirectResponse(
-        url="/admin/company-requests",
-        status_code=303
-    )
+    return RedirectResponse(url="/admin/company-requests", status_code=303)
+
 
 # ==================================
 # Deactivate Company

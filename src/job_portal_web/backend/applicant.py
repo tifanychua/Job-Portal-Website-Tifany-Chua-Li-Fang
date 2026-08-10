@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request
 
 from .database import bucket, db
 
@@ -128,7 +128,7 @@ def get_shortlisted_candidates():
 
 
 @router.get("/api/applications/{application_id}")
-def get_application(application_id: str):
+def get_application(application_id: str, request: Request):
 
     doc = db.collection("application").document(application_id).get()
 
@@ -136,6 +136,29 @@ def get_application(application_id: str):
         return {"error": "Application not found"}
 
     application = doc.to_dict()
+
+    # =================================
+    # Authorization: only the employer who owns the job this application
+    # was submitted to may view the applicant's personal information.
+    # =================================
+
+    if request.session.get("user_type") != "employer":
+        raise HTTPException(status_code=403, detail="Access denied.")
+
+    session_company_id = request.session.get("company_id")
+
+    owning_company_id = None
+
+    job_id = application.get("job_id")
+
+    if job_id:
+        job_doc = db.collection("job_list").document(job_id).get()
+
+        if job_doc.exists:
+            owning_company_id = job_doc.to_dict().get("company_id")
+
+    if not session_company_id or session_company_id != owning_company_id:
+        raise HTTPException(status_code=403, detail="You do not have access to this application.")
 
     application["applicationId"] = application_id
 

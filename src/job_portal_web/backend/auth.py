@@ -141,6 +141,12 @@ async def firebase_login(request: Request, data: LoginToken):
     except Exception as e:
         return JSONResponse(status_code=401, content={"error": str(e)})
 
+    # Wipe any previous identity in this session (e.g. a leftover
+    # applicant_id/company_id from a different account logging in earlier
+    # on the same browser session) before establishing the new one, so
+    # pages can never see a mix of old and new session keys.
+    request.session.clear()
+
     # Job Seeker
     job = db.collection("job_seeker").document(uid).get()
 
@@ -400,6 +406,10 @@ async def admin_firebase_login(request: Request, data: LoginToken):
 
     if not admin.exists:
         return JSONResponse({"error": "Access denied."}, status_code=403)
+
+    # See firebase_login() above -- clear any previous identity before
+    # establishing the new one.
+    request.session.clear()
 
     request.session["user_type"] = "admin"
     request.session["admin_id"] = uid

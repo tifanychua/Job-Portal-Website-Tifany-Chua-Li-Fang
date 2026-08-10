@@ -2,6 +2,7 @@ from fastapi import Request
 
 from .database import db
 
+
 def parse_salary(value):
 
     if value in (None, ""):
@@ -14,6 +15,7 @@ def parse_salary(value):
         return float(value)
     except (TypeError, ValueError):
         return 0
+
 
 def get_company(request: Request):
 
@@ -33,6 +35,7 @@ def get_company(request: Request):
     company["companyId"] = company_id
 
     return company
+
 
 def get_current_user(request: Request):
 

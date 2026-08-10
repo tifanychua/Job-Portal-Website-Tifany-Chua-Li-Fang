@@ -104,7 +104,7 @@ def my_applications(request: Request, status: str = "all"):
         return RedirectResponse(
             url="/login?next=/application",
             status_code=302,
-    )
+        )
 
     docs = (
         db.collection("application")
