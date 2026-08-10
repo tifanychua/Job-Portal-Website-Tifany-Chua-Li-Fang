@@ -131,7 +131,7 @@ def assert_applications_listed(context):
     assert context.response.status_code == 200
     page = context.response.text
     assert "Backend Developer" in page
-    assert f'/application/{context.application_id}' in page
+    assert f"/application/{context.application_id}" in page
     assert "Submitted" in page
 
 
@@ -147,7 +147,7 @@ def viewing_application_history_list(fake_db, client, context):
     seed_job(fake_db, context.job_id, title="Mobile Developer")
     seed_application(fake_db, context.application_id, context.job_id)
     response = client.get("/application")
-    assert f'/application/{context.application_id}' in response.text
+    assert f"/application/{context.application_id}" in response.text
 
 
 @when("the job seeker selects a specific application")

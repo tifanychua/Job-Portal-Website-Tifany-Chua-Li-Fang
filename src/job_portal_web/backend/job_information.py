@@ -173,9 +173,7 @@ def job_detail(request: Request, job_id: str):
         job_seeker_id = request.session.get("applicant_id")
 
         applications = (
-            db.collection("application")
-            .where(filter=FieldFilter("job_id", "==", job_id))
-            .stream()
+            db.collection("application").where(filter=FieldFilter("job_id", "==", job_id)).stream()
         )
 
         for app in applications:
@@ -200,9 +198,7 @@ def job_detail(request: Request, job_id: str):
     job_position = job.get("job_title")
     location = job.get("location")
 
-    query = db.collection("job_list").where(
-        filter=FieldFilter("status", "==", "Active")
-    )
+    query = db.collection("job_list").where(filter=FieldFilter("status", "==", "Active"))
 
     docs = query.stream()
 
@@ -255,27 +251,19 @@ def job_detail(request: Request, job_id: str):
             sim_company = _find_company(sim.get("company_id"))
 
             if sim_company:
-                sim["companyName"] = sim_company.get(
-                    "companyName", "Unknown"
-                )
-                sim["company_logo"] = sim_company.get(
-                    "logo", "default.jpg"
-                )
+                sim["companyName"] = sim_company.get("companyName", "Unknown")
+                sim["company_logo"] = sim_company.get("logo", "default.jpg")
             else:
                 sim["companyName"] = "Unknown"
                 sim["company_logo"] = "default.jpg"
 
             scored_jobs.append(sim)
 
-
     # -----------------------------
     # Highest similarity first
     # -----------------------------
 
-    scored_jobs.sort(
-        key=lambda x: x["similarity_score"],
-        reverse=True
-    )
+    scored_jobs.sort(key=lambda x: x["similarity_score"], reverse=True)
 
     # Maximum 2 similar jobs
     similar_jobs = scored_jobs[:2]

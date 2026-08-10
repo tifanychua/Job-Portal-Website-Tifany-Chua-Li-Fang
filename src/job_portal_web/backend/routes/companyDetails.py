@@ -16,6 +16,7 @@ db = firestore.client()
 # Current Applicant
 # ======================================================
 
+
 def get_current_applicant_id(request: Request):
 
     # Skip login during pytest
@@ -23,18 +24,12 @@ def get_current_applicant_id(request: Request):
         return "0YLcc18JszVqSXWn8DEDQ81o2vR2"
 
     if request.session.get("user_type") != "job_seeker":
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied"
-        )
+        raise HTTPException(status_code=403, detail="Access denied")
 
     applicant_id = request.session.get("applicant_id")
 
     if not applicant_id:
-        raise HTTPException(
-            status_code=401,
-            detail="Applicant not logged in"
-        )
+        raise HTTPException(status_code=401, detail="Applicant not logged in")
 
     return applicant_id
 
@@ -43,15 +38,12 @@ def get_current_applicant_id(request: Request):
 # Current User
 # ======================================================
 
+
 def get_current_user(request: Request):
 
     applicant_id = get_current_applicant_id(request)
 
-    applicant_doc = (
-        db.collection("job_seeker")
-        .document(applicant_id)
-        .get()
-    )
+    applicant_doc = db.collection("job_seeker").document(applicant_id).get()
 
     if applicant_doc.exists:
         return applicant_doc.to_dict()
@@ -63,13 +55,10 @@ def get_current_user(request: Request):
 # Company Information
 # ======================================================
 
+
 def get_company(company_id: str):
 
-    company_doc = (
-        db.collection("company")
-        .document(company_id)
-        .get()
-    )
+    company_doc = db.collection("company").document(company_id).get()
 
     if not company_doc.exists:
         return None
@@ -79,14 +68,7 @@ def get_company(company_id: str):
     company["id"] = company_doc.id
 
     company["location"] = ", ".join(
-        filter(
-            None,
-            [
-                company.get("city"),
-                company.get("state"),
-                company.get("country")
-            ]
-        )
+        filter(None, [company.get("city"), company.get("state"), company.get("country")])
     )
 
     return company
@@ -95,6 +77,7 @@ def get_company(company_id: str):
 # ======================================================
 # Company Jobs
 # ======================================================
+
 
 def get_company_jobs(company_id: str):
 
@@ -117,9 +100,7 @@ def get_company_jobs(company_id: str):
         # Salary Display
         # -----------------------------
 
-        salary_type = str(
-            job.get("salaryType", "")
-        ).lower().strip()
+        salary_type = str(job.get("salaryType", "")).lower().strip()
 
         if salary_type == "fixed":
 
@@ -140,9 +121,7 @@ def get_company_jobs(company_id: str):
                 minimum = float(str(minimum).replace(",", ""))
                 maximum = float(str(maximum).replace(",", ""))
 
-                job["salary_display"] = (
-                    f"RM {minimum:,.0f} - RM {maximum:,.0f}"
-                )
+                job["salary_display"] = f"RM {minimum:,.0f} - RM {maximum:,.0f}"
 
             except:
 
@@ -160,9 +139,11 @@ def get_company_jobs(company_id: str):
 
     return jobs
 
+
 # ======================================================
 # Company Review Summary
 # ======================================================
+
 
 def get_company_review_summary(company_id: str):
 
@@ -227,85 +208,51 @@ def get_company_review_summary(company_id: str):
     if count > 0:
 
         summary = {
-
             "rating": round(total_rating / count, 1),
-
             "review_count": count,
-
             "work_environment_avg": round(total_work_environment / count, 1),
-
             "management_avg": round(total_management / count, 1),
-
             "career_growth_avg": round(total_career_growth / count, 1),
-
             "work_life_balance_avg": round(total_work_life_balance / count, 1),
-
             "benefits_avg": round(total_benefits / count, 1),
-
             "company_culture_avg": round(total_company_culture / count, 1),
-
             "learning_opportunities_avg": round(total_learning / count, 1),
-
             "five_star": five_star,
-
             "four_star": four_star,
-
             "three_star": three_star,
-
             "two_star": two_star,
-
-            "one_star": one_star
-
+            "one_star": one_star,
         }
 
     else:
 
         summary = {
-
             "rating": 0,
-
             "review_count": 0,
-
             "work_environment_avg": 0,
-
             "management_avg": 0,
-
             "career_growth_avg": 0,
-
             "work_life_balance_avg": 0,
-
             "benefits_avg": 0,
-
             "company_culture_avg": 0,
-
             "learning_opportunities_avg": 0,
-
             "five_star": 0,
-
             "four_star": 0,
-
             "three_star": 0,
-
             "two_star": 0,
-
-            "one_star": 0
-
+            "one_star": 0,
         }
 
     return reviews, summary
+
 
 # ======================================================
 # Company Details (About)
 # ======================================================
 
-@router.get(
-    "/company/{company_id}",
-    response_class=HTMLResponse
-)
-async def company_details(
-    request: Request,
-    company_id: str
-):
+
+@router.get("/company/{company_id}", response_class=HTMLResponse)
+async def company_details(request: Request, company_id: str):
 
     # ==========================================
     # Current User
@@ -322,19 +269,7 @@ async def company_details(
     if company is None:
 
         return templates.TemplateResponse(
-
-            request=request,
-
-            name="404.html",
-
-            context={
-
-                "user": user,
-
-                "active_page": "companies"
-
-            }
-
+            request=request, name="404.html", context={"user": user, "active_page": "companies"}
         )
 
     # ==========================================
@@ -361,25 +296,15 @@ async def company_details(
     # ==========================================
 
     return templates.TemplateResponse(
-
         request=request,
-
         name="companyDetails.html",
-
         context={
-
             "user": user,
-
             "company": company,
-
             "jobs": display_jobs,
-
             "total_jobs": len(jobs),
-
-            "active_page": "companies"
-
-        }
-
+            "active_page": "companies",
+        },
     )
 
 
@@ -387,14 +312,9 @@ async def company_details(
 # Company Jobs
 # ======================================================
 
-@router.get(
-    "/company/{company_id}/jobs",
-    response_class=HTMLResponse
-)
-async def company_jobs(
-    request: Request,
-    company_id: str
-):
+
+@router.get("/company/{company_id}/jobs", response_class=HTMLResponse)
+async def company_jobs(request: Request, company_id: str):
 
     # ==========================================
     # Current User
@@ -411,19 +331,7 @@ async def company_jobs(
     if company is None:
 
         return templates.TemplateResponse(
-
-            request=request,
-
-            name="404.html",
-
-            context={
-
-                "user": user,
-
-                "active_page": "companies"
-
-            }
-
+            request=request, name="404.html", context={"user": user, "active_page": "companies"}
         )
 
     # ==========================================
@@ -443,39 +351,25 @@ async def company_jobs(
     # ==========================================
 
     return templates.TemplateResponse(
-
         request=request,
-
         name="companyJobs.html",
-
         context={
-
             "user": user,
-
             "company": company,
-
             "jobs": jobs,
-
             "total_jobs": len(jobs),
-
-            "active_page": "companies"
-
-        }
-
+            "active_page": "companies",
+        },
     )
+
 
 # ======================================================
 # Company Reviews
 # ======================================================
 
-@router.get(
-    "/company/{company_id}/reviews",
-    response_class=HTMLResponse
-)
-async def company_reviews(
-    request: Request,
-    company_id: str
-):
+
+@router.get("/company/{company_id}/reviews", response_class=HTMLResponse)
+async def company_reviews(request: Request, company_id: str):
 
     # ==========================================
     # Current User
@@ -492,19 +386,7 @@ async def company_reviews(
     if company is None:
 
         return templates.TemplateResponse(
-
-            request=request,
-
-            name="404.html",
-
-            context={
-
-                "user": user,
-
-                "active_page": "companies"
-
-            }
-
+            request=request, name="404.html", context={"user": user, "active_page": "companies"}
         )
 
     # ==========================================
@@ -528,21 +410,7 @@ async def company_reviews(
     # ==========================================
 
     return templates.TemplateResponse(
-
         request=request,
-
         name="companyReviews.html",
-
-        context={
-
-            "user": user,
-
-            "company": company,
-
-            "reviews": reviews,
-
-            "active_page": "companies"
-
-        }
-
+        context={"user": user, "company": company, "reviews": reviews, "active_page": "companies"},
     )

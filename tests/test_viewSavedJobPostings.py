@@ -180,7 +180,9 @@ def login_and_access(client, context):
     context.response = client.get("/saved-jobs")
 
 
-@then("the system should retrieve and display the saved job postings associated with the job seeker's account")
+@then(
+    "the system should retrieve and display the saved job postings associated with the job seeker's account"
+)
 def assert_account_scoped_retrieval(context):
     assert context.response.status_code == 200
     assert f'data-id="{context.job_id}"' in context.response.text

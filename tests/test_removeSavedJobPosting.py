@@ -144,7 +144,9 @@ def removal_action_completed(client, context):
     context.response = client.delete(f"/api/saved-jobs/{context.job_id}")
 
 
-@then("the system should display a confirmation message indicating that the job posting has been removed")
+@then(
+    "the system should display a confirmation message indicating that the job posting has been removed"
+)
 def assert_confirmation_message(context):
     body = context.response.json()
     assert body["success"] is True

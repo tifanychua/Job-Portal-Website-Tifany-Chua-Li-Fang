@@ -10,8 +10,6 @@ send is monkeypatched out here so tests run fully offline/deterministically.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-
 import pytest
 from fastapi.testclient import TestClient
 from pytest_bdd import given, scenarios, then, when
@@ -157,7 +155,9 @@ def employer_updates_interview_status(client, context):
     assert context.response.status_code == 200
 
 
-@then("the system should display a notification to the job seeker indicating the updated interview status")
+@then(
+    "the system should display a notification to the job seeker indicating the updated interview status"
+)
 def assert_status_notification_created(fake_db, context):
     notifs = interview_notifications(fake_db)
     assert len(notifs) == 1
@@ -189,7 +189,9 @@ def click_interview_notification(fake_db, client, context):
     context.response = client.get(link)
 
 
-@then("the system should display the interview details including company name, job position, interview date, and updated status")
+@then(
+    "the system should display the interview details including company name, job position, interview date, and updated status"
+)
 def assert_interview_details_available(client, context):
     # The detail page itself is client-rendered; the data it fetches
     # (GET /api/applicant/interviews) is what carries company name,

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import os
 
 from fastapi import APIRouter, Request, HTTPException
@@ -75,9 +75,7 @@ def _load_notifications(user_id):
     loads + normalizes every notification document for this user_id."""
 
     docs = (
-        db.collection("notification")
-        .where(filter=FieldFilter("user_id", "==", user_id))
-        .stream()
+        db.collection("notification").where(filter=FieldFilter("user_id", "==", user_id)).stream()
     )
 
     notifications = []
@@ -142,6 +140,7 @@ def _format_relative(ts):
 # JOB EXPIRY NOTIFICATIONS
 # =====================================================
 
+
 def check_job_expiry_notifications():
 
     from datetime import datetime, timezone, timedelta
@@ -190,9 +189,7 @@ def check_job_expiry_notifications():
             message = f'Your job posting "{job_title}" has expired.'
 
             # Optional: mark the job as expired
-            job.reference.update({
-                "status": "Expired"
-            })
+            job.reference.update({"status": "Expired"})
 
         else:
             continue
@@ -214,21 +211,25 @@ def check_job_expiry_notifications():
         # -------------------------
         # Create notification
         # -------------------------
-        db.collection("notification").add({
-            "user_id": company_id,
-            "job_id": job.id,
-            "event": event,
-            "type": "job_alert",
-            "title": title,
-            "message": message,
-            "link": "/manage-jobs",
-            "is_read": False,
-            "created_at": datetime.now(MYT)
-        })
+        db.collection("notification").add(
+            {
+                "user_id": company_id,
+                "job_id": job.id,
+                "event": event,
+                "type": "job_alert",
+                "title": title,
+                "message": message,
+                "link": "/manage-jobs",
+                "is_read": False,
+                "created_at": datetime.now(MYT),
+            }
+        )
+
 
 # =====================================================
 # UNREAD COUNT
 # =====================================================
+
 
 def get_unread_notifications_count(request: Request):
 
@@ -246,9 +247,11 @@ def get_unread_notifications_count(request: Request):
 
     return sum(1 for _ in docs)
 
+
 # =====================================================
 # PAGE — Notifications list
 # =====================================================
+
 
 @router.get("/notifications", name="notifications_page")
 def notifications_page(request: Request):

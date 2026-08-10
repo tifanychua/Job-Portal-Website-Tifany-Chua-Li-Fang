@@ -15,6 +15,7 @@ db = firestore.client()
 # Get Current Applicant
 # ======================================================
 
+
 def get_current_applicant_id(request: Request):
 
     # During pytest, skip login
@@ -33,11 +34,7 @@ def get_current_applicant_id(request: Request):
 
 
 @router.get("/companies", response_class=HTMLResponse)
-async def browse_companies(
-    request: Request,
-    keyword: str = "",
-    page: int = 1
-):
+async def browse_companies(request: Request, keyword: str = "", page: int = 1):
 
     # =====================================
     # Current Applicant
@@ -45,11 +42,7 @@ async def browse_companies(
 
     applicant_id = get_current_applicant_id(request)
 
-    applicant_doc = (
-        db.collection("job_seeker")
-        .document(applicant_id)
-        .get()
-    )
+    applicant_doc = db.collection("job_seeker").document(applicant_id).get()
 
     user = applicant_doc.to_dict() if applicant_doc.exists else None
 
@@ -63,11 +56,7 @@ async def browse_companies(
     # Get Companies
     # =====================================
 
-    company_docs = (
-        db.collection("company")
-        .where("status", "==", "Active")
-        .stream()
-    )
+    company_docs = db.collection("company").where("status", "==", "Active").stream()
 
     for doc in company_docs:
 
@@ -94,11 +83,7 @@ async def browse_companies(
 
         if keyword:
 
-            searchable = (
-                f"{company_name} "
-                f"{location} "
-                f"{industry}"
-            ).lower()
+            searchable = (f"{company_name} " f"{location} " f"{industry}").lower()
 
             if keyword not in searchable:
                 continue
@@ -120,11 +105,7 @@ async def browse_companies(
         # Calculate Rating
         # =====================================
 
-        review_docs = (
-            db.collection("company_review")
-            .where("company_id", "==", company_id)
-            .stream()
-        )
+        review_docs = db.collection("company_review").where("company_id", "==", company_id).stream()
 
         total_rating = 0
         review_count = 0
@@ -139,10 +120,7 @@ async def browse_companies(
 
         if review_count > 0:
 
-            average_rating = round(
-                total_rating / review_count,
-                1
-            )
+            average_rating = round(total_rating / review_count, 1)
 
         else:
 
@@ -152,37 +130,24 @@ async def browse_companies(
         # Add Company
         # =====================================
 
-        companies.append({
-
-            "id": company_id,
-
-            "company_name": company_name,
-
-            "logo": company.get("logo", ""),
-
-            "industry": industry,
-
-            "location": location,
-
-            "rating": average_rating,
-
-            "review_count": review_count,
-
-            "job_count": job_count
-
-        })
+        companies.append(
+            {
+                "id": company_id,
+                "company_name": company_name,
+                "logo": company.get("logo", ""),
+                "industry": industry,
+                "location": location,
+                "rating": average_rating,
+                "review_count": review_count,
+                "job_count": job_count,
+            }
+        )
 
     # =====================================
     # Highest Rating First
     # =====================================
 
-    companies.sort(
-        key=lambda x: (
-            x["rating"],
-            x["review_count"]
-        ),
-        reverse=True
-    )
+    companies.sort(key=lambda x: (x["rating"], x["review_count"]), reverse=True)
 
     # =====================================
     # Pagination
@@ -190,10 +155,7 @@ async def browse_companies(
 
     total_company = len(companies)
 
-    total_pages = max(
-        1,
-        (total_company + PER_PAGE - 1) // PER_PAGE
-    )
+    total_pages = max(1, (total_company + PER_PAGE - 1) // PER_PAGE)
 
     start = (page - 1) * PER_PAGE
 
@@ -206,27 +168,15 @@ async def browse_companies(
     # =====================================
 
     return templates.TemplateResponse(
-
         request=request,
-
         name="companyBrowse.html",
-
         context={
-
             "user": user,
-
             "companies": companies,
-
             "keyword": keyword,
-
             "page": page,
-
             "total_pages": total_pages,
-
             "total_company": total_company,
-
-            "active_page": "companies"
-
-        }
-
+            "active_page": "companies",
+        },
     )

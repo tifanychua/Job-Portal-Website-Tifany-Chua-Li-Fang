@@ -138,6 +138,7 @@ def job_apply_form(request: Request, job_id: str):
             "job": job,
             "job_seeker": job_seeker_display,
             "questions": _get_screening_questions(job),
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -239,7 +240,7 @@ async def job_apply_submit(
             "updated_on": datetime.now(UTC),
         }
     )
-    
+
     # ==============================
     # Notify the employer
     # ==============================

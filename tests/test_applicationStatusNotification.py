@@ -139,7 +139,9 @@ def employer_updates_status(client, context):
     assert context.response.status_code == 200
 
 
-@then("the system should display a notification to the job seeker indicating the updated application status")
+@then(
+    "the system should display a notification to the job seeker indicating the updated application status"
+)
 def assert_notification_created(fake_db, context):
     notifs = notification_for_application(fake_db, context.application_id)
     assert len(notifs) == 1
@@ -173,7 +175,9 @@ def click_notification(fake_db, client, context):
     context.response = client.get(link)
 
 
-@then("the system should redirect the job seeker to the application details page showing the updated status")
+@then(
+    "the system should redirect the job seeker to the application details page showing the updated status"
+)
 def assert_redirected_to_details(context):
     assert context.response.status_code == 200
     assert "Offered" in context.response.text

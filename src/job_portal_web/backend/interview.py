@@ -300,19 +300,19 @@ async def cancel_interview(interview_id: str):
     interview = doc.to_dict()
 
     interview_ref.update({"status": "Cancelled", "applicantResponse": "Cancelled"})
-    
+
     db.collection("notification").document().set(
-            {
-                "user_id": interview.get("candidateId"),
-                "user_type": "job_seeker",
-                "is_read": False,
-                "type": "interview",
-                "title": "Interview cancelled",
-                "message": f"Your interview for {interview.get('position', 'the position')} has been cancelled.",
-                "link": f"/my_interviews/detail/{interview_id}",
-                "created_at": datetime.now(UTC),
-            }
-        )
+        {
+            "user_id": interview.get("candidateId"),
+            "user_type": "job_seeker",
+            "is_read": False,
+            "type": "interview",
+            "title": "Interview cancelled",
+            "message": f"Your interview for {interview.get('position', 'the position')} has been cancelled.",
+            "link": f"/my_interviews/detail/{interview_id}",
+            "created_at": datetime.now(UTC),
+        }
+    )
     try:
         seeker_doc = db.collection("job_seeker").document(interview.get("candidateId")).get()
 
@@ -394,7 +394,6 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
             "applicantResponse": "Pending",
         }
     )
-    
 
     try:
         # ======================================
@@ -417,19 +416,19 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
 
         if seeker_doc.exists:
             db.collection("notification").document().set(
-                    {
-                        "user_id": seeker_id,
-                        "user_type": "job_seeker",
-                        "is_read": False,
-                        "type": "interview",
-                        "title": "Interview rescheduled",
-                        "message": (
-                            f"Your interview for {updated_data.get('position', 'the position')} "
-                            f"has been rescheduled to {updated_data.get('date')} at {updated_data.get('time')}."
-                        ),
-                        "link": f"/my_interviews/detail/{interview_id}",
-                        "created_at": datetime.now(UTC),
-                    }
+                {
+                    "user_id": seeker_id,
+                    "user_type": "job_seeker",
+                    "is_read": False,
+                    "type": "interview",
+                    "title": "Interview rescheduled",
+                    "message": (
+                        f"Your interview for {updated_data.get('position', 'the position')} "
+                        f"has been rescheduled to {updated_data.get('date')} at {updated_data.get('time')}."
+                    ),
+                    "link": f"/my_interviews/detail/{interview_id}",
+                    "created_at": datetime.now(UTC),
+                }
             )
             seeker = seeker_doc.to_dict()
 
@@ -772,7 +771,7 @@ async def accept_interview(interview_id: str):
                     interview.get("time"),
                     interview.get("meetingLink", "To be provided"),
                 )
-                
+
         db.collection("notification").document().set(
             {
                 "user_id": interview.get("companyId"),
@@ -827,7 +826,7 @@ async def decline_interview(interview_id: str):
                 interview.get("position"),
                 "Declined",
             )
-            
+
         db.collection("notification").document().set(
             {
                 "user_id": interview.get("companyId"),
@@ -902,7 +901,7 @@ async def reschedule_request(interview_id: str, request_data: RescheduleRequest)
                 request_data.requestedDate,
                 request_data.requestedTime,
             )
-            
+
         db.collection("notification").document().set(
             {
                 "user_id": interview.get("companyId"),
@@ -1000,10 +999,8 @@ async def interview_schedule(request: Request, applicationId: str):
             "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
-    
-    
-    
-    
+
+
 # ==================================================
 # SEND UPCOMING-INTERVIEW REMINDERS
 # (call this once a day via a cron job / scheduler — see note below)

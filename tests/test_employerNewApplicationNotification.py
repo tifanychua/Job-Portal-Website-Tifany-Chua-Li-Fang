@@ -124,7 +124,9 @@ def submit_application_for_vacancy(client, context):
     assert context.response.json()["success"] is True
 
 
-@then("the system should display a notification to the employer indicating a new application has been received")
+@then(
+    "the system should display a notification to the employer indicating a new application has been received"
+)
 def assert_employer_notification_created(fake_db):
     notifs = employer_notifications(fake_db)
     assert len(notifs) == 1
@@ -175,7 +177,6 @@ def given_unread_application_notifications(fake_db, client, context):
 
 @when("the employer views the new application")
 def employer_views_new_application(fake_db, client, context):
-    notif = employer_notifications(fake_db)[0]
     context.notification_id = notif_id = [
         d.id
         for d in fake_db.collection("notification").stream()

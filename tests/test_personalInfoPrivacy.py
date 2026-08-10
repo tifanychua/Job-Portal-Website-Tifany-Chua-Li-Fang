@@ -191,7 +191,9 @@ def job_seeker_views_privacy_settings(client, monkeypatch, context):
     context.response = client.get("/privacy-settings")
 
 
-@then("the system should display the employers who are allowed to access their personal information")
+@then(
+    "the system should display the employers who are allowed to access their personal information"
+)
 def assert_privacy_settings_shown(context):
     assert context.response.status_code == 200
     assert "Applied Co" in context.response.text

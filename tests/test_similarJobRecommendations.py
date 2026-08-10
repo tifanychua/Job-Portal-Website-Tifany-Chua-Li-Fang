@@ -99,7 +99,9 @@ def job_details_page_loaded(client, context):
     context.response = client.get(f"/jobs/{context.job_id}")
 
 
-@then("the system should display a list of similar job recommendations based on the selected job posting")
+@then(
+    "the system should display a list of similar job recommendations based on the selected job posting"
+)
 def assert_similar_jobs_displayed(context):
     assert context.response.status_code == 200
     page = context.response.text
@@ -117,7 +119,9 @@ def system_generates_recommendations(client, context):
     context.response = client.get(f"/jobs/{context.job_id}")
 
 
-@then("the system should recommend jobs with similar attributes such as job position, category or location")
+@then(
+    "the system should recommend jobs with similar attributes such as job position, category or location"
+)
 def assert_recommendations_match_attributes(context):
     assert context.response.status_code == 200
     page = context.response.text
@@ -137,7 +141,9 @@ def similar_jobs_displayed(fake_db, client, context):
     context.job_id = "JOB_MAIN_2"
     seed_job(fake_db, context.job_id, title="Data Analyst", category="Data", location="KL")
     context.recommended_id = "JOB_SIMILAR_2"
-    seed_job(fake_db, context.recommended_id, title="Data Scientist", category="Data", location="Johor")
+    seed_job(
+        fake_db, context.recommended_id, title="Data Scientist", category="Data", location="Johor"
+    )
 
     response = client.get(f"/jobs/{context.job_id}")
     assert f'href="/jobs/{context.recommended_id}"' in response.text

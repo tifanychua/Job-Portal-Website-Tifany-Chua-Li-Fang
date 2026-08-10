@@ -180,7 +180,9 @@ def employer_clicks_notification(fake_db, client, context):
     context.response = client.get(link)
 
 
-@then("the system should display the interview details including candidate information, interview date, time, and status")
+@then(
+    "the system should display the interview details including candidate information, interview date, time, and status"
+)
 def assert_interview_details_available(client, context):
     assert context.response.status_code == 200
 
@@ -235,7 +237,9 @@ def employer_accesses_notification_section(client, context):
     context.response = client.get("/employer-notifications")
 
 
-@then("the system should display a message indicating that no interview notifications are available")
+@then(
+    "the system should display a message indicating that no interview notifications are available"
+)
 def assert_no_interview_notifications_message(client, context):
     assert context.response.status_code == 200
     assert "No notifications yet" in context.response.text
