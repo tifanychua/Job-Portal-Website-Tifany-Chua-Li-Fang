@@ -94,7 +94,7 @@ def transaction_management(
                 )
 
                 company_email = company_data.get(
-                    "email",
+                    "businessEmail",
                     ""
                 )
 

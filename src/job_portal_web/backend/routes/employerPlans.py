@@ -10,6 +10,7 @@ from fastapi import (
     APIRouter,
     Request,
     HTTPException,
+    Form,
 )
 
 from fastapi.responses import (
@@ -413,7 +414,8 @@ def start_subscription(
 )
 def change_subscription(
     request: Request,
-    plan_name: str
+    plan_name: str,
+    proration_date: int = Form(...)
 ):
 
     company_id = (
