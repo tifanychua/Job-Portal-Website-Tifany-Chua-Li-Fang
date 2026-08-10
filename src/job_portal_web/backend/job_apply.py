@@ -73,6 +73,13 @@ def _get_screening_questions(job):
 
 
 def _get_current_job_seeker(request: Request):
+    # Require user_type == "job_seeker" too, not just a leftover
+    # applicant_id in the session -- keeps this in sync with how
+    # job_information.py / main.py / savedJob.py / notifications.py all
+    # determine "is this session a logged-in job seeker".
+    if request.session.get("user_type") != "job_seeker":
+        return None, None
+
     job_seeker_id = request.session.get("applicant_id")
 
     if not job_seeker_id:
@@ -112,22 +119,24 @@ def job_apply_form(request: Request, job_id: str):
 
     job_seeker_id, job_seeker = _get_current_job_seeker(request)
 
-    job_seeker = job_seeker or {
+    # `job_seeker_display` is only used to prefill/describe the form for a
+    # guest browsing the apply page before logging in -- it must NOT be
+    # passed as `user`, since header.html treats any truthy `user` as
+    # "logged in" and would otherwise show a logged-in header for guests.
+    job_seeker_display = job_seeker or {
         "full_name": "Guest Applicant",
         "headline": "Complete your profile to speed up applications",
         "photo": "",
     }
-    user = job_seeker
-    print(user)
 
     return templates.TemplateResponse(
         request=request,
         name="job_apply.html",
         context={
-            "user": user,
+            "user": job_seeker,
             "request": request,
             "job": job,
-            "job_seeker": job_seeker,
+            "job_seeker": job_seeker_display,
             "questions": _get_screening_questions(job),
         },
     )
@@ -153,6 +162,24 @@ async def job_apply_submit(
         return JSONResponse(
             status_code=401,
             content={"success": False, "message": "Please log in to apply for this job."},
+        )
+
+    # ==============================
+    # Check Registered Account
+    #
+    # A session can carry an applicant_id without a matching job_seeker
+    # document (e.g. a stale session after the account was removed, or a
+    # forged/expired session cookie). Only a genuinely registered job
+    # seeker may submit an application.
+    # ==============================
+
+    if not job_seeker:
+        return JSONResponse(
+            status_code=403,
+            content={
+                "success": False,
+                "message": "Only registered job seekers can apply. Please log in with a registered account.",
+            },
         )
 
     form_data = await request.form()

@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Applications | JobConnect</title>
-  <link rel="stylesheet" href="/css/job_application.css">
+  <link rel="stylesheet" href="/css/job_application.css?v=8">
   <link rel="stylesheet" href="/css/profile.css">
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="/css/base.css">
@@ -13,6 +13,7 @@
 </head>
 
 <body>
+
   {% include "components/header.html" %}
 
   <div class="profile-page">
@@ -56,6 +57,10 @@
 
 </div>
     <!-- ================= APPLICATION LIST ================= -->
+    <div class="application-results">
+      <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+      </div>
     {% if application %}
     <div class="application-list">
 
@@ -183,6 +188,7 @@
       </a>
     </div>
     {% endif %}
+    </div>
   </div>
 
       </div>
@@ -191,6 +197,50 @@
   </div>
 
   {% include "components/footer.html" %}
+
+  <script>
+    // Show a spinner overlay while a status tab switch reloads the page
+    // (tabs are plain links to /application?status=...). A full-page
+    // navigation can start before the browser ever paints a class change
+    // made right before it, so this holds the navigation for a short beat
+    // with setTimeout to guarantee at least one paint happens first.
+    //
+    // The overlay is position:fixed (see job_application.css), so it shows
+    // up immediately regardless of scroll position or list length -- no
+    // scrolling the page, no pushing content down. Its `top` is set here
+    // to sit right under the tabs at the current scroll position (or at
+    // the very top of the viewport if the tabs have already been
+    // scrolled out of view).
+    document.querySelectorAll(".application-tab").forEach(function (tab) {
+      tab.addEventListener("click", function (event) {
+        var destination = tab.getAttribute("href");
+        if (!destination) return;
+
+        event.preventDefault();
+
+        var overlay = document.getElementById("loadingOverlay");
+        if (overlay) {
+          var tabsEl = document.querySelector(".application-tabs");
+          var top = tabsEl ? tabsEl.getBoundingClientRect().bottom : 0;
+          overlay.style.top = Math.max(top, 0) + "px";
+
+          // Only cover the main content column, not the sidebar next to it.
+          var mainEl = document.querySelector(".profile-main");
+          if (mainEl) {
+            var mainRect = mainEl.getBoundingClientRect();
+            overlay.style.left = mainRect.left + "px";
+            overlay.style.width = mainRect.width + "px";
+          }
+
+          overlay.classList.add("active");
+        }
+
+        setTimeout(function () {
+          window.location.href = destination;
+        }, 120);
+      });
+    });
+  </script>
 </body>
 
 </html>

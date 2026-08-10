@@ -323,7 +323,7 @@ function reviewApplication(){
             .then(res => {
 
                 if (res.status === 401) {
-                    window.location.href = "/login";
+                    alert("Please log in to save jobs.");
                     return null;
                 }
 

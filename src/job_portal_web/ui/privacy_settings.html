@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobConnect — Privacy Settings</title>
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/profile.css">
+  <link rel="stylesheet" href="/css/jobs.css">
+  <link rel="stylesheet" href="/css/savedJob.css">
+  <link rel="stylesheet" href="/css/privacy_settings.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+  {% include "components/header.html" %}
+
+  <div class="profile-page">
+    <div class="profile-layout">
+
+      {% include "components/profile_sidebar.html" %}
+
+      <div class="profile-main">
+
+        <!-- ============================== PAGE HEADER ============================== -->
+        <div class="saved-header">
+          <div class="saved-header-title">
+            <div>
+              <h1 class="text-page-title">Privacy Settings</h1>
+              <p class="text-normal">
+                Your personal information (name, contact details, resume) is only shared with
+                employers you have applied to. This is the list of employers who currently have
+                access.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================== EMPLOYER ACCESS LIST ============================== -->
+        {% if employers %}
+        <div class="privacy-grid">
+
+          {% for employer in employers %}
+          <div class="privacy-card">
+
+            {% if employer.logo and employer.logo != "default.jpg" %}
+            <div class="logo-placeholder"><img src="{{ employer.logo }}" alt="{{ employer.companyName }}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" loading="lazy"></div>
+            {% else %}
+            <div class="logo-placeholder">{{ employer.companyName[:1] | upper }}</div>
+            {% endif %}
+
+            <div class="job-info">
+              <div class="privacy-card-top">
+                <div class="privacy-company-name">
+                  {{ employer.companyName }}
+                  {% if employer.verified %}<i class="fa-solid fa-circle-check verified-badge"></i>{% endif %}
+                </div>
+
+                <span class="badge-pill badge-success privacy-access-badge">
+                  <i class="fa-solid fa-lock-open"></i> Access granted
+                </span>
+              </div>
+
+              <div class="privacy-applied-jobs">
+                Applied for <strong>{{ employer.job_titles | join(", ") }}</strong>
+                ({{ employer.application_count }} application{{ "s" if employer.application_count != 1 else "" }})
+              </div>
+            </div>
+
+          </div>
+          {% endfor %}
+
+        </div>
+        {% else %}
+
+        <!-- ============================== EMPTY STATE ============================== -->
+        <div class="privacy-empty">
+          <div class="privacy-empty-icon"><i class="fa-solid fa-shield-halved"></i></div>
+          <h3>No employers have access yet</h3>
+          <p>Once you apply to a job, that employer will be able to view your personal information here.</p>
+        </div>
+
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+  {% include "components/footer.html" %}
+
+</body>
+
+</html>

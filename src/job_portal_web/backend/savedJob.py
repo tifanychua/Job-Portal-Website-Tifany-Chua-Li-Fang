@@ -194,7 +194,20 @@ def unsave_job(request: Request, job_id: str):
 
     doc_id = _saved_doc_id(job_seeker_id, job_id)
 
-    db.collection("saved_job").document(doc_id).delete()
+    saved_ref = db.collection("saved_job").document(doc_id)
+
+    if not saved_ref.get().exists:
+
+        return JSONResponse(
+            status_code=404,
+            content={
+                "success": False,
+                "saved": False,
+                "message": "This job is not in your saved list.",
+            },
+        )
+
+    saved_ref.delete()
 
     return JSONResponse(content={"success": True, "saved": False, "message": "Job removed from saved list."})
 

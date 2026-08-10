@@ -1,3 +1,53 @@
+/* ================= LOADING SPINNER OVERLAY (status tab switching) ================= */
+/* Scoped to .application-results (the area below the tabs) only, not the
+   whole page -- header/tabs stay visible while this covers just the list. */
+.application-results {
+    position: relative;
+    min-height: 160px;
+}
+/* A real overlay layer (position:fixed) so it shows up instantly on click,
+   regardless of scroll position or how long the list is -- no scrolling,
+   no pushing content down. `top` is set inline by the click handler to sit
+   right under the tabs at whatever the current scroll position is; left/
+   right/bottom pin it to the rest of the viewport. It does NOT cover the
+   header/tabs above it.
+   ui/style.css also defines a plain .loading-overlay rule (position:fixed,
+   full viewport, different background). Our selector is scoped with the
+   .application-results parent so it out-specificities that rule -- but
+   every property style.css sets is still re-declared explicitly below so
+   none of them leak through. */
+.application-results .loading-overlay {
+    display: none;
+    position: fixed;
+    /* left/width are set inline by the click handler to match the main
+       content column only (excludes the sidebar); these are just a
+       fallback in case that JS hasn't run yet. */
+    left: 0;
+    width: 100%;
+    bottom: 0;
+    height: auto;
+    background: rgba(248, 250, 252, 0.9);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+.application-results .loading-overlay.active {
+    display: flex;
+}
+.loading-spinner {
+    display: inline-block;
+    width: 44px;
+    height: 44px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: loading-spin 0.7s linear infinite;
+}
+@keyframes loading-spin {
+    to { transform: rotate(360deg); }
+}
+
 /* ================= MAIN CONTAINER ================= */
 .applications-body {
     /* Nested inside .profile-main (profile.css) which already supplies
