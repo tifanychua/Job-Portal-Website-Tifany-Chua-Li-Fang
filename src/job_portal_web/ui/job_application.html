@@ -5,14 +5,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Applications | JobConnect</title>
-  <link rel="stylesheet" href="/css/job_application.css">
+  <link rel="stylesheet" href="/css/job_application.css?v=8">
+  <link rel="stylesheet" href="/css/profile.css">
   <link rel="stylesheet" href="/static/style.css">
   <link rel="stylesheet" href="/css/base.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
+
   {% include "components/header.html" %}
+
+  <div class="profile-page">
+    <div class="profile-layout">
+
+      {% include "components/profile_sidebar.html" %}
+
+      <div class="profile-main">
+
   <div class="applications-body">
     <!-- ================= PAGE HEADER ================= -->
     <div class="application-page-header">
@@ -26,89 +36,31 @@
       </div>
     </div>
     <!-- ================= FILTER TABS ================= -->
-    <div class="application-filter">
+    <div class="application-tabs">
 
-      <a href="/application?status=all" class="filter-btn {% if active_filter == 'all' %}active{% endif %}">
+  <a href="/application?status=all"
+     class="application-tab {% if active_filter == 'all' %}active{% endif %}">
+    All <span class="tab-count">({{ total_count }})</span>
+  </a>
 
-        <span class="filter-icon all">
-          <i class="fa-solid fa-layer-group"></i>
-        </span>
+  {% for tab in filter_tabs %}
+  {% if tab != "all" %}
+  <a href="/application?status={{ tab|capitalize }}"
+     class="application-tab {% if active_filter|lower == tab %}active{% endif %}">
+    {{ tab|capitalize }}
+    <span class="tab-count">
+      ({% for key, value in counts.items() %}{% if key|lower == tab %}{{ value }}{% endif %}{% endfor %})
+    </span>
+  </a>
+  {% endif %}
+  {% endfor %}
 
-        <span class="filter-content">
-          <span class="filter-label">
-            All
-          </span>
-
-          <span class="filter-count">
-            {{ total_count }}
-          </span>
-        </span>
-
-      </a>
-
-
-      {% for tab in filter_tabs %}
-
-      {% if tab != "all" %}
-
-      <a href="/application?status={{ tab|capitalize }}" 
-        class="filter-btn filter-{{ tab }}
-        {% if active_filter|lower == tab %}active{% endif %}">
-
-
-        <span class="filter-icon">
-
-          {% if tab == "submitted" %}
-          <i class="fa-regular fa-paper-plane"></i>
-
-          {% elif tab == "reviewed" %}
-          <i class="fa-solid fa-award"></i>
-
-          {% elif tab == "shortlisted" %}
-          <i class="fa-regular fa-star"></i>
-
-          {% elif tab == "offered" %}
-          <i class="fa-solid fa-award"></i>
-
-          {% elif tab == "rejected" %}
-          <i class="fa-solid fa-xmark"></i>
-
-          {% elif tab == "cancelled" %}
-          <i class="fa-solid fa-ban"></i>
-
-          {% endif %}
-
-        </span>
-
-
-        <span class="filter-content">
-
-          <span class="filter-label">
-            {{ tab|capitalize }}
-          </span>
-
-
-          <span class="filter-count">
-
-            {% for key,value in counts.items() %}
-            {% if key|lower == tab %}
-            {{ value }}
-            {% endif %}
-            {% endfor %}
-
-          </span>
-
-        </span>
-
-
-      </a>
-
-      {% endif %}
-
-      {% endfor %}
-
-    </div>
+</div>
     <!-- ================= APPLICATION LIST ================= -->
+    <div class="application-results">
+      <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+      </div>
     {% if application %}
     <div class="application-list">
 
@@ -236,7 +188,59 @@
       </a>
     </div>
     {% endif %}
+    </div>
   </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  {% include "components/footer.html" %}
+
+  <script>
+    // Show a spinner overlay while a status tab switch reloads the page
+    // (tabs are plain links to /application?status=...). A full-page
+    // navigation can start before the browser ever paints a class change
+    // made right before it, so this holds the navigation for a short beat
+    // with setTimeout to guarantee at least one paint happens first.
+    //
+    // The overlay is position:fixed (see job_application.css), so it shows
+    // up immediately regardless of scroll position or list length -- no
+    // scrolling the page, no pushing content down. Its `top` is set here
+    // to sit right under the tabs at the current scroll position (or at
+    // the very top of the viewport if the tabs have already been
+    // scrolled out of view).
+    document.querySelectorAll(".application-tab").forEach(function (tab) {
+      tab.addEventListener("click", function (event) {
+        var destination = tab.getAttribute("href");
+        if (!destination) return;
+
+        event.preventDefault();
+
+        var overlay = document.getElementById("loadingOverlay");
+        if (overlay) {
+          var tabsEl = document.querySelector(".application-tabs");
+          var top = tabsEl ? tabsEl.getBoundingClientRect().bottom : 0;
+          overlay.style.top = Math.max(top, 0) + "px";
+
+          // Only cover the main content column, not the sidebar next to it.
+          var mainEl = document.querySelector(".profile-main");
+          if (mainEl) {
+            var mainRect = mainEl.getBoundingClientRect();
+            overlay.style.left = mainRect.left + "px";
+            overlay.style.width = mainRect.width + "px";
+          }
+
+          overlay.classList.add("active");
+        }
+
+        setTimeout(function () {
+          window.location.href = destination;
+        }, 120);
+      });
+    });
+  </script>
 </body>
 
 </html>

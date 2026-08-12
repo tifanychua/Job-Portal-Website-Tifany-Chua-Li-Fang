@@ -1,10 +1,21 @@
 __pycache__/
 *.pyc
 .venv/
+
 .coverage
 coverage.xml
+htmlcov/
+.pytest_cache/
 .hypothesis/
-dist/
 .cache/
-src/job_portal_web/backend/firebase_key.json.hypothesis/
+dist/
+
+# Firebase credentials
 src/job_portal_web/backend/firebase_key.json
+
+# Environment secrets
+.env
+**/.env
+
+# Generated reports
+generated_reports/

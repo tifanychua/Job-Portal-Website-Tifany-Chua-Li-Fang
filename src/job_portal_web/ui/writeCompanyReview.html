@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Write Company Review</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/css/companyReview.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<form
+    id="reviewForm"
+    method="post"
+    action="/company/{{ company.id }}/write-review">
+
+    <div class="review-container">
+
+        <!-- =========================================== -->
+        <!-- Header -->
+        <!-- =========================================== -->
+
+        <div class="review-header">
+
+            <div class="company-logo">
+
+                <img
+                    src="{{ company.logo if company.logo else '/images/user.png' }}"
+                    alt="{{ company.companyName }}">
+
+            </div>
+
+            <div>
+
+                <h1>
+
+                    Review Working at
+
+                    {{ company.companyName }}
+
+                </h1>
+
+                <p>
+
+                    Your review is anonymous and helps other job seekers
+                    understand what it is like to work here.
+
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- =========================================== -->
+        <!-- Progress -->
+        <!-- =========================================== -->
+
+        <div class="progress-bar">
+
+            <div class="step active">
+
+                <div class="circle">
+
+                    1
+
+                </div>
+
+                <span>
+
+                    Overall Rating
+
+                </span>
+
+            </div>
+
+            <div class="line"></div>
+
+            <div class="step">
+
+                <div class="circle">
+
+                    2
+
+                </div>
+
+                <span>
+
+                    Your Role
+
+                </span>
+
+            </div>
+
+            <div class="line"></div>
+
+            <div class="step">
+
+                <div class="circle">
+
+                    3
+
+                </div>
+
+                <span>
+
+                    Experience
+
+                </span>
+
+            </div>
+
+            <div class="line"></div>
+
+            <div class="step">
+
+                <div class="circle">
+
+                    4
+
+                </div>
+
+                <span>
+
+                    Submit
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <!-- =========================================== -->
+        <!-- STEP 1 -->
+        <!-- =========================================== -->
+
+        <section
+            class="review-step active-step"
+            id="step1">
+
+            <div class="step-title">
+
+                <h2>
+
+                    Overall Rating
+
+                </h2>
+
+                <p>
+
+                    How was your overall experience working at
+                    <strong>{{ company.companyName }}</strong>?
+
+                </p>
+
+            </div>
+
+            <div class="rating-box">
+
+                <div class="star-rating">
+
+                    <i class="fa-regular fa-star" data-value="1"></i>
+                    <i class="fa-regular fa-star" data-value="2"></i>
+                    <i class="fa-regular fa-star" data-value="3"></i>
+                    <i class="fa-regular fa-star" data-value="4"></i>
+                    <i class="fa-regular fa-star" data-value="5"></i>
+
+                    <input
+                        type="hidden"
+                        id="overallRating"
+                        name="overall_rating"
+                        value="">
+
+                </div>
+
+                <p id="ratingError" class="field-error"></p>
+
+                <p>
+
+                    Select a rating from 1 to 5 stars.
+
+                </p>
+
+            </div>
+
+            <div class="step-footer">
+
+                <div></div>
+
+                <button
+                    type="button"
+                    class="btn-primary btn-next"
+                    id="nextStep1">
+
+                    Continue
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+            <!-- =========================================== -->
+        <!-- STEP 2 -->
+        <!-- =========================================== -->
+
+        <section
+            class="review-step"
+            id="step2">
+
+            <div class="step-title">
+
+                <h2>
+
+                    Your Role
+
+                </h2>
+
+                <p>
+
+                    Tell us about the role you had at
+                    <strong>{{ company.companyName }}</strong>.
+
+                </p>
+
+            </div>
+
+            <div class="review-form">
+
+                <!-- Job Title -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Job Title
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="jobTitle"
+                        name="job_title"
+                        placeholder="e.g. Software Engineer"
+                        required>
+
+                </div>
+
+                <!-- Department -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Department
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="department"
+                        name="department"
+                        placeholder="e.g. Information Technology"
+                        required>
+                </div>
+
+                <!-- Employment Type -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Employment Type
+
+                    </label>
+
+                    <select name="employment_type" required>
+
+                        <option value="">
+
+                            Select Employment Type
+
+                        </option>
+
+                        <option>
+
+                            Full-time
+
+                        </option>
+
+                        <option>
+
+                            Part-time
+
+                        </option>
+
+                        <option>
+
+                            Contract
+
+                        </option>
+
+                        <option>
+
+                            Internship
+
+                        </option>
+
+                        <option>
+
+                            Temporary
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Work Location -->
+
+                <div class="form-group">
+
+                    <label>
+
+                        Work Location
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="e.g. Kuala Lumpur"
+                        required>
+
+                </div>
+
+                <!-- Start -->
+
+                <div class="form-row">
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Started Working
+
+                        </label>
+
+                        <input
+                            type="month"
+                            id="startDate"
+                            name="start_date"
+                            required>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Ended Working
+
+                        </label>
+
+                        <input
+                            type="month"
+                            id="endDate"
+                            name="end_date">
+
+                    </div>
+
+                </div>
+
+                <!-- Still Working -->
+
+                <div class="checkbox-group">
+
+                    <label class="checkbox-row">
+
+                        <input
+                            type="checkbox"
+                            id="stillWorking"
+                            name="still_working">
+
+                        <span>I currently work here</span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+
+            <div class="step-footer">
+
+                <button
+                    class="btn-secondary btn-back"
+                    id="backStep2">
+
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                    Back
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-primary btn-next"
+                    id="nextStep2">
+
+                    Continue
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+            <!-- =========================================== -->
+        <!-- STEP 3 -->
+        <!-- =========================================== -->
+
+        <section
+            class="review-step"
+            id="step3">
+
+            <div class="step-title">
+
+                <h2>
+
+                    Your Experience
+
+                </h2>
+
+                <p>
+
+                    Share your experience to help future job seekers understand
+                    what it is like to work at
+                    <strong>{{ company.companyName }}</strong>.
+
+                </p>
+
+            </div>
+
+            <div class="review-layout">
+
+                <!-- ================= Left ================= -->
+
+                <div class="review-main">
+
+                    <div class="form-group">
+
+                        <label class="question-label">
+
+                            Would you recommend this company to a friend?
+
+                        </label>
+
+                        <div class="recommend-group">
+
+                            <label class="recommend-card">
+
+                                <input
+                                    type="radio"
+                                    name="recommend"
+                                    value="Yes"
+                                    required>
+
+                                <i class="fa-solid fa-thumbs-up"></i>
+
+                                <span>Yes</span>
+
+                            </label>
+
+                            <label class="recommend-card">
+
+                                <input
+                                    type="radio"
+                                    name="recommend"
+                                    value="No">
+
+                                <i class="fa-solid fa-thumbs-down"></i>
+
+                                <span>No</span>
+
+                            </label>
+
+                        </div>
+
+        <small id="recommendError" class="field-error"></small>
+
+    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            The Good Things
+
+                        </label>
+
+                        <textarea
+                            name="pros"
+                            rows="5"
+                            placeholder="Describe what you enjoyed about working here..."></textarea>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            The Challenges
+
+                        </label>
+
+                        <textarea
+                            name="cons"
+                            rows="5"
+                            placeholder="Describe what could be improved..."></textarea>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label>
+
+                            Summarise your experience in one sentence
+
+                        </label>
+
+                        <textarea
+                            name="review_title"
+                            rows="3"
+                            placeholder="This will be used as the title of your review"
+                            required></textarea>
+
+                    </div>
+
+                </div>
+
+                <!-- ================= Right ================= -->
+
+                <div class="review-sidebar">
+
+                    <div class="tips-card">
+
+                        <div class="tips-header">
+
+                            <i class="fa-solid fa-shield-heart"></i>
+
+                            <div>
+
+                                <h3>Review Guidelines</h3>
+
+                                <p>Help others by writing an honest and respectful review.</p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="tips-section do">
+
+                            <h4>
+
+                                <i class="fa-solid fa-circle-check"></i>
+
+                                What you should do
+
+                            </h4>
+
+                            <ul>
+
+                                <li>
+                                    Share your real working experience.
+                                </li>
+
+                                <li>
+                                    Mention the company culture.
+                                </li>
+
+                                <li>
+                                    Describe both positive and negative experiences.
+                                </li>
+
+                                <li>
+                                    Write clearly and professionally.
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                        <div class="tips-section dont">
+
+                            <h4>
+
+                                <i class="fa-solid fa-circle-xmark"></i>
+
+                                What you shouldn't do
+
+                            </h4>
+
+                            <ul>
+
+                                <li>
+                                    Don't mention people's names.
+                                </li>
+
+                                <li>
+                                    Don't reveal confidential information.
+                                </li>
+
+                                <li>
+                                    Don't use offensive language.
+                                </li>
+
+                                <li>
+                                    Don't post fake or misleading reviews.
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+
+            <div class="step-footer">
+
+                <button
+                    class="btn-secondary btn-back"
+                    id="backStep3">
+
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                    Back
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-primary btn-next"
+                    id="nextStep3">
+
+                    Continue
+
+                    <i class="fa-solid fa-arrow-right"></i>
+
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- =========================================== -->
+        <!-- STEP 4 -->
+        <!-- =========================================== -->
+
+        <section
+            class="review-step"
+            id="step4">
+
+            <div class="step-title">
+
+                <h2>
+
+                    Final Rating & Submit
+
+                </h2>
+
+                <p>
+
+                    Please rate the following aspects of your experience.
+
+                </p>
+
+            </div>
+
+            <div class="review-form">
+
+                <!-- =========================================== -->
+                <!-- Work Environment -->
+                <!-- =========================================== -->
+
+                <div class="rating-item">
+
+                    <label>
+
+                        Work Environment <span class="required">*</span>
+
+                    </label>
+
+                    <div class="star-rating">
+
+                        <i class="fa-regular fa-star" data-value="1"></i>
+                        <i class="fa-regular fa-star" data-value="2"></i>
+                        <i class="fa-regular fa-star" data-value="3"></i>
+                        <i class="fa-regular fa-star" data-value="4"></i>
+                        <i class="fa-regular fa-star" data-value="5"></i>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        name="work_environment"
+                        required>
+
+                </div>
+
+                <!-- =========================================== -->
+                <!-- Management -->
+                <!-- =========================================== -->
+
+                <div class="rating-item">
+
+                    <label>
+
+                        Management <span class="required">*</span>
+
+                    </label>
+
+                    <div class="star-rating">
+
+                        <i class="fa-regular fa-star" data-value="1"></i>
+                        <i class="fa-regular fa-star" data-value="2"></i>
+                        <i class="fa-regular fa-star" data-value="3"></i>
+                        <i class="fa-regular fa-star" data-value="4"></i>
+                        <i class="fa-regular fa-star" data-value="5"></i>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        name="management"
+                        required>
+
+                </div>
+
+                <!-- =========================================== -->
+                <!-- Career Growth -->
+                <!-- =========================================== -->
+
+                <div class="rating-item">
+
+                    <label>
+
+                        Career Growth <span class="required">*</span>
+
+                    </label>
+
+                    <div class="star-rating">
+
+                        <i class="fa-regular fa-star" data-value="1"></i>
+                        <i class="fa-regular fa-star" data-value="2"></i>
+                        <i class="fa-regular fa-star" data-value="3"></i>
+                        <i class="fa-regular fa-star" data-value="4"></i>
+                        <i class="fa-regular fa-star" data-value="5"></i>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        name="career_growth"
+                        required>
+
+                </div>
+
+                <!-- =========================================== -->
+                <!-- Work-Life Balance -->
+                <!-- =========================================== -->
+
+                <div class="rating-item">
+
+                    <label>
+
+                        Work-Life Balance <span class="required">*</span>
+
+                    </label>
+
+                    <div class="star-rating">
+
+                        <i class="fa-regular fa-star" data-value="1"></i>
+                        <i class="fa-regular fa-star" data-value="2"></i>
+                        <i class="fa-regular fa-star" data-value="3"></i>
+                        <i class="fa-regular fa-star" data-value="4"></i>
+                        <i class="fa-regular fa-star" data-value="5"></i>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        name="work_life_balance"
+                        required>
+
+                </div>
+
+                <!-- =========================================== -->
+                <!-- Benefits & Perks -->
+                <!-- =========================================== -->
+
+                <div class="rating-item">
+
+                    <label>
+
+                        Benefits & Perks <span class="required">*</span>
+
+                    </label>
+
+                    <div class="star-rating">
+
+                        <i class="fa-regular fa-star" data-value="1"></i>
+                        <i class="fa-regular fa-star" data-value="2"></i>
+                        <i class="fa-regular fa-star" data-value="3"></i>
+                        <i class="fa-regular fa-star" data-value="4"></i>
+                        <i class="fa-regular fa-star" data-value="5"></i>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        name="benefits"
+                        required>
+
+                </div>
+
+                <!-- =========================================== -->
+                <!-- Company Culture -->
+                <!-- =========================================== -->
+
+                <div class="rating-item">
+
+                    <label>
+
+                        Company Culture <span class="required">*</span>
+
+                    </label>
+
+                    <div class="star-rating">
+
+                        <i class="fa-regular fa-star" data-value="1"></i>
+                        <i class="fa-regular fa-star" data-value="2"></i>
+                        <i class="fa-regular fa-star" data-value="3"></i>
+                        <i class="fa-regular fa-star" data-value="4"></i>
+                        <i class="fa-regular fa-star" data-value="5"></i>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        name="company_culture"
+                        required>
+
+                </div>
+
+                <!-- =========================================== -->
+                <!-- Learning Opportunities -->
+                <!-- =========================================== -->
+
+                <div class="rating-item">
+
+                    <label>
+
+                        Learning Opportunities <span class="required">*</span>
+
+                    </label>
+
+                    <div class="star-rating">
+
+                        <i class="fa-regular fa-star" data-value="1"></i>
+                        <i class="fa-regular fa-star" data-value="2"></i>
+                        <i class="fa-regular fa-star" data-value="3"></i>
+                        <i class="fa-regular fa-star" data-value="4"></i>
+                        <i class="fa-regular fa-star" data-value="5"></i>
+
+                    </div>
+
+                    <input
+                        type="hidden"
+                        name="learning_opportunities"
+                        required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+
+                        Additional Comments (Optional)
+
+                    </label>
+
+                    <textarea
+                        rows="5"
+                        name="additional_comments"
+                        placeholder="Any additional feedback..."></textarea>
+
+                </div>
+
+                <div class="checkbox-group">
+
+                    <label class="checkbox-row">
+
+                        <input
+                            type="checkbox"
+                            id="confirmReview"
+                            required>
+
+                        <span>
+
+                            I confirm that this review is based on my own experience and follows the community guidelines.
+
+                        </span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+            <div class="step-footer">
+
+                <button
+                    type="button"
+                    class="btn-secondary btn-back">
+
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                    Back
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn-primary">
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                    Submit Review
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </div>
+</form>
+
+<script src="/js/companyReview.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>JobConnect - Transaction Management</title>
+
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/adminTransactions.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "adminHeader.html" %}
+
+<div class="admin-page">
+
+<main>
+
+    <!-- ========================================= -->
+    <!-- Page Header -->
+    <!-- ========================================= -->
+
+    <div class="page-header">
+
+        <div>
+            <h1>Transaction Management</h1>
+
+            <p>
+                Monitor all employer payments and subscription transactions.
+            </p>
+        </div>
+
+        <div class="header-buttons">
+
+            <a href="/admin/transactions/report"
+            class="report-btn">
+
+                <i class="fa-solid fa-file-lines"></i>
+
+                Generate Report
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- Summary Cards -->
+    <!-- ========================================= -->
+
+    <div class="summary-grid">
+
+        <div class="summary-card">
+
+            <div class="summary-icon blue">
+                <i class="fa-solid fa-money-bill-wave"></i>
+            </div>
+
+            <div class="summary-content">
+
+                <h2>
+                    RM {{ "%.2f"|format(total_revenue) }}
+                </h2>
+
+                <span>Total Revenue {{ current_year }}</span>
+
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-icon purple">
+                <i class="fa-solid fa-receipt"></i>
+            </div>
+
+            <div class="summary-content">
+
+                <h2>{{ total_transactions }}</h2>
+
+                <span>Total Transactions</span>
+
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-icon green">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div class="summary-content">
+
+                <h2>{{ successful }}</h2>
+
+                <span>Successful Payments</span>
+
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-icon orange">
+                <i class="fa-solid fa-clock"></i>
+            </div>
+
+            <div class="summary-content">
+
+                <h2>{{ pending }}</h2>
+
+                <span>Pending Payments</span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- Search & Filter -->
+    <!-- ========================================= -->
+
+    <div class="toolbar">
+
+        <!-- Search -->
+        <div class="toolbar-left">
+
+            <input
+                type="text"
+                id="transactionSearch"
+                class="search-box"
+                placeholder="Search transaction ID, company..."
+                autocomplete="off">
+
+        </div>
+
+
+        <!-- Filters -->
+        <div class="toolbar-right">
+
+            <!-- Status -->
+            <select id="statusFilter">
+
+                <option value="">All Status</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="PENDING">Pending</option>
+                <option value="FAILED">Failed</option>
+
+            </select>
+
+
+            <!-- Payment Method -->
+            <!-- <select id="paymentMethodFilter">
+
+                <option value="">All Payment Methods</option>
+                <option value="PAYPAL">PayPal</option>
+                <option value="CREDIT CARD">Credit Card</option>
+
+            </select> -->
+
+
+            <!-- Date Filter Button -->
+            <button
+                type="button"
+                class="date-filter-btn"
+                id="dateFilterBtn">
+
+                <i class="fa-solid fa-calendar-days"></i>
+
+                Date Filter
+
+            </button>
+
+
+            <!-- Date Filter Panel -->
+            <div
+                class="date-filter-panel"
+                id="dateFilterPanel">
+
+                <div class="date-field">
+
+                    <label>From Date</label>
+
+                    <input
+                        type="date"
+                        id="fromDate">
+
+                </div>
+
+
+                <div class="date-field">
+
+                    <label>To Date</label>
+
+                    <input
+                        type="date"
+                        id="toDate">
+
+                </div>
+
+
+                <div class="date-filter-actions">
+
+                    <button
+                        type="button"
+                        class="clear-date-btn"
+                        id="clearDateBtn">
+
+                        Clear
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="apply-date-btn"
+                        id="applyDateBtn">
+
+                        Apply
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+        <!-- ========================================= -->
+    <!-- Transaction Table -->
+    <!-- ========================================= -->
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Transaction ID</th>
+
+                    <th>Company</th>
+
+                    <th>Package</th>
+
+                    <th>Payment Method</th>
+
+                    <th>Amount</th>
+
+                    <th>Status</th>
+
+                    <th>Date</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody id="transactionTableBody">
+
+                {% if transactions %}
+
+                    {% for transaction in transactions %}
+
+                    <tr
+                        class="transaction-row"
+
+                        data-status="{{ transaction.status|upper }}"
+
+                        data-payment-method="{{ transaction.payment_method|upper }}"
+
+                        {% if transaction.completed_at %}
+                            data-date="{{ transaction.completed_at.strftime('%Y-%m-%d') }}"
+                        {% elif transaction.created_at %}
+                            data-date="{{ transaction.created_at.strftime('%Y-%m-%d') }}"
+                        {% else %}
+                            data-date=""
+                        {% endif %}
+                    >
+
+                        <td>{{ transaction.transaction_id }}</td>
+
+                        <td>{{ transaction.company_name }}</td>
+
+                        <td>{{ transaction.package }}</td>
+
+                        <td>{{ transaction.payment_method }}</td>
+
+                        <td>
+                            RM {{ "%.2f"|format(transaction.amount|float) }}
+                        </td>
+
+                        <td>
+
+                            {% if transaction.status == "COMPLETED" %}
+
+                                <span class="status success">
+                                    Completed
+                                </span>
+
+                            {% elif transaction.status == "PENDING" %}
+
+                                <span class="status pending">
+                                    Pending
+                                </span>
+
+                            {% elif transaction.status == "FAILED" %}
+
+                                <span class="status failed">
+                                    Failed
+                                </span>
+
+                            {% else %}
+
+                                <span class="status">
+                                    {{ transaction.status }}
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if transaction.completed_at %}
+
+                                {{ transaction.completed_at.strftime("%d %b %Y") }}
+
+                            {% elif transaction.created_at %}
+
+                                {{ transaction.created_at.strftime("%d %b %Y") }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                {% endif %}
+
+
+                <!-- Empty / no search result message -->
+                <tr
+                    id="noTransactionMessage"
+                    {% if transactions %}style="display:none;"{% endif %}
+                >
+                    <td colspan="7" class="empty-state">
+
+                        <i class="fa-solid fa-receipt"></i>
+
+                        <p>No transactions found.</p>
+
+                    </td>
+                </tr>
+
+                </tbody>
+
+    </div>
+
+        <!-- ========================================= -->
+    <!-- Transaction Detail Modal -->
+    <!-- ========================================= -->
+
+    <div id="transactionModal" class="modal">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h2>
+                    Transaction Details
+                </h2>
+
+                <span class="close" onclick="closeTransactionModal()">
+                    &times;
+                </span>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Transaction ID
+                    </span>
+
+                    <span id="modalTransactionId"></span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Company
+                    </span>
+
+                    <span id="modalCompany"></span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Package
+                    </span>
+
+                    <span id="modalPackage"></span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Payment Method
+                    </span>
+
+                    <span id="modalMethod"></span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Credits
+                    </span>
+
+                    <span id="modalCredits"></span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Amount
+                    </span>
+
+                    <span id="modalAmount"></span>
+
+                </div>
+
+
+                <div class="detail-row">
+
+                    <span class="detail-label">
+                        Status
+                    </span>
+
+                    <span id="modalStatus"></span>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    class="secondary-btn"
+                    onclick="closeTransactionModal()">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- Pagination -->
+    <!-- ========================================= -->
+
+    {% if total_pages > 1 %}
+
+    <div class="pagination">
+
+        <!-- Previous -->
+        {% if current_page > 1 %}
+
+        <a
+            class="page-btn"
+                href="/admin/transactions?page={{ current_page - 1 }}&status={{ current_status }}&keyword={{ keyword }}"        </a>
+
+        {% endif %}
+
+
+        <!-- Page Numbers -->
+        {% for page_number in range(1, total_pages + 1) %}
+
+            <a
+                class="page-btn {% if page_number == current_page %}active{% endif %}"
+                href="/admin/transactions?page={{ current_page - 1 }}&status={{ current_status }}&keyword={{ keyword }}"                {{ page_number }}
+
+            </a>
+
+        {% endfor %}
+
+
+        <!-- Next -->
+        {% if current_page < total_pages %}
+
+        <a
+            class="page-btn"
+            href="/admin/transactions?page={{ current_page + 1 }}&status={{ current_status }}&keyword={{ keyword }}"            <i class="fa-solid fa-chevron-right"></i>
+        </a>
+
+        {% endif %}
+
+    </div>
+
+    {% endif %}
+
+</main>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput =
+        document.getElementById("transactionSearch");
+
+    const statusFilter =
+        document.getElementById("statusFilter");
+
+    //const paymentMethodFilter =
+        //document.getElementById("paymentMethodFilter");
+
+    const dateFilterBtn =
+        document.getElementById("dateFilterBtn");
+
+    const dateFilterPanel =
+        document.getElementById("dateFilterPanel");
+
+    const fromDate =
+        document.getElementById("fromDate");
+
+    const toDate =
+        document.getElementById("toDate");
+
+    // =====================================================
+    // DATE LIMITS
+    // =====================================================
+
+    // Don't allow future dates
+    const today = new Date().toISOString().split("T")[0];
+
+    fromDate.max = today;
+    toDate.max = today;
+
+
+    // When From Date changes
+    fromDate.addEventListener("change", function () {
+
+        if (fromDate.value) {
+
+            // To Date cannot be before From Date
+            toDate.min = fromDate.value;
+
+        } else {
+
+            toDate.removeAttribute("min");
+
+        }
+
+
+        // If current To Date became invalid, clear it
+        if (
+            toDate.value &&
+            fromDate.value &&
+            toDate.value < fromDate.value
+        ) {
+
+            toDate.value = "";
+
+        }
+
+    });
+
+
+    // When To Date changes
+    toDate.addEventListener("change", function () {
+
+        if (toDate.value) {
+
+            // From Date cannot be after To Date
+            fromDate.max = toDate.value;
+
+        } else {
+
+            fromDate.max = today;
+
+        }
+
+
+        // Extra protection
+        if (
+            fromDate.value &&
+            toDate.value &&
+            fromDate.value > toDate.value
+        ) {
+
+            fromDate.value = "";
+
+        }
+
+    });
+
+    const applyDateBtn =
+        document.getElementById("applyDateBtn");
+
+    const clearDateBtn =
+        document.getElementById("clearDateBtn");
+
+    const noTransactionMessage =
+        document.getElementById("noTransactionMessage");
+
+
+    let activeFromDate = "";
+    let activeToDate = "";
+
+
+    function filterTransactions() {
+
+        const keyword =
+            searchInput.value.toLowerCase().trim();
+
+        const selectedStatus =
+            statusFilter.value.toUpperCase();
+
+        //const selectedPaymentMethod =
+            //paymentMethodFilter.value.toUpperCase();
+
+        const rows =
+            document.querySelectorAll(".transaction-row");
+
+        let visibleCount = 0;
+
+
+        rows.forEach(function (row) {
+
+            const rowText =
+                row.textContent.toLowerCase();
+
+            const rowStatus =
+                (row.dataset.status || "").toUpperCase();
+
+            //const rowPaymentMethod =
+                //(row.dataset.paymentMethod || "").toUpperCase();
+
+            const rowDate =
+                row.dataset.date || "";
+
+
+            const matchesSearch =
+                keyword === "" ||
+                rowText.includes(keyword);
+
+
+            const matchesStatus =
+                selectedStatus === "" ||
+                rowStatus === selectedStatus;
+
+
+            //const matchesPaymentMethod =
+               // selectedPaymentMethod === "" ||
+                //rowPaymentMethod === selectedPaymentMethod;
+
+
+            const matchesFromDate =
+                activeFromDate === "" ||
+                (
+                    rowDate !== "" &&
+                    rowDate >= activeFromDate
+                );
+
+
+            const matchesToDate =
+                activeToDate === "" ||
+                (
+                    rowDate !== "" &&
+                    rowDate <= activeToDate
+                );
+
+
+            if (
+                matchesSearch &&
+                matchesStatus &&
+                //matchesPaymentMethod &&
+                matchesFromDate &&
+                matchesToDate
+            ) {
+
+                row.style.display = "";
+                visibleCount++;
+
+            } else {
+
+                row.style.display = "none";
+
+            }
+
+        });
+
+
+        if (visibleCount === 0) {
+
+            noTransactionMessage.style.display = "";
+
+        } else {
+
+            noTransactionMessage.style.display = "none";
+
+        }
+
+    }
+
+
+    // Live search
+    searchInput.addEventListener(
+        "input",
+        filterTransactions
+    );
+
+
+    // Status
+    statusFilter.addEventListener(
+        "change",
+        filterTransactions
+    );
+
+
+    // Payment Method
+    //paymentMethodFilter.addEventListener(
+    //    "change",
+    //    filterTransactions
+    //);
+
+
+    // Open / close date panel
+    dateFilterBtn.addEventListener("click", function () {
+
+        dateFilterPanel.classList.toggle("show");
+
+    });
+
+
+    // Apply date
+    applyDateBtn.addEventListener("click", function () {
+
+        activeFromDate = fromDate.value;
+        activeToDate = toDate.value;
+
+        // Validation
+        if (
+            activeFromDate !== "" &&
+            activeToDate !== "" &&
+            activeFromDate > activeToDate
+        ) {
+
+            alert("From Date cannot be later than To Date.");
+
+            return;
+
+        }
+
+        filterTransactions();
+
+        dateFilterPanel.classList.remove("show");
+
+    });
+
+
+    // Clear date
+    clearDateBtn.addEventListener("click", function () {
+
+        fromDate.value = "";
+        toDate.value = "";
+
+        activeFromDate = "";
+        activeToDate = "";
+
+        filterTransactions();
+
+        dateFilterPanel.classList.remove("show");
+
+    });
+
+
+    filterTransactions();
+
+});
+
+</script>
+</body>
+
+</html>

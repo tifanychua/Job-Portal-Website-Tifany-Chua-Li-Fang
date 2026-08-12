@@ -1,15 +1,34 @@
 <header>
-    <div class="logo">
+    <a href="/" class="logo">
         <i class="fa-solid fa-location-dot"></i>
         <span>JobConnect</span>
-    </div>
+    </a>
 
     <nav>
-        <a href="/">Home</a>
-        <a href="/jobs">Jobs</a>
-        <a href="/companies">Companies</a>
-        <a href="/career-advice">Career Advice</a>
-        <a href="/about">About Us</a>
+        <a href="/"
+            class="{% if active_page == 'home' %}active{% endif %}">
+                Home
+            </a>
+
+            <a href="/jobs"
+            class="{% if active_page == 'jobs' %}active{% endif %}">
+                Jobs
+            </a>
+
+            <a href="/companies"
+            class="{% if active_page == 'companies' %}active{% endif %}">
+                Companies
+            </a>
+
+            <a href="/career-advice"
+            class="{% if active_page == 'career' %}active{% endif %}">
+                Career Advice
+            </a>
+
+            <a href="/about-us"
+            class="{% if active_page == 'about' %}active{% endif %}">
+                About Us
+            </a>
 
         {% if user %}
             <a href="/my_interviews">Interviews</a>
@@ -19,17 +38,17 @@
 
     <div class="nav-right">
 
-        <i class="fa-solid fa-globe"></i>
-        <span>EN</span>
+        
 
         {% if user %}
 
-            <i class="fa-regular fa-heart"></i>
-
-            <div class="notification">
+            <a href="/notifications" class="notification">
                 <i class="fa-regular fa-bell"></i>
-                <span class="badge">3</span>
-            </div>
+                {% set unread = unread_notifications_count if unread_notifications_count is defined else 0 %}
+                {% if unread > 0 %}
+                <span class="badge">{{ unread if unread <= 9 else '9+' }}</span>
+                {% endif %}
+            </a>
 
             <a href="/profile" class="profile">
 

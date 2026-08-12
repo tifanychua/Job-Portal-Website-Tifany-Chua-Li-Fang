@@ -129,7 +129,14 @@ def login_page(request: Request):
             "role_label": ROLE_LABEL[role],
         },
     )
+def _job_seeker_account_is_active(account_data: dict) -> bool:
+    account_status = (
+        account_data.get("accountStatus")
+        or account_data.get("account_status")
+        or account_data.get("status")
+    )
 
+    return str(account_status).strip().lower() == "active"
 
 @router.post("/firebase-login")
 async def firebase_login(request: Request, data: LoginToken):
@@ -142,23 +149,33 @@ async def firebase_login(request: Request, data: LoginToken):
     except Exception as e:
         return JSONResponse(status_code=401, content={"error": str(e)})
 
+    # Wipe any previous identity in this session (e.g. a leftover
+    # applicant_id/company_id from a different account logging in earlier
+    # on the same browser session) before establishing the new one, so
+    # pages can never see a mix of old and new session keys.
+    request.session.clear()
+    
     # Job Seeker
     job = db.collection("job_seeker").document(uid).get()
 
     if job.exists:
         job_data = job.to_dict() or {}
 
-        try:
-            ensure_account_can_log_in(job_data)
-        except HTTPException as error:
-            return JSONResponse(
-                {"error": error.detail},
-                status_code=error.status_code,
-            )
+    if not _job_seeker_account_is_active(job_data):
+        return JSONResponse(
+            content={
+                "error": (
+                    "Your account is not active. "
+                    "Please contact the administrator."
+                )
+            },
+            status_code=403,
+        )
 
-        request.session["user_type"] = "job_seeker"
-        request.session["applicant_id"] = uid
-        return {"redirect": "/"}
+    request.session["user_type"] = "job_seeker"
+    request.session["applicant_id"] = uid
+
+    return {"redirect": "/"}
 
     # Employer
     company = db.collection("company").document(uid).get()
@@ -423,10 +440,14 @@ async def admin_firebase_login(request: Request, data: LoginToken):
     if not admin.exists:
         return JSONResponse({"error": "Access denied."}, status_code=403)
 
+    # See firebase_login() above -- clear any previous identity before
+    # establishing the new one.
+    request.session.clear()
+
     request.session["user_type"] = "admin"
     request.session["admin_id"] = uid
 
-    return {"redirect": "/admin/company-requests"}
+    return {"redirect": "/admin/dashboard"}
 
 
 @router.get("/admin/dashboard")

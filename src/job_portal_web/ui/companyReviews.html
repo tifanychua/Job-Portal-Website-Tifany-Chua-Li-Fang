@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+
+        {{ company.companyName }} Reviews
+
+    </title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/jobs.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/css/companyDetails.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<!-- ===================================================== -->
+<!-- Hero -->
+<!-- ===================================================== -->
+
+<section class="company-hero">
+
+    <div class="hero-inner">
+
+        <div class="company-header">
+
+            <div class="company-logo">
+
+                <img
+                    src="{{ company.logo if company.logo else '/images/user.png' }}"
+                    alt="{{ company.companyName }}">
+
+            </div>
+
+            <div class="company-info">
+
+                <h1>
+
+                    {{ company.companyName }}
+
+                </h1>
+
+                <div class="company-rating">
+
+                    <i class="fa-solid fa-star"></i>
+
+                    <strong>
+
+                        {{ company.rating }}
+
+                    </strong>
+
+                    <span>
+
+                        ({{ company.review_count }} Reviews)
+
+                    </span>
+
+                </div>
+
+                <div class="company-meta">
+
+                    <span>
+
+                        <i class="fa-solid fa-briefcase"></i>
+
+                        {{ company.industry }}
+
+                    </span>
+
+                    <span>
+
+                        <i class="fa-solid fa-location-dot"></i>
+
+                        {{ company.city }},
+                        {{ company.state }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- Navigation -->
+<!-- ===================================================== -->
+
+<div class="company-tabs">
+
+    <a href="/company/{{ company.id }}">
+
+        About
+
+    </a>
+
+    <a href="/company/{{ company.id }}/jobs">
+
+        Jobs
+
+        <span>
+
+            {{ company.job_count }}
+
+        </span>
+
+    </a>
+
+    <a
+        href="/company/{{ company.id }}/reviews"
+        class="active">
+
+        Reviews
+
+        <span>
+
+            {{ company.review_count }}
+
+        </span>
+
+    </a>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- Main -->
+<!-- ===================================================== -->
+
+<div class="company-container">
+
+<!-- ===================================================== -->
+<!-- Review Summary -->
+<!-- ===================================================== -->
+
+<section class="card">
+
+    <div class="section-title">
+
+        <div>
+
+            <h2>
+
+                Employee Reviews
+
+            </h2>
+
+            <p class="section-subtitle">
+
+                Read honest experiences shared by employees who have worked at
+
+                <strong>
+
+                    {{ company.companyName }}
+
+                </strong>
+
+            </p>
+
+        </div>
+
+        {% if user %}
+
+<button
+    class="btn-primary"
+    onclick="location.href='/company/{{ company.id }}/write-review'">
+
+    <i class="fa-regular fa-pen-to-square"></i>
+
+    Write a Review
+
+</button>
+
+{% else %}
+
+<button
+    class="btn-primary"
+    onclick="alert('Please log in to write a review.'); location.href='/login';">
+
+    <i class="fa-regular fa-pen-to-square"></i>
+
+    Write a Review
+
+</button>
+
+{% endif %}
+
+    </div>
+
+    <div class="review-summary">
+
+        <!-- ================================= -->
+        <!-- Overall Rating -->
+        <!-- ================================= -->
+
+        <div class="overall">
+
+            <h1>
+
+                {{ company.rating }}
+
+            </h1>
+
+            <div class="stars">
+
+                {% for i in range(5) %}
+
+                    {% if i < company.rating|round(0,'floor')|int %}
+
+                        <i class="fa-solid fa-star"></i>
+
+                    {% else %}
+
+                        <i class="fa-regular fa-star"></i>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+            <p>
+
+                Based on
+
+                <strong>
+
+                    {{ company.review_count }}
+
+                </strong>
+
+                employee review{% if company.review_count != 1 %}s{% endif %}
+
+            </p>
+
+        </div>
+
+        <!-- ================================= -->
+        <!-- Rating Breakdown -->
+        <!-- ================================= -->
+
+        <div class="bars">
+
+            <div>
+
+                <span>
+
+                    Work Environment
+
+                </span>
+
+                <progress
+                    value="{{ company.work_environment_avg or 0 }}"
+                    max="5"></progress>
+
+                <strong>
+
+                    {{ company.work_environment_avg or "0.0" }}
+
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+
+                    Management
+
+                </span>
+
+                <progress
+                    value="{{ company.management_avg or 0 }}"
+                    max="5"></progress>
+
+                <strong>
+
+                    {{ company.management_avg or "0.0" }}
+
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+
+                    Career Growth
+
+                </span>
+
+                <progress
+                    value="{{ company.career_growth_avg or 0 }}"
+                    max="5"></progress>
+
+                <strong>
+
+                    {{ company.career_growth_avg or "0.0" }}
+
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+
+                    Work-Life Balance
+
+                </span>
+
+                <progress
+                    value="{{ company.work_life_balance_avg or 0 }}"
+                    max="5"></progress>
+
+                <strong>
+
+                    {{ company.work_life_balance_avg or "0.0" }}
+
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+
+                    Company Culture
+
+                </span>
+
+                <progress
+                    value="{{ company.company_culture_avg or 0 }}"
+                    max="5"></progress>
+
+                <strong>
+
+                    {{ company.company_culture_avg or "0.0" }}
+
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>
+
+                    Learning Opportunities
+
+                </span>
+
+                <progress
+                    value="{{ company.learning_opportunities_avg or 0 }}"
+                    max="5"></progress>
+
+                <strong>
+
+                    {{ company.learning_opportunities_avg or "0.0" }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- Rating Distribution -->
+<!-- ===================================================== -->
+
+<section class="card">
+
+    <h2>
+
+        Rating Distribution
+
+    </h2>
+
+    <div class="bars">
+
+        <div>
+
+            <span>
+
+                ★★★★★
+
+            </span>
+
+            <progress
+                value="{{ company.five_star or 0 }}"
+                max="{{ company.review_count if company.review_count > 0 else 1 }}"></progress>
+
+            <strong>
+
+                {{ company.five_star or 0 }}
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span>
+
+                ★★★★☆
+
+            </span>
+
+            <progress
+                value="{{ company.four_star or 0 }}"
+                max="{{ company.review_count if company.review_count > 0 else 1 }}"></progress>
+
+            <strong>
+
+                {{ company.four_star or 0 }}
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span>
+
+                ★★★☆☆
+
+            </span>
+
+            <progress
+                value="{{ company.three_star or 0 }}"
+                max="{{ company.review_count if company.review_count > 0 else 1 }}"></progress>
+
+            <strong>
+
+                {{ company.three_star or 0 }}
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span>
+
+                ★★☆☆☆
+
+            </span>
+
+            <progress
+                value="{{ company.two_star or 0 }}"
+                max="{{ company.review_count if company.review_count > 0 else 1 }}"></progress>
+
+            <strong>
+
+                {{ company.two_star or 0 }}
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span>
+
+                ★☆☆☆☆
+
+            </span>
+
+            <progress
+                value="{{ company.one_star or 0 }}"
+                max="{{ company.review_count if company.review_count > 0 else 1 }}"></progress>
+
+            <strong>
+
+                {{ company.one_star or 0 }}
+
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- Employee Reviews -->
+<!-- ===================================================== -->
+
+<section class="card">
+
+    <div class="section-title">
+
+        <div>
+
+            <h2>
+
+                Employee Reviews
+
+            </h2>
+
+            <p class="section-subtitle">
+
+                {{ company.review_count }}
+
+                Review{% if company.review_count != 1 %}s{% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+    {% if reviews %}
+
+        {% for review in reviews %}
+
+        <div class="review-card">
+
+            <div class="review-left">
+
+                <div class="review-stars">
+
+                    {% for i in range(5) %}
+                        {% if i < review.overall_rating %}
+                            <i class="fa-solid fa-star"></i>
+                        {% else %}
+                            <i class="fa-regular fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+
+                    <span>{{ review.overall_rating }}.0</span>
+
+                </div>
+
+                <h4>{{ review.job_title }}</h4>
+
+                <p class="review-location">
+
+                    {{ review.location }}
+
+                </p>
+
+                <p class="review-period">
+
+                    {{ review.start_date }}
+
+                    -
+
+                    {% if review.still_working %}
+
+                        Present
+
+                    {% else %}
+
+                        {{ review.end_date }}
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+            <div class="review-right">
+
+                <h3>
+
+                    {{ review.review_title }}
+
+                </h3>
+
+                <div class="review-section">
+
+                    <strong>
+
+                        The good things
+
+                    </strong>
+
+                    <p>
+
+                        {{ review.pros }}
+
+                    </p>
+
+                </div>
+
+                <div class="review-section">
+
+                    <strong>
+
+                        The challenges
+
+                    </strong>
+
+                    <p>
+
+                        {{ review.cons }}
+
+                    </p>
+
+                </div>
+
+                {% if review.additional_comments %}
+
+                <div class="review-section">
+
+                    <strong>
+
+                        Additional comments
+
+                    </strong>
+
+                    <p>
+
+                        {{ review.additional_comments }}
+
+                    </p>
+
+                </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+    <!-- =========================================== -->
+    <!-- Empty State -->
+    <!-- =========================================== -->
+
+    <div class="empty-state">
+
+        <i class="fa-regular fa-star"></i>
+
+        <h3>
+
+            No Reviews Yet
+
+        </h3>
+
+        <p>
+
+            This company has not received any employee reviews yet.
+
+        </p>
+
+        <p>
+
+            Be the first to share your working experience and help future job seekers.
+
+        </p>
+
+        <button
+            class="btn-primary"
+            onclick="location.href='/company/{{ company.id }}/write-review'">
+
+            <i class="fa-regular fa-pen-to-square"></i>
+
+            Write the First Review
+
+        </button>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+</div>
+
+</body>
+
+</html>

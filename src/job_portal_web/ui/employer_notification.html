@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+JobConnect - Notifications
+</title>
+
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/css/employerHeader.css">
+<link rel="stylesheet" href="/css/employer_notification.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "employerHeader.html" %}
+
+<div class="employer-notif-page">
+
+<main>
+
+  <div class="notif-page-header">
+    <div class="notif-page-header-title">
+      <div>
+        <h1 class="page-title" style="margin:0;font-size:28px;">Notifications</h1>
+        <p id="notifSubtitle">
+          {% if unread_count > 0 %}
+            You have {{ unread_count }} unread notification{{ "s" if unread_count != 1 else "" }}.
+          {% else %}
+            You're all caught up.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <button type="button" class="notif-mark-all-btn" id="markAllBtn" onclick="markAllRead()" {% if unread_count == 0 %}disabled{% endif %}>
+      <i class="fa-solid fa-check-double"></i> Mark all as read
+    </button>
+  </div>
+
+  <!-- ============================== TABS ============================== -->
+  <div class="notif-tabs">
+    <button type="button" class="notif-tab active" data-filter="all" onclick="setNotifTab('all', this)">
+      All <span class="tab-count">({{ total_notifications }})</span>
+    </button>
+    <button type="button" class="notif-tab" data-filter="unread" onclick="setNotifTab('unread', this)">
+      Unread <span class="tab-count" id="unreadTabCount">({{ unread_count }})</span>
+    </button>
+  </div>
+
+  <!-- ============================== NOTIFICATION LIST ============================== -->
+  <div class="notif-list" id="notifList">
+
+    {% for n in notifications %}
+
+    <div class="notif-item {{ 'unread' if not n.is_read else '' }}"
+      data-id="{{ n.id }}"
+      data-read="{{ 'true' if n.is_read else 'false' }}">
+
+      <div class="notif-icon {{ n.color_class }}">
+        <i class="fa-solid {{ n.icon }}"></i>
+      </div>
+
+      <div class="notif-body" onclick="handleNotifClick('{{ n.id }}', '{{ n.link }}')">
+        <div class="notif-top-row">
+          <span class="notif-title">{{ n.title }}</span>
+          <span class="notif-time">{{ n.time_display }}</span>
+        </div>
+        <p class="notif-message">{{ n.message }}</p>
+      </div>
+
+      <div class="notif-actions">
+        {% if not n.is_read %}
+        <span class="notif-dot" title="Unread"></span>
+        {% endif %}
+        <button type="button" class="notif-action-btn" title="Delete" onclick="deleteNotification('{{ n.id }}', this)">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+
+  <!-- ============================== EMPTY STATE ============================== -->
+  <div class="notif-empty" id="notifEmpty" {% if notifications %}style="display:none"{% endif %}>
+    <div class="notif-empty-icon"><i class="fa-regular fa-bell"></i></div>
+    <h3>No notifications yet</h3>
+    <p>Updates about applicants, interviews and messages will appear here.</p>
+  </div>
+
+  <!-- No results after tab filter -->
+  <div class="notif-empty" id="notifNoResults" style="display:none">
+    <div class="notif-empty-icon"><i class="fa-solid fa-check"></i></div>
+    <h3>No unread notifications</h3>
+    <p>You've read everything for now.</p>
+  </div>
+
+</main>
+
+</div>
+
+<script>
+
+  let currentTab = "all";
+
+  // ---------- Click a notification: mark read + navigate ----------
+  function handleNotifClick(id, link) {
+
+    const item = document.querySelector(`.notif-item[data-id="${id}"]`);
+
+    if (item && item.dataset.read !== "true") {
+      markRead(id, item, false);
+    }
+
+    if (link) {
+      window.location.href = link;
+    }
+  }
+
+  // ---------- Mark single notification read ----------
+  function markRead(id, itemEl, refreshCounts = true) {
+
+    fetch(`/api/notifications/${id}/read`, { method: "POST" })
+      .then(res => res.json())
+      .then(data => {
+
+        if (!data.success) return;
+
+        itemEl.classList.remove("unread");
+        itemEl.dataset.read = "true";
+
+        const dot = itemEl.querySelector(".notif-dot");
+        if (dot) dot.remove();
+
+        if (refreshCounts) updateCounts();
+      });
+  }
+
+  // ---------- Mark all as read ----------
+  function markAllRead() {
+
+    fetch("/api/notifications/mark-all-read", { method: "POST" })
+      .then(res => res.json())
+      .then(data => {
+
+        if (!data.success) return;
+
+        document.querySelectorAll(".notif-item.unread").forEach(item => {
+          item.classList.remove("unread");
+          item.dataset.read = "true";
+          const dot = item.querySelector(".notif-dot");
+          if (dot) dot.remove();
+        });
+
+        updateCounts();
+      });
+  }
+
+  // ---------- Delete ----------
+  function deleteNotification(id, buttonEl) {
+
+    const item = buttonEl.closest(".notif-item");
+
+    fetch(`/api/notifications/${id}`, { method: "DELETE" })
+      .then(res => res.json())
+      .then(data => {
+
+        if (!data.success) {
+          alert("Could not delete this notification. Please try again.");
+          return;
+        }
+
+        item.style.transition = "opacity 0.2s ease";
+        item.style.opacity = "0";
+
+        setTimeout(() => {
+          item.remove();
+          updateCounts();
+          filterNotifTab();
+        }, 200);
+      });
+  }
+
+
+
+  // ---------- Tabs ----------
+  function setNotifTab(tab, buttonEl) {
+
+    currentTab = tab;
+
+    document.querySelectorAll(".notif-tab").forEach(btn => btn.classList.remove("active"));
+    buttonEl.classList.add("active");
+
+    filterNotifTab();
+  }
+
+  function filterNotifTab() {
+
+    const items = document.querySelectorAll(".notif-item");
+    let visibleCount = 0;
+
+    items.forEach(item => {
+
+      const visible = currentTab === "all" || item.dataset.read === "false";
+      item.style.display = visible ? "" : "none";
+
+      if (visible) visibleCount++;
+    });
+
+    document.getElementById("notifNoResults").style.display =
+      (visibleCount === 0 && items.length > 0 && currentTab === "unread") ? "" : "none";
+
+    document.getElementById("notifEmpty").style.display =
+      items.length === 0 ? "" : "none";
+  }
+
+  // ---------- Counts / subtitle / mark-all button state ----------
+  function updateCounts() {
+
+    const allItems = document.querySelectorAll(".notif-item");
+    const unreadItems = document.querySelectorAll('.notif-item[data-read="false"]');
+    const count = unreadItems.length;
+
+    document.querySelector('.notif-tab[data-filter="all"] .tab-count').textContent = `(${allItems.length})`;
+    document.getElementById("unreadTabCount").textContent = `(${count})`;
+
+    const subtitle = document.getElementById("notifSubtitle");
+    subtitle.textContent = count > 0
+      ? `You have ${count} unread notification${count !== 1 ? "s" : ""}.`
+      : "You're all caught up.";
+
+    document.getElementById("markAllBtn").disabled = count === 0;
+}
+
+  filterNotifTab();
+
+</script>
+
+</body>
+
+</html>

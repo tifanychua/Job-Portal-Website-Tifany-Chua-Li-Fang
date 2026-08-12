@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Payment</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+    <link rel="stylesheet"
+          href="/css/payment.css">
+
+</head>
+
+<body>
+
+    {% include "employerHeader.html" %}
+
+    <div class="main-content">
+
+        <!-- ================================= -->
+        <!-- Title -->
+        <!-- ================================= -->
+
+        <div class="page-title">
+
+            <h1>Complete Your Purchase</h1>
+
+            <p>
+
+                Review your package and complete your payment securely.
+
+            </p>
+
+        </div>
+
+        <!-- ================================= -->
+        <!-- Checkout -->
+        <!-- ================================= -->
+
+        <div class="checkout-container">
+
+            <!-- ================================ -->
+            <!-- Left -->
+            <!-- ================================ -->
+
+            <div class="payment-card">
+
+                <div class="package-header">
+
+                    <h2>{{ package.name }}</h2>
+
+                    <div class="package-price">
+
+                        RM {{ package.price }}
+
+                    </div>
+
+                    <span>
+
+                        {{ package.valid_days }} Days Access
+
+                    </span>
+
+                </div>
+
+                <div class="package-feature">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    {{ package.credits }} Job Posting Credits
+
+                </div>
+
+                <div class="package-feature">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    Valid for {{ package.valid_days }} Days
+
+                </div>
+
+                <div class="package-feature">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    Featured Job Visibility
+
+                </div>
+
+                <div class="package-feature">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    Priority Employer Support
+
+                </div>
+
+                <div class="payment-method">
+
+                    <h3>Payment Method</h3>
+
+                    <div class="method-box">
+                        <i class="fa-brands fa-paypal"></i>
+                        PayPal
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ================================ -->
+            <!-- Right -->
+            <!-- ================================ -->
+
+            <div class="summary-card">
+
+                <h2>
+
+                    Order Summary
+
+                </h2>
+
+                <div class="summary-row">
+
+                    <span>
+
+                        Package
+
+                    </span>
+
+                    <strong>
+
+                        {{ package.name }}
+
+                    </strong>
+
+                </div>
+
+                <div class="summary-row">
+
+                    <span>
+
+                        Credits
+
+                    </span>
+
+                    <strong>
+
+                        {{ package.credits }}
+
+                    </strong>
+
+                </div>
+
+                <div class="summary-row">
+
+                    <span>
+
+                        Validity
+
+                    </span>
+
+                    <strong>
+
+                        {{ package.valid_days }} Days
+
+                    </strong>
+
+                </div>
+
+                <div class="summary-row">
+
+                    <span>
+
+                        Payment
+
+                    </span>
+
+                    <strong>
+
+                        PayPal
+
+                    </strong>
+
+                </div>
+
+                <hr>
+
+                <div class="summary-total">
+
+                    <span>
+
+                        Total
+
+                    </span>
+
+                    <strong>
+
+                        RM {{ package.price }}
+
+                    </strong>
+
+                </div>
+
+                <div class="security-box">
+
+                    <i class="fa-solid fa-lock"></i>
+
+                    Secure payment powered by PayPal.
+
+                </div>
+
+                <!-- PayPal Button -->
+
+                <div class="paypal-area">
+
+                    <div id="paypal-button-container"></div>
+
+                </div>
+
+                <a href="/employer-credit"
+                   class="back-btn">
+
+                    <i class="fa-solid fa-arrow-left"></i>
+
+                    Back to Subscription
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================================= -->
+    <!-- PayPal -->
+    <!-- ================================= -->
+
+    <script src="https://www.paypal.com/sdk/js?client-id={{ paypal_client_id }}&currency=MYR"></script>
+
+    <script>
+
+        const packageName = "{{ package_name }}";
+
+    </script>
+
+    <script src="/js/payment.js"></script>
+
+</body>
+
+</html>

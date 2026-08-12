@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Job Posting Credits - JobConnect</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+    <link rel="stylesheet"
+          href="/css/employerCredit.css">
+
+</head>
+
+
+<body>
+
+{% include "employerHeader.html" %}
+
+
+<div class="main-content">
+
+
+    <!-- ================================================= -->
+    <!-- PAGE HEADER -->
+    <!-- ================================================= -->
+
+    <div class="page-title credit-page-header">
+
+        <div>
+
+            <h1>
+                Job Posting Credits
+            </h1>
+
+            <p>
+                View your available job posting credits
+                and subscription usage.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CREDIT SUMMARY -->
+    <!-- ================================================= -->
+
+    <section class="credit-summary">
+
+
+        <!-- Left -->
+
+        <div class="summary-left">
+
+            <h3>
+                Available Job Posting Credits
+            </h3>
+
+
+            <div class="credit-number">
+
+                {{ available_credit }}
+
+                <span>
+                    credits left
+                </span>
+
+            </div>
+
+
+            <p>
+                You can post
+                {{ available_credit }}
+                more job(s).
+            </p>
+
+
+            <button
+                type="button"
+                class="post-btn"
+                onclick="window.location.href='/publish-job'">
+
+                <i class="fa-solid fa-paper-plane"></i>
+
+                Post New Job
+
+            </button>
+
+        </div>
+
+
+        <!-- Center -->
+
+        <div class="summary-center">
+
+            <div class="progress-circle">
+
+                <svg
+                    width="190"
+                    height="190">
+
+                    <circle
+                        class="bg"
+                        cx="95"
+                        cy="95"
+                        r="70">
+                    </circle>
+
+
+                    <circle
+                        id="progress-ring"
+                        class="progress"
+                        cx="95"
+                        cy="95"
+                        r="70">
+                    </circle>
+
+                </svg>
+
+
+                <div class="circle-text">
+
+                    <h2>
+                        {{ available_credit }}
+                    </h2>
+
+                    <span>
+                        left
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Right -->
+
+        <div class="summary-right">
+
+            <div class="legend">
+
+                <span class="blue"></span>
+
+                <label>
+                    Total Credits
+                </label>
+
+                <strong>
+                    {{ total_credit }}
+                </strong>
+
+            </div>
+
+
+            <div class="legend">
+
+                <span class="orange"></span>
+
+                <label>
+                    Used Credits
+                </label>
+
+                <strong>
+                    {{ used_credit }}
+                </strong>
+
+            </div>
+
+
+            <div class="legend">
+
+                <span class="green"></span>
+
+                <label>
+                    Available Credits
+                </label>
+
+                <strong>
+                    {{ available_credit }}
+                </strong>
+
+            </div>
+
+
+            <div class="legend">
+
+                <span class="red"></span>
+
+                <label>
+                    Expired Credits
+                </label>
+
+                <strong>
+                    {{ expired_credit }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- CURRENT SUBSCRIPTION -->
+    <!-- ================================================= -->
+
+    <section class="current-subscription-card">
+
+
+        <!-- Left -->
+
+        <div class="subscription-info">
+
+            <span class="subscription-label">
+                Current Subscription
+            </span>
+
+
+            {% if current_plan %}
+
+                <div class="subscription-plan-row">
+
+                    <h2>
+                        {{ current_plan_name }}
+                    </h2>
+
+
+                    {% if cancel_at_period_end %}
+
+                        <span class="subscription-status cancelling">
+                            Cancelling
+                        </span>
+
+                    {% else %}
+
+                        <span class="subscription-status">
+                            {{ subscription_status|title }}
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+
+                {% if subscription_end %}
+
+                <p>
+
+                    <i class="fa-regular fa-calendar"></i>
+
+
+                    {% if cancel_at_period_end %}
+
+                        Subscription ends:
+
+                    {% else %}
+
+                        Next billing date:
+
+                    {% endif %}
+
+
+                    <strong>
+                        {{ subscription_end }}
+                    </strong>
+
+                </p>
+
+                {% endif %}
+
+
+            {% else %}
+
+                <h2>
+                    No Active Subscription
+                </h2>
+
+                <p>
+                    Choose a subscription plan to receive
+                    job posting credits.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- Right Actions -->
+
+        <div class="subscription-actions">
+
+            <a href="/employer-plans"
+               class="change-plan-btn">
+
+                <i class="fa-solid fa-arrows-rotate"></i>
+
+                <span>
+
+                    {% if current_plan %}
+                        Change Plan
+                    {% else %}
+                        Select Plan
+                    {% endif %}
+
+                </span>
+
+            </a>
+
+
+            {% if current_plan
+                  and subscription_status|upper == "ACTIVE"
+                  and not cancel_at_period_end %}
+
+                <button
+                    type="button"
+                    class="cancel-subscription-btn"
+                    onclick="openCancelSubscriptionModal()">
+
+                    <i class="fa-regular fa-circle-xmark"></i>
+
+                    Cancel Subscription
+
+                </button>
+
+            {% endif %}
+
+
+            {% if current_plan
+                  and cancel_at_period_end %}
+
+                <div class="cancellation-scheduled">
+
+                    <i class="fa-regular fa-clock"></i>
+
+                    Cancels on {{ subscription_end }}
+
+                </div>
+
+
+                <form
+                    action="/employer/subscription/resume"
+                    method="post">
+
+                    <button
+                        type="submit"
+                        class="resume-subscription-btn">
+
+                        <i class="fa-solid fa-rotate-left"></i>
+
+                        Keep Subscription
+
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- PAYMENT METHOD -->
+    <!-- ================================================= -->
+
+    {% if current_plan %}
+
+    <section class="payment-management-card">
+
+
+        <div class="payment-management-info">
+
+            <div class="payment-section-icon">
+
+                <i class="fa-regular fa-credit-card"></i>
+
+            </div>
+
+
+            <div>
+
+                <span class="subscription-label">
+                    Payment Method
+                </span>
+
+
+                {% if card_last4 %}
+
+                    <div class="current-payment-card">
+
+                        <div>
+
+                            <strong>
+
+                                {{ card_brand|upper }}
+                                •••• {{ card_last4 }}
+
+                            </strong>
+
+
+                            {% if card_exp_month
+                                  and card_exp_year %}
+
+                                <span>
+
+                                    Expires
+
+                                    {{ "%02d"|format(card_exp_month) }}/{{ card_exp_year }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+
+                {% else %}
+
+                    <h3>
+                        Payment method managed by Stripe
+                    </h3>
+
+                    <p>
+                        View or update the card used for
+                        your subscription payments.
+                    </p>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+        <form
+            action="/employer/payment-method/manage"
+            method="post">
+
+            <button
+                type="submit"
+                class="manage-payment-btn">
+
+                <i class="fa-solid fa-pen-to-square"></i>
+
+                Manage Payment Method
+
+            </button>
+
+        </form>
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- ================================================= -->
+    <!-- RECENT TRANSACTIONS -->
+    <!-- ================================================= -->
+
+    <section class="history-card recent-transaction-card">
+
+        <div class="history-title-row">
+
+            <div>
+
+                <h2>
+                    Recent Transactions
+                </h2>
+
+                <p>
+                    View your latest subscription payments.
+                </p>
+
+            </div>
+
+
+            <a href="/employer-transactions"
+            class="view-all-btn">
+
+                View All
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </a>
+
+        </div>
+
+
+        <div class="recent-table-wrapper">
+
+            <table class="recent-transaction-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Plan</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Price</th>
+                        <th>Receipt</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% if histories %}
+
+                    {% for item in histories %}
+
+                    <tr>
+
+                        <!-- Plan -->
+                        <td>
+
+                            <strong class="recent-plan-name">
+                                {{ item.package }}
+                            </strong>
+
+                        </td>
+
+
+                        <!-- Date -->
+                        <td>
+
+                            {{ item.date }}
+
+                        </td>
+
+
+                        <!-- Status -->
+                        <td>
+
+                            {% if item.status|upper == "COMPLETED" %}
+
+                                <span class="transaction-status completed">
+
+                                    <i class="fa-solid fa-circle-check"></i>
+
+                                    Completed
+
+                                </span>
+
+                            {% elif item.status|upper == "PENDING" %}
+
+                                <span class="transaction-status pending">
+
+                                    <i class="fa-solid fa-clock"></i>
+
+                                    Pending
+
+                                </span>
+
+                            {% elif item.status|upper == "FAILED" %}
+
+                                <span class="transaction-status failed">
+
+                                    <i class="fa-solid fa-circle-xmark"></i>
+
+                                    Failed
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="transaction-status">
+
+                                    {{ item.status|title }}
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <!-- Price -->
+                        <td>
+
+                            <strong class="recent-price">
+
+                                RM {{
+                                    "%.2f"|
+                                    format(
+                                        item.amount|float
+                                    )
+                                }}
+
+                            </strong>
+
+                        </td>
+
+
+                        <!-- Receipt -->
+                        <td>
+
+                            {% if item.status|upper == "COMPLETED" %}
+
+                                <a
+                                    href="/payment-receipt/{{ item.transaction_id }}"
+                                    class="recent-receipt-btn">
+
+                                    <i class="fa-solid fa-receipt"></i>
+
+                                    View Receipt
+
+                                </a>
+
+                            {% else %}
+
+                                <span class="no-receipt">
+                                    -
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="empty-history">
+
+                            <i class="fa-regular fa-credit-card"></i>
+
+                            <p>
+                                No transaction history yet.
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- CREDIT DATA -->
+<!-- ================================================= -->
+
+<div
+    id="credit-data"
+    data-total-credit="{{ total_credit }}"
+    data-available-credit="{{ available_credit }}">
+</div>
+
+
+<!-- ================================================= -->
+<!-- CANCEL SUBSCRIPTION MODAL -->
+<!-- ================================================= -->
+
+<div
+    id="cancelSubscriptionModal"
+    class="cancel-subscription-modal">
+
+
+    <div
+        class="cancel-subscription-overlay"
+        onclick="closeCancelSubscriptionModal()">
+    </div>
+
+
+    <div class="cancel-subscription-content">
+
+
+        <!-- Header -->
+
+        <div class="cancel-subscription-header">
+
+            <h2>
+                Cancel Subscription?
+            </h2>
+
+
+            <button
+                type="button"
+                class="cancel-modal-close"
+                onclick="closeCancelSubscriptionModal()">
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <!-- Warning Icon -->
+
+        <div class="cancel-warning-icon">
+
+            <i class="fa-solid fa-triangle-exclamation"></i>
+
+        </div>
+
+
+        <!-- Main Message -->
+
+        <div class="cancel-message">
+
+            <h3>
+
+                Are you sure you want to cancel
+                {{ current_plan_name }}?
+
+            </h3>
+
+
+            <p>
+
+                Your subscription will not end immediately.
+                You can continue using your current plan and
+                remaining job posting credits until the end
+                of your current billing period.
+
+            </p>
+
+        </div>
+
+
+        <!-- End Date -->
+
+        {% if subscription_end %}
+
+        <div class="cancel-period-box">
+
+            <span>
+                Your subscription will remain active until
+            </span>
+
+            <strong>
+                {{ subscription_end }}
+            </strong>
+
+            <p>
+
+                You can continue using your remaining
+                plan benefits and job posting credits
+                until this date.
+
+            </p>
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- No Refund -->
+
+        <div class="cancel-refund-warning">
+
+            <i class="fa-solid fa-circle-exclamation"></i>
+
+            <div>
+
+                <strong>
+                    No refund will be provided
+                </strong>
+
+                <p>
+
+                    Payments already made for the current
+                    billing period are non-refundable.
+                    Your subscription benefits remain
+                    available until the billing period ends.
+
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <!-- No More Charges -->
+
+        <div class="cancel-note">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+            <span>
+
+                After
+                {{ subscription_end if subscription_end
+                   else "the current billing period" }},
+                your subscription will end automatically
+                and you will not be charged again.
+
+            </span>
+
+        </div>
+
+
+        <!-- Buttons -->
+
+        <div class="cancel-subscription-footer">
+
+
+            <button
+                type="button"
+                class="keep-plan-btn"
+                onclick="closeCancelSubscriptionModal()">
+
+                Keep My Plan
+
+            </button>
+
+
+            <form
+                action="/employer/subscription/cancel"
+                method="post">
+
+                <button
+                    type="submit"
+                    class="confirm-cancel-btn">
+
+                    Cancel Subscription
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================================= -->
+
+<script src="/js/employerCredit.js"></script>
+
+
+<script>
+
+function openCancelSubscriptionModal() {
+
+    document
+        .getElementById(
+            "cancelSubscriptionModal"
+        )
+        .classList.add(
+            "show"
+        );
+
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+}
+
+
+function closeCancelSubscriptionModal() {
+
+    document
+        .getElementById(
+            "cancelSubscriptionModal"
+        )
+        .classList.remove(
+            "show"
+        );
+
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key === "Escape"
+        ) {
+
+            closeCancelSubscriptionModal();
+
+        }
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>

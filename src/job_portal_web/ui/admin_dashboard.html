@@ -1,35 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard | JobConnect</title>
-<link rel="stylesheet" href="/css/base.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Analytics Dashboard | JobConnect</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/employerHeader.css">
+    <link rel="stylesheet" href="/css/adminDashboardAnalytics.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
+
 <body>
 
-<nav class="navbar">
-  <div class="navbar-left">
-    <a href="/admin/dashboard" class="brand">
-      <i class="fa-solid fa-location-dot brand-pin"></i>
-      Job<span class="brand-connect">Connect</span> <span class="text-caption" style="margin-left:6px; color:var(--color-text-secondary);">Admin</span>
-    </a>
-  </div>
-  <div class="navbar-right">
-    <a href="/login/admin" class="btn btn-outline">Log Out</a>
-  </div>
-</nav>
-<h2>Welcome, {{ admin.name }}</h2>
+{% include "adminHeader.html" %}
 
-<p>{{ admin.email }}</p>
+<main class="analytics-page">
+    <nav class="analytics-breadcrumb" aria-label="Breadcrumb">
+        <a href="/admin/dashboard">Administration</a>
+        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        <span>Dashboard Analytics</span>
+    </nav>
 
-<div style="max-width:1000px; margin:40px auto; padding:0 24px;">
-  <h1 class="text-page-title-alt">Admin Dashboard</h1>
-  <p class="text-normal" style="color:var(--color-text-secondary); margin-top:8px;">
-    This is a placeholder — build out user management, job moderation, and reports here.
-  </p>
-</div>
+    <section class="analytics-hero">
+        <div>
+            <p class="analytics-eyebrow">
+                <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                Platform overview
+            </p>
+            <h1>Dashboard Analytics</h1>
+            <p class="analytics-subtitle">
+                Monitor users, job activity, applications and payment performance from one place.
+            </p>
+            <p class="analytics-updated" id="lastUpdated">Loading the latest data…</p>
+        </div>
+
+        <div class="analytics-hero-actions">
+            <button class="analytics-button analytics-button-secondary"
+                    id="refreshDashboard"
+                    type="button">
+                <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                Refresh
+            </button>
+
+            
+        </div>
+    </section>
+
+    <div class="analytics-alert" id="dashboardAlert" role="alert" hidden>
+        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+        <div>
+            <strong>Analytics could not be loaded.</strong>
+            <span id="dashboardAlertMessage">Please refresh the page and try again.</span>
+        </div>
+    </div>
+
+    <section class="metric-grid" aria-label="Key performance indicators">
+        <article class="metric-card metric-card-blue">
+            <div class="metric-icon">
+                <i class="fa-solid fa-users" aria-hidden="true"></i>
+            </div>
+            <div class="metric-content">
+                <p>Total registered users</p>
+                <strong data-metric="total_users">—</strong>
+                <span>Job seekers and employers</span>
+            </div>
+        </article>
+
+        <article class="metric-card metric-card-violet">
+            <div class="metric-icon">
+                <i class="fa-solid fa-user-tie" aria-hidden="true"></i>
+            </div>
+            <div class="metric-content">
+                <p>Job seekers</p>
+                <strong data-metric="job_seekers">—</strong>
+                <span>Registered candidate accounts</span>
+            </div>
+        </article>
+
+        <article class="metric-card metric-card-cyan">
+            <div class="metric-icon">
+                <i class="fa-solid fa-building" aria-hidden="true"></i>
+            </div>
+            <div class="metric-content">
+                <p>Employers</p>
+                <strong data-metric="employers">—</strong>
+                <span>Registered companies</span>
+            </div>
+        </article>
+
+        <article class="metric-card metric-card-orange">
+            <div class="metric-icon">
+                <i class="fa-solid fa-briefcase" aria-hidden="true"></i>
+            </div>
+            <div class="metric-content">
+                <p>Active jobs</p>
+                <strong data-metric="active_jobs">—</strong>
+                <span>Open or published vacancies</span>
+            </div>
+        </article>
+
+        <article class="metric-card metric-card-rose">
+            <div class="metric-icon">
+                <i class="fa-solid fa-file-lines" aria-hidden="true"></i>
+            </div>
+            <div class="metric-content">
+                <p>Applications</p>
+                <strong data-metric="applications">—</strong>
+                <span>Applications received</span>
+            </div>
+        </article>
+
+        <article class="metric-card metric-card-green">
+            <div class="metric-icon">
+                <i class="fa-solid fa-wallet" aria-hidden="true"></i>
+            </div>
+            <div class="metric-content">
+                <p id="revenueLabel">Revenue this year</p>
+                <strong data-metric="current_year_revenue">—</strong>
+                <span><b data-metric="completed_transactions">—</b> completed payments</span>
+            </div>
+        </article>
+    </section>
+
+    <section class="analytics-content-grid">
+        <article class="analytics-panel analytics-panel-wide">
+            <header class="panel-header">
+                <div>
+                    <p class="panel-kicker">Financial performance</p>
+                    <h2>Monthly revenue</h2>
+                </div>
+                <span class="panel-chip" id="revenueYear">Current year</span>
+            </header>
+
+            <div class="chart-container chart-container-wide">
+                <canvas id="revenueChart" aria-label="Monthly revenue chart"></canvas>
+            </div>
+        </article>
+
+        <article class="analytics-panel">
+            <header class="panel-header">
+                <div>
+                    <p class="panel-kicker">Recruitment flow</p>
+                    <h2>Application status</h2>
+                </div>
+                <span class="panel-chip">Live</span>
+            </header>
+
+            <div class="chart-container chart-container-doughnut">
+                <canvas id="applicationChart" aria-label="Application status chart"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="analytics-lower-grid">
+        <article class="analytics-panel transaction-panel">
+            <header class="panel-header panel-header-actions">
+                <div>
+                    <p class="panel-kicker">Latest payment activity</p>
+                    <h2>Recent transactions</h2>
+                </div>
+                <a class="panel-link" href="/admin/transactions">
+                    View all transactions
+                    <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+                </a>
+            </header>
+
+            <div class="transaction-table-wrap">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Transaction</th>
+                            <th scope="col">Company</th>
+                            <th scope="col">Package</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentTransactions">
+                        <tr class="loading-row">
+                            <td colspan="6">
+                                <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                                Loading transactions…
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <aside class="analytics-side-stack">
+            <article class="analytics-panel">
+                <header class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Payment health</p>
+                        <h2>Transaction status</h2>
+                    </div>
+                </header>
+
+                <div class="status-list">
+                    <div class="status-row">
+                        <span class="status-dot status-dot-completed"></span>
+                        <span>Completed</span>
+                        <strong data-status="completed">—</strong>
+                    </div>
+                    <div class="status-row">
+                        <span class="status-dot status-dot-pending"></span>
+                        <span>Pending</span>
+                        <strong data-status="pending">—</strong>
+                    </div>
+                    
+                    <div class="status-row">
+                        <span class="status-dot status-dot-failed"></span>
+                        <span>Failed</span>
+                        <strong data-status="failed">—</strong>
+                    </div>
+                </div>
+            </article>
+
+            <article class="analytics-panel quick-actions-panel">
+                <header class="panel-header">
+                    <div>
+                        <p class="panel-kicker">Navigation</p>
+                        <h2>Quick actions</h2>
+                    </div>
+                </header>
+
+                <nav class="quick-actions" aria-label="Dashboard quick actions">
+                    <a href="/admin/transactions">
+                        <span class="quick-action-icon quick-action-blue">
+                            <i class="fa-solid fa-receipt" aria-hidden="true"></i>
+                        </span>
+                        <span>
+                            <strong>Manage transactions</strong>
+                            <small>Search, filter and review payments</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+
+                    <a href="/admin/transactions/report">
+                        <span class="quick-action-icon quick-action-green">
+                            <i class="fa-solid fa-file-export" aria-hidden="true"></i>
+                        </span>
+                        <span>
+                            <strong>Transaction report</strong>
+                            <small>Generate and download a report</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+
+                    <a href="/admin/career-advice">
+                        <span class="quick-action-icon quick-action-violet">
+                            <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+                        </span>
+                        <span>
+                            <strong>Career advice</strong>
+                            <small>Manage published guidance</small>
+                        </span>
+                        <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                    </a>
+                </nav>
+            </article>
+        </aside>
+    </section>
+</main>
+
+<script>
+    const dashboardState = {
+        revenueChart: null,
+        applicationChart: null
+    };
+
+    const numberFormatter = new Intl.NumberFormat("en-MY");
+    const currencyFormatter = new Intl.NumberFormat("en-MY", {
+        style: "currency",
+        currency: "MYR",
+        minimumFractionDigits: 2
+    });
+
+    function setText(selector, value) {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.textContent = value;
+        }
+    }
+
+    function displayAlert(message) {
+        const alert = document.getElementById("dashboardAlert");
+        document.getElementById("dashboardAlertMessage").textContent = message;
+        alert.hidden = false;
+    }
+
+    function clearAlert() {
+        document.getElementById("dashboardAlert").hidden = true;
+    }
+
+    function updateMetrics(data) {
+        const metrics = data.metrics || {};
+
+        document.querySelectorAll("[data-metric]").forEach((element) => {
+            const key = element.dataset.metric;
+            const rawValue = Number(metrics[key] || 0);
+            element.textContent = key === "current_year_revenue"
+                ? currencyFormatter.format(rawValue)
+                : numberFormatter.format(rawValue);
+        });
+
+        setText("#revenueLabel", `Revenue in ${data.current_year}`);
+        setText("#revenueYear", String(data.current_year));
+        setText("#lastUpdated", `Updated ${data.generated_at}`);
+
+        const statuses = data.transaction_statuses || {};
+        document.querySelectorAll("[data-status]").forEach((element) => {
+            element.textContent = numberFormatter.format(Number(statuses[element.dataset.status] || 0));
+        });
+    }
+
+    function buildRevenueChart(chartData) {
+        const canvas = document.getElementById("revenueChart");
+        const context = canvas.getContext("2d");
+        const gradient = context.createLinearGradient(0, 0, 0, 280);
+        gradient.addColorStop(0, "rgba(37, 99, 235, 0.28)");
+        gradient.addColorStop(1, "rgba(37, 99, 235, 0.02)");
+
+        if (dashboardState.revenueChart) {
+            dashboardState.revenueChart.destroy();
+        }
+
+        dashboardState.revenueChart = new Chart(canvas, {
+            type: "line",
+            data: {
+                labels: chartData.labels || [],
+                datasets: [{
+                    label: "Revenue (RM)",
+                    data: chartData.values || [],
+                    borderColor: "#2563eb",
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    pointBackgroundColor: "#ffffff",
+                    pointBorderColor: "#2563eb",
+                    pointBorderWidth: 2,
+                    fill: true,
+                    tension: 0.35
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: "index" },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => currencyFormatter.format(context.parsed.y || 0)
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: "#64748b", font: { size: 11 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        border: { display: false },
+                        grid: { color: "#eef2f7" },
+                        ticks: {
+                            color: "#64748b",
+                            font: { size: 11 },
+                            callback: (value) => `RM ${numberFormatter.format(value)}`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function buildApplicationChart(chartData) {
+        const canvas = document.getElementById("applicationChart");
+        const hasData = Array.isArray(chartData.values)
+            && chartData.values.some((value) => Number(value) > 0);
+        const labels = hasData ? chartData.labels : ["No applications"];
+        const values = hasData ? chartData.values : [1];
+
+        if (dashboardState.applicationChart) {
+            dashboardState.applicationChart.destroy();
+        }
+
+        dashboardState.applicationChart = new Chart(canvas, {
+            type: "doughnut",
+            data: {
+                labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: hasData
+                        ? ["#2563eb", "#8b5cf6", "#14b8a6", "#f59e0b", "#f43f5e", "#64748b", "#22c55e"]
+                        : ["#e2e8f0"],
+                    borderColor: "#ffffff",
+                    borderWidth: 4,
+                    hoverOffset: hasData ? 5 : 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "68%",
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: "circle",
+                            boxWidth: 8,
+                            padding: 16,
+                            color: "#475569",
+                            font: { size: 11 }
+                        }
+                    },
+                    tooltip: { enabled: hasData }
+                }
+            }
+        });
+    }
+
+    function statusClass(status) {
+        const normalised = String(status || "unknown").toLowerCase();
+        return ["completed", "pending", "failed"].includes(normalised)
+            ? normalised
+            : "unknown";
+    }
+
+    function renderTransactions(transactions) {
+        const body = document.getElementById("recentTransactions");
+        body.replaceChildren();
+
+        if (!Array.isArray(transactions) || transactions.length === 0) {
+            const row = document.createElement("tr");
+            row.className = "empty-row";
+            const cell = document.createElement("td");
+            cell.colSpan = 6;
+            cell.textContent = "No transaction records are available yet.";
+            row.appendChild(cell);
+            body.appendChild(row);
+            return;
+        }
+
+        transactions.forEach((transaction) => {
+            const row = document.createElement("tr");
+
+            const idCell = document.createElement("td");
+            const id = document.createElement("code");
+            id.textContent = transaction.transaction_id || "—";
+            id.title = transaction.transaction_id || "";
+            idCell.appendChild(id);
+
+            const companyCell = document.createElement("td");
+            companyCell.textContent = transaction.company_name || "Unknown company";
+
+            const packageCell = document.createElement("td");
+            packageCell.textContent = transaction.package || "—";
+
+            const amountCell = document.createElement("td");
+            amountCell.className = "amount-cell";
+            amountCell.textContent = currencyFormatter.format(Number(transaction.amount || 0));
+
+            const statusCell = document.createElement("td");
+            const status = document.createElement("span");
+            status.className = `transaction-badge transaction-badge-${statusClass(transaction.status)}`;
+            status.textContent = String(transaction.status || "Unknown").replaceAll("_", " ");
+            statusCell.appendChild(status);
+
+            const dateCell = document.createElement("td");
+            dateCell.className = "date-cell";
+            dateCell.textContent = transaction.date || "Date unavailable";
+
+            row.append(idCell, companyCell, packageCell, amountCell, statusCell, dateCell);
+            body.appendChild(row);
+        });
+    }
+
+    async function loadDashboard() {
+        const refreshButton = document.getElementById("refreshDashboard");
+        let dataWasLoaded = false;
+        refreshButton.disabled = true;
+        refreshButton.classList.add("is-loading");
+        clearAlert();
+
+        try {
+            const response = await fetch("/admin/dashboard/analytics-data", {
+                credentials: "same-origin",
+                headers: { "Accept": "application/json" }
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.detail || `Request failed with status ${response.status}`);
+            }
+
+            const data = await response.json();
+            updateMetrics(data);
+            renderTransactions(data.recent_transactions || []);
+            dataWasLoaded = true;
+
+            if (typeof Chart === "undefined") {
+                displayAlert("The chart library did not load, but the latest dashboard totals are available.");
+                return;
+            }
+
+            buildRevenueChart(data.charts?.monthly_revenue || {});
+            buildApplicationChart(data.charts?.application_statuses || {});
+        } catch (error) {
+            displayAlert(error.message || "Please refresh the page and try again.");
+            if (!dataWasLoaded) {
+                renderTransactions([]);
+            }
+        } finally {
+            refreshButton.disabled = false;
+            refreshButton.classList.remove("is-loading");
+        }
+    }
+
+    document.getElementById("refreshDashboard").addEventListener("click", loadDashboard);
+    document.addEventListener("DOMContentLoaded", loadDashboard);
+</script>
 
 </body>
 </html>

@@ -66,11 +66,27 @@
                     Back
                 </a>
 
-                <form action="/publish-job-confirm" method="post">
+                <form
+                    id="publishForm"
+                    action="/publish-job-confirm"
+                    method="post">
 
-                    <button type="submit"
-                            class="publish-btn"
-                            onclick="return confirm('Are you sure you want to publish this job posting? Once published, the job will be visible to job seekers.')">
+                    <input
+                        type="hidden"
+                        id="durationInput"
+                        name="duration"
+                        value="14">
+
+                    <input
+                        type="hidden"
+                        id="creditInput"
+                        name="credit_used"
+                        value="1">
+
+                    <button
+                        type="button"
+                        class="publish-btn"
+                        id="openPublishModal">
 
                         <i class="fa-solid fa-paper-plane"></i>
                         Publish Job
@@ -287,7 +303,288 @@
 
     </div>
 
+    <div id="publishModal" class="modal">
+
+        <div class="modal-card">
+
+            <div class="modal-header">
+                <h2>Publish Job</h2>
+                <span class="close">&times;</span>
+            </div>
+
+            <p class="modal-description">
+                Select how long you want this job to remain visible.
+            </p>
+
+            <div class="duration-list">
+
+                <label class="duration-option">
+                    <input type="radio"
+                        name="duration"
+                        value="14"
+                        data-credit="1"
+                        checked>
+
+                    <div>
+                        <strong>14 Days</strong>
+                        <span>1 Credit</span>
+                    </div>
+                </label>
+
+                <label class="duration-option recommended">
+                    <input type="radio"
+                        name="duration"
+                        value="30"
+                        data-credit="2">
+
+                    <div>
+                        <strong>30 Days</strong>
+
+                        <span>2 Credits</span>
+
+                        <small class="badge">
+                            ⭐ Most Popular
+                        </small>
+
+                    </div>
+                </label>
+
+                <label class="duration-option">
+                    <input type="radio"
+                        name="duration"
+                        value="60"
+                        data-credit="2">
+
+                    <div>
+                        <strong>60 Days</strong>
+                        <span>2 Credits</span>
+                    </div>
+                </label>
+
+                <label class="duration-option">
+                    <input type="radio"
+                        name="duration"
+                        value="90"
+                        data-credit="3">
+
+                    <div>
+                        <strong>90 Days</strong>
+                        <span>3 Credits</span>
+                    </div>
+                </label>
+
+            </div>
+
+            <div class="summary">
+
+                <div
+                    id="creditWarning"
+                    class="credit-warning"
+                    style="display:none;">
+
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                    <div>
+
+                        <strong>
+                            Insufficient job posting credits
+                        </strong>
+
+                        <p>
+                            You do not have enough credits for the selected
+                            posting duration. If you continue, this job will
+                            be saved as a draft and will not be published.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div>
+                    <label>Available Credits</label>
+                    <strong>{{ company.available_credit }}</strong>
+                </div>
+
+                <div>
+                    <label>Credits Required</label>
+                    <strong id="creditRequired">1</strong>
+                </div>
+
+                <div>
+                    <label>Posting Ends On</label>
+                    <strong id="expiryDate"></strong>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    id="closePublishModal">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="button"
+                    class="publish-btn"
+                    onclick="submitPublish()">
+
+                    Publish Job
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </main>
+
+<script>
+    const modal = document.getElementById("publishModal");
+
+    const openBtn = document.getElementById("openPublishModal");
+
+    const closeBtn = document.getElementById("closePublishModal");
+
+    const closeIcon = document.querySelector(".close");
+
+    const radios = document.querySelectorAll("input[name='duration']");
+
+    const credit = document.getElementById("creditRequired");
+
+    const expiry = document.getElementById("expiryDate");
+
+    openBtn.onclick = function(){
+
+        modal.style.display = "flex";
+
+    }
+
+    closeBtn.onclick = function(){
+
+        modal.style.display = "none";
+
+    }
+
+    closeIcon.onclick = function(){
+
+        modal.style.display = "none";
+
+    }
+
+    window.onclick = function(event){
+
+        if(event.target == modal){
+
+            modal.style.display = "none";
+
+        }
+
+    }
+
+    function update(){
+
+        const selected =
+            document.querySelector(
+                "input[name='duration']:checked"
+            );
+
+        const requiredCredit =
+            Number(
+                selected.dataset.credit
+            );
+
+        const availableCredit =
+            Number(
+                "{{ company.available_credit|default(0) }}"
+            );
+
+        credit.textContent =
+            requiredCredit;
+
+        const date = new Date();
+
+        date.setDate(
+            date.getDate()
+            + Number(
+                selected.value
+            )
+        );
+
+        expiry.textContent =
+            date.toLocaleDateString();
+
+
+        // ==========================================
+        // Credit Warning
+        // ==========================================
+
+        const warning =
+            document.getElementById(
+                "creditWarning"
+            );
+
+        const publishButton =
+            document.querySelector(
+                ".modal-footer .publish-btn"
+            );
+
+        if (
+            availableCredit
+            < requiredCredit
+        ){
+
+            warning.style.display =
+                "flex";
+
+            publishButton.innerHTML =
+                `
+                <i class="fa-solid fa-file"></i>
+                Save as Draft
+                `;
+
+        }
+        else{
+
+            warning.style.display =
+                "none";
+
+            publishButton.innerHTML =
+                `
+                <i class="fa-solid fa-paper-plane"></i>
+                Publish Job
+                `;
+        }
+    }
+
+    function submitPublish(){
+
+        const selected =
+            document.querySelector(
+                "input[name='duration']:checked"
+            );
+
+        document.getElementById(
+            "durationInput"
+        ).value =
+            selected.value;
+
+        document.getElementById(
+            "creditInput"
+        ).value =
+            selected.dataset.credit;
+
+        document.getElementById(
+            "publishForm"
+        ).submit();
+    }
+</script>
 
 </body>
 

@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from job_portal_web.backend.database import db
+from job_portal_web.backend.notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -63,7 +64,11 @@ async def manage_education(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="manageEducation.html",
-        context={"education_list": education_list, "user": user},
+        context={
+            "education_list": education_list,
+            "user": user,
+            "unread_notifications_count": get_unread_notifications_count(request),
+        },
     )
 
 

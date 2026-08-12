@@ -1,0 +1,45 @@
+<!-- =====================================================
+     SHARED JOB SEEKER SIDEBAR
+     Included on: jobSeekerProfile.html, saved_jobs.html, job_application.html
+     Requires context vars: user, active_page
+     (active_page: "profile" | "saved_jobs" | "application")
+===================================================== -->
+
+<aside class="profile-sidebar">
+
+    <div class="sidebar-label">JOB SEEKER</div>
+
+    <nav class="sidebar-nav">
+
+        <a href="/profile"
+           class="sidebar-link {{ 'active' if active_page == 'profile' else '' }}">
+            <i class="fa-solid fa-user"></i>
+            Profile
+        </a>
+
+        <a href="/application"
+           class="sidebar-link {{ 'active' if active_page == 'application' else '' }}">
+            <i class="fa-regular fa-file-lines"></i>
+            Applications
+        </a>
+
+        <a href="/saved-jobs"
+           class="sidebar-link {{ 'active' if active_page == 'saved_jobs' else '' }}">
+            <i class="fa-regular fa-heart"></i>
+            Saved Jobs
+        </a>
+        </a>
+
+        <a href="/privacy-settings"
+           class="sidebar-link {{ 'active' if active_page == 'privacy_settings' else '' }}">
+            <i class="fa-solid fa-shield-halved"></i>
+            Privacy
+        </a>
+
+        <a href="/logout" class="sidebar-link sidebar-logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            Log Out
+        </a>
+
+    </nav>
+</aside>

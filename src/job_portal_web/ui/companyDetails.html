@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>{{ company.companyName }}</title>
+
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/home.css">
+    <link rel="stylesheet" href="/css/jobs.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/css/companyDetails.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "components/header.html" %}
+
+<!-- ===================================================== -->
+<!-- Hero -->
+<!-- ===================================================== -->
+
+<section class="company-hero">
+
+    <div class="hero-inner">
+
+        <div class="company-header">
+
+            <div class="company-logo">
+
+                <img
+                    src="{{ company.logo if company.logo else '/images/user.png' }}"
+                    alt="{{ company.companyName }}">
+
+            </div>
+
+            <div class="company-info">
+
+                <h1>
+
+                    {{ company.companyName }}
+
+                </h1>
+
+                <div class="company-rating">
+
+                    <i class="fa-solid fa-star"></i>
+
+                    <strong>
+
+                        {{ company.rating }}
+
+                    </strong>
+
+                    <span>
+
+                        ({{ company.review_count }} Reviews)
+
+                    </span>
+
+                </div>
+
+                <div class="company-meta">
+
+                    <span>
+
+                        <i class="fa-solid fa-briefcase"></i>
+
+                        {{ company.industry or "-" }}
+
+                    </span>
+
+                    <span>
+
+                        <i class="fa-solid fa-location-dot"></i>
+
+                        {{ company.city }},
+                        {{ company.state }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- Navigation -->
+<!-- ===================================================== -->
+
+<div class="company-tabs">
+
+    <a
+        href="/company/{{ company.id }}"
+        class="active">
+
+        About
+
+    </a>
+
+    <a href="/company/{{ company.id }}/jobs">
+
+        Jobs
+
+        <span>
+
+            {{ company.job_count }}
+
+        </span>
+
+    </a>
+
+    <a href="/company/{{ company.id }}/reviews">
+
+        Reviews
+
+        <span>
+
+            {{ company.review_count }}
+
+        </span>
+
+    </a>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- Main -->
+<!-- ===================================================== -->
+
+<div class="company-container">
+
+<!-- ===================================================== -->
+<!-- Company Information -->
+<!-- ===================================================== -->
+
+<section class="card">
+
+    <h2>
+
+        Company Information
+
+    </h2>
+
+    <div class="overview-grid">
+
+        <div>
+
+            <label>
+
+                Website
+
+            </label>
+
+            <p>
+
+                {% if company.companyWebsite %}
+
+                <a
+                    href="{{ company.companyWebsite }}"
+                    target="_blank">
+
+                    {{ company.companyWebsite }}
+
+                </a>
+
+                {% else %}
+
+                -
+
+                {% endif %}
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <label>
+
+                Industry
+
+            </label>
+
+            <p>
+
+                {{ company.industry or "-" }}
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <label>
+
+                Company Type
+
+            </label>
+
+            <p>
+
+                {{ company.companyType or "-" }}
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <label>
+
+                Company Size
+
+            </label>
+
+            <p>
+
+                {{ company.companySize or "-" }}
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <label>
+
+                Founded Year
+
+            </label>
+
+            <p>
+
+                {{ company.foundedYear or "-" }}
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <label>
+
+                Registration Number
+
+            </label>
+
+            <p>
+
+                {{ company.registrationNumber or "-" }}
+
+            </p>
+
+        </div>
+
+                <div>
+
+            <label>
+
+                Business Email
+
+            </label>
+
+            <p>
+
+                {{ company.businessEmail or "-" }}
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <label>
+
+                Phone Number
+
+            </label>
+
+            <p>
+
+                {{ company.phone or "-" }}
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <label>
+
+                Address
+
+            </label>
+
+            <p>
+
+                {{ company.address or "" }}
+
+                {% if company.address2 %}
+                <br>
+                {{ company.address2 }}
+                {% endif %}
+
+                <br>
+
+                {{ company.city }},
+                {{ company.state }}
+                {{ company.postalCode }}
+
+                <br>
+
+                {{ company.country }}
+
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- About Company -->
+<!-- ===================================================== -->
+
+<section class="card">
+
+    <h2>
+
+        About {{ company.companyName }}
+
+    </h2>
+
+    <div class="description">
+
+        <p>
+
+            {{ company.companyDescription or "No company description available." }}
+
+        </p>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- Latest Open Positions -->
+<!-- ===================================================== -->
+
+<section class="card">
+
+    <div class="section-title">
+
+        <h2>
+
+            Latest Open Positions
+
+        </h2>
+
+        <a href="/company/{{ company.id }}/jobs">
+
+            View All Jobs
+
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
+
+    </div>
+
+    {% if jobs %}
+
+    <div class="job-list">
+
+        {% for job in jobs %}
+
+                <a
+            href="/jobs/{{ job.id }}"
+            class="job-card">
+
+            <div class="job-content">
+
+                <h3>
+
+                    {{ job.job_title }}
+
+                </h3>
+
+                <div class="job-meta">
+
+                    <span>
+
+                        <i class="fa-solid fa-location-dot"></i>
+
+                        {{ job.location or company.location }}
+
+                    </span>
+
+                    <span>
+
+                        <i class="fa-solid fa-briefcase"></i>
+
+                        {{ job.employment_type or "-" }}
+
+                    </span>
+
+                </div>
+
+                <div class="job-salary">
+
+                    <i class="fa-solid fa-money-bill-wave"></i>
+
+                    {% if job.salaryType == "fixed" %}
+
+                        {{ job.salary_display }}
+
+                    {% elif job.salaryType == "range" %}
+
+                        RM {{ "{:,.0f}".format(job.minSalary) }}
+                        -
+                        RM {{ "{:,.0f}".format(job.maxSalary) }}
+
+                    {% else %}
+
+                        Negotiable
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="apply">
+
+                View
+
+                <i class="fa-solid fa-arrow-right"></i>
+
+            </div>
+
+        </a>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="empty-state">
+
+        <i class="fa-solid fa-briefcase"></i>
+
+        <h3>
+
+            No Open Positions
+
+        </h3>
+
+        <p>
+
+            This company currently has no active job vacancies.
+
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+<!-- ===================================================== -->
+<!-- Employee Review Summary -->
+<!-- ===================================================== -->
+
+<section class="card">
+
+    <div class="section-title">
+
+        <h2>
+
+            Employee Review Summary
+
+        </h2>
+
+        <a href="/company/{{ company.id }}/reviews">
+
+            View All Reviews
+
+            <i class="fa-solid fa-arrow-right"></i>
+
+        </a>
+
+    </div>
+
+    <div class="review-summary">
+
+        <!-- Left -->
+
+        <div class="overall">
+
+            <h1>
+
+                {{ company.rating }}
+
+            </h1>
+
+            <div class="stars">
+
+                {% for i in range(5) %}
+
+                    {% if i < company.rating|int %}
+
+                        <i class="fa-solid fa-star"></i>
+
+                    {% else %}
+
+                        <i class="fa-regular fa-star"></i>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+            <p>
+
+                Based on
+
+                <strong>
+
+                    {{ company.review_count }}
+
+                </strong>
+
+                review{% if company.review_count != 1 %}s{% endif %}
+
+            </p>
+
+        </div>
+
+        <!-- Right -->
+
+        <div class="bars">
+
+            <div>
+                <span>Work Environment</span>
+                <progress value="{{ company.work_environment_avg or 0 }}" max="5"></progress>
+                <strong>{{ company.work_environment_avg or "0.0" }}</strong>
+            </div>
+
+            <div>
+                <span>Salary &amp; Benefits</span>
+                <progress value="{{ company.benefits_avg or 0 }}" max="5"></progress>
+                <strong>{{ company.benefits_avg or "0.0" }}</strong>
+            </div>
+
+            <div>
+                <span>Career Growth</span>
+                <progress value="{{ company.career_growth_avg or 0 }}" max="5"></progress>
+                <strong>{{ company.career_growth_avg or "0.0" }}</strong>
+            </div>
+
+            <div>
+                <span>Work-Life Balance</span>
+                <progress value="{{ company.work_life_balance_avg or 0 }}" max="5"></progress>
+                <strong>{{ company.work_life_balance_avg or "0.0" }}</strong>
+            </div>
+
+            <div>
+                <span>Management</span>
+                <progress value="{{ company.management_avg or 0 }}" max="5"></progress>
+                <strong>{{ company.management_avg or "0.0" }}</strong>
+            </div>
+
+            <div>
+                <span>Company Culture</span>
+                <progress value="{{ company.company_culture_avg or 0 }}" max="5"></progress>
+                <strong>{{ company.company_culture_avg or "0.0" }}</strong>
+            </div>
+
+            <div>
+                <span>Learning Opportunities</span>
+                <progress value="{{ company.learning_opportunities_avg or 0 }}" max="5"></progress>
+                <strong>{{ company.learning_opportunities_avg or "0.0" }}</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</div>
+
+</body>
+
+</html>

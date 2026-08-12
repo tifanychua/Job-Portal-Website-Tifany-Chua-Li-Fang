@@ -1,0 +1,768 @@
+/* ==========================================
+   PAGE
+========================================== */
+
+*{
+    box-sizing:border-box;
+}
+
+
+body{
+    margin:0;
+
+    background:#F5F7FB;
+
+    font-family:"Poppins",sans-serif;
+
+    color:#162447;
+}
+
+
+.main-content{
+    margin-left:220px;
+
+    margin-top:85px;
+
+    padding:35px;
+
+    min-height:100vh;
+
+    background:#F5F7FB;
+}
+
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.job-details-header{
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-end;
+
+    gap:25px;
+
+    margin-bottom:28px;
+}
+
+
+/* ==========================================
+   PAGE HEADER
+========================================== */
+
+.job-details-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:25px;
+
+    margin-bottom:32px;
+}
+
+
+.header-title h1{
+    margin:0 0 7px 0;
+
+    color:#162447;
+
+    font-size:32px;
+    font-weight:700;
+}
+
+
+.header-title p{
+    margin:0;
+
+    color:#64748B;
+
+    font-size:14px;
+}
+
+
+/* ==========================================
+   HEADER ACTIONS
+========================================== */
+
+.header-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+
+/* ==========================================
+   COMMON BUTTON STYLE
+========================================== */
+
+.header-action-btn{
+    height:58px;
+
+    padding:0 24px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    gap:10px;
+
+    border-radius:12px;
+
+    font-size:14px;
+    font-weight:600;
+
+    text-decoration:none;
+
+    transition:.2s ease;
+}
+
+
+/* ==========================================
+   EDIT JOB
+========================================== */
+
+.edit-job-btn{
+    background:#2563EB;
+
+    border:1px solid #2563EB;
+
+    color:#FFFFFF;
+}
+
+
+.edit-job-btn i{
+    font-size:14px;
+}
+
+
+.edit-job-btn:hover{
+    background:#1D4ED8;
+
+    border-color:#1D4ED8;
+
+    color:#FFFFFF;
+
+    transform:translateY(-1px);
+
+    box-shadow:
+        0 5px 14px rgba(37,99,235,.18);
+}
+
+
+/* ==========================================
+   BACK TO JOBS
+========================================== */
+
+.back-jobs-btn{
+    background:#FFFFFF;
+
+    border:1px solid #CBD5E1;
+
+    color:#162447;
+}
+
+
+.back-jobs-btn i{
+    font-size:14px;
+}
+
+
+.back-jobs-btn:hover{
+    background:#F8FAFC;
+
+    border-color:#94A3B8;
+
+    color:#162447;
+
+    transform:translateY(-1px);
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.06);
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:700px){
+
+    .job-details-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+
+    .header-actions{
+        width:100%;
+    }
+
+
+    .header-action-btn{
+        flex:1;
+    }
+
+}
+
+/* ==========================================
+   SUMMARY
+========================================== */
+
+.job-summary-card{
+    background:#FFFFFF;
+
+    border:1px solid #E5EAF1;
+
+    border-radius:18px;
+
+    padding:26px;
+
+    margin-bottom:24px;
+
+    box-shadow:
+        0 8px 26px rgba(15,23,42,.05);
+}
+
+
+.job-summary-main{
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+    padding-bottom:24px;
+
+    border-bottom:1px solid #EEF2F7;
+}
+
+
+.job-icon{
+    width:60px;
+
+    height:60px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-shrink:0;
+
+    border-radius:15px;
+
+    background:#EEF4FF;
+
+    color:#2563EB;
+
+    font-size:23px;
+}
+
+
+.job-summary-content{
+    flex:1;
+}
+
+
+.job-title-row{
+    display:flex;
+
+    align-items:center;
+
+    gap:13px;
+
+    flex-wrap:wrap;
+}
+
+
+.job-title-row h2{
+    margin:0;
+
+    color:#162447;
+
+    font-size:23px;
+
+    font-weight:700;
+}
+
+
+.job-meta{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:18px;
+
+    margin-top:9px;
+
+    color:#64748B;
+
+    font-size:12px;
+}
+
+
+.job-meta span{
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+}
+
+
+.job-meta i{
+    color:#94A3B8;
+}
+
+
+/* ==========================================
+   STATUS
+========================================== */
+
+.status-badge{
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    min-height:29px;
+
+    padding:5px 11px;
+
+    border-radius:999px;
+
+    font-size:11px;
+
+    font-weight:600;
+}
+
+
+.status-active{
+    background:#DCFCE7;
+
+    color:#15803D;
+}
+
+
+.status-draft{
+    background:#FEF3C7;
+
+    color:#B45309;
+}
+
+
+.status-closed{
+    background:#FEE2E2;
+
+    color:#B91C1C;
+}
+
+
+.status-expired{
+    background:#F1F5F9;
+
+    color:#64748B;
+}
+
+
+/* ==========================================
+   SUMMARY STATS
+========================================== */
+
+.summary-stats{
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:15px;
+
+    margin-top:22px;
+}
+
+
+.summary-stat{
+    padding:14px 16px;
+
+    border-radius:11px;
+
+    background:#F8FAFC;
+}
+
+
+.summary-stat span{
+    display:block;
+
+    margin-bottom:5px;
+
+    color:#94A3B8;
+
+    font-size:11px;
+}
+
+
+.summary-stat strong{
+    color:#162447;
+
+    font-size:14px;
+}
+
+
+/* ==========================================
+   DETAILS CARD
+========================================== */
+
+.details-card{
+    background:#FFFFFF;
+
+    border:1px solid #E5EAF1;
+
+    border-radius:18px;
+
+    padding:26px;
+
+    margin-bottom:24px;
+
+    box-shadow:
+        0 8px 26px rgba(15,23,42,.05);
+}
+
+
+/* ==========================================
+   SECTION HEADER
+========================================== */
+
+.section-heading{
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding-bottom:18px;
+
+    margin-bottom:22px;
+
+    border-bottom:1px solid #EEF2F7;
+}
+
+
+.section-icon{
+    width:39px;
+
+    height:39px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-shrink:0;
+
+    border-radius:10px;
+
+    background:#EEF4FF;
+
+    color:#2563EB;
+
+    font-size:15px;
+}
+
+
+.section-heading h2{
+    margin:0;
+
+    color:#162447;
+
+    font-size:19px;
+
+    font-weight:700;
+}
+
+
+.section-heading p{
+    margin:3px 0 0;
+
+    color:#94A3B8;
+
+    font-size:11px;
+}
+
+
+/* ==========================================
+   INFORMATION
+========================================== */
+
+.information-grid{
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:16px;
+}
+
+
+.information-item{
+    padding:15px 16px;
+
+    border:1px solid #EEF2F7;
+
+    border-radius:10px;
+
+    background:#FAFBFD;
+}
+
+
+.information-item.full-width{
+    grid-column:1 / -1;
+}
+
+
+.information-item label{
+    display:block;
+
+    margin-bottom:6px;
+
+    color:#94A3B8;
+
+    font-size:11px;
+
+    font-weight:600;
+}
+
+
+.information-item strong{
+    color:#334155;
+
+    font-size:13px;
+
+    font-weight:600;
+}
+
+
+/* ==========================================
+   TEXT DETAILS
+========================================== */
+
+.text-detail-section{
+    margin-bottom:21px;
+}
+
+
+.text-detail-section:last-child{
+    margin-bottom:0;
+}
+
+
+.text-detail-section label{
+    display:block;
+
+    margin-bottom:8px;
+
+    color:#64748B;
+
+    font-size:12px;
+
+    font-weight:600;
+}
+
+
+.detail-text{
+    padding:15px 17px;
+
+    border:1px solid #EEF2F7;
+
+    border-radius:10px;
+
+    background:#FAFBFD;
+
+    color:#475569;
+
+    font-size:13px;
+
+    line-height:1.75;
+}
+
+
+.empty-information{
+    color:#94A3B8;
+}
+
+
+/* ==========================================
+   SALARY
+========================================== */
+
+.salary-display{
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:16px;
+}
+
+
+.salary-display > div{
+    padding:16px;
+
+    border:1px solid #EEF2F7;
+
+    border-radius:10px;
+
+    background:#FAFBFD;
+}
+
+
+.salary-display label{
+    display:block;
+
+    margin-bottom:6px;
+
+    color:#94A3B8;
+
+    font-size:11px;
+
+    font-weight:600;
+}
+
+
+.salary-display strong{
+    color:#334155;
+
+    font-size:14px;
+}
+
+
+.salary-display .salary-value{
+    color:#2563EB;
+
+    font-size:17px;
+}
+
+
+/* ==========================================
+   BENEFITS
+========================================== */
+
+.benefit-section{
+    margin-top:22px;
+}
+
+
+.benefit-section > label{
+    display:block;
+
+    margin-bottom:10px;
+
+    color:#64748B;
+
+    font-size:12px;
+
+    font-weight:600;
+}
+
+
+.benefit-list{
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:9px;
+}
+
+
+.benefit-list span{
+    padding:7px 12px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    border:1px solid #DBEAFE;
+
+    border-radius:999px;
+
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+    font-size:11px;
+
+    font-weight:600;
+}
+
+
+.benefit-list span i{
+    font-size:9px;
+}
+
+
+.benefit-list .no-benefits{
+    background:#F8FAFC;
+
+    border-color:#E2E8F0;
+
+    color:#94A3B8;
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:1000px){
+
+    .main-content{
+        margin-left:0;
+    }
+
+
+    .summary-stats{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+
+@media(max-width:700px){
+
+    .main-content{
+        padding:20px;
+    }
+
+
+    .job-details-header{
+        align-items:flex-start;
+
+        flex-direction:column;
+    }
+
+
+    .header-actions{
+        width:100%;
+    }
+
+
+    .edit-job-btn,
+    .close-job-btn{
+        flex:1;
+    }
+
+
+    .information-grid,
+    .salary-display,
+    .summary-stats{
+        grid-template-columns:1fr;
+    }
+
+
+    .information-item.full-width{
+        grid-column:auto;
+    }
+
+}

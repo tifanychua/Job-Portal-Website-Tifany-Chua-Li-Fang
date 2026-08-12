@@ -19,41 +19,43 @@
 
 {% include "components/header.html" %}
 
-<!-- ================= HERO ================= -->
-
-<section class="profile-hero">
-
-    <div class="profile-hero-inner">
-
-        <div class="profile-top">
-
-            <div>
-
-                <h1 class="text-page-title">
-                    My Profile
-                </h1>
-
-                <p class="text-normal">
-                    Manage your personal information and professional details.
-                </p>
-
-            </div>
-
-            <button class="profile-primary-btn"
-                    onclick="window.location.href='/edit-profile'">
-                <i class="fa-solid fa-pen"></i>
-                Edit Profile
-            </button>
-
-        </div>
-
-    </div>
-
-</section>
-
 <!-- ================= MAIN CONTENT ================= -->
 
 <div class="profile-page">
+
+    <div class="profile-layout">
+
+        <!-- ================= SIDEBAR ================= -->
+
+        {% include "components/profile_sidebar.html" %}
+
+        <!-- ================= MAIN ================= -->
+
+        <div class="profile-main">
+
+    <!-- ================= PAGE TITLE (right side, above the card) ================= -->
+
+    <div class="profile-top">
+
+        <div>
+
+            <h1 class="text-page-title">
+                My Profile
+            </h1>
+
+            <p class="text-normal">
+                Manage your personal information and professional details.
+            </p>
+
+        </div>
+
+        <button class="profile-primary-btn"
+                onclick="window.location.href='/edit-profile'">
+            <i class="fa-solid fa-pen"></i>
+            Edit Profile
+        </button>
+
+    </div>
 
     <!-- ================= PROFILE CARD ================= -->
 
@@ -71,7 +73,7 @@
                 {% endif %}
             </div>
 
-            <div class="profile-basic">
+            <div class="profile-basic" style="margin-top:5px;">
 
                 <div class="profile-name">
 
@@ -348,19 +350,11 @@
         </div>
 
     </div>
-    <!-- ================= LOGOUT ================= -->
 
-    <div class="logout-section">
-
-        <button class="logout-btn"
-        onclick="window.location.href='http://127.0.0.1:8000/login'">
-
-    <i class="fa-solid fa-right-from-bracket"></i>
-    Logout
-
-</button>
+        </div>
 
     </div>
+
 </div>
 
 <script>

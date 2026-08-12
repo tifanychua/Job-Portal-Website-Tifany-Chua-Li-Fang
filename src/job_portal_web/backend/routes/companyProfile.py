@@ -5,6 +5,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore
 
+from job_portal_web.backend.notifications import get_unread_notifications_count
+
 router = APIRouter()
 
 db = firestore.client()
@@ -176,5 +178,6 @@ async def company_profile(request: Request):
             "gallery": gallery,
             "team_members": team_members,
             "documents": documents,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
