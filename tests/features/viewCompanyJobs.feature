@@ -1,7 +1,4 @@
 Feature: View Company Jobs
-  As a Job Seeker
-  I want to view jobs posted by a company
-  So that I can find suitable employment opportunities.
 
   Scenario: Job seeker opens company jobs page
     Given an active company exists for company jobs
@@ -68,7 +65,7 @@ Feature: View Company Jobs
     When the job seeker opens the company jobs page
     Then the company rating should be available on the jobs page
 
-  Scenario: Company does not exist
+  Scenario: Company does not existb
     Given the requested company does not exist for company jobs
     When the job seeker opens the company jobs page
     Then the company jobs not found page should be displayed

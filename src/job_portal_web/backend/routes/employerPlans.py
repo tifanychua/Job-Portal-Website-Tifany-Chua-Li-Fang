@@ -235,20 +235,30 @@ def change_subscription(request: Request, plan_name: str, proration_date: int = 
 
     plan = PLANS.get(plan_name)
 
+    # =================================================
+    # Validate Plan
+    # =================================================
+
     if not plan:
 
         raise HTTPException(status_code=404, detail="Plan not found")
 
-    current_plan = str(company.get("subscription_plan", "")).lower()
+    current_plan = str(company.get("subscription_plan", "") or "").lower()
 
-    # Same plan
+    # =================================================
+    # Same Plan
+    # =================================================
+
     if current_plan == plan_name:
 
         return RedirectResponse("/employer-plans", status_code=303)
 
+    # =================================================
+    # Stripe Subscription
+    # =================================================
+
     subscription_id = company.get("stripe_subscription_id")
 
-    # Old PayPal company / no Stripe subscription
     if not subscription_id:
 
         raise HTTPException(
@@ -270,32 +280,46 @@ def change_subscription(request: Request, plan_name: str, proration_date: int = 
 
     if not subscription_items:
 
-        raise HTTPException(status_code=400, detail=("Subscription item " "not found."))
+        raise HTTPException(status_code=400, detail="Subscription item not found.")
+
+    subscription_item_id = subscription_items[0]["id"]
 
     # =================================================
-    # CHANGE PLAN WITH PRORATION
+    # Change Subscription Plan
     # =================================================
     #
-    # Example:
+    # Stripe will:
     #
-    # Starter = RM49/month
+    # 1. Change the subscription price
+    # 2. Calculate unused-plan credit
+    # 3. Calculate the new-plan charge
+    # 4. Create the prorated invoice
     #
-    # Upgrade halfway through month
-    # to Business RM129.
-    #
-    # Stripe calculates:
-    #
-    # unused Starter credit
-    # +
-    # remaining Business charge
-    #
-    # You DON'T manually calculate it.
+    # Firestore is NOT manually updated here.
+    # Stripe webhook updates the final plan after
+    # Stripe confirms the payment/change.
     # =================================================
 
-    # Don't manually change Firestore plan here.
-    #
-    # Webhook will update Firestore
-    # after Stripe confirms the change/payment.
+    stripe.Subscription.modify(
+        subscription_id,
+        items=[
+            {
+                "id": subscription_item_id,
+                "price": plan["stripe_price_id"],
+            }
+        ],
+        proration_behavior="always_invoice",
+        proration_date=proration_date,
+        payment_behavior="pending_if_incomplete",
+        metadata={
+            "company_id": company_id,
+            "plan": plan_name,
+        },
+    )
+
+    # =================================================
+    # Redirect While Webhook Processes Change
+    # =================================================
 
     return RedirectResponse("/employer-credit" "?plan_change=processing", status_code=303)
 

@@ -1,7 +1,4 @@
 Feature: View Company Details
-  As a Job Seeker
-  I want to view company details
-  So that I can learn more about a potential employer before applying.
 
   Scenario: Job seeker opens company details page
     Given an active company exists for company details

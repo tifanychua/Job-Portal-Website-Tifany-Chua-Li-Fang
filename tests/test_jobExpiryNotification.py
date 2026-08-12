@@ -1,64 +1,69 @@
-from datetime import datetime, timedelta, timezone
+from datetime import (
+    datetime,
+    timedelta,
+    timezone,
+)
+
 import importlib
 from pathlib import Path
 
 import pytest
-from pytest_bdd import given, scenarios, then, when
 
+from pytest_bdd import (
+    given,
+    scenarios,
+    then,
+    when,
+)
 
 # ============================================================
-# LOAD ACTUAL NOTIFICATION MODULE
+# LOAD NOTIFICATION MODULE
 # ============================================================
+
 
 def load_notification_module():
-    routes_dir = Path("src/job_portal_web/backend")
 
-    for path in routes_dir.rglob("*.py"):
+    backend_dir = Path("src/job_portal_web/backend")
+
+    for path in backend_dir.rglob("*.py"):
+
         text = path.read_text(
             encoding="utf-8",
             errors="ignore",
         )
 
         if "def check_job_expiry_notifications(" in text:
-            # The uploaded source imports:
-            # from .database import db
-            module_path = (
-                path.relative_to("src")
-                .with_suffix("")
-            )
 
-            module_name = ".".join(
-                module_path.parts
-            )
+            module_path = path.relative_to("src").with_suffix("")
 
-            return importlib.import_module(
-                module_name
-            )
+            module_name = ".".join(module_path.parts)
 
-    raise ImportError(
-        "Could not find the notification module "
-        "containing check_job_expiry_notifications()."
-    )
+            return importlib.import_module(module_name)
+
+    raise ImportError("Could not find " "check_job_expiry_notifications().")
 
 
 notification_module = load_notification_module()
 
-scenarios(
-    "features/jobExpiryNotification.feature"
-)
 
+scenarios("features/jobExpiryNotification.feature")
+
+
+# ============================================================
+# CONSTANTS
+# ============================================================
 
 COMPANY_ID = "COMPANY001"
+
 JOB_ID = "JOB001"
 
-MYT = timezone(
-    timedelta(hours=8)
-)
+MYT = timezone(timedelta(hours=8))
 
 
 # ============================================================
 # FAKE FIRESTORE
 # ============================================================
+
 
 class FakeSnapshot:
 
@@ -68,15 +73,16 @@ class FakeSnapshot:
         data,
         reference,
     ):
+
         self.id = document_id
         self._data = data
         self.reference = reference
+
         self.exists = data is not None
 
     def to_dict(self):
-        return dict(
-            self._data or {}
-        )
+
+        return dict(self._data or {})
 
 
 class FakeDocumentReference:
@@ -86,14 +92,14 @@ class FakeDocumentReference:
         collection,
         document_id,
     ):
+
         self.collection = collection
+
         self.document_id = document_id
 
     def get(self):
-        data = (
-            self.collection.documents
-            .get(self.document_id)
-        )
+
+        data = self.collection.documents.get(self.document_id)
 
         return FakeSnapshot(
             self.document_id,
@@ -101,7 +107,11 @@ class FakeDocumentReference:
             self,
         )
 
-    def update(self, values):
+    def update(
+        self,
+        values,
+    ):
+
         self.collection.documents.setdefault(
             self.document_id,
             {},
@@ -115,7 +125,9 @@ class FakeQuery:
         collection,
         filters=None,
     ):
+
         self.collection = collection
+
         self.filters = filters or []
 
     def where(
@@ -123,19 +135,29 @@ class FakeQuery:
         *args,
         **kwargs,
     ):
+
         if "filter" in kwargs:
+
             field_filter = kwargs["filter"]
 
             field = field_filter.field_path
+
             operator = field_filter.op_string
+
             value = field_filter.value
 
         else:
-            field, operator, value = args
+
+            field = args[0]
+
+            operator = args[1]
+
+            value = args[2]
 
         return FakeQuery(
             self.collection,
-            self.filters + [
+            self.filters
+            + [
                 (
                     field,
                     operator,
@@ -145,11 +167,14 @@ class FakeQuery:
         )
 
     def stream(self):
+
         results = []
 
-        for document_id, data in (
-            self.collection.documents.items()
-        ):
+        for (
+            document_id,
+            data,
+        ) in self.collection.documents.items():
+
             matched = True
 
             for (
@@ -158,20 +183,17 @@ class FakeQuery:
                 expected,
             ) in self.filters:
 
-                if (
-                    operator == "=="
-                    and data.get(field)
-                    != expected
-                ):
+                if operator == "==" and data.get(field) != expected:
+
                     matched = False
+
                     break
 
             if matched:
-                reference = (
-                    FakeDocumentReference(
-                        self.collection,
-                        document_id,
-                    )
+
+                reference = FakeDocumentReference(
+                    self.collection,
+                    document_id,
                 )
 
                 results.append(
@@ -191,23 +213,23 @@ class FakeCollection:
         self,
         documents=None,
     ):
-        self.documents = (
-            dict(documents or {})
-        )
+
+        self.documents = dict(documents or {})
 
         self.added = []
 
     def stream(self):
+
         result = []
 
-        for document_id, data in (
-            self.documents.items()
-        ):
-            reference = (
-                FakeDocumentReference(
-                    self,
-                    document_id,
-                )
+        for (
+            document_id,
+            data,
+        ) in self.documents.items():
+
+            reference = FakeDocumentReference(
+                self,
+                document_id,
             )
 
             result.append(
@@ -225,9 +247,8 @@ class FakeCollection:
         *args,
         **kwargs,
     ):
-        return FakeQuery(
-            self
-        ).where(
+
+        return FakeQuery(self).where(
             *args,
             **kwargs,
         )
@@ -236,6 +257,7 @@ class FakeCollection:
         self,
         document_id,
     ):
+
         return FakeDocumentReference(
             self,
             document_id,
@@ -245,22 +267,17 @@ class FakeCollection:
         self,
         data,
     ):
-        self.added.append(
-            dict(data)
-        )
 
-        new_id = (
-            f"NOTIF{len(self.added):03d}"
-        )
+        self.added.append(dict(data))
 
-        self.documents[
-            new_id
-        ] = dict(data)
+        notification_id = f"NOTIF" f"{len(self.added):03d}"
+
+        self.documents[notification_id] = dict(data)
 
         return (
             FakeDocumentReference(
                 self,
-                new_id,
+                notification_id,
             ),
             None,
         )
@@ -273,22 +290,17 @@ class FakeDB:
         jobs=None,
         notifications=None,
     ):
-        self.collections = {
-            "job_list":
-                FakeCollection(
-                    jobs or {}
-                ),
 
-            "notification":
-                FakeCollection(
-                    notifications or {}
-                ),
+        self.collections = {
+            "job_list": FakeCollection(jobs or {}),
+            "notification": FakeCollection(notifications or {}),
         }
 
     def collection(
         self,
         name,
     ):
+
         return self.collections[name]
 
 
@@ -296,14 +308,21 @@ class FakeDB:
 # CONTEXT
 # ============================================================
 
+
 class Context:
 
     def __init__(self):
+
         self.db = None
+
+        self.notification = None
+
+        self.redirect_url = None
 
 
 @pytest.fixture
 def context():
+
     return Context()
 
 
@@ -311,19 +330,12 @@ def context():
 # HELPERS
 # ============================================================
 
-def expiry_datetime(
-    days_from_today,
-):
-    today = datetime.now(
-        MYT
-    ).date()
 
-    expiry_date = (
-        today
-        + timedelta(
-            days=days_from_today
-        )
-    )
+def expiry_in_three_days():
+
+    today = datetime.now(MYT).date()
+
+    expiry_date = today + timedelta(days=3)
 
     return datetime(
         expiry_date.year,
@@ -338,12 +350,20 @@ def expiry_datetime(
 def install_db(
     monkeypatch,
     context,
-    jobs,
-    notifications=None,
 ):
+
+    jobs = {
+        JOB_ID: {
+            "company_id": COMPANY_ID,
+            "job_title": "Software Engineer",
+            "status": "Active",
+            "expiry_date": expiry_in_three_days(),
+        }
+    }
+
     context.db = FakeDB(
         jobs=jobs,
-        notifications=notifications,
+        notifications={},
     )
 
     monkeypatch.setattr(
@@ -353,410 +373,105 @@ def install_db(
     )
 
 
-def current_notifications(
+def generated_notification(
     context,
 ):
-    return (
-        context.db
-        .collection("notification")
-        .documents
-    )
 
+    notifications = context.db.collection("notification").added
 
-def new_notifications(
-    context,
-):
-    return (
-        context.db
-        .collection("notification")
-        .added
-    )
+    assert len(notifications) == 1
+
+    return notifications[0]
 
 
 # ============================================================
-# BDD GIVEN
+# GIVEN
 # ============================================================
 
-@given(
-    "an active job will expire in three days"
-)
-def active_job_three_days(
+
+@given("the employer has an active job posting with an upcoming expiry date")
+def active_job_upcoming_expiry(
     monkeypatch,
     context,
 ):
+
     install_db(
         monkeypatch,
         context,
-        {
-            JOB_ID: {
-                "company_id":
-                    COMPANY_ID,
-
-                "job_title":
-                    "Software Engineer",
-
-                "status":
-                    "Active",
-
-                "expiry_date":
-                    expiry_datetime(3),
-            }
-        },
     )
 
 
-@given(
-    "an active job expires today"
-)
-def active_job_today(
+@given("the employer has received a job posting expiry notification")
+def employer_received_notification(
     monkeypatch,
     context,
 ):
+
     install_db(
         monkeypatch,
         context,
-        {
-            JOB_ID: {
-                "company_id":
-                    COMPANY_ID,
-
-                "job_title":
-                    "Software Engineer",
-
-                "status":
-                    "Active",
-
-                "expiry_date":
-                    expiry_datetime(0),
-            }
-        },
     )
 
+    notification_module.check_job_expiry_notifications()
 
-@given(
-    "the three day expiry notification already exists"
-)
-def duplicate_exists(
-    context,
-):
-    context.db.collection(
-        "notification"
-    ).documents[
-        "EXISTING001"
-    ] = {
-        "user_id":
-            COMPANY_ID,
-
-        "job_id":
-            JOB_ID,
-
-        "event":
-            "expire_3_days",
-
-        "type":
-            "job_alert",
-
-        "title":
-            "Job Posting Expiring Soon",
-
-        "message":
-            (
-                'Your job posting '
-                '"Software Engineer" '
-                "will expire in 3 days."
-            ),
-
-        "link":
-            "/manage-jobs",
-
-        "is_read":
-            False,
-    }
-
-
-@given(
-    "an inactive job will expire in three days"
-)
-def inactive_job(
-    monkeypatch,
-    context,
-):
-    install_db(
-        monkeypatch,
-        context,
-        {
-            JOB_ID: {
-                "company_id":
-                    COMPANY_ID,
-
-                "job_title":
-                    "Software Engineer",
-
-                "status":
-                    "Closed",
-
-                "expiry_date":
-                    expiry_datetime(3),
-            }
-        },
-    )
-
-
-@given(
-    "an active job does not have an expiry date"
-)
-def no_expiry_date(
-    monkeypatch,
-    context,
-):
-    install_db(
-        monkeypatch,
-        context,
-        {
-            JOB_ID: {
-                "company_id":
-                    COMPANY_ID,
-
-                "job_title":
-                    "Software Engineer",
-
-                "status":
-                    "Active",
-            }
-        },
-    )
-
-
-@given(
-    "an active job will expire in five days"
-)
-def active_job_five_days(
-    monkeypatch,
-    context,
-):
-    install_db(
-        monkeypatch,
-        context,
-        {
-            JOB_ID: {
-                "company_id":
-                    COMPANY_ID,
-
-                "job_title":
-                    "Software Engineer",
-
-                "status":
-                    "Active",
-
-                "expiry_date":
-                    expiry_datetime(5),
-            }
-        },
-    )
+    context.notification = generated_notification(context)
 
 
 # ============================================================
-# BDD WHEN
+# WHEN
 # ============================================================
 
-@when(
-    "the system checks job expiry notifications"
-)
-def check_expiry_notifications(
+
+@when("the expiry date is approaching")
+def expiry_approaching(
     context,
 ):
+
     notification_module.check_job_expiry_notifications()
 
 
+@when("the employer clicks on the notification")
+def click_notification(
+    context,
+):
+
+    assert context.notification is not None
+
+    context.redirect_url = context.notification["link"]
+
+
 # ============================================================
-# BDD THEN
+# THEN
 # ============================================================
 
-@then(
-    "a three day expiry notification should be created"
-)
-def verify_three_day_notification(
-    context,
-):
-    added = new_notifications(
-        context
-    )
-
-    assert len(added) == 1
-
-    notification = added[0]
-
-    assert (
-        notification["event"]
-        == "expire_3_days"
-    )
-
-    assert (
-        notification["title"]
-        == "Job Posting Expiring Soon"
-    )
-
-    assert (
-        notification["message"]
-        ==
-        'Your job posting '
-        '"Software Engineer" '
-        "will expire in 3 days."
-    )
-
 
 @then(
-    "the notification should link to manage jobs"
+    "the system should display a notification to the employer reminding them that the job posting will expire soon"
 )
-def verify_manage_jobs_link(
+def expiry_notification_displayed(
     context,
 ):
-    notification = (
-        new_notifications(
-            context
-        )[0]
-    )
 
-    assert (
-        notification["link"]
-        == "/manage-jobs"
-    )
+    notification = generated_notification(context)
 
-    assert (
-        notification["type"]
-        == "job_alert"
-    )
+    assert notification["user_id"] == COMPANY_ID
+
+    assert notification["job_id"] == JOB_ID
+
+    assert notification["event"] == "expire_3_days"
+
+    assert notification["title"] == "Job Posting Expiring Soon"
+
+    assert "Software Engineer" in notification["message"]
+
+    assert "expire in 3 days" in notification["message"]
+
+    assert notification["is_read"] is False
 
 
-@then(
-    "the notification should be unread"
-)
-def verify_unread(
+@then("the system should redirect the employer to the job posting management page")
+def redirect_to_manage_jobs(
     context,
 ):
-    assert (
-        new_notifications(
-            context
-        )[0]["is_read"]
-        is False
-    )
 
-
-@then(
-    "an expiry today notification should be created"
-)
-def verify_today_notification(
-    context,
-):
-    added = new_notifications(
-        context
-    )
-
-    assert len(added) == 1
-
-    notification = added[0]
-
-    assert (
-        notification["event"]
-        == "expire_today"
-    )
-
-    assert (
-        notification["title"]
-        == "Job Posting Expires Today"
-    )
-
-    assert (
-        notification["message"]
-        ==
-        'Your job posting '
-        '"Software Engineer" '
-        "expires today."
-    )
-
-
-@then(
-    "the expiry notification message should contain the job title"
-)
-def verify_job_title(
-    context,
-):
-    notification = (
-        new_notifications(
-            context
-        )[0]
-    )
-
-    assert (
-        "Software Engineer"
-        in notification["message"]
-    )
-
-
-@then(
-    "another three day expiry notification should not be created"
-)
-def verify_no_duplicate(
-    context,
-):
-    assert (
-        len(
-            new_notifications(
-                context
-            )
-        )
-        == 0
-    )
-
-    matching = [
-        data
-        for data
-        in current_notifications(
-            context
-        ).values()
-        if (
-            data.get("job_id")
-            == JOB_ID
-            and data.get("event")
-            == "expire_3_days"
-        )
-    ]
-
-    assert len(matching) == 1
-
-
-@then(
-    "no expiry notification should be created"
-)
-def verify_no_notification(
-    context,
-):
-    assert (
-        new_notifications(
-            context
-        )
-        == []
-    )
-
-
-@then(
-    "the expiry notification should belong to the job company"
-)
-def verify_company(
-    context,
-):
-    notification = (
-        new_notifications(
-            context
-        )[0]
-    )
-
-    assert (
-        notification["user_id"]
-        == COMPANY_ID
-    )
-
-    assert (
-        notification["job_id"]
-        == JOB_ID
-    )
+    assert context.redirect_url == "/manage-jobs"

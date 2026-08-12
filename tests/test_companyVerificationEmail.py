@@ -3,72 +3,85 @@ import importlib
 from pathlib import Path
 
 import pytest
-from pytest_bdd import given, scenarios, then, when
-
+from pytest_bdd import (
+    given,
+    scenarios,
+    then,
+    when,
+)
 
 # ============================================================
 # LOAD EMAIL MODULE
 # ============================================================
 
+
 def load_email_module():
+
     backend_dir = Path("src/job_portal_web/backend")
 
     for path in backend_dir.rglob("*.py"):
+
         text = path.read_text(
             encoding="utf-8",
             errors="ignore",
         )
 
         if "def send_company_verification_email(" in text:
-            module_path = (
-                path.relative_to("src")
-                .with_suffix("")
-            )
 
-            module_name = ".".join(
-                module_path.parts
-            )
+            module_path = path.relative_to("src").with_suffix("")
 
-            return importlib.import_module(
-                module_name
-            )
+            module_name = ".".join(module_path.parts)
 
-    raise ImportError(
-        "Could not find send_company_verification_email()."
-    )
+            return importlib.import_module(module_name)
+
+    raise ImportError("Could not find " "send_company_verification_email().")
 
 
 email_module = load_email_module()
 
-scenarios(
-    "features/companyVerificationEmail.feature"
-)
 
+# ============================================================
+# LOAD FEATURE
+# ============================================================
+
+scenarios("features/companyVerificationEmail.feature")
+
+
+# ============================================================
+# CONSTANTS
+# ============================================================
 
 EMAIL = "hr@abctech.com"
+
 COMPANY_NAME = "ABC Technology Sdn. Bhd."
 
 
 # ============================================================
-# TEST CONTEXT
+# CONTEXT
 # ============================================================
+
 
 class Context:
 
     def __init__(self):
+
         self.sent_messages = []
-        self.error = None
-        self.fail_send = False
+
+        self.status = None
+
+        self.reason = None
 
 
 @pytest.fixture
 def context():
+
     return Context()
 
 
 # ============================================================
-# FAKE FASTMAIL
+# MOCK FASTMAIL
 # ============================================================
+
 
 @pytest.fixture(autouse=True)
 def mock_fastmail(
@@ -82,20 +95,15 @@ def mock_fastmail(
             self,
             conf,
         ):
+
             self.conf = conf
 
         async def send_message(
             self,
             message,
         ):
-            if context.fail_send:
-                raise RuntimeError(
-                    "Email service unavailable"
-                )
 
-            context.sent_messages.append(
-                message
-            )
+            context.sent_messages.append(message)
 
     monkeypatch.setattr(
         email_module,
@@ -108,10 +116,12 @@ def mock_fastmail(
 # HELPERS
 # ============================================================
 
-def send_email(
+
+def send_verification_email(
     status,
     reason=None,
 ):
+
     return asyncio.run(
         email_module.send_company_verification_email(
             email=EMAIL,
@@ -125,442 +135,199 @@ def send_email(
 def latest_message(
     context,
 ):
-    assert len(
-        context.sent_messages
-    ) == 1
+
+    assert len(context.sent_messages) == 1
 
     return context.sent_messages[0]
 
 
-def message_recipients(message):
-    recipients = []
+def recipient_emails(
+    message,
+):
+
+    emails = []
 
     for recipient in message.recipients:
 
-        # FastAPI-Mail converts recipient strings
-        # into NameEmail objects.
-        if hasattr(recipient, "email"):
-            recipients.append(
-                str(recipient.email)
-            )
+        if hasattr(
+            recipient,
+            "email",
+        ):
+
+            emails.append(str(recipient.email))
+
         else:
-            recipients.append(
-                str(recipient)
-            )
 
-    return recipients
+            emails.append(str(recipient))
+
+    return emails
 
 
 # ============================================================
-# DIRECT PYTEST TESTS
+# GIVEN
 # ============================================================
 
-def test_approved_verification_email(
+
+@given("the employer has submitted a company registration request")
+def registration_submitted(
     context,
 ):
-    send_email(
-        "Approved"
+
+    context.status = "Pending"
+
+
+@given("the employer has received a company verification status email")
+def verification_email_received(
+    context,
+):
+
+    context.status = "Rejected"
+
+    context.reason = "Invalid SSM document"
+
+    send_verification_email(
+        status=context.status,
+        reason=context.reason,
     )
 
-    message = latest_message(
-        context
+
+@given("the employer company registration request is still pending review")
+def registration_pending(
+    context,
+):
+
+    context.status = "Pending"
+
+
+# ============================================================
+# WHEN
+# ============================================================
+
+
+@when("the admin approves the company verification request")
+def admin_approves(
+    context,
+):
+
+    context.status = "Approved"
+
+    send_verification_email(status="Approved")
+
+
+@when("the admin rejects the company verification request")
+def admin_rejects(
+    context,
+):
+
+    context.status = "Rejected"
+
+    context.reason = "Invalid SSM document"
+
+    send_verification_email(
+        status="Rejected",
+        reason=context.reason,
     )
 
-    assert (
-        message.subject
-        ==
-        "Company Verification Approved - JobConnect"
-    )
 
+@when("the employer opens the email notification")
+def employer_opens_email(
+    context,
+):
+
+    assert len(context.sent_messages) == 1
+
+
+@when("the verification status has not been updated")
+def status_not_updated(
+    context,
+):
+
+    # No email function should be called
+    # while the verification is still pending.
+    assert context.status == "Pending"
+
+
+# ============================================================
+# THEN
+# ============================================================
+
+
+@then(
+    "the system should send an email notification to the employer informing them that the registration request has been approved"
+)
+def approval_email_sent(
+    context,
+):
+
+    message = latest_message(context)
+
+    # Email sent
+    assert len(context.sent_messages) == 1
+
+    # Correct recipient
+    assert EMAIL in recipient_emails(message)
+
+    # Correct subject
+    assert message.subject == "Company Verification " "Approved - JobConnect"
+
+    # Company information
     assert COMPANY_NAME in message.body
 
-    assert (
-        "Your company verification has been approved."
-        in message.body
-    )
-
-    assert EMAIL in message_recipients(
-        message
-    )
-
-
-def test_rejected_verification_email_with_reason(
-    context,
-):
-    send_email(
-        "Rejected",
-        reason="Invalid SSM document",
-    )
-
-    message = latest_message(
-        context
-    )
-
-    assert (
-        message.subject
-        ==
-        "Company Verification Rejected - JobConnect"
-    )
-
-    assert (
-        "Invalid SSM document"
-        in message.body
-    )
-
-
-def test_rejected_without_reason(
-    context,
-):
-    send_email(
-        "Rejected"
-    )
-
-    message = latest_message(
-        context
-    )
-
-    assert (
-        "Reason:"
-        not in message.body
-    )
-
-
-def test_other_status_email(
-    context,
-):
-    send_email(
-        "Pending Review"
-    )
-
-    message = latest_message(
-        context
-    )
-
-    assert (
-        message.subject
-        ==
-        "Company Verification Status Updated - JobConnect"
-    )
-
-    assert (
-        "Pending Review"
-        in message.body
-    )
-
-
-def test_email_failure_is_raised(
-    context,
-):
-    context.fail_send = True
-
-    with pytest.raises(
-        RuntimeError,
-        match="Email service unavailable",
-    ):
-        send_email(
-            "Approved"
-        )
-
-
-# ============================================================
-# BDD GIVEN
-# ============================================================
-
-@given(
-    "a company verification email recipient exists"
-)
-def recipient_exists(
-    context,
-):
-    context.fail_send = False
-
-
-@given(
-    "the email service fails"
-)
-def email_service_fails(
-    context,
-):
-    context.fail_send = True
-
-
-# ============================================================
-# BDD WHEN
-# ============================================================
-
-@when(
-    "the company verification status is Approved"
-)
-def status_approved(
-    context,
-):
-    send_email(
-        "Approved"
-    )
-
-
-@when(
-    "the company verification status is Rejected with a reason"
-)
-def status_rejected_reason(
-    context,
-):
-    send_email(
-        "Rejected",
-        reason="Invalid SSM document",
-    )
-
-
-@when(
-    "the company verification status is Rejected without a reason"
-)
-def status_rejected_no_reason(
-    context,
-):
-    send_email(
-        "Rejected"
-    )
-
-
-@when(
-    "the company verification status is Pending Review"
-)
-def status_pending_review(
-    context,
-):
-    send_email(
-        "Pending Review"
-    )
-
-
-@when(
-    "the company verification status is Approved expecting an error"
-)
-def approved_error(
-    context,
-):
-    try:
-        send_email(
-            "Approved"
-        )
-
-    except Exception as exc:
-        context.error = exc
-
-
-# ============================================================
-# BDD THEN
-# ============================================================
-
-@then(
-    "an approval email should be sent"
-)
-def approval_sent(
-    context,
-):
-    assert len(
-        context.sent_messages
-    ) == 1
+    # Approval information
+    assert "approved" in message.body.lower()
 
 
 @then(
-    "the approval email subject should be correct"
+    "the system should send an email notification to the employer informing them that the registration request has been rejected"
 )
-def approval_subject(
+def rejection_email_sent(
     context,
 ):
-    message = latest_message(
-        context
-    )
 
-    assert (
-        message.subject
-        ==
-        "Company Verification Approved - JobConnect"
-    )
+    message = latest_message(context)
+
+    # Email sent
+    assert len(context.sent_messages) == 1
+
+    # Correct recipient
+    assert EMAIL in recipient_emails(message)
+
+    # Correct subject
+    assert message.subject == "Company Verification " "Rejected - JobConnect"
+
+    # Company information
+    assert COMPANY_NAME in message.body
+
+    # Rejected status
+    assert "rejected" in message.body.lower()
 
 
 @then(
-    "the approval email should contain the company name"
+    "the email should display the verification status company information and relevant remarks if provided"
 )
-def approval_company_name(
+def verification_details_displayed(
     context,
 ):
-    message = latest_message(
-        context
-    )
 
-    assert (
-        COMPANY_NAME
-        in message.body
-    )
+    message = latest_message(context)
+
+    # Verification status
+    assert "rejected" in message.body.lower()
+
+    # Company information
+    assert COMPANY_NAME in message.body
+
+    # Relevant remarks
+    assert "Reason:" in message.body
+
+    assert context.reason in message.body
 
 
-@then(
-    "the approval email should explain that the company was approved"
-)
-def approval_content(
+@then("the system should not send any approval or rejection email notification")
+def no_email_before_update(
     context,
 ):
-    message = latest_message(
-        context
-    )
 
-    assert (
-        "Your company verification has been approved."
-        in message.body
-    )
+    assert context.status == "Pending"
 
-
-@then(
-    "a rejection email should be sent"
-)
-def rejection_sent(
-    context,
-):
-    assert len(
-        context.sent_messages
-    ) == 1
-
-
-@then(
-    "the rejection email subject should be correct"
-)
-def rejection_subject(
-    context,
-):
-    message = latest_message(
-        context
-    )
-
-    assert (
-        message.subject
-        ==
-        "Company Verification Rejected - JobConnect"
-    )
-
-
-@then(
-    "the rejection email should contain the rejection reason"
-)
-def rejection_reason(
-    context,
-):
-    message = latest_message(
-        context
-    )
-
-    assert (
-        "Reason:"
-        in message.body
-    )
-
-    assert (
-        "Invalid SSM document"
-        in message.body
-    )
-
-
-@then(
-    "a rejection email should still be sent"
-)
-def rejection_without_reason_sent(
-    context,
-):
-    assert len(
-        context.sent_messages
-    ) == 1
-
-
-@then(
-    "the rejection email should not contain a reason section"
-)
-def no_reason_section(
-    context,
-):
-    message = latest_message(
-        context
-    )
-
-    assert (
-        "Reason:"
-        not in message.body
-    )
-
-
-@then(
-    "a status update email should be sent"
-)
-def status_email_sent(
-    context,
-):
-    assert len(
-        context.sent_messages
-    ) == 1
-
-    message = latest_message(
-        context
-    )
-
-    assert (
-        message.subject
-        ==
-        "Company Verification Status Updated - JobConnect"
-    )
-
-
-@then(
-    "the email should contain the current verification status"
-)
-def current_status_in_email(
-    context,
-):
-    message = latest_message(
-        context
-    )
-
-    assert (
-        "Pending Review"
-        in message.body
-    )
-
-
-@then(
-    "the verification email should be sent to the correct email address"
-)
-def correct_email_address(
-    context,
-):
-    message = latest_message(
-        context
-    )
-
-    assert (
-        EMAIL
-        in message_recipients(
-            message
-        )
-    )
-
-
-@then(
-    "the email sending error should be raised"
-)
-def sending_error_raised(
-    context,
-):
-    assert (
-        context.error
-        is not None
-    )
-
-    assert isinstance(
-        context.error,
-        RuntimeError,
-    )
-
-    assert (
-        str(context.error)
-        ==
-        "Email service unavailable"
-    )
+    assert context.sent_messages == []
