@@ -33,7 +33,13 @@ DEFAULT_QUESTIONS = [
         "label": "What is your total years of experience in this field?",
         "type": "select",
         "required": True,
-        "options": ["Less than 1 year", "1 - 2 years", "3 - 5 years", "6 - 10 years", "10+ years"],
+        "options": [
+            "Less than 1 year",
+            "1 - 2 years",
+            "3 - 5 years",
+            "6 - 10 years",
+            "10+ years",
+        ],
     },
     {
         "id": "notice_period",
@@ -151,7 +157,10 @@ async def job_apply_submit(
     if not job_seeker_id:
         return JSONResponse(
             status_code=401,
-            content={"success": False, "message": "Please log in to apply for this job."},
+            content={
+                "success": False,
+                "message": "Please log in to apply for this job.",
+            },
         )
 
     form_data = await request.form()
@@ -174,7 +183,10 @@ async def job_apply_submit(
         if ext not in ALLOWED_RESUME_EXTENSIONS:
             return JSONResponse(
                 status_code=400,
-                content={"success": False, "message": "Resume must be a PDF, DOC, or DOCX file."},
+                content={
+                    "success": False,
+                    "message": "Resume must be a PDF, DOC, or DOCX file.",
+                },
             )
 
         contents = await resume.read()

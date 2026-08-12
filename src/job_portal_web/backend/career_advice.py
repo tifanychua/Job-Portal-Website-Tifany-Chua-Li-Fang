@@ -15,7 +15,6 @@ from pydantic import BaseModel
 
 from job_portal_web.backend.database import db
 
-
 router = APIRouter()
 
 PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
@@ -65,13 +64,7 @@ def admin_id(request: Request):
 
 def is_job_seeker(request: Request) -> bool:
     role = request.session.get("user_type") or request.session.get("userType")
-    normalized_role = (
-        str(role or "")
-        .strip()
-        .lower()
-        .replace("-", "_")
-        .replace(" ", "_")
-    )
+    normalized_role = str(role or "").strip().lower().replace("-", "_").replace(" ", "_")
     return normalized_role in {"job_seeker", "jobseeker"}
 
 
@@ -93,11 +86,7 @@ def get_current_job_seeker(request: Request):
     if not seeker_id:
         return None
 
-    seeker_document = (
-        db.collection("job_seeker")
-        .document(str(seeker_id))
-        .get()
-    )
+    seeker_document = db.collection("job_seeker").document(str(seeker_id)).get()
 
     if not seeker_document.exists:
         return None
@@ -132,9 +121,7 @@ def get_saved_article_ids(seeker_id: str | None) -> set[str]:
         return set()
 
     snapshots = (
-        db.collection(SAVED_COLLECTION_NAME)
-        .where("jobSeekerId", "==", str(seeker_id))
-        .stream()
+        db.collection(SAVED_COLLECTION_NAME).where("jobSeekerId", "==", str(seeker_id)).stream()
     )
 
     saved_ids = set()
@@ -172,9 +159,7 @@ def validate_post(data: dict, publishing: bool) -> None:
         errors.append("Summary cannot exceed 300 characters.")
 
     image_url = data.get("imageUrl", "")
-    if image_url and not image_url.startswith(
-        "https://firebasestorage.googleapis.com/"
-    ):
+    if image_url and not image_url.startswith("https://firebasestorage.googleapis.com/"):
         errors.append("The cover image URL is invalid.")
 
     if publishing:
@@ -225,42 +210,20 @@ def admin_career_advice_page(
             status_code=303,
         )
 
+    snapshots = db.collection(COLLECTION_NAME).stream()
 
-    snapshots = (
-        db.collection(COLLECTION_NAME)
-        .stream()
-    )
-
-
-    all_posts = [
-        snapshot_to_dict(snapshot)
-        for snapshot in snapshots
-    ]
-
+    all_posts = [snapshot_to_dict(snapshot) for snapshot in snapshots]
 
     # Main admin page only displays published posts.
-    published_posts = [
-        post
-        for post in all_posts
-        if post.get("status") == "Published"
-    ]
-
+    published_posts = [post for post in all_posts if post.get("status") == "Published"]
 
     # Used for the Saved Drafts counter.
-    draft_posts = [
-        post
-        for post in all_posts
-        if post.get("status") == "Draft"
-    ]
-
+    draft_posts = [post for post in all_posts if post.get("status") == "Draft"]
 
     published_posts.sort(
-        key=lambda post: timestamp_number(
-            post.get("publicationDate")
-        ),
+        key=lambda post: timestamp_number(post.get("publicationDate")),
         reverse=True,
     )
-
 
     return templates.TemplateResponse(
         request=request,
@@ -271,6 +234,7 @@ def admin_career_advice_page(
             "active_page": "career_advice",
         },
     )
+
 
 @router.get(
     "/admin/career-advice/drafts",
@@ -286,35 +250,22 @@ def saved_career_advice_drafts_page(
             status_code=303,
         )
 
-
-    snapshots = (
-        db.collection(COLLECTION_NAME)
-        .stream()
-    )
-
+    snapshots = db.collection(COLLECTION_NAME).stream()
 
     drafts = []
 
-
     for snapshot in snapshots:
 
-        post = snapshot_to_dict(
-            snapshot
-        )
-
+        post = snapshot_to_dict(snapshot)
 
         if post.get("status") == "Draft":
 
             drafts.append(post)
 
-
     drafts.sort(
-        key=lambda post: timestamp_number(
-            post.get("updatedAt")
-        ),
+        key=lambda post: timestamp_number(post.get("updatedAt")),
         reverse=True,
     )
-
 
     return templates.TemplateResponse(
         request=request,
@@ -325,32 +276,22 @@ def saved_career_advice_drafts_page(
         },
     )
 
-@router.delete(
-    "/api/admin/career-advice/{post_id}"
-)
+
+@router.delete("/api/admin/career-advice/{post_id}")
 def delete_career_advice_post(
     post_id: str,
     request: Request,
 ):
     require_admin(request)
 
-
-    snapshot = get_post_snapshot(
-        post_id
-    )
-
+    snapshot = get_post_snapshot(post_id)
 
     post = snapshot.to_dict() or {}
 
-
-    image_url = str(
-        post.get("imageUrl", "")
-    ).strip()
-
+    image_url = str(post.get("imageUrl", "")).strip()
 
     # Delete the Firestore post.
     snapshot.reference.delete()
-
 
     # Delete the cover image from Firebase Storage.
     if image_url:
@@ -362,31 +303,18 @@ def delete_career_advice_post(
                 urlparse,
             )
 
-
-            parsed_url = urlparse(
-                image_url
-            )
-
+            parsed_url = urlparse(image_url)
 
             if "/o/" in parsed_url.path:
 
-                encoded_storage_path = (
-                    parsed_url.path.split(
-                        "/o/",
-                        1,
-                    )[1]
-                )
+                encoded_storage_path = parsed_url.path.split(
+                    "/o/",
+                    1,
+                )[1]
 
+                storage_path = unquote(encoded_storage_path)
 
-                storage_path = unquote(
-                    encoded_storage_path
-                )
-
-
-                storage.bucket().blob(
-                    storage_path
-                ).delete()
-
+                storage.bucket().blob(storage_path).delete()
 
         except Exception as error:
 
@@ -397,12 +325,9 @@ def delete_career_advice_post(
                 error,
             )
 
-
     return {
         "success": True,
-        "message": (
-            "Career advice post deleted successfully."
-        ),
+        "message": ("Career advice post deleted successfully."),
     }
 
 
@@ -514,9 +439,7 @@ def create_career_advice(
     )
 
 
-@router.put(
-    "/api/admin/career-advice/{post_id}"
-)
+@router.put("/api/admin/career-advice/{post_id}")
 def update_career_advice(
     post_id: str,
     payload: CareerAdvicePayload,
@@ -524,42 +447,22 @@ def update_career_advice(
 ):
     require_admin(request)
 
-
     # Retrieve the existing post.
-    snapshot = get_post_snapshot(
-        post_id
-    )
+    snapshot = get_post_snapshot(post_id)
 
-
-    existing_post = (
-        snapshot.to_dict() or {}
-    )
-
+    existing_post = snapshot.to_dict() or {}
 
     # Clean the submitted values.
-    data = clean_payload(
-        payload
-    )
+    data = clean_payload(payload)
 
-
-    publishing = (
-        payload.action == "publish"
-    )
-
+    publishing = payload.action == "publish"
 
     # A published post cannot return to Draft.
-    if (
-        existing_post.get("status") == "Published"
-        and payload.action == "draft"
-    ):
+    if existing_post.get("status") == "Published" and payload.action == "draft":
         raise HTTPException(
             status_code=409,
-            detail=(
-                "A published post cannot be changed "
-                "back to Draft."
-            ),
+            detail=("A published post cannot be changed " "back to Draft."),
         )
-
 
     # Validate all required publication fields.
     validate_post(
@@ -567,52 +470,25 @@ def update_career_advice(
         publishing,
     )
 
-
     current_time = now_utc()
-
 
     update_data = {
         **data,
-
-        "status": (
-            "Published"
-            if publishing
-            else "Draft"
-        ),
-
+        "status": ("Published" if publishing else "Draft"),
         "updatedAt": current_time,
-
-        "updatedBy": admin_id(
-            request
-        ),
+        "updatedBy": admin_id(request),
     }
-
 
     # Record publication date only the first time
     # that the post is published.
-    if (
-        publishing
-        and not existing_post.get(
-            "publicationDate"
-        )
-    ):
-        update_data[
-            "publicationDate"
-        ] = current_time
+    if publishing and not existing_post.get("publicationDate"):
+        update_data["publicationDate"] = current_time
 
-
-    snapshot.reference.update(
-        update_data
-    )
-
+    snapshot.reference.update(update_data)
 
     return {
         "success": True,
-
-        "status": update_data[
-            "status"
-        ],
-
+        "status": update_data["status"],
         "message": (
             "Career advice post updated successfully."
             if existing_post.get("status") == "Published"
@@ -712,11 +588,7 @@ def remove_saved_career_advice(post_id: str, request: Request):
 def published_career_advice_page(request: Request):
     user = get_current_job_seeker(request)
 
-    snapshots = (
-        db.collection(COLLECTION_NAME)
-        .where("status", "==", "Published")
-        .stream()
-    )
+    snapshots = db.collection(COLLECTION_NAME).where("status", "==", "Published").stream()
     posts = [snapshot_to_dict(snapshot) for snapshot in snapshots]
     posts.sort(
         key=lambda post: timestamp_number(post.get("publicationDate")),
@@ -737,6 +609,7 @@ def published_career_advice_page(request: Request):
         },
     )
 
+
 @router.get("/job-seeker/career-advice/{post_id}")
 def job_seeker_view_career_advice(
     request: Request,
@@ -744,11 +617,7 @@ def job_seeker_view_career_advice(
 ):
     user = get_current_job_seeker(request)
 
-    post_document = (
-        db.collection("career_advice")
-        .document(post_id)
-        .get()
-    )
+    post_document = db.collection("career_advice").document(post_id).get()
 
     if not post_document.exists:
         raise HTTPException(
@@ -768,8 +637,7 @@ def job_seeker_view_career_advice(
 
     seeker_id = job_seeker_id(request)
     post["is_saved"] = bool(
-        seeker_id
-        and get_saved_article_reference(str(seeker_id), post_id).get().exists
+        seeker_id and get_saved_article_reference(str(seeker_id), post_id).get().exists
     )
 
     return templates.TemplateResponse(
@@ -793,8 +661,7 @@ def career_advice_details_page(request: Request, post_id: str):
 
     seeker_id = job_seeker_id(request)
     post["is_saved"] = bool(
-        seeker_id
-        and get_saved_article_reference(str(seeker_id), post_id).get().exists
+        seeker_id and get_saved_article_reference(str(seeker_id), post_id).get().exists
     )
 
     return templates.TemplateResponse(

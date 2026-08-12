@@ -9,7 +9,6 @@ from pydantic import BaseModel, Field
 
 from job_portal_web.backend.database import db
 
-
 router = APIRouter()
 
 PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
@@ -197,12 +196,8 @@ def get_account_counts(accounts: list[dict]) -> dict:
     return {
         "total": len(accounts),
         "active": sum(account["status"] == "Active" for account in accounts),
-        "suspended": sum(
-            account["status"] == "Suspended" for account in accounts
-        ),
-        "deactivated": sum(
-            account["status"] == "Deactivated" for account in accounts
-        ),
+        "suspended": sum(account["status"] == "Suspended" for account in accounts),
+        "deactivated": sum(account["status"] == "Deactivated" for account in accounts),
     }
 
 

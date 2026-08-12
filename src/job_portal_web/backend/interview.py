@@ -405,7 +405,10 @@ async def update_interview(interview_id: str, interview: InterviewUpdate):
             # ======================================
 
             await send_interview_rescheduled_email(
-                seeker.get("email"), seeker.get("name"), Interview(**updated_data), company_address
+                seeker.get("email"),
+                seeker.get("name"),
+                Interview(**updated_data),
+                company_address,
             )
 
     except Exception as e:
@@ -666,7 +669,9 @@ async def schedule_list(request: Request):
         return RedirectResponse("/login", status_code=303)
 
     return templates.TemplateResponse(
-        request=request, name="schedule_list.html", context={"request": request, "company": user}
+        request=request,
+        name="schedule_list.html",
+        context={"request": request, "company": user},
     )
 
 

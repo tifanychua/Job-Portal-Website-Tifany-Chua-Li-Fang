@@ -389,7 +389,8 @@ async def update_application_status(application_id: str, status_data: Applicatio
 
     if received_status not in status_mapping:
         raise HTTPException(
-            status_code=400, detail=("Invalid application status: " + status_data.status)
+            status_code=400,
+            detail=("Invalid application status: " + status_data.status),
         )
 
     # Get the correct Firestore value
@@ -420,7 +421,10 @@ async def update_application_status(application_id: str, status_data: Applicatio
     current_status = str(application.get("status", "")).strip().lower()
 
     # During pytest, allow changing status repeatedly
-    if not os.getenv("PYTEST_CURRENT_TEST") and current_status in ["offered", "rejected"]:
+    if not os.getenv("PYTEST_CURRENT_TEST") and current_status in [
+        "offered",
+        "rejected",
+    ]:
         raise HTTPException(
             status_code=400,
             detail=(

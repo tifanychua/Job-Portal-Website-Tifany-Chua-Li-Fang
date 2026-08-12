@@ -288,7 +288,11 @@ async def update_company_profile(
 
     if len(specialty_category_ids) > 6:
         return return_error(
-            request, company, industries, categories, "Maximum 6 company specialties allowed."
+            request,
+            company,
+            industries,
+            categories,
+            "Maximum 6 company specialties allowed.",
         )
 
     company_data = {
@@ -317,7 +321,11 @@ async def update_company_profile(
 
         if logo.content_type not in allowed_types:
             return return_error(
-                request, company, industries, categories, "Only PNG and JPG images are allowed."
+                request,
+                company,
+                industries,
+                categories,
+                "Only PNG and JPG images are allowed.",
             )
 
         extension = logo.filename.rsplit(".", 1)[-1]

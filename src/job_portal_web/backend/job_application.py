@@ -24,7 +24,15 @@ STATUS_META = {
 }
 
 
-FILTER_TABS = ["all", "submitted", "reviewed", "shortlisted", "offered", "rejected", "cancelled"]
+FILTER_TABS = [
+    "all",
+    "submitted",
+    "reviewed",
+    "shortlisted",
+    "offered",
+    "rejected",
+    "cancelled",
+]
 
 
 def _format_timestamp(ts):

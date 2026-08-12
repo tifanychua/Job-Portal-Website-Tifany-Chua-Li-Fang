@@ -87,7 +87,11 @@ def test_employer_send_message_success(client):
 def test_employer_receive_job_seeker_message(client):
 
     response = send_message(
-        client, "J000001", "job_seeker", "C000001", "Can I know more details about the interview?"
+        client,
+        "J000001",
+        "job_seeker",
+        "C000001",
+        "Can I know more details about the interview?",
     )
 
     assert response.status_code == 200

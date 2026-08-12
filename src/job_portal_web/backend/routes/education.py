@@ -103,23 +103,27 @@ async def add_education(
 
     if degree == "":
         return JSONResponse(
-            {"success": False, "message": "Please select your qualification."}, status_code=400
+            {"success": False, "message": "Please select your qualification."},
+            status_code=400,
         )
 
     if institution == "":
         return JSONResponse(
-            {"success": False, "message": "Please enter your institution."}, status_code=400
+            {"success": False, "message": "Please enter your institution."},
+            status_code=400,
         )
 
     if start_date == "":
         return JSONResponse(
-            {"success": False, "message": "Please select your start date."}, status_code=400
+            {"success": False, "message": "Please select your start date."},
+            status_code=400,
         )
 
     if not current_study:
         if end_date == "":
             return JSONResponse(
-                {"success": False, "message": "Please select your end date."}, status_code=400
+                {"success": False, "message": "Please select your end date."},
+                status_code=400,
             )
 
         if end_date < start_date:
@@ -142,7 +146,8 @@ async def add_education(
 
     if next(duplicate, None):
         return JSONResponse(
-            {"success": False, "message": "This education record already exists."}, status_code=409
+            {"success": False, "message": "This education record already exists."},
+            status_code=409,
         )
 
     # ===========================================
@@ -231,23 +236,27 @@ async def update_education(
 
     if degree == "":
         return JSONResponse(
-            {"success": False, "message": "Please select your qualification."}, status_code=400
+            {"success": False, "message": "Please select your qualification."},
+            status_code=400,
         )
 
     if institution == "":
         return JSONResponse(
-            {"success": False, "message": "Please enter your institution."}, status_code=400
+            {"success": False, "message": "Please enter your institution."},
+            status_code=400,
         )
 
     if start_date == "":
         return JSONResponse(
-            {"success": False, "message": "Please select your start date."}, status_code=400
+            {"success": False, "message": "Please select your start date."},
+            status_code=400,
         )
 
     if not current_study:
         if end_date == "":
             return JSONResponse(
-                {"success": False, "message": "Please select your end date."}, status_code=400
+                {"success": False, "message": "Please select your end date."},
+                status_code=400,
             )
 
         if end_date < start_date:

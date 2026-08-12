@@ -167,7 +167,12 @@ async def edit_job(request: Request, job_id: str):
     return templates.TemplateResponse(
         request=request,
         name="editJob.html",
-        context={"request": request, "job": job, "categories": categories, "company": company},
+        context={
+            "request": request,
+            "job": job,
+            "categories": categories,
+            "company": company,
+        },
     )
 
 
@@ -495,5 +500,11 @@ async def job_statistics(request: Request):
             deleted += 1
 
     return JSONResponse(
-        {"success": True, "total": total, "active": active, "draft": draft, "deleted": deleted}
+        {
+            "success": True,
+            "total": total,
+            "active": active,
+            "draft": draft,
+            "deleted": deleted,
+        }
     )

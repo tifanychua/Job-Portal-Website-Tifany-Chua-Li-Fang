@@ -302,6 +302,8 @@ def schedule_list_page(request: Request):
         return RedirectResponse("/login", status_code=303)
 
     return render_template(request, "schedule_list.html", {"active_page": "schedule_list"})
+
+
 @app.get("/login")
 def login_page(request: Request):
     return render_template(request, "login.html")
@@ -309,10 +311,8 @@ def login_page(request: Request):
 
 @app.get("/career-advice")
 def view_career_advice(request: Request):
-    return templates.TemplateResponse(
-        "jobSeekerCareerAdvice.html",
-        {"request": request}
-    )
+    return templates.TemplateResponse("jobSeekerCareerAdvice.html", {"request": request})
+
 
 # ==================================================
 # RUN
@@ -322,5 +322,3 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
-
-
