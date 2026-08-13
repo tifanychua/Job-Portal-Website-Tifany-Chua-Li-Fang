@@ -142,7 +142,7 @@ def test_update_job_success(client: TestClient):
     assert response.status_code == 303
     assert response.headers.get("location") is not None
 
-    print("Acceptance Test Passed: " "Employer submitted the updated job successfully.")
+    print("Acceptance Test Passed: Employer submitted the updated job successfully.")
 
 
 # ==================================================
@@ -162,7 +162,7 @@ def test_save_updated_job_information(
     assert job["location"] == "Petaling Jaya"
     assert job["job_desc"] == "Updated job description"
 
-    print("Acceptance Test Passed: " "Updated job information was saved.")
+    print("Acceptance Test Passed: Updated job information was saved.")
 
 
 # ==================================================
@@ -181,7 +181,7 @@ def test_view_updated_job_information(
     assert job["job_title"] == "Updated HR Executive"
     assert job["location"] == "Petaling Jaya"
 
-    print("Acceptance Test Passed: " "Latest job information is available.")
+    print("Acceptance Test Passed: Latest job information is available.")
 
 
 # ==================================================
@@ -205,7 +205,7 @@ def test_update_invalid_job(
 
     assert not invalid_document.exists
 
-    print("Negative Test Passed: " "Invalid job was not created or updated.")
+    print("Negative Test Passed: Invalid job was not created or updated.")
 
 
 # ==================================================
@@ -259,7 +259,7 @@ def verify_updated(context):
     assert context.response is not None
     assert context.response.status_code == 303
 
-    print("Scenario Passed: " "Employer updated the job posting.")
+    print("Scenario Passed: Employer updated the job posting.")
 
 
 # ==================================================
@@ -289,7 +289,7 @@ def update_completed(context):
     assert context.response.status_code == 303
 
 
-@then("the updated job information " "should be saved in the database")
+@then("the updated job information should be saved in the database")
 def verify_saved(context):
     job = get_updated_job(context.job_id)
 
@@ -305,7 +305,7 @@ def verify_saved(context):
 
     assert job["job_req"] == "Updated job requirement"
 
-    print("Scenario Passed: " "Updated job information was saved.")
+    print("Scenario Passed: Updated job information was saved.")
 
 
 # ==================================================
@@ -329,4 +329,4 @@ def verify_display(context):
     assert job["job_title"] == "Updated HR Executive"
     assert job["location"] == "Petaling Jaya"
 
-    print("Scenario Passed: " "Latest job information is available.")
+    print("Scenario Passed: Latest job information is available.")

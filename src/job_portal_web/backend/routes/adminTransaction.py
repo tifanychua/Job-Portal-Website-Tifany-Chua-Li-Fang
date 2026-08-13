@@ -1,26 +1,24 @@
-from datetime import datetime, timezone
 import math
 import os
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Request
 from fastapi.responses import FileResponse
 from fastapi.templating import Jinja2Templates
-
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.styles import (
-    getSampleStyleSheet,
     ParagraphStyle,
+    getSampleStyleSheet,
 )
 from reportlab.lib.units import mm
-
 from reportlab.platypus import (
-    SimpleDocTemplate,
+    HRFlowable,
     Paragraph,
+    SimpleDocTemplate,
     Spacer,
     Table,
     TableStyle,
-    HRFlowable,
 )
 
 from ..database import db
@@ -47,7 +45,7 @@ def transaction_management(
     all_transactions = []
 
     # Automatically changes every year
-    current_year = datetime.now(timezone.utc).year
+    current_year = datetime.now(UTC).year
 
     # Clean filter values
     keyword_lower = keyword.strip().lower()
@@ -61,7 +59,6 @@ def transaction_management(
     docs = db.collection("payment").stream()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         data["transaction_id"] = doc.id
@@ -76,11 +73,9 @@ def transaction_management(
         company_id = data.get("company_id")
 
         if company_id:
-
             company_doc = db.collection("company").document(company_id).get()
 
             if company_doc.exists:
-
                 company_data = company_doc.to_dict()
 
                 company_name = company_data.get("companyName", "")
@@ -97,7 +92,6 @@ def transaction_management(
         payment_status = str(data.get("status", "")).strip().upper()
 
         if status_filter:
-
             if payment_status != status_filter:
                 continue
 
@@ -106,7 +100,6 @@ def transaction_management(
         # =================================================
 
         if keyword_lower:
-
             transaction_id = doc.id.lower()
 
             paypal_order_id = str(data.get("paypal_order_id", "")).lower()
@@ -137,9 +130,7 @@ def transaction_management(
     # =====================================================
 
     all_transactions.sort(
-        key=lambda transaction: (
-            transaction.get("display_date") or datetime.min.replace(tzinfo=timezone.utc)
-        ),
+        key=lambda transaction: transaction.get("display_date") or datetime.min.replace(tzinfo=UTC),
         reverse=True,
     )
 
@@ -148,22 +139,20 @@ def transaction_management(
     # Based on current filtered results
     # =====================================================
 
-    total_revenue = 0
-    successful = 0
-    pending = 0
-    refunded = 0
-    failed = 0
+    total_revenue: float = 0.0
+    successful: int = 0
+    pending: int = 0
+    refunded: int = 0
+    failed: int = 0
 
     for transaction in all_transactions:
-
         payment_status = str(transaction.get("status", "")).strip().upper()
 
-        amount = float(transaction.get("amount", 0) or 0)
+        amount = float(transaction.get("amount", 0.0) or 0.0)
 
         payment_date = transaction.get("display_date")
 
         if payment_status == "COMPLETED":
-
             successful += 1
 
             # Only revenue from current year
@@ -187,11 +176,9 @@ def transaction_management(
 
     total_pages = max(1, math.ceil(total_transactions / PER_PAGE))
 
-    if page < 1:
-        page = 1
+    page = max(page, 1)
 
-    if page > total_pages:
-        page = total_pages
+    page = min(page, total_pages)
 
     start = (page - 1) * PER_PAGE
 
@@ -243,13 +230,12 @@ def transaction_report_page(
 
     docs = db.collection("payment").stream()
 
-    total_revenue = 0
+    total_revenue: float = 0.0
     successful = 0
     pending = 0
     failed = 0
 
     for doc in docs:
-
         data = doc.to_dict()
 
         data["transaction_id"] = doc.id
@@ -262,11 +248,9 @@ def transaction_report_page(
         company_id = data.get("company_id")
 
         if company_id:
-
             company_doc = db.collection("company").document(company_id).get()
 
             if company_doc.exists:
-
                 company_name = company_doc.to_dict().get("companyName", "")
 
         data["company_name"] = company_name
@@ -287,7 +271,6 @@ def transaction_report_page(
         data["display_date"] = payment_date
 
         if payment_date:
-
             payment_date_string = payment_date.strftime("%Y-%m-%d")
 
             if from_date and payment_date_string < from_date:
@@ -299,7 +282,7 @@ def transaction_report_page(
         # -----------------------------------------
         # Summary
         # -----------------------------------------
-        amount = float(data.get("amount", 0) or 0)
+        amount = float(data.get("amount", 0.0) or 0.0)
 
         if payment_status == "COMPLETED":
             successful += 1
@@ -315,7 +298,7 @@ def transaction_report_page(
 
     # Newest first
     transactions.sort(
-        key=lambda x: (x.get("display_date") or datetime.min.replace(tzinfo=timezone.utc)),
+        key=lambda x: x.get("display_date") or datetime.min.replace(tzinfo=UTC),
         reverse=True,
     )
 
@@ -356,12 +339,11 @@ def download_transaction_report(
 
     transactions = []
 
-    total_revenue = 0
+    total_revenue: float = 0.0
 
     docs = db.collection("payment").stream()
 
     for doc in docs:
-
         data = doc.to_dict()
 
         transaction_id = doc.id
@@ -375,11 +357,9 @@ def download_transaction_report(
         company_id = data.get("company_id")
 
         if company_id:
-
             company_doc = db.collection("company").document(company_id).get()
 
             if company_doc.exists:
-
                 company_data = company_doc.to_dict()
 
                 company_name = company_data.get("companyName", "-")
@@ -391,7 +371,6 @@ def download_transaction_report(
         payment_status = str(data.get("status", "")).strip().upper()
 
         if status:
-
             if payment_status != status.strip().upper():
                 continue
 
@@ -408,7 +387,6 @@ def download_transaction_report(
         payment_date = data.get("completed_at") or data.get("created_at")
 
         if payment_date:
-
             payment_date_string = payment_date.strftime("%Y-%m-%d")
 
             if from_date and payment_date_string < from_date:
@@ -421,7 +399,7 @@ def download_transaction_report(
         # AMOUNT
         # =================================================
 
-        amount = float(data.get("amount", 0) or 0)
+        amount = float(data.get("amount", 0.0) or 0.0)
 
         if payment_status == "COMPLETED":
             total_revenue += amount
@@ -448,9 +426,7 @@ def download_transaction_report(
     # =====================================================
 
     transactions.sort(
-        key=lambda transaction: (
-            transaction["payment_date"] or datetime.min.replace(tzinfo=timezone.utc)
-        ),
+        key=lambda transaction: transaction["payment_date"] or datetime.min.replace(tzinfo=UTC),
         reverse=True,
     )
 
@@ -464,30 +440,24 @@ def download_transaction_report(
             return None
 
         try:
-
             return datetime.strptime(date_string, "%Y-%m-%d").strftime("%d %b %Y")
 
         except ValueError:
-
             return date_string
 
     formatted_from = format_date(from_date)
     formatted_to = format_date(to_date)
 
     if formatted_from and formatted_to:
-
         report_period = f"{formatted_from} - {formatted_to}"
 
     elif formatted_from:
-
         report_period = f"{formatted_from} - Present"
 
     elif formatted_to:
-
         report_period = f"Beginning - {formatted_to}"
 
     else:
-
         report_period = "All Dates"
 
     # =====================================================
@@ -508,7 +478,7 @@ def download_transaction_report(
 
     os.makedirs(output_dir, exist_ok=True)
 
-    filename = "JobConnect_Transaction_Report_" f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    filename = f"JobConnect_Transaction_Report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
     filepath = os.path.join(output_dir, filename)
 
@@ -802,9 +772,7 @@ def download_transaction_report(
     # =====================================================
 
     if transactions:
-
         for transaction in transactions:
-
             status_text = transaction["status"].replace("_", " ").title()
 
             table_data.append(
@@ -813,14 +781,13 @@ def download_transaction_report(
                     Paragraph(transaction["company_name"], table_text_style),
                     Paragraph(str(transaction["package"]), table_text_style),
                     Paragraph(transaction["payment_method"], table_text_style),
-                    Paragraph(f'RM {transaction["amount"]:,.2f}', table_text_style),
+                    Paragraph(f"RM {transaction['amount']:,.2f}", table_text_style),
                     Paragraph(status_text, table_text_style),
                     Paragraph(transaction["date_display"], table_text_style),
                 ]
             )
 
     else:
-
         table_data.append(
             [
                 Paragraph(
@@ -867,20 +834,16 @@ def download_transaction_report(
 
     # Alternating rows
     for row_number in range(1, len(table_data)):
-
         if row_number % 2 == 0:
-
             table_styles.append(
                 ("BACKGROUND", (0, row_number), (-1, row_number), colors.HexColor("#F8FAFC"))
             )
 
         else:
-
             table_styles.append(("BACKGROUND", (0, row_number), (-1, row_number), colors.white))
 
     # No transactions row
     if not transactions:
-
         table_styles.append(("SPAN", (0, 1), (-1, 1)))
 
         table_styles.append(("ALIGN", (0, 1), (-1, 1), "CENTER"))

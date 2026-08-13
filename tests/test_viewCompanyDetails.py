@@ -1,9 +1,7 @@
 import asyncio
-
 from unittest.mock import patch
 
 import pytest
-
 from pytest_bdd import (
     given,
     scenarios,
@@ -41,7 +39,6 @@ scenarios("features/viewCompanyDetails.feature")
 
 
 class FakeDocumentSnapshot:
-
     def __init__(self, document_id, data=None, exists=True):
 
         self.id = document_id
@@ -54,7 +51,6 @@ class FakeDocumentSnapshot:
 
 
 class FakeDocumentReference:
-
     def __init__(self, collection, document_id):
 
         self.collection = collection
@@ -65,14 +61,12 @@ class FakeDocumentReference:
         data = self.collection.documents.get(self.document_id)
 
         if data is None:
-
             return FakeDocumentSnapshot(self.document_id, {}, False)
 
         return FakeDocumentSnapshot(self.document_id, data, True)
 
 
 class FakeQuery:
-
     def __init__(self, documents, filters=None):
 
         self.documents = documents
@@ -87,27 +81,21 @@ class FakeQuery:
         results = []
 
         for document_id, data in self.documents.items():
-
             matched = True
 
             for field, operator, expected in self.filters:
-
                 if operator == "==":
-
                     if data.get(field) != expected:
-
                         matched = False
                         break
 
             if matched:
-
                 results.append(FakeDocumentSnapshot(document_id, data, True))
 
         return results
 
 
 class FakeCollection:
-
     def __init__(self, documents=None):
 
         self.documents = documents or {}
@@ -122,7 +110,6 @@ class FakeCollection:
 
 
 class FakeDB:
-
     def __init__(self, applicants=None, companies=None, jobs=None, reviews=None):
 
         self.collections = {
@@ -143,7 +130,6 @@ class FakeDB:
 
 
 class FakeTemplates:
-
     def TemplateResponse(
         self,
         request=None,
@@ -166,7 +152,6 @@ class FakeTemplates:
 
 
 class FakeRequest:
-
     def __init__(self):
 
         self.session = {"user_type": "job_seeker", "applicant_id": APPLICANT_ID}
@@ -178,7 +163,6 @@ class FakeRequest:
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -346,7 +330,6 @@ def test_only_five_jobs_displayed(monkeypatch, applicants, companies, reviews):
     many_jobs = {}
 
     for number in range(1, 8):
-
         many_jobs[f"JOB{number}"] = {
             "company_id": COMPANY_ID,
             "status": "Active",
@@ -417,7 +400,6 @@ def more_than_five_jobs(monkeypatch, applicants, companies, reviews):
     jobs = {}
 
     for number in range(1, 8):
-
         jobs[f"JOB{number}"] = {
             "company_id": COMPANY_ID,
             "status": "Active",

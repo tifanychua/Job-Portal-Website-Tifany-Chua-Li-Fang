@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -91,8 +93,7 @@ def review_company(
 ):
     company_doc = db.collection("company").document(company_id).get()
 
-    company = {}
-
+    company: dict[str, Any] = {}
     if company_doc.exists:
         company = company_doc.to_dict() or {}
         company["company_id"] = company_id
@@ -203,6 +204,6 @@ def deactivate_company(company_id: str):
     )
 
     return RedirectResponse(
-        url=("/admin/company-requests" "?status=Active"),
+        url=("/admin/company-requests?status=Active"),
         status_code=303,
     )

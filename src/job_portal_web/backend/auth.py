@@ -129,6 +129,8 @@ def login_page(request: Request):
             "role_label": ROLE_LABEL[role],
         },
     )
+
+
 def _job_seeker_account_is_active(account_data: dict) -> bool:
     account_status = (
         account_data.get("accountStatus")
@@ -137,6 +139,7 @@ def _job_seeker_account_is_active(account_data: dict) -> bool:
     )
 
     return str(account_status).strip().lower() == "active"
+
 
 @router.post("/firebase-login")
 async def firebase_login(request: Request, data: LoginToken):
@@ -147,35 +150,31 @@ async def firebase_login(request: Request, data: LoginToken):
         uid = decoded["uid"]
 
     except Exception as e:
-        return JSONResponse(status_code=401, content={"error": str(e)})
+        return JSONResponse(
+            status_code=401,
+            content={"error": str(e)},
+        )
 
-    # Wipe any previous identity in this session (e.g. a leftover
-    # applicant_id/company_id from a different account logging in earlier
-    # on the same browser session) before establishing the new one, so
-    # pages can never see a mix of old and new session keys.
     request.session.clear()
-    
+
     # Job Seeker
     job = db.collection("job_seeker").document(uid).get()
 
     if job.exists:
         job_data = job.to_dict() or {}
 
-    if not _job_seeker_account_is_active(job_data):
-        return JSONResponse(
-            content={
-                "error": (
-                    "Your account is not active. "
-                    "Please contact the administrator."
-                )
-            },
-            status_code=403,
-        )
+        if not _job_seeker_account_is_active(job_data):
+            return JSONResponse(
+                content={
+                    "error": ("Your account is not active. Please contact the administrator.")
+                },
+                status_code=403,
+            )
 
-    request.session["user_type"] = "job_seeker"
-    request.session["applicant_id"] = uid
+        request.session["user_type"] = "job_seeker"
+        request.session["applicant_id"] = uid
 
-    return {"redirect": "/"}
+        return {"redirect": "/"}
 
     # Employer
     company = db.collection("company").document(uid).get()
@@ -185,9 +184,10 @@ async def firebase_login(request: Request, data: LoginToken):
 
         try:
             ensure_account_can_log_in(company_data)
+
         except HTTPException as error:
             return JSONResponse(
-                {"error": error.detail},
+                content={"error": error.detail},
                 status_code=error.status_code,
             )
 
@@ -196,34 +196,43 @@ async def firebase_login(request: Request, data: LoginToken):
         if status in ["Pending", "Active"]:
             request.session["user_type"] = "employer"
             request.session["company_id"] = uid
+
             return {"redirect": "/manage-jobs"}
 
-        elif status == "Rejected":
+        if status == "Rejected":
             return JSONResponse(
-                {
-                    "error": "Your company registration has been rejected. Please contact the administrator for assistance."
+                content={
+                    "error": (
+                        "Your company registration has been rejected. "
+                        "Please contact the administrator for assistance."
+                    )
                 },
                 status_code=403,
             )
 
-        elif status == "Deactive":
+        if status == "Deactive":
             return JSONResponse(
-                {
-                    "error": "Your company account has been deactivated. Please contact the administrator."
+                content={
+                    "error": (
+                        "Your company account has been deactivated. "
+                        "Please contact the administrator."
+                    )
                 },
                 status_code=403,
             )
 
-        else:
-            return JSONResponse(
-                {"error": "Your company account is not permitted to log in."},
-                status_code=403,
-            )
+        return JSONResponse(
+            content={"error": "Your company account is not permitted to log in."},
+            status_code=403,
+        )
 
-    # User exists in Firebase Authentication but not in Firestore
+    # Firebase user exists but no matching Firestore account exists
     return JSONResponse(
-        {
-            "error": "No account information was found. Please complete your registration or contact support."
+        content={
+            "error": (
+                "No account information was found. "
+                "Please complete your registration or contact support."
+            )
         },
         status_code=404,
     )

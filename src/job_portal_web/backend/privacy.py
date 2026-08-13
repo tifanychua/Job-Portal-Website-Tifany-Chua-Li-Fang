@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
@@ -49,10 +50,8 @@ def privacy_settings_page(request: Request):
         .stream()
     )
 
-    employers_by_company = {}
-
+    employers_by_company: dict[str, dict[str, Any]] = {}
     for doc in application_docs:
-
         data = doc.to_dict()
 
         job_id = data.get("job_id")
@@ -75,7 +74,6 @@ def privacy_settings_page(request: Request):
         entry = employers_by_company.get(company_id)
 
         if entry is None:
-
             company_doc = db.collection("company").document(company_id).get()
 
             company = company_doc.to_dict() if company_doc.exists else {}

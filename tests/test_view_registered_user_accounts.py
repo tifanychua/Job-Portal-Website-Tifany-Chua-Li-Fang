@@ -4,7 +4,7 @@ import socket
 import threading
 import time
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -101,7 +101,7 @@ def context():
 
 @pytest.fixture
 def test_accounts(context):
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(UTC)
 
     db.collection("job_seeker").document(context["active_seeker_id"]).set(
         {
@@ -241,7 +241,7 @@ def verify_each_account_details(browser, context):
     )
 
 
-@then("the details should include the user's personal information " "and account status")
+@then("the details should include the user's personal information and account status")
 def verify_personal_information_and_status(browser, context):
     seeker_row = row(browser, context["active_seeker_id"])
     assert context["active_seeker_email"] in seeker_row.text
@@ -264,7 +264,7 @@ def filter_by_user_type(browser):
     Select(browser.find_element(By.ID, "accountTypeFilter")).select_by_value("job_seeker")
 
 
-@then("the system should display only the user accounts that match " "the selected criteria")
+@then("the system should display only the user accounts that match the selected criteria")
 def verify_filtered_accounts(browser, context):
     assert row(browser, context["active_seeker_id"]).is_displayed()
     assert row(browser, context["suspended_seeker_id"]).is_displayed()
@@ -281,7 +281,7 @@ def search_account(browser, context):
     browser.find_element(By.ID, "userSearch").send_keys(context["employer_email"])
 
 
-@then("the system should display the user accounts that match " "the search criteria")
+@then("the system should display the user accounts that match the search criteria")
 def verify_search_results(browser, context):
     assert row(browser, context["employer_id"]).is_displayed()
     assert not row(browser, context["active_seeker_id"]).is_displayed()

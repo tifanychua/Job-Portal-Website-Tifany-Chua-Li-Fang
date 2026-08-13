@@ -50,7 +50,6 @@ COMPANY_ID = "company001"
 
 
 class FakeSnapshot:
-
     def __init__(
         self,
         document_id,
@@ -66,7 +65,6 @@ class FakeSnapshot:
 
 
 class FakeDocument:
-
     def __init__(
         self,
         collection,
@@ -93,7 +91,6 @@ class FakeDocument:
 
 
 class FakeCollection:
-
     def __init__(
         self,
         documents=None,
@@ -131,7 +128,6 @@ class FakeCollection:
 
 
 class FakeDB:
-
     def __init__(
         self,
         companies=None,
@@ -157,7 +153,6 @@ class FakeDB:
 
 
 class FakeTemplates:
-
     def TemplateResponse(
         self,
         request,
@@ -176,7 +171,6 @@ class FakeTemplates:
 
 
 class FakeRequest:
-
     def __init__(
         self,
         user_type="job_seeker",
@@ -196,7 +190,6 @@ class FakeRequest:
 
 
 class Context:
-
     def __init__(self):
         self.response = None
         self.error = None
@@ -546,7 +539,6 @@ def company_exists(
 ):
 
     if context.db is None:
-
         context.db = install_fake_db(
             monkeypatch,
             companies,
@@ -563,7 +555,6 @@ def applicant_exists(
 ):
 
     if context.db is None:
-
         context.db = install_fake_db(
             monkeypatch,
             companies,

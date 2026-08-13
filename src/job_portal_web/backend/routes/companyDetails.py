@@ -123,7 +123,7 @@ def get_company_jobs(company_id: str):
 
                 maximum = float(str(maximum).replace(",", ""))
 
-                job["salary_display"] = f"RM {minimum:,.0f} - " f"RM {maximum:,.0f}"
+                job["salary_display"] = f"RM {minimum:,.0f} - RM {maximum:,.0f}"
 
             except (ValueError, TypeError):
                 job["salary_display"] = "Negotiable"

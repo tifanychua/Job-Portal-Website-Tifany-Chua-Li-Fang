@@ -1,7 +1,7 @@
 import json
 import os
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -64,7 +64,7 @@ def post_id():
 
 
 def create_published_post(post_id):
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(UTC)
     title = f"Original Career Advice {uuid4().hex}"
 
     db.collection("career_advice").document(post_id).set(
@@ -126,7 +126,7 @@ def viewing_management_section(client, context, post_id):
     assert context["original_title"] in response.text
 
 
-@when("the admin selects an existing career advice post and " "updates its information")
+@when("the admin selects an existing career advice post and updates its information")
 def update_existing_post(client, context):
     context["response"] = client.put(
         f"/api/admin/career-advice/{context['post_id']}",
@@ -167,7 +167,7 @@ def modify_published_content(client, context):
     )
 
 
-@then("the system should update the published post with the latest " "information")
+@then("the system should update the published post with the latest information")
 def verify_published_post_updated(context):
     assert context["response"].status_code == 200
 
@@ -210,7 +210,7 @@ def submit_invalid_changes(client, context):
     )
 
 
-@then("the system should display a validation message requesting " "the missing details")
+@then("the system should display a validation message requesting the missing details")
 def verify_validation_message(context):
     response = context["response"]
     assert response.status_code == 422

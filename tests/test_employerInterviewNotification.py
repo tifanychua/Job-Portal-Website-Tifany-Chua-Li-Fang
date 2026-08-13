@@ -12,10 +12,10 @@ real trigger for an employer-facing interview notification.
 from __future__ import annotations
 
 import pytest
+from fakes import FakeFirestore, patch_db_everywhere
 from fastapi.testclient import TestClient
 from pytest_bdd import given, scenarios, then, when
 
-from fakes import FakeFirestore, patch_db_everywhere
 from job_portal_web.backend import interview, notifications
 from job_portal_web.backend.main import app
 

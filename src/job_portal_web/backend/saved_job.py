@@ -1,13 +1,13 @@
-from datetime import datetime, timezone
 import os
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Request, HTTPException
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 from .database import db
-from .job_information import _find_company, _normalize_job, _attach_company_fields
+from .job_information import _attach_company_fields, _find_company, _normalize_job
 from .notifications import get_unread_notifications_count
 
 router = APIRouter()
@@ -76,12 +76,11 @@ def saved_jobs_page(request: Request):
         if (data := doc.to_dict()).get("status") != "Cancelled"
     }
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     saved_jobs = []
 
     for doc in saved_docs:
-
         saved = doc.to_dict()
 
         job_id = saved.get("job_id")
@@ -114,8 +113,7 @@ def saved_jobs_page(request: Request):
         is_recent = False
 
         if hasattr(saved_at, "tzinfo"):
-
-            ts = saved_at if saved_at.tzinfo else saved_at.replace(tzinfo=timezone.utc)
+            ts = saved_at if saved_at.tzinfo else saved_at.replace(tzinfo=UTC)
 
             is_recent = (now - ts).days <= 7
 
@@ -153,7 +151,6 @@ def save_job(request: Request, job_id: str):
     job_seeker_id = _get_current_job_seeker_id(request)
 
     if not job_seeker_id:
-
         return JSONResponse(
             status_code=401,
             content={"success": False, "message": "Please log in to save jobs."},
@@ -170,7 +167,7 @@ def save_job(request: Request, job_id: str):
         {
             "job_seeker_id": job_seeker_id,
             "job_id": job_id,
-            "saved_at": datetime.now(timezone.utc),
+            "saved_at": datetime.now(UTC),
         }
     )
 
@@ -188,7 +185,6 @@ def unsave_job(request: Request, job_id: str):
     job_seeker_id = _get_current_job_seeker_id(request)
 
     if not job_seeker_id:
-
         return JSONResponse(
             status_code=401,
             content={"success": False, "message": "Please log in."},
@@ -199,7 +195,6 @@ def unsave_job(request: Request, job_id: str):
     saved_ref = db.collection("saved_job").document(doc_id)
 
     if not saved_ref.get().exists:
-
         return JSONResponse(
             status_code=404,
             content={

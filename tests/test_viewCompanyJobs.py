@@ -1,9 +1,7 @@
 import asyncio
-
 from unittest.mock import patch
 
 import pytest
-
 from pytest_bdd import (
     given,
     scenarios,
@@ -28,7 +26,6 @@ scenarios("features/viewCompanyJobs.feature")
 
 
 class FakeDocumentSnapshot:
-
     def __init__(self, document_id, data=None, exists=True):
 
         self.id = document_id
@@ -41,7 +38,6 @@ class FakeDocumentSnapshot:
 
 
 class FakeDocumentReference:
-
     def __init__(self, collection, document_id):
 
         self.collection = collection
@@ -52,14 +48,12 @@ class FakeDocumentReference:
         data = self.collection.documents.get(self.document_id)
 
         if data is None:
-
             return FakeDocumentSnapshot(self.document_id, {}, False)
 
         return FakeDocumentSnapshot(self.document_id, data, True)
 
 
 class FakeQuery:
-
     def __init__(self, documents, filters=None):
 
         self.documents = documents
@@ -74,27 +68,21 @@ class FakeQuery:
         result = []
 
         for document_id, data in self.documents.items():
-
             valid = True
 
             for field, operator, value in self.filters:
-
                 if operator == "==":
-
                     if data.get(field) != value:
-
                         valid = False
                         break
 
             if valid:
-
                 result.append(FakeDocumentSnapshot(document_id, data, True))
 
         return result
 
 
 class FakeCollection:
-
     def __init__(self, documents=None):
 
         self.documents = documents or {}
@@ -109,7 +97,6 @@ class FakeCollection:
 
 
 class FakeDB:
-
     def __init__(self, applicants=None, companies=None, jobs=None, reviews=None):
 
         self.collections = {
@@ -125,7 +112,6 @@ class FakeDB:
 
 
 class FakeTemplates:
-
     def TemplateResponse(
         self,
         request=None,
@@ -143,14 +129,12 @@ class FakeTemplates:
 
 
 class FakeRequest:
-
     def __init__(self):
 
         self.session = {"user_type": "job_seeker", "applicant_id": APPLICANT_ID}
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None

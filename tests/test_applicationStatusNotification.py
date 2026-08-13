@@ -9,13 +9,13 @@ drive that real route and then the job-seeker notifications routes
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
+from fakes import FakeFirestore, patch_db_everywhere
 from fastapi.testclient import TestClient
 from pytest_bdd import given, scenarios, then, when
 
-from fakes import FakeFirestore, patch_db_everywhere
 from job_portal_web.backend import job_application, notifications
 from job_portal_web.backend.main import app
 
@@ -80,8 +80,8 @@ def seed_application(fake_db, app_id, job_id, *, status="Submitted"):
             "job_id": job_id,
             "job_seeker_id": JOB_SEEKER_ID,
             "status": status,
-            "created_at": datetime.now(timezone.utc),
-            "updated_on": datetime.now(timezone.utc),
+            "created_at": datetime.now(UTC),
+            "updated_on": datetime.now(UTC),
         },
     )
 

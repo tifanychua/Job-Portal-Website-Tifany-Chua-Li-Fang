@@ -3,8 +3,7 @@ import os
 # Mock for testing - make it accessible globally
 from typing import Any
 
-from fastapi_mail import FastMail, MessageSchema, MessageType
-from fastapi_mail.schemas import NameEmail
+from fastapi_mail import FastMail, MessageSchema, MessageType, NameEmail
 
 from .email_config import conf
 
@@ -421,10 +420,13 @@ Regards,
 
 JobConnect Team
 """
-
+    recipient = NameEmail(
+        name="JobConnect User",
+        email=email,
+    )
     message = MessageSchema(
         subject=subject,
-        recipients=[email],
+        recipients=[recipient],
         body=body,
         subtype=MessageType.plain,
     )

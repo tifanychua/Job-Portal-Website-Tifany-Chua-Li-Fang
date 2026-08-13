@@ -32,7 +32,6 @@ TEST_SIGNED_URL = "https://example.com/signed-test-resume.pdf"
 
 
 class FakeBlob:
-
     def __init__(self, name: str):
         self.name = name
 
@@ -48,7 +47,6 @@ class FakeBlob:
 
 
 class FakeBucket:
-
     def blob(self, name: str) -> FakeBlob:
         return FakeBlob(name)
 
@@ -81,7 +79,6 @@ def client():
 
 
 class Context:
-
     def __init__(self):
         self.response = None
         self.application_id = None

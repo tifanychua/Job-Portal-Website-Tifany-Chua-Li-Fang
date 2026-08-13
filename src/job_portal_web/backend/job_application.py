@@ -1,16 +1,17 @@
 from datetime import timedelta
-from fastapi import HTTPException
+
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from firebase_admin import storage
-from fastapi import APIRouter, Request
 from fastapi.templating import Jinja2Templates
+from firebase_admin import storage
 from google.cloud.firestore_v1.base_query import FieldFilter
-from .database import db, bucket
-from .job_information import _find_company
+
+from .database import bucket, db
 from .job_apply import (
     UI_DIR,
     _get_screening_questions,
 )
+from .job_information import _find_company
 from .notifications import get_unread_notifications_count
 
 router = APIRouter()
@@ -169,7 +170,6 @@ def my_applications(request: Request, status: str = "all"):
     counts = {key: 0 for key in STATUS_META}
 
     for doc in docs:
-
         data = doc.to_dict()
         data["id"] = doc.id
 
@@ -210,11 +210,9 @@ def my_applications(request: Request, status: str = "all"):
     user = None
 
     if request.session.get("user_type") == "job_seeker":
-
         uid = request.session.get("applicant_id")
 
         if uid:
-
             doc = db.collection("job_seeker").document(uid).get()
 
             if doc.exists:
@@ -257,11 +255,9 @@ def my_applications_detail(request: Request, application_id: str):
     user = None
 
     if request.session.get("user_type") == "job_seeker":
-
         uid = request.session.get("applicant_id")
 
         if uid:
-
             doc = db.collection("job_seeker").document(uid).get()
 
             if doc.exists:
@@ -301,7 +297,6 @@ def withdraw_application(application_id: str):
     doc = doc_ref.get()
 
     if not doc.exists:
-
         return RedirectResponse("/application", status_code=302)
 
     data = doc.to_dict()
@@ -309,7 +304,6 @@ def withdraw_application(application_id: str):
         raise HTTPException(status_code=409, detail="Application already cancelled")
 
     if data.get("status") == "Submitted":
-
         doc_ref.update({"status": "Cancelled"})
 
     return RedirectResponse(f"/application/{application_id}", status_code=302)

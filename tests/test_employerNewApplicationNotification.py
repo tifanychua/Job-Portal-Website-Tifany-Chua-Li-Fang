@@ -10,10 +10,10 @@ notification details" is tested against that actual link target.
 from __future__ import annotations
 
 import pytest
+from fakes import FakeFirestore, patch_db_everywhere
 from fastapi.testclient import TestClient
 from pytest_bdd import given, scenarios, then, when
 
-from fakes import FakeFirestore, patch_db_everywhere
 from job_portal_web.backend import job_apply, notifications
 from job_portal_web.backend.main import app
 
@@ -177,11 +177,11 @@ def given_unread_application_notifications(fake_db, client, context):
 
 @when("the employer views the new application")
 def employer_views_new_application(fake_db, client, context):
-    context.notification_id = notif_id = [
+    context.notification_id = notif_id = next(
         d.id
         for d in fake_db.collection("notification").stream()
         if d.to_dict().get("user_id") == COMPANY_ID
-    ][0]
+    )
     context.response = client.post(f"/api/notifications/{notif_id}/read")
 
 

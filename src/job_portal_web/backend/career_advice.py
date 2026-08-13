@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from hashlib import sha256
 from io import BytesIO
 from pathlib import Path
@@ -41,7 +41,7 @@ class CareerAdvicePayload(BaseModel):
 
 
 def now_utc() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def is_admin(request: Request) -> bool:
@@ -107,7 +107,7 @@ def require_job_seeker(request: Request) -> str:
 
 
 def saved_article_document_id(seeker_id: str, post_id: str) -> str:
-    value = f"{seeker_id}:{post_id}".encode("utf-8")
+    value = f"{seeker_id}:{post_id}".encode()
     return sha256(value).hexdigest()
 
 
@@ -204,7 +204,6 @@ def admin_career_advice_page(
     request: Request,
 ):
     if not is_admin(request):
-
         return RedirectResponse(
             "/login/admin",
             status_code=303,
@@ -244,7 +243,6 @@ def saved_career_advice_drafts_page(
     request: Request,
 ):
     if not is_admin(request):
-
         return RedirectResponse(
             "/login/admin",
             status_code=303,
@@ -255,11 +253,9 @@ def saved_career_advice_drafts_page(
     drafts = []
 
     for snapshot in snapshots:
-
         post = snapshot_to_dict(snapshot)
 
         if post.get("status") == "Draft":
-
             drafts.append(post)
 
     drafts.sort(
@@ -295,9 +291,7 @@ def delete_career_advice_post(
 
     # Delete the cover image from Firebase Storage.
     if image_url:
-
         try:
-
             from urllib.parse import (
                 unquote,
                 urlparse,
@@ -306,7 +300,6 @@ def delete_career_advice_post(
             parsed_url = urlparse(image_url)
 
             if "/o/" in parsed_url.path:
-
                 encoded_storage_path = parsed_url.path.split(
                     "/o/",
                     1,
@@ -317,7 +310,6 @@ def delete_career_advice_post(
                 storage.bucket().blob(storage_path).delete()
 
         except Exception as error:
-
             # The post is already deleted.
             # Only report the failed image cleanup in the log.
             print(
@@ -461,7 +453,7 @@ def update_career_advice(
     if existing_post.get("status") == "Published" and payload.action == "draft":
         raise HTTPException(
             status_code=409,
-            detail=("A published post cannot be changed " "back to Draft."),
+            detail=("A published post cannot be changed back to Draft."),
         )
 
     # Validate all required publication fields.

@@ -1,7 +1,4 @@
 Feature: Write Company Review
-  As a Job Seeker
-  I want to write and submit a company review
-  So that I can share my employment experience with other job seekers.
 
   Scenario: Job seeker opens the write company review page
     Given a job seeker is logged in

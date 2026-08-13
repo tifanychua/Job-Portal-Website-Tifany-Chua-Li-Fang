@@ -1,6 +1,6 @@
 import asyncio
 import importlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -23,7 +23,6 @@ def load_receipt_module():
 
     # Prefer Stripe/current payment route
     for path in routes_dir.glob("*.py"):
-
         text = path.read_text(
             encoding="utf-8",
             errors="ignore",
@@ -34,7 +33,6 @@ def load_receipt_module():
             and "def download_receipt(" in text
             and "PayPal Sandbox" not in text
         ):
-
             import firebase_admin.firestore as firestore_module
 
             original_client = firestore_module.client
@@ -42,23 +40,19 @@ def load_receipt_module():
             firestore_module.client = lambda: None
 
             try:
-
                 return importlib.import_module("job_portal_web.backend.routes." + path.stem)
 
             finally:
-
                 firestore_module.client = original_client
 
     # Fallback
     for path in routes_dir.glob("*.py"):
-
         text = path.read_text(
             encoding="utf-8",
             errors="ignore",
         )
 
         if "def payment_receipt(" in text:
-
             import firebase_admin.firestore as firestore_module
 
             original_client = firestore_module.client
@@ -66,11 +60,9 @@ def load_receipt_module():
             firestore_module.client = lambda: None
 
             try:
-
                 return importlib.import_module("job_portal_web.backend.routes." + path.stem)
 
             finally:
-
                 firestore_module.client = original_client
 
     raise ImportError("Could not find payment receipt route module.")
@@ -103,7 +95,6 @@ ORDER_ID = "in_test_receipt"
 
 
 class FakeSnapshot:
-
     def __init__(
         self,
         document_id,
@@ -123,7 +114,6 @@ class FakeSnapshot:
 
 
 class FakeDocument:
-
     def __init__(
         self,
         collection,
@@ -139,7 +129,6 @@ class FakeDocument:
         data = self.collection.documents.get(self.document_id)
 
         if data is None:
-
             return FakeSnapshot(
                 self.document_id,
                 {},
@@ -154,7 +143,6 @@ class FakeDocument:
 
 
 class FakeCollection:
-
     def __init__(
         self,
         documents=None,
@@ -174,7 +162,6 @@ class FakeCollection:
 
 
 class FakeDB:
-
     def __init__(
         self,
         companies=None,
@@ -200,7 +187,6 @@ class FakeDB:
 
 
 class FakeTemplates:
-
     def TemplateResponse(
         self,
         request,
@@ -220,7 +206,6 @@ class FakeTemplates:
 
 
 class FakeRequest:
-
     def __init__(self):
 
         self.session = {
@@ -235,7 +220,6 @@ class FakeRequest:
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -288,7 +272,7 @@ def payments():
                 10,
                 9,
                 30,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         }
     }
@@ -367,11 +351,9 @@ def capture_open_error(
 ):
 
     try:
-
         context.response = open_receipt()
 
     except HTTPException as exc:
-
         context.error = exc
 
 
@@ -665,7 +647,7 @@ def completed_payment_required(
 
     assert context.error.status_code == 400
 
-    assert context.error.detail == "Receipt is only available " "for completed payments."
+    assert context.error.detail == "Receipt is only available for completed payments."
 
 
 @then("company not found should be returned")

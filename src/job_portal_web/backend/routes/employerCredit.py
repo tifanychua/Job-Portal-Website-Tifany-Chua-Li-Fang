@@ -1,7 +1,7 @@
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore
@@ -22,17 +22,14 @@ db = firestore.client()
 def get_current_company_id(request: Request):
 
     if os.getenv("PYTEST_CURRENT_TEST"):
-
         return "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
 
     if request.session.get("user_type") != "employer":
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     company_id = request.session.get("company_id")
 
     if not company_id:
-
         raise HTTPException(status_code=401, detail="Company not logged in")
 
     return company_id
@@ -55,7 +52,6 @@ async def employer_credit(request: Request):
     company_doc = db.collection("company").document(company_id).get()
 
     if not company_doc.exists:
-
         raise HTTPException(status_code=404, detail="Company not found")
 
     company = company_doc.to_dict()
@@ -93,11 +89,9 @@ async def employer_credit(request: Request):
     subscription_end = company.get("subscription_current_period_end")
 
     if subscription_end:
-
         subscription_end_display = subscription_end.strftime("%d %b %Y")
 
     else:
-
         subscription_end_display = None
 
     # =================================================
@@ -111,7 +105,6 @@ async def employer_credit(request: Request):
     all_histories = []
 
     for doc in payment_docs:
-
         data = doc.to_dict()
 
         payment_date = data.get("completed_at") or data.get("created_at")
@@ -129,7 +122,7 @@ async def employer_credit(request: Request):
 
     # Newest first
     all_histories.sort(
-        key=lambda item: (item["sort_date"] or datetime.min.replace(tzinfo=timezone.utc)),
+        key=lambda item: item["sort_date"] or datetime.min.replace(tzinfo=UTC),
         reverse=True,
     )
 

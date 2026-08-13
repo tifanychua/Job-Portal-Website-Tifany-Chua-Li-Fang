@@ -1,7 +1,6 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
-
 from pytest_bdd import (
     given,
     scenarios,
@@ -10,6 +9,13 @@ from pytest_bdd import (
 )
 
 from job_portal_web.backend.routes import adminTransaction as transaction_module
+
+# ============================================================
+# LOAD FEATURE
+# ============================================================
+
+scenarios("features/viewTransactions.feature")
+
 
 # ============================================================
 # LOAD FEATURE
@@ -35,7 +41,6 @@ COMPANY_EMAIL = "hr@abctech.com"
 
 
 class FakeDocumentSnapshot:
-
     def __init__(
         self,
         document_id,
@@ -55,7 +60,6 @@ class FakeDocumentSnapshot:
 
 
 class FakeDocumentReference:
-
     def __init__(
         self,
         collection,
@@ -71,7 +75,6 @@ class FakeDocumentReference:
         data = self.collection.documents.get(self.document_id)
 
         if data is None:
-
             return FakeDocumentSnapshot(
                 self.document_id,
                 {},
@@ -86,7 +89,6 @@ class FakeDocumentReference:
 
 
 class FakeCollection:
-
     def __init__(
         self,
         documents=None,
@@ -120,7 +122,6 @@ class FakeCollection:
 
 
 class FakeDB:
-
     def __init__(
         self,
         payments=None,
@@ -146,7 +147,6 @@ class FakeDB:
 
 
 class FakeTemplates:
-
     def TemplateResponse(
         self,
         request,
@@ -166,7 +166,6 @@ class FakeTemplates:
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -208,7 +207,7 @@ def companies():
 @pytest.fixture
 def payments():
 
-    year = datetime.now(timezone.utc).year
+    year = datetime.now(UTC).year
 
     return {
         "TXN001": {
@@ -221,13 +220,13 @@ def payments():
                 year,
                 1,
                 10,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
             "completed_at": datetime(
                 year,
                 1,
                 11,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         },
         "TXN002": {
@@ -240,7 +239,7 @@ def payments():
                 year,
                 2,
                 15,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         },
         "TXN003": {
@@ -253,7 +252,7 @@ def payments():
                 year,
                 3,
                 20,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         },
     }

@@ -4,7 +4,7 @@ import socket
 import threading
 import time
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -101,7 +101,7 @@ def context():
 
 @pytest.fixture
 def test_accounts(context):
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(UTC)
 
     db.collection("job_seeker").document(context["job_seeker_id"]).set(
         {
@@ -202,7 +202,7 @@ def search_by_email(browser, context):
     enter_search(browser, context["employer_email"])
 
 
-@then("the system should display the user account associated with " "the entered email address")
+@then("the system should display the user account associated with the entered email address")
 def verify_email_results(browser, context):
     assert account_row(
         browser,
@@ -224,7 +224,7 @@ def search_no_match(browser):
     enter_search(browser, f"NO_MATCH_{uuid4().hex}")
 
 
-@then("the system should display a message indicating that no user " "accounts were found")
+@then("the system should display a message indicating that no user accounts were found")
 def verify_no_accounts_message(browser):
     no_results = WebDriverWait(browser, 5).until(
         lambda driver: driver.find_element(By.ID, "noFilteredUsers")
@@ -264,17 +264,19 @@ def clear_search(browser):
     search.send_keys(Keys.BACKSPACE)
 
 
-@then("the system should display the complete list of registered " "user accounts")
+@then("the system should display the complete list of registered user accounts")
 def verify_complete_account_list(browser, context):
     WebDriverWait(browser, 5).until(
-        lambda driver: account_row(
-            driver,
-            context["job_seeker_id"],
-        ).is_displayed()
-        and account_row(
-            driver,
-            context["employer_id"],
-        ).is_displayed()
+        lambda driver: (
+            account_row(
+                driver,
+                context["job_seeker_id"],
+            ).is_displayed()
+            and account_row(
+                driver,
+                context["employer_id"],
+            ).is_displayed()
+        )
     )
     assert account_row(
         browser,

@@ -1,14 +1,10 @@
 import os
-
-from fastapi import APIRouter, Request, Form, HTTPException
-
-from fastapi.responses import HTMLResponse, RedirectResponse
-
-from fastapi.templating import Jinja2Templates
-
-from firebase_admin import firestore
-
 from datetime import datetime
+
+from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.templating import Jinja2Templates
+from firebase_admin import firestore
 
 router = APIRouter()
 
@@ -25,17 +21,14 @@ db = firestore.client()
 def get_current_applicant_id(request: Request):
 
     if os.getenv("PYTEST_CURRENT_TEST"):
-
         return "0YLcc18JszVqSXWn8DEDQ81o2vR2"
 
     if request.session.get("user_type") != "job_seeker":
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     applicant_id = request.session.get("applicant_id")
 
     if not applicant_id:
-
         raise HTTPException(status_code=401, detail="Please login.")
 
     return applicant_id
@@ -51,7 +44,6 @@ def get_company(company_id: str):
     company_doc = db.collection("company").document(company_id).get()
 
     if not company_doc.exists:
-
         return None
 
     company = company_doc.to_dict()
@@ -76,7 +68,6 @@ async def write_company_review(request: Request, company_id: str):
     company = get_company(company_id)
 
     if company is None:
-
         raise HTTPException(status_code=404, detail="Company not found")
 
     # ======================================================
@@ -148,7 +139,6 @@ async def submit_company_review(
     company = get_company(company_id)
 
     if company is None:
-
         raise HTTPException(status_code=404, detail="Company not found")
 
     # --------------------------------------------------

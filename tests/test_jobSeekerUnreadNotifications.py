@@ -11,14 +11,14 @@ that is what the client-side tab filtering depends on.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
+from fakes import FakeFirestore, patch_db_everywhere
 from fastapi.testclient import TestClient
+from html_helpers import item_block, tab_count
 from pytest_bdd import given, scenarios, then, when
 
-from fakes import FakeFirestore, patch_db_everywhere
-from html_helpers import item_block, tab_count
 from job_portal_web.backend import notifications
 from job_portal_web.backend.main import app
 
@@ -71,7 +71,7 @@ def seed_notification(fake_db, doc_id, *, is_read, minutes_ago=0, title="Notice"
             "title": title,
             "message": message,
             "link": "",
-            "created_at": datetime.now(timezone.utc),
+            "created_at": datetime.now(UTC),
         },
     )
 

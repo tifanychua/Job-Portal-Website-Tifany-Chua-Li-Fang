@@ -1,338 +1,326 @@
+import asyncio
 import importlib
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
-from fastapi import HTTPException
-from pytest_bdd import given, scenarios, then, when
+from pytest_bdd import (
+    given,
+    scenarios,
+    then,
+    when,
+)
+
+# ============================================================
+# LOAD EMAIL MODULE
+# ============================================================
 
 
-def load_subscription_module():
-    routes_dir = Path("src/job_portal_web/backend/routes")
+def load_email_module():
 
-    for path in routes_dir.glob("*.py"):
-        text = path.read_text(encoding="utf-8", errors="ignore")
+    backend_dir = Path("src/job_portal_web/backend")
 
-        if "def change_subscription(" in text and "def preview_subscription_change(" in text:
-            import firebase_admin.firestore as firestore_module
+    for path in backend_dir.rglob("*.py"):
+        text = path.read_text(
+            encoding="utf-8",
+            errors="ignore",
+        )
 
-            original_client = firestore_module.client
-            firestore_module.client = lambda: None
+        if "def send_company_verification_email(" in text:
+            module_path = path.relative_to("src").with_suffix("")
 
-            try:
-                return importlib.import_module("job_portal_web.backend.routes." + path.stem)
-            finally:
-                firestore_module.client = original_client
+            module_name = ".".join(module_path.parts)
 
-    raise ImportError("Cannot find subscription route module.")
+            return importlib.import_module(module_name)
 
-
-subscription_module = load_subscription_module()
-
-scenarios("features/changeSubscription.feature")
-
-COMPANY_ID = "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
+    raise ImportError("Could not find send_company_verification_email().")
 
 
-class FakeRequest:
-    def __init__(self):
-        self.session = {
-            "user_type": "employer",
-            "company_id": COMPANY_ID,
-        }
+email_module = load_email_module()
+
+
+# ============================================================
+# LOAD FEATURE
+# ============================================================
+
+scenarios("features/companyVerificationEmail.feature")
+
+
+# ============================================================
+# CONSTANTS
+# ============================================================
+
+EMAIL = "hr@abctech.com"
+
+COMPANY_NAME = "ABC Technology Sdn. Bhd."
+
+
+# ============================================================
+# CONTEXT
+# ============================================================
 
 
 class Context:
     def __init__(self):
-        self.company = None
-        self.response = None
-        self.error = None
-        self.modify_args = None
-        self.preview = None
+
+        self.sent_messages = []
+
+        self.status = None
+
+        self.reason = None
 
 
 @pytest.fixture
 def context():
+
     return Context()
 
 
+# ============================================================
+# MOCK FASTMAIL
+# ============================================================
+
+
 @pytest.fixture(autouse=True)
-def common_setup(monkeypatch, context):
-    monkeypatch.setattr(
-        subscription_module,
-        "get_current_company_id",
-        lambda request: COMPANY_ID,
-    )
+def mock_fastmail(
+    monkeypatch,
+    context,
+):
+
+    class FakeFastMail:
+        def __init__(
+            self,
+            conf,
+        ):
+
+            self.conf = conf
+
+        async def send_message(
+            self,
+            message,
+        ):
+
+            context.sent_messages.append(message)
 
     monkeypatch.setattr(
-        subscription_module,
-        "get_company",
-        lambda company_id: context.company,
-    )
-
-    monkeypatch.setitem(
-        subscription_module.PLANS["business"],
-        "stripe_price_id",
-        "price_business_test",
-    )
-
-    monkeypatch.setitem(
-        subscription_module.PLANS["starter"],
-        "stripe_price_id",
-        "price_starter_test",
+        email_module,
+        "FastMail",
+        FakeFastMail,
     )
 
 
-def call_preview(context, plan):
-    try:
-        context.response = subscription_module.preview_subscription_change(
-            FakeRequest(),
-            plan,
-        )
-    except HTTPException as exc:
-        context.error = exc
+# ============================================================
+# HELPERS
+# ============================================================
 
 
-def call_change(context, plan):
-    try:
-        context.response = subscription_module.change_subscription(
-            FakeRequest(),
-            plan,
-        )
-    except HTTPException as exc:
-        context.error = exc
+def send_verification_email(
+    status,
+    reason=None,
+):
 
-
-def active_subscription():
-    return {"items": {"data": [{"id": "si_test"}]}}
-
-
-@given("the employer currently uses the starter plan")
-def starter_company(context):
-    context.company = {
-        "subscription_plan": "starter",
-        "stripe_subscription_id": "sub_test",
-        "stripe_customer_id": "cus_test",
-    }
-
-
-@given("the employer currently uses the starter plan without a Stripe subscription")
-def starter_without_subscription(context):
-    context.company = {
-        "subscription_plan": "starter",
-        "stripe_subscription_id": "",
-        "stripe_customer_id": "cus_test",
-    }
-
-
-@given("an active Stripe subscription exists")
-def stripe_subscription(monkeypatch):
-    monkeypatch.setattr(
-        subscription_module.stripe.Subscription,
-        "retrieve",
-        lambda subscription_id: active_subscription(),
-    )
-
-
-@given("a Stripe subscription without items exists")
-def stripe_without_items(monkeypatch):
-    monkeypatch.setattr(
-        subscription_module.stripe.Subscription,
-        "retrieve",
-        lambda subscription_id: {"items": {"data": []}},
-    )
-
-
-def install_preview(monkeypatch, adjustment=-3000):
-    proration_parent = SimpleNamespace(subscription_item_details=SimpleNamespace(proration=True))
-
-    normal_parent = SimpleNamespace(subscription_item_details=SimpleNamespace(proration=False))
-
-    preview = SimpleNamespace(
-        amount_due=9900,
-        subtotal=12900,
-        lines=SimpleNamespace(
-            data=[
-                SimpleNamespace(
-                    amount=adjustment,
-                    parent=proration_parent,
-                ),
-                SimpleNamespace(
-                    amount=12900,
-                    parent=normal_parent,
-                ),
-            ]
-        ),
-    )
-
-    monkeypatch.setattr(
-        subscription_module.stripe.Invoice,
-        "create_preview",
-        lambda **kwargs: preview,
-    )
-
-
-def install_card(monkeypatch):
-    payment_method = SimpleNamespace(
-        card=SimpleNamespace(
-            brand="visa",
-            last4="4242",
+    return asyncio.run(
+        email_module.send_company_verification_email(
+            email=EMAIL,
+            company_name=COMPANY_NAME,
+            status=status,
+            reason=reason,
         )
     )
 
-    customer = SimpleNamespace(
-        invoice_settings=SimpleNamespace(default_payment_method=payment_method)
-    )
 
-    monkeypatch.setattr(
-        subscription_module.stripe.Customer,
-        "retrieve",
-        lambda *args, **kwargs: customer,
-    )
+def latest_message(
+    context,
+):
 
+    assert len(context.sent_messages) == 1
 
-@when("the employer previews the business plan")
-def preview_business(monkeypatch, context):
-    install_preview(monkeypatch)
-    install_card(monkeypatch)
-    call_preview(context, "business")
+    return context.sent_messages[0]
 
 
-@when("the employer previews the business plan with an unused subscription credit")
-def preview_proration(monkeypatch, context):
-    install_preview(monkeypatch, adjustment=-3000)
-    install_card(monkeypatch)
-    call_preview(context, "business")
+def recipient_emails(
+    message,
+):
+
+    emails = []
+
+    for recipient in message.recipients:
+        if hasattr(
+            recipient,
+            "email",
+        ):
+            emails.append(str(recipient.email))
+
+        else:
+            emails.append(str(recipient))
+
+    return emails
 
 
-@when("the employer previews an invalid plan")
-def preview_invalid(context):
-    call_preview(context, "invalid")
+# ============================================================
+# GIVEN
+# ============================================================
 
 
-@when("the employer previews the starter plan")
-def preview_same(context):
-    call_preview(context, "starter")
+@given("the employer has submitted a company registration request")
+def registration_submitted(
+    context,
+):
+
+    context.status = "Pending"
 
 
-@when("the employer changes to the business plan")
-def change_business(monkeypatch, context):
-    def modify(subscription_id, **kwargs):
-        context.modify_args = {
-            "subscription_id": subscription_id,
-            **kwargs,
-        }
+@given("the employer has received a company verification status email")
+def verification_email_received(
+    context,
+):
 
-        return {
-            "id": subscription_id,
-        }
+    context.status = "Rejected"
 
-    # Backend retrieves the subscription item first
-    monkeypatch.setattr(
-        subscription_module.stripe.Subscription,
-        "retrieve",
-        lambda subscription_id: active_subscription(),
-    )
+    context.reason = "Invalid SSM document"
 
-    # Capture the modification arguments
-    monkeypatch.setattr(
-        subscription_module.stripe.Subscription,
-        "modify",
-        modify,
-    )
-
-    call_change(
-        context,
-        "business",
+    send_verification_email(
+        status=context.status,
+        reason=context.reason,
     )
 
 
-@when("the employer changes to the starter plan")
-def change_same(context):
-    call_change(context, "starter")
+@given("the employer company registration request is still pending review")
+def registration_pending(
+    context,
+):
+
+    context.status = "Pending"
 
 
-@then("the preview should display the business plan information")
-def preview_plan_info(context):
-    data = context.response.body.decode("utf-8")
-    assert '"plan_name":"Business Pack"' in data
-    assert '"plan_price":129.0' in data
+# ============================================================
+# WHEN
+# ============================================================
 
 
-@then("Stripe amounts should be converted from cents")
-def cents_converted(context):
-    data = context.response.body.decode("utf-8")
-    assert '"subtotal":129.0' in data
-    assert '"amount_due":99.0' in data
+@when("the admin approves the company verification request")
+def admin_approves(
+    context,
+):
+
+    context.status = "Approved"
+
+    send_verification_email(status="Approved")
 
 
-@then("the saved card should be displayed")
-def card_display(context):
-    data = context.response.body.decode("utf-8")
-    assert "VISA" in data
-    assert "4242" in data
+@when("the admin rejects the company verification request")
+def admin_rejects(
+    context,
+):
 
+    context.status = "Rejected"
 
-@then("the negative proration adjustment should be returned")
-def adjustment(context):
-    data = context.response.body.decode("utf-8")
-    assert '"adjustment":-30.0' in data
+    context.reason = "Invalid SSM document"
 
-
-@then("plan not found should be returned")
-def plan_not_found(context):
-    assert context.error is not None
-    assert context.error.status_code == 404
-
-
-@then("current plan preview should be rejected")
-def same_preview_rejected(context):
-    assert context.error is not None
-    assert context.error.status_code == 400
-    assert "already your current plan" in context.error.detail
-
-
-@then("missing Stripe subscription should be returned")
-def no_subscription(context):
-    assert context.error is not None
-    assert context.error.status_code == 400
-    assert "No active Stripe" in context.error.detail
-
-
-@then("missing subscription item should be returned")
-def no_item(context):
-    assert context.error is not None
-    assert context.error.status_code == 400
-    assert "Subscription item" in context.error.detail
-
-
-@then("Stripe should modify the subscription with proration")
-def modified_with_proration(context):
-    assert context.error is None, (
-        f"Backend returned HTTP " f"{context.error.status_code}: " f"{context.error.detail}"
+    send_verification_email(
+        status="Rejected",
+        reason=context.reason,
     )
 
-    assert context.modify_args is not None
-    assert context.modify_args["subscription_id"] == "sub_test"
-    assert context.modify_args["proration_behavior"] == "always_invoice"
-    assert context.modify_args["payment_behavior"] == "pending_if_incomplete"
-    assert context.modify_args["items"][0]["price"] == "price_business_test"
+
+@when("the employer opens the email notification")
+def employer_opens_email(
+    context,
+):
+
+    assert len(context.sent_messages) == 1
 
 
-@then("the employer should be redirected while the plan change is processing")
-def processing_redirect(context):
-    assert context.response.status_code == 303
-    assert context.response.headers["location"] == "/employer-credit?plan_change=processing"
+@when("the verification status has not been updated")
+def status_not_updated(
+    context,
+):
+
+    # No email function should be called
+    # while the verification is still pending.
+    assert context.status == "Pending"
 
 
-@then("the employer should be redirected back to subscription plans")
-def same_plan_redirect(context):
-    assert context.response.status_code == 303
-    assert context.response.headers["location"] == "/employer-plans"
+# ============================================================
+# THEN
+# ============================================================
 
 
-@then("starting a Stripe subscription first should be required")
-def stripe_required(context):
-    assert context.error is not None
-    assert context.error.status_code == 400
-    assert "Start a Stripe subscription first" in context.error.detail
+@then(
+    "the system should send an email notification to the employer informing them that the registration request has been approved"
+)
+def approval_email_sent(
+    context,
+):
+
+    message = latest_message(context)
+
+    # Email sent
+    assert len(context.sent_messages) == 1
+
+    # Correct recipient
+    assert EMAIL in recipient_emails(message)
+
+    # Correct subject
+    assert message.subject == "Company Verification Approved - JobConnect"
+
+    # Company information
+    assert COMPANY_NAME in message.body
+
+    # Approval information
+    assert "approved" in message.body.lower()
+
+
+@then(
+    "the system should send an email notification to the employer informing them that the registration request has been rejected"
+)
+def rejection_email_sent(
+    context,
+):
+
+    message = latest_message(context)
+
+    # Email sent
+    assert len(context.sent_messages) == 1
+
+    # Correct recipient
+    assert EMAIL in recipient_emails(message)
+
+    # Correct subject
+    assert message.subject == "Company Verification Rejected - JobConnect"
+
+    # Company information
+    assert COMPANY_NAME in message.body
+
+    # Rejected status
+    assert "rejected" in message.body.lower()
+
+
+@then(
+    "the email should display the verification status company information and relevant remarks if provided"
+)
+def verification_details_displayed(
+    context,
+):
+
+    message = latest_message(context)
+
+    # Verification status
+    assert "rejected" in message.body.lower()
+
+    # Company information
+    assert COMPANY_NAME in message.body
+
+    # Relevant remarks
+    assert "Reason:" in message.body
+
+    assert context.reason in message.body
+
+
+@then("the system should not send any approval or rejection email notification")
+def no_email_before_update(
+    context,
+):
+
+    assert context.status == "Pending"
+
+    assert context.sent_messages == []

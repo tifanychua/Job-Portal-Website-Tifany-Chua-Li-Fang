@@ -40,7 +40,7 @@ class FakeSnapshot:
 
 
 class FakeDocumentRef:
-    def __init__(self, collection: "FakeCollection", doc_id: str):
+    def __init__(self, collection: FakeCollection, doc_id: str):
         self._collection = collection
         self.id = doc_id
 
@@ -102,7 +102,7 @@ def _matches(data, condition):
 
 
 class _FakeQuery:
-    def __init__(self, collection: "FakeCollection", conditions):
+    def __init__(self, collection: FakeCollection, conditions):
         self._collection = collection
         self._conditions = conditions
 
@@ -246,10 +246,10 @@ class FakeBucket:
 # Functions look up `db` in the globals of the module where they are
 # *defined*, not where they are called from, so a page like /saved-jobs
 # that calls into notifications.get_unread_notifications_count() needs
-# notifications.db patched too, even though the test is "about" savedJob.py.
+# notifications.db patched too, even though the test is "about" saved_job.py.
 _DB_MODULES = [
     "job_portal_web.backend.notifications",
-    "job_portal_web.backend.savedJob",
+    "job_portal_web.backend.saved_job",
     "job_portal_web.backend.job_information",
     "job_portal_web.backend.job_apply",
     "job_portal_web.backend.job_application",

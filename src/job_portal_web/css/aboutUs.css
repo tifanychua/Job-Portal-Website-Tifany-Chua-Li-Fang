@@ -1,0 +1,877 @@
+:root {
+    --primary: #2563EB;
+    --primary-dark: #1D4ED8;
+    --primary-light: #EFF6FF;
+    --accent: #2563EB;
+    --heading: #172554;
+    --text: #64748B;
+    --border: #E2E8F0;
+    --surface: #FFFFFF;
+    --background: #F8FAFC;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    color: var(--text);
+    background: var(--surface);
+    font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+}
+
+
+/* ==========================================
+   HERO
+========================================== */
+
+.about-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    min-height: 660px;
+    padding: 110px max(6%, 70px);
+    overflow: hidden;
+    align-items: center;
+    gap: 70px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #EEF2FF 0%,
+            #F8FAFC 60%,
+            #FFFFFF 100%
+        );
+}
+
+.hero-content,
+.hero-visual {
+    position: relative;
+    z-index: 2;
+}
+
+.section-tag {
+    display: inline-block;
+    margin-bottom: 18px;
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+}
+
+.hero-content h1 {
+    max-width: 720px;
+    margin: 0 0 24px;
+    color: var(--heading);
+    font-size: clamp(44px, 5vw, 68px);
+    line-height: 1.08;
+    letter-spacing: -2.5px;
+}
+
+.hero-content h1 span {
+    color: var(--primary);
+}
+
+.hero-content > p {
+    max-width: 650px;
+    margin: 0;
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+
+/* ==========================================
+   HERO BUTTONS
+========================================== */
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 36px;
+    gap: 14px;
+}
+
+.primary-button,
+.secondary-button {
+    display: inline-flex;
+    min-height: 52px;
+    padding: 0 24px;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.primary-button {
+    color: #FFFFFF;
+    background: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.primary-button:hover {
+    color: #FFFFFF;
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 14px
+        rgba(37, 99, 235, 0.18);
+}
+
+.secondary-button {
+    color: var(--heading);
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.secondary-button:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+    background: #F8FAFC;
+    transform: translateY(-2px);
+}
+
+
+/* ==========================================
+   HERO VISUAL
+========================================== */
+
+.hero-visual {
+    display: flex;
+    min-height: 450px;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-visual-card {
+    width: min(390px, 90%);
+    padding: 55px 40px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 28px;
+    color: #FFFFFF;
+    text-align: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            var(--primary),
+            var(--primary-dark)
+        );
+
+    box-shadow:
+        0 35px 70px
+        rgba(37, 99, 235, 0.22);
+}
+
+.visual-icon {
+    display: flex;
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 25px;
+    border-radius: 24px;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    background: #FFFFFF;
+    font-size: 34px;
+}
+
+.main-visual-card h3 {
+    margin: 0 0 14px;
+    color: #FFFFFF;
+    font-size: 28px;
+}
+
+.main-visual-card p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.84);
+    line-height: 1.7;
+}
+
+
+/* ==========================================
+   FLOATING CARDS
+========================================== */
+
+.floating-card {
+    position: absolute;
+    display: flex;
+    min-width: 220px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    align-items: center;
+    gap: 13px;
+    background: var(--surface);
+
+    box-shadow:
+        0 18px 45px
+        rgba(15, 23, 42, 0.10);
+}
+
+.floating-card > i {
+    color: var(--primary);
+    font-size: 24px;
+}
+
+.floating-card strong,
+.floating-card span {
+    display: block;
+}
+
+.floating-card strong {
+    color: var(--heading);
+    font-size: 14px;
+}
+
+.floating-card span {
+    margin-top: 4px;
+    color: var(--text);
+    font-size: 12px;
+}
+
+.floating-job {
+    top: 50px;
+    left: 0;
+}
+
+.floating-company {
+    right: 0;
+    bottom: 45px;
+}
+
+
+/* ==========================================
+   HERO DECORATIONS
+========================================== */
+
+.hero-decoration {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(2px);
+}
+
+.hero-decoration-one {
+    width: 310px;
+    height: 310px;
+    right: -100px;
+    top: -100px;
+    background: rgba(37, 99, 235, 0.10);
+}
+
+.hero-decoration-two {
+    width: 180px;
+    height: 180px;
+    left: 45%;
+    bottom: -90px;
+    background: rgba(30, 58, 138, 0.07);
+}
+
+
+/* ==========================================
+   MISSION
+========================================== */
+
+.mission-section {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    padding: 110px max(7%, 80px);
+    align-items: center;
+    gap: 80px;
+    background: var(--surface);
+}
+
+.mission-content h2,
+.section-heading h2 {
+    margin: 0;
+    color: var(--heading);
+    font-size: clamp(32px, 4vw, 46px);
+    line-height: 1.2;
+    letter-spacing: -1.3px;
+}
+
+.mission-content > p {
+    max-width: 720px;
+    margin: 22px 0 0;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.85;
+}
+
+.mission-points {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 30px;
+    gap: 16px;
+}
+
+.mission-point {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--heading);
+    font-weight: 600;
+}
+
+.mission-point i {
+    display: flex;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    background: var(--primary-light);
+    font-size: 12px;
+}
+
+
+/* ==========================================
+   MISSION PANEL
+========================================== */
+
+.mission-panel {
+    padding: 45px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--background);
+
+    box-shadow:
+        0 10px 30px
+        rgba(15, 23, 42, 0.05);
+}
+
+.mission-panel-icon {
+    display: flex;
+    width: 70px;
+    height: 70px;
+    margin-bottom: 25px;
+    border-radius: 20px;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    background: var(--primary);
+    font-size: 28px;
+
+    box-shadow:
+        0 8px 20px
+        rgba(37, 99, 235, 0.18);
+}
+
+.mission-panel h3 {
+    margin: 0 0 14px;
+    color: var(--heading);
+    font-size: 27px;
+}
+
+.mission-panel > p {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.8;
+}
+
+.panel-line {
+    height: 1px;
+    margin: 30px 0;
+    background: var(--border);
+}
+
+.panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.panel-footer strong,
+.panel-footer span {
+    display: block;
+}
+
+.panel-footer strong {
+    color: var(--heading);
+}
+
+.panel-footer span {
+    margin-top: 5px;
+    color: var(--text);
+    font-size: 13px;
+}
+
+.panel-footer > i {
+    color: var(--primary);
+}
+
+
+/* ==========================================
+   SHARED SECTION
+========================================== */
+
+.audience-section,
+.values-section {
+    padding: 105px max(7%, 80px);
+    background: var(--background);
+}
+
+.section-heading {
+    max-width: 760px;
+    margin: 0 auto 55px;
+    text-align: center;
+}
+
+.section-heading p {
+    margin: 18px auto 0;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+
+/* ==========================================
+   AUDIENCE
+========================================== */
+
+.audience-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1280px;
+    margin: auto;
+    gap: 24px;
+}
+
+.audience-card {
+    padding: 35px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
+}
+
+.audience-card:hover {
+    border-color: rgba(37, 99, 235, 0.30);
+    transform: translateY(-6px);
+
+    box-shadow:
+        0 20px 45px
+        rgba(15, 23, 42, 0.09);
+}
+
+.audience-icon {
+    display: flex;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    background: var(--primary-light);
+    font-size: 25px;
+}
+
+.seeker-icon,
+.employer-icon,
+.admin-icon {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.audience-card h3 {
+    margin: 25px 0 13px;
+    color: var(--heading);
+    font-size: 22px;
+}
+
+.audience-card p {
+    min-height: 105px;
+    margin: 0;
+    color: var(--text);
+    line-height: 1.75;
+}
+
+.audience-card a {
+    display: inline-flex;
+    margin-top: 22px;
+    align-items: center;
+    gap: 9px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.audience-card a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+
+/* ==========================================
+   FEATURES
+========================================== */
+
+.features-section {
+    padding: 110px max(7%, 80px);
+    background: var(--surface);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1250px;
+    margin: auto;
+    gap: 25px;
+}
+
+.feature-item {
+    display: flex;
+    padding: 26px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    gap: 18px;
+    background: var(--surface);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.feature-item:hover {
+    border-color: rgba(37, 99, 235, 0.25);
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 12px 30px
+        rgba(15, 23, 42, 0.07);
+}
+
+.feature-item > i {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    border-radius: 14px;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    background: var(--primary-light);
+    font-size: 19px;
+}
+
+.feature-item h3 {
+    margin: 0 0 8px;
+    color: var(--heading);
+    font-size: 18px;
+}
+
+.feature-item p {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.65;
+}
+
+
+/* ==========================================
+   VALUES
+========================================== */
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 1280px;
+    margin: auto;
+    gap: 20px;
+}
+
+.value-card {
+    padding: 30px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.value-card:hover {
+    border-color: rgba(37, 99, 235, 0.25);
+    transform: translateY(-3px);
+
+    box-shadow:
+        0 12px 30px
+        rgba(15, 23, 42, 0.07);
+}
+
+.value-card > span {
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.value-card h3 {
+    margin: 18px 0 10px;
+    color: var(--heading);
+    font-size: 21px;
+}
+
+.value-card p {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.7;
+}
+
+
+/* ==========================================
+   CALL TO ACTION
+========================================== */
+
+.about-cta {
+    display: flex;
+    max-width: 1250px;
+    margin: 100px auto;
+    padding: 58px;
+    border-radius: 26px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 35px;
+    color: #FFFFFF;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--primary),
+            var(--primary-dark)
+        );
+
+    box-shadow:
+        0 20px 45px
+        rgba(37, 99, 235, 0.20);
+}
+
+.light-tag {
+    color: #DBEAFE;
+}
+
+.about-cta h2 {
+    margin: 0;
+    color: #FFFFFF;
+    font-size: 37px;
+}
+
+.about-cta p {
+    max-width: 680px;
+    margin: 14px 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.7;
+}
+
+.cta-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 12px;
+}
+
+.cta-primary,
+.cta-secondary {
+    display: inline-flex;
+    min-height: 50px;
+    padding: 0 23px;
+    border-radius: 9px;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-weight: 700;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.cta-primary {
+    color: var(--primary);
+    background: #FFFFFF;
+    border: 1px solid #FFFFFF;
+}
+
+.cta-primary:hover {
+    color: var(--primary-dark);
+    background: #EFF6FF;
+    transform: translateY(-2px);
+}
+
+.cta-secondary {
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: transparent;
+}
+
+.cta-secondary:hover {
+    color: #FFFFFF;
+    border-color: #FFFFFF;
+    background: rgba(255, 255, 255, 0.10);
+    transform: translateY(-2px);
+}
+
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width: 1050px) {
+    .about-hero,
+    .mission-section {
+        grid-template-columns: 1fr;
+    }
+
+    .about-hero {
+        min-height: auto;
+        padding-top: 80px;
+        padding-bottom: 80px;
+    }
+
+    .audience-grid,
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .values-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .about-cta {
+        margin-right: 35px;
+        margin-left: 35px;
+    }
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width: 700px) {
+    .about-hero,
+    .mission-section,
+    .audience-section,
+    .features-section,
+    .values-section {
+        padding: 75px 22px;
+    }
+
+    .hero-content h1 {
+        font-size: 42px;
+        letter-spacing: -1.5px;
+    }
+
+    .hero-content > p {
+        font-size: 16px;
+    }
+
+    .hero-visual {
+        min-height: 360px;
+    }
+
+    .floating-card {
+        display: none;
+    }
+
+    .main-visual-card {
+        width: 100%;
+        padding: 45px 25px;
+    }
+
+    .audience-grid,
+    .features-grid,
+    .values-grid,
+    .mission-points {
+        grid-template-columns: 1fr;
+    }
+
+    .audience-card p {
+        min-height: 0;
+    }
+
+    .panel-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .panel-footer > i {
+        transform: rotate(90deg);
+    }
+
+    .about-cta {
+        margin: 65px 20px;
+        padding: 38px 25px;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .about-cta h2 {
+        font-size: 30px;
+    }
+
+    .cta-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .cta-primary,
+    .cta-secondary {
+        width: 100%;
+    }
+}
+
+
+/* ==========================================
+   SMALL MOBILE
+========================================== */
+
+@media (max-width: 430px) {
+    .about-hero,
+    .mission-section,
+    .audience-section,
+    .features-section,
+    .values-section {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+
+    .hero-content h1 {
+        font-size: 36px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .primary-button,
+    .secondary-button {
+        width: 100%;
+    }
+
+    .mission-panel,
+    .audience-card,
+    .feature-item,
+    .value-card {
+        padding: 24px;
+    }
+}

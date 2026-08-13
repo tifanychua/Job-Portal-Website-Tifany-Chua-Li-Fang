@@ -1,19 +1,15 @@
-import os
 import math
-from datetime import datetime, timezone
+import os
+from datetime import UTC, datetime
 
 from fastapi import (
     APIRouter,
-    Request,
     HTTPException,
+    Request,
 )
-
 from fastapi.responses import HTMLResponse
-
 from fastapi.templating import Jinja2Templates
-
 from firebase_admin import firestore
-
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 router = APIRouter()
@@ -34,13 +30,11 @@ def get_current_company_id(request: Request):
         return "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
 
     if request.session.get("user_type") != "employer":
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     company_id = request.session.get("company_id")
 
     if not company_id:
-
         raise HTTPException(status_code=401, detail="Company not logged in")
 
     return company_id
@@ -68,7 +62,6 @@ def employer_transactions(
     company_doc = db.collection("company").document(company_id).get()
 
     if not company_doc.exists:
-
         raise HTTPException(status_code=404, detail="Company not found")
 
     company = company_doc.to_dict()
@@ -98,7 +91,6 @@ def employer_transactions(
     # =================================================
 
     for doc in payment_docs:
-
         data = doc.to_dict()
 
         transaction_id = doc.id
@@ -118,8 +110,7 @@ def employer_transactions(
         # =============================================
 
         if keyword_lower:
-
-            searchable_text = (f"{transaction_id} " f"{package} " f"{payment_method}").lower()
+            searchable_text = (f"{transaction_id} {package} {payment_method}").lower()
 
             if keyword_lower not in searchable_text:
                 continue
@@ -136,17 +127,14 @@ def employer_transactions(
         # =============================================
 
         if transaction_status == "COMPLETED":
-
             completed_count += 1
 
             total_spent += amount
 
         elif transaction_status == "PENDING":
-
             pending_count += 1
 
         elif transaction_status == "FAILED":
-
             failed_count += 1
 
         # =============================================
@@ -174,7 +162,7 @@ def employer_transactions(
     # =================================================
 
     transactions.sort(
-        key=lambda item: (item["sort_date"] or datetime.min.replace(tzinfo=timezone.utc)),
+        key=lambda item: item["sort_date"] or datetime.min.replace(tzinfo=UTC),
         reverse=True,
     )
 
@@ -188,11 +176,9 @@ def employer_transactions(
 
     total_pages = max(1, math.ceil(total_transactions / PER_PAGE))
 
-    if page < 1:
-        page = 1
+    page = max(page, 1)
 
-    if page > total_pages:
-        page = total_pages
+    page = min(page, total_pages)
 
     start = (page - 1) * PER_PAGE
 

@@ -2,7 +2,6 @@ import importlib
 from pathlib import Path
 
 import pytest
-
 from pytest_bdd import (
     given,
     scenarios,
@@ -20,14 +19,12 @@ def load_subscription_module():
     routes_dir = Path("src/job_portal_web/backend/routes")
 
     for path in routes_dir.glob("*.py"):
-
         text = path.read_text(
             encoding="utf-8",
             errors="ignore",
         )
 
         if "def employer_plans(" in text and "def start_subscription(" in text:
-
             import firebase_admin.firestore as firestore_module
 
             original_client = firestore_module.client
@@ -35,11 +32,9 @@ def load_subscription_module():
             firestore_module.client = lambda: None
 
             try:
-
                 return importlib.import_module("job_portal_web.backend.routes." + path.stem)
 
             finally:
-
                 firestore_module.client = original_client
 
     raise ImportError("Cannot find subscription route module.")
@@ -68,7 +63,6 @@ COMPANY_ID = "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
 
 
 class FakeSnapshot:
-
     def __init__(
         self,
         data=None,
@@ -84,7 +78,6 @@ class FakeSnapshot:
 
 
 class FakeDocument:
-
     def __init__(
         self,
         collection,
@@ -101,7 +94,6 @@ class FakeDocument:
 
 
 class FakeCollection:
-
     def __init__(
         self,
         data=None,
@@ -121,7 +113,6 @@ class FakeCollection:
 
 
 class FakeDB:
-
     def __init__(
         self,
         company=None,
@@ -135,7 +126,6 @@ class FakeDB:
     ):
 
         if name == "company":
-
             return self.company
 
         return FakeCollection()
@@ -147,7 +137,6 @@ class FakeDB:
 
 
 class FakeTemplates:
-
     def TemplateResponse(
         self,
         request,
@@ -167,7 +156,6 @@ class FakeTemplates:
 
 
 class FakeRequest:
-
     def __init__(self):
 
         self.session = {
@@ -182,7 +170,6 @@ class FakeRequest:
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -359,7 +346,6 @@ def display_plan_details(
     plans = context.response["context"]["plans"]
 
     for plan in plans.values():
-
         assert "price" in plan
 
         assert "credits" in plan

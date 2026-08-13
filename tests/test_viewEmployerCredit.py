@@ -1,10 +1,8 @@
 import asyncio
-
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 import pytest
-
 from fastapi import HTTPException
 from pytest_bdd import (
     given,
@@ -41,7 +39,6 @@ scenarios("features/viewEmployerCredit.feature")
 
 
 class FakeDocumentSnapshot:
-
     def __init__(self, document_id, data=None, exists=True):
 
         self.id = document_id
@@ -54,7 +51,6 @@ class FakeDocumentSnapshot:
 
 
 class FakeDocumentReference:
-
     def __init__(self, collection, document_id):
 
         self.collection = collection
@@ -65,14 +61,12 @@ class FakeDocumentReference:
         data = self.collection.documents.get(self.document_id)
 
         if data is None:
-
             return FakeDocumentSnapshot(self.document_id, {}, False)
 
         return FakeDocumentSnapshot(self.document_id, data, True)
 
 
 class FakeQuery:
-
     def __init__(self, documents, filters=None):
 
         self.documents = documents
@@ -84,7 +78,6 @@ class FakeQuery:
         # .where(filter=FieldFilter(...))
 
         if "filter" in kwargs:
-
             field_filter = kwargs["filter"]
 
             field = field_filter.field_path
@@ -92,7 +85,6 @@ class FakeQuery:
             value = field_filter.value
 
         else:
-
             field, operator, value = args
 
         return FakeQuery(self.documents, self.filters + [(field, operator, value)])
@@ -102,27 +94,21 @@ class FakeQuery:
         result = []
 
         for document_id, data in self.documents.items():
-
             matched = True
 
             for field, operator, expected in self.filters:
-
                 if operator == "==":
-
                     if data.get(field) != expected:
-
                         matched = False
                         break
 
             if matched:
-
                 result.append(FakeDocumentSnapshot(document_id, data, True))
 
         return result
 
 
 class FakeCollection:
-
     def __init__(self, documents=None):
 
         self.documents = documents or {}
@@ -144,7 +130,6 @@ class FakeCollection:
 
 
 class FakeDB:
-
     def __init__(self, companies=None, payments=None):
 
         self.collections = {
@@ -163,7 +148,6 @@ class FakeDB:
 
 
 class FakeTemplates:
-
     def TemplateResponse(self, request, name, context):
 
         return {"template": name, "context": context}
@@ -175,7 +159,6 @@ class FakeTemplates:
 
 
 class FakeRequest:
-
     def __init__(self):
 
         self.session = {"user_type": "employer", "company_id": COMPANY_ID}
@@ -187,7 +170,6 @@ class FakeRequest:
 
 
 class Context:
-
     def __init__(self):
 
         self.response = None
@@ -218,7 +200,7 @@ def companies():
             "subscription_plan": "business",
             "subscription_status": "ACTIVE",
             "cancel_at_period_end": False,
-            "subscription_current_period_end": datetime(2026, 9, 30, tzinfo=timezone.utc),
+            "subscription_current_period_end": datetime(2026, 9, 30, tzinfo=UTC),
         }
     }
 
@@ -237,22 +219,22 @@ def payments():
             "package": "Business Pack",
             "status": "COMPLETED",
             "amount": 129.00,
-            "created_at": datetime(2026, 7, 1, tzinfo=timezone.utc),
-            "completed_at": datetime(2026, 7, 2, tzinfo=timezone.utc),
+            "created_at": datetime(2026, 7, 1, tzinfo=UTC),
+            "completed_at": datetime(2026, 7, 2, tzinfo=UTC),
         },
         "PAY002": {
             "company_id": COMPANY_ID,
             "package": "Business Pack",
             "status": "PENDING",
             "amount": 129.00,
-            "created_at": datetime(2026, 8, 1, tzinfo=timezone.utc),
+            "created_at": datetime(2026, 8, 1, tzinfo=UTC),
         },
         "OTHER001": {
             "company_id": "OTHER-COMPANY",
             "package": "Enterprise Pack",
             "status": "COMPLETED",
             "amount": 249.00,
-            "created_at": datetime(2026, 8, 5, tzinfo=timezone.utc),
+            "created_at": datetime(2026, 8, 5, tzinfo=UTC),
         },
     }
 
@@ -359,7 +341,6 @@ def test_missing_company(monkeypatch, payments):
     install_fake_db(monkeypatch, {}, payments)
 
     with pytest.raises(HTTPException) as exc:
-
         open_credit()
 
     assert exc.value.status_code == 404
@@ -385,13 +366,12 @@ def create_payments(count):
     result = {}
 
     for number in range(1, count + 1):
-
         result[f"PAY{number:03d}"] = {
             "company_id": COMPANY_ID,
             "package": "Business Pack",
             "status": "COMPLETED",
             "amount": 129,
-            "created_at": datetime(2026, 1, number, tzinfo=timezone.utc),
+            "created_at": datetime(2026, 1, number, tzinfo=UTC),
         }
 
     return result
@@ -460,7 +440,7 @@ def no_subscription(monkeypatch):
 def subscription_end_exists(monkeypatch):
 
     install_company(
-        monkeypatch, {"subscription_current_period_end": datetime(2026, 9, 30, tzinfo=timezone.utc)}
+        monkeypatch, {"subscription_current_period_end": datetime(2026, 9, 30, tzinfo=UTC)}
     )
 
 
@@ -497,8 +477,8 @@ def payment_both_dates(monkeypatch, companies):
             "package": "Business Pack",
             "status": "COMPLETED",
             "amount": 129,
-            "created_at": datetime(2026, 7, 1, tzinfo=timezone.utc),
-            "completed_at": datetime(2026, 7, 2, tzinfo=timezone.utc),
+            "created_at": datetime(2026, 7, 1, tzinfo=UTC),
+            "completed_at": datetime(2026, 7, 2, tzinfo=UTC),
         }
     }
 
@@ -514,7 +494,7 @@ def payment_created_only(monkeypatch, companies):
             "package": "Business Pack",
             "status": "PENDING",
             "amount": 129,
-            "created_at": datetime(2026, 8, 1, tzinfo=timezone.utc),
+            "created_at": datetime(2026, 8, 1, tzinfo=UTC),
         }
     }
 
@@ -604,11 +584,9 @@ def open_credit_step(context):
 def open_credit_error(context):
 
     try:
-
         open_credit()
 
     except HTTPException as exc:
-
         context.error = exc
 
 

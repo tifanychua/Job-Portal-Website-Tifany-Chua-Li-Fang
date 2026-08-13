@@ -1,8 +1,8 @@
-from datetime import datetime, timezone
 import os
+from datetime import UTC, datetime, timezone
 
-from fastapi import APIRouter, Request, HTTPException
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from google.cloud.firestore_v1.base_query import FieldFilter
 
@@ -81,7 +81,6 @@ def _load_notifications(user_id):
     notifications = []
 
     for doc in docs:
-
         data = doc.to_dict()
 
         data["id"] = doc.id
@@ -113,9 +112,9 @@ def _format_relative(ts):
         return ""
 
     if hasattr(ts, "tzinfo") and ts.tzinfo is None:
-        ts = ts.replace(tzinfo=timezone.utc)
+        ts = ts.replace(tzinfo=UTC)
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     diff = now - ts
 
@@ -143,7 +142,7 @@ def _format_relative(ts):
 
 def check_job_expiry_notifications():
 
-    from datetime import datetime, timezone, timedelta
+    from datetime import datetime, timedelta
 
     MYT = timezone(timedelta(hours=8))
 
@@ -152,7 +151,6 @@ def check_job_expiry_notifications():
     jobs = db.collection("job_list").stream()
 
     for job in jobs:
-
         data = job.to_dict()
 
         # Only Active jobs
@@ -390,7 +388,6 @@ def mark_all_notifications_read(request: Request):
     count = 0
 
     for doc in docs:
-
         batch.update(doc.reference, {"is_read": True})
 
         count += 1

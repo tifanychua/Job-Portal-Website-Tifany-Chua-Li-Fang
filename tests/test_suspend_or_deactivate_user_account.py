@@ -1,7 +1,7 @@
 import json
 import os
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -67,7 +67,7 @@ def create_active_user(user_id):
             "email": f"{user_id.lower()}@example.com",
             "accountStatus": "Active",
             "accountStatusReason": "",
-            "createdAt": datetime.now(timezone.utc),
+            "createdAt": datetime.now(UTC),
             "test": True,
         }
     )
@@ -129,7 +129,7 @@ def viewing_user_management(client, context, user_id):
 # =====================================
 
 
-@when("the admin selects an active user account and chooses " "the suspend option")
+@when("the admin selects an active user account and chooses the suspend option")
 def suspend_account(client, context):
     change_status(
         client,
@@ -158,7 +158,7 @@ def verify_suspended_access(context):
 # =====================================
 
 
-@when("the admin selects an active user account and chooses " "the deactivate option")
+@when("the admin selects an active user account and chooses the deactivate option")
 def deactivate_account(client, context):
     change_status(
         client,
@@ -252,7 +252,7 @@ def verify_audit_created(context):
     assert len(audits) == 1
 
 
-@then("the record should include the user information, action performed, " "and date of change")
+@then("the record should include the user information, action performed, and date of change")
 def verify_audit_details(context):
     audits = list(
         db.collection("account_status_audit").where("accountId", "==", context["user_id"]).stream()

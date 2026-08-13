@@ -65,8 +65,7 @@ async def browse_companies(
     keyword = keyword.strip().lower()
 
     # Prevent invalid page numbers.
-    if page < 1:
-        page = 1
+    page = max(page, 1)
 
     # ==================================================
     # Retrieve Active Companies
@@ -103,7 +102,7 @@ async def browse_companies(
         # ==============================================
 
         if keyword:
-            searchable_text = (f"{company_name} " f"{location} " f"{industry}").lower()
+            searchable_text = (f"{company_name} {location} {industry}").lower()
 
             if keyword not in searchable_text:
                 continue
@@ -190,8 +189,7 @@ async def browse_companies(
         (total_company + per_page - 1) // per_page,
     )
 
-    if page > total_pages:
-        page = total_pages
+    page = min(page, total_pages)
 
     start = (page - 1) * per_page
     end = start + per_page

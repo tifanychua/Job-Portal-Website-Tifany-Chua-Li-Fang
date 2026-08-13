@@ -1,6 +1,7 @@
 import os
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import (
     APIRouter,
@@ -69,10 +70,10 @@ ALLOWED_RESUME_EXTENSIONS = {
 # Default Screening Questions
 # =====================================================
 
-DEFAULT_QUESTIONS = [
+DEFAULT_QUESTIONS: list[dict[str, Any]] = [
     {
         "id": "years_experience",
-        "label": ("What is your total years of " "experience in this field?"),
+        "label": ("What is your total years of experience in this field?"),
         "type": "select",
         "required": True,
         "options": [
@@ -127,9 +128,9 @@ def _get_screening_questions(job: dict):
 
     location = job.get("location") or "this location"
 
-    questions[2]["label"] = (
-        "Are you willing to relocate or work " f"from {company_name}'s office in " f"{location}?"
-    )
+    questions[2][
+        "label"
+    ] = f"Are you willing to relocate or work from {company_name}'s office in {location}?"
 
     return questions
 
@@ -273,7 +274,7 @@ def job_apply_form(
 
     job_seeker_display = job_seeker or {
         "full_name": "Guest Applicant",
-        "headline": ("Complete your profile to speed " "up applications"),
+        "headline": ("Complete your profile to speed up applications"),
         "photo": "",
     }
 
@@ -319,7 +320,7 @@ async def job_apply_submit(
             status_code=401,
             content={
                 "success": False,
-                "message": ("Please log in to apply for " "this job."),
+                "message": ("Please log in to apply for this job."),
             },
         )
 
@@ -367,7 +368,7 @@ async def job_apply_submit(
                 status_code=400,
                 content={
                     "success": False,
-                    "message": ("Resume must be a PDF, " "DOC, or DOCX file."),
+                    "message": ("Resume must be a PDF, DOC, or DOCX file."),
                 },
             )
 
@@ -380,11 +381,11 @@ async def job_apply_submit(
                 status_code=400,
                 content={
                     "success": False,
-                    "message": ("Resume must be under " f"{MAX_RESUME_SIZE_MB}MB."),
+                    "message": (f"Resume must be under {MAX_RESUME_SIZE_MB}MB."),
                 },
             )
 
-        resume_name = f"{job_seeker_id}_" f"{job_id}_" f"{uuid.uuid4().hex[:8]}" f"{extension}"
+        resume_name = f"{job_seeker_id}_{job_id}_{uuid.uuid4().hex[:8]}{extension}"
 
         blob = bucket.blob(f"resumes/{resume_name}")
 
@@ -435,7 +436,7 @@ async def job_apply_submit(
             "is_read": False,
             "type": "application",
             "title": "New application received",
-            "message": (f"{applicant_name} applied for " f"{job_title}."),
+            "message": (f"{applicant_name} applied for {job_title}."),
             "link": "/applications",
             "created_at": now,
         }
@@ -446,7 +447,7 @@ async def job_apply_submit(
             {
                 "user": job_seeker,
                 "success": True,
-                "message": ("Application submitted " "successfully!"),
+                "message": ("Application submitted successfully!"),
                 "application_id": (application_reference.id),
                 "redirect_url": f"/jobs/{job_id}",
             }

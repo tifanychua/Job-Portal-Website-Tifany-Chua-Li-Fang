@@ -1,7 +1,7 @@
 import json
 import os
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -58,7 +58,7 @@ def post_id():
 
 
 def create_draft(post_id, complete=False):
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(UTC)
     title = f"Saved Draft Career Advice {uuid4().hex}"
 
     db.collection("career_advice").document(post_id).set(

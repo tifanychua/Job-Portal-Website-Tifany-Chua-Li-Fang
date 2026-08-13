@@ -1,17 +1,14 @@
 import asyncio
-import json
-
-import pytest
-import stripe
-
-from fastapi import HTTPException
-from pytest_bdd import given, scenarios, then, when
-
-
 import importlib
+import json
 import sys
 import types
 from pathlib import Path
+
+import pytest
+import stripe
+from fastapi import HTTPException
+from pytest_bdd import given, scenarios, then, when
 
 
 def load_stripe_module():
@@ -30,7 +27,7 @@ def load_stripe_module():
 
     if not matches:
         raise ImportError(
-            "Could not find the Stripe route module in " "src/job_portal_web/backend/routes."
+            "Could not find the Stripe route module in src/job_portal_web/backend/routes."
         )
 
     module_name = "job_portal_web.backend.routes." + matches[0].stem

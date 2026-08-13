@@ -1,7 +1,7 @@
 import socket
 import threading
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -82,7 +82,7 @@ def test_posts():
 
 def create_post(test_posts, title, category, summary):
     post_id = f"TEST_SEARCH_ADVICE_{uuid4().hex}"
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(UTC)
     db.collection("career_advice").document(post_id).set(
         {
             "title": title,
@@ -132,7 +132,7 @@ def prepare_posts(context, test_posts):
 def card(browser, title):
     return browser.find_element(
         By.XPATH,
-        "//article[contains(@class,'career-card')]" f"[contains(., '{title}')]",
+        f"//article[contains(@class,'career-card')][contains(., '{title}')]",
     )
 
 
@@ -173,7 +173,7 @@ def search_by_keyword(browser, context):
     wait_for_filter(browser)
 
 
-@then("the system should display career advice posts that match " "the keyword")
+@then("the system should display career advice posts that match the keyword")
 def verify_keyword_results(browser, context):
     assert card(browser, context["interview_title"]).is_displayed()
     assert not card(browser, context["resume_title"]).is_displayed()
@@ -194,7 +194,7 @@ def select_category(browser):
     wait_for_filter(browser)
 
 
-@then("the system should display only career advice posts that belong " "to the selected category")
+@then("the system should display only career advice posts that belong to the selected category")
 def verify_category_results(browser, context):
     assert card(browser, context["interview_title"]).is_displayed()
     assert not card(browser, context["resume_title"]).is_displayed()
@@ -216,7 +216,7 @@ def apply_multiple_criteria(browser, context):
     wait_for_filter(browser)
 
 
-@then("the system should display career advice posts that match all " "selected criteria")
+@then("the system should display career advice posts that match all selected criteria")
 def verify_multiple_criteria(browser, context):
     assert card(browser, context["interview_title"]).is_displayed()
     assert not card(browser, context["resume_title"]).is_displayed()

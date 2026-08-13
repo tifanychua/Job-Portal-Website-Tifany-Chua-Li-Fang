@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
+from fakes import FakeFirestore, patch_db_everywhere
 from fastapi.testclient import TestClient
 from pytest_bdd import given, scenarios, then, when
 
-from fakes import FakeFirestore, patch_db_everywhere
-from job_portal_web.backend import savedJob
+from job_portal_web.backend import saved_job
 from job_portal_web.backend.main import app
 
 JOB_SEEKER_ID = "J000001"
@@ -38,7 +38,7 @@ def fake_login(monkeypatch):
         request.session["applicant_id"] = JOB_SEEKER_ID
         return JOB_SEEKER_ID
 
-    monkeypatch.setattr(savedJob, "_get_current_job_seeker_id", fake_job_seeker_id)
+    monkeypatch.setattr(saved_job, "_get_current_job_seeker_id", fake_job_seeker_id)
 
 
 @pytest.fixture
@@ -73,7 +73,7 @@ def seed_saved(fake_db, job_id):
         {
             "job_seeker_id": JOB_SEEKER_ID,
             "job_id": job_id,
-            "saved_at": datetime.now(timezone.utc),
+            "saved_at": datetime.now(UTC),
         },
     )
 

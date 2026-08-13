@@ -1,7 +1,7 @@
 import json
 import os
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -66,7 +66,7 @@ def create_restricted_user(user_id, status):
             "email": f"{user_id.lower()}@example.com",
             "accountStatus": status,
             "accountStatusReason": "Test restriction reason",
-            "createdAt": datetime.now(timezone.utc),
+            "createdAt": datetime.now(UTC),
             "test": True,
         }
     )
@@ -210,7 +210,7 @@ def verify_reactivation_audit_exists(context):
     assert len(audits) == 1
 
 
-@then("the record should include the user information, admin action, " "and date of change")
+@then("the record should include the user information, admin action, and date of change")
 def verify_audit_details(context):
     audits = list(
         db.collection("account_status_audit").where("accountId", "==", context["user_id"]).stream()

@@ -1,5 +1,5 @@
 import importlib
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -50,7 +50,6 @@ TEMPLATE_PATH = Path("src/job_portal_web/ui/employerTransactions.html")
 
 
 class FakeSnapshot:
-
     def __init__(
         self,
         document_id,
@@ -66,7 +65,6 @@ class FakeSnapshot:
 
 
 class FakeDocument:
-
     def __init__(
         self,
         collection,
@@ -93,7 +91,6 @@ class FakeDocument:
 
 
 class FakeQuery:
-
     def __init__(
         self,
         documents,
@@ -140,7 +137,6 @@ class FakeQuery:
                 operator,
                 expected,
             ) in self.filters:
-
                 if operator == "==" and data.get(field) != expected:
                     matched = False
                     break
@@ -158,7 +154,6 @@ class FakeQuery:
 
 
 class FakeCollection:
-
     def __init__(
         self,
         documents=None,
@@ -186,7 +181,6 @@ class FakeCollection:
 
 
 class FakeDB:
-
     def __init__(
         self,
         companies=None,
@@ -210,7 +204,6 @@ class FakeDB:
 
 
 class FakeTemplates:
-
     def TemplateResponse(
         self,
         request,
@@ -224,7 +217,6 @@ class FakeTemplates:
 
 
 class FakeRequest:
-
     def __init__(self):
         self.session = {
             "user_type": "employer",
@@ -238,7 +230,6 @@ class FakeRequest:
 
 
 class Context:
-
     def __init__(self):
         self.response = None
         self.error = None
@@ -282,7 +273,7 @@ def payments():
                 9,
                 10,
                 0,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
             "completed_at": datetime(
                 2026,
@@ -290,7 +281,7 @@ def payments():
                 10,
                 11,
                 30,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         },
         "TXN002": {
@@ -307,7 +298,7 @@ def payments():
                 15,
                 12,
                 0,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         },
         "TXN003": {
@@ -324,7 +315,7 @@ def payments():
                 20,
                 15,
                 45,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         },
         "OTHER001": {
@@ -339,7 +330,7 @@ def payments():
                 2026,
                 4,
                 1,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         },
     }
@@ -432,7 +423,7 @@ def create_payments(count):
                 min(number, 28),
                 number % 24,
                 0,
-                tzinfo=timezone.utc,
+                tzinfo=UTC,
             ),
         }
 

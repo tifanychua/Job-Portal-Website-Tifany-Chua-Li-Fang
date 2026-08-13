@@ -1,7 +1,4 @@
 Feature: Stripe Webhook
-  As the system
-  I want to process Stripe webhook events
-  So that subscription and payment changes are handled automatically.
 
   Scenario: Valid checkout completed webhook
     Given a valid Stripe webhook secret is configured

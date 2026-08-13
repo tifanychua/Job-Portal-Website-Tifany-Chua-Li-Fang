@@ -1,5 +1,6 @@
 import base64
 import json
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
@@ -7,7 +8,6 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from itsdangerous import TimestampSigner
 from pydantic import BaseModel, field_validator
-from datetime import UTC, datetime, timedelta
 
 from .database import db
 from .email_service import (

@@ -1,7 +1,7 @@
 import json
 import os
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from hashlib import sha256
 from uuid import uuid4
 
@@ -71,11 +71,11 @@ def post_id():
 
 
 def saved_document_id(job_seeker_id, post_id):
-    return sha256(f"{job_seeker_id}:{post_id}".encode("utf-8")).hexdigest()
+    return sha256(f"{job_seeker_id}:{post_id}".encode()).hexdigest()
 
 
 def create_published_post(post_id):
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(UTC)
     title = f"Save Career Advice Test {uuid4().hex}"
     db.collection("career_advice").document(post_id).set(
         {
@@ -130,7 +130,7 @@ def select_save(client, context):
     save_post(client, context)
 
 
-@then("the system should save the selected post to the job seeker's " "saved posts list")
+@then("the system should save the selected post to the job seeker's saved posts list")
 def verify_post_saved(context, job_seeker_id):
     try:
         assert context["response"].status_code == 201

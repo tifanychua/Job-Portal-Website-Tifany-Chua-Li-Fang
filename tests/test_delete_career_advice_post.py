@@ -1,7 +1,7 @@
 import json
 import os
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -100,7 +100,7 @@ def post_id():
 
 
 def create_career_advice_post(post_id):
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(UTC)
     title = f"Career Advice Delete Test {uuid4().hex}"
 
     db.collection("career_advice").document(post_id).set(
@@ -149,12 +149,12 @@ def viewing_career_advice_management(client, context, post_id):
     assert context["post_title"] in response.text
 
 
-@when("the admin selects a career advice post and chooses " "the delete option")
+@when("the admin selects a career advice post and chooses the delete option")
 def choose_delete_option(client, context):
     context["response"] = client.delete(f"/api/admin/career-advice/{context['post_id']}")
 
 
-@then("the system should remove the selected career advice post " "from the system")
+@then("the system should remove the selected career advice post from the system")
 def verify_post_removed(context):
     response = context["response"]
 
@@ -191,7 +191,7 @@ def verify_selected_post_deleted(context):
     assert not document.exists
 
 
-@then("display a confirmation message indicating that the post " "has been successfully deleted")
+@then("display a confirmation message indicating that the post has been successfully deleted")
 def verify_deletion_confirmation(context):
     result = context["response"].json()
 

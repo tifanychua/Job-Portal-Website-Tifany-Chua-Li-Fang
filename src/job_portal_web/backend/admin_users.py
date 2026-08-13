@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
@@ -247,7 +247,7 @@ def update_account_status(
 
     previous_record = snapshot.to_dict() or {}
     previous_status = account_status(previous_record)
-    changed_at = datetime.now(timezone.utc)
+    changed_at = datetime.now(UTC)
     changed_by = current_admin_id(request)
 
     account_reference.update(

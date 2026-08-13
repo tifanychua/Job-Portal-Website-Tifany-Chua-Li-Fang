@@ -8,13 +8,13 @@ updates the same Firestore "application" document.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
+from fakes import FakeFirestore, patch_db_everywhere
 from fastapi.testclient import TestClient
 from pytest_bdd import given, scenarios, then, when
 
-from fakes import FakeFirestore, patch_db_everywhere
 from job_portal_web.backend import job_application
 from job_portal_web.backend.main import app
 
@@ -85,8 +85,8 @@ def seed_application(fake_db, app_id, job_id, *, status="Submitted"):
             "resume_path": "resumes/resume.pdf",
             "cover_letter": "",
             "answers": {},
-            "created_at": datetime.now(timezone.utc),
-            "updated_on": datetime.now(timezone.utc),
+            "created_at": datetime.now(UTC),
+            "updated_on": datetime.now(UTC),
         },
     )
 

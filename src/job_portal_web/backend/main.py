@@ -2,20 +2,26 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from starlette.middleware.sessions import SessionMiddleware
 from fastapi.responses import (
     HTMLResponse,
     RedirectResponse,
 )
-from .helper import get_company
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from starlette.middleware.sessions import SessionMiddleware
+
+from job_portal_web.backend.routes.education import router as education_router
+from job_portal_web.backend.routes.experience import router as experience_router
+
+from .admin_users import router as admin_users_router
+from .applicant import router as applicant_router
 
 # Routers
 from .auth import router as auth_router
 from .career_advice import router as career_advice_router
 from .chat import router as chat_router
 from .database import db
+from .helper import get_company
 from .homepage import router as home_router
 from .interview import router as interview_router
 from .job_application import router as job_application_router
@@ -23,32 +29,28 @@ from .job_apply import router as job_apply_router
 from .job_information import router as job_information_router
 from .jobs import router as jobs_router
 from .messages import router as messages_router
+from .notifications import get_unread_notifications_count
+from .notifications import router as notifications_router
+from .privacy import router as privacy_router
 from .routes.admin import router as admin_router
+from .routes.adminAnalytics import router as admin_analytics_router
+from .routes.adminTransaction import router as admin_transaction_router
+from .routes.companyBrowse import router as company_browse_router
+from .routes.companyDetails import router as company_details_router
 from .routes.companyProfile import router as companyProfile_router
 from .routes.editCompanyProfile import router as editCompanyProfile_router
 from .routes.editProfile import router as editProfile_router
 from .routes.employer import router as employer_router
 from .routes.employerApplication import router as employer_application_router
 from .routes.employerCredit import router as employer_credit_router
-from job_portal_web.backend.routes.education import router as education_router
-from job_portal_web.backend.routes.experience import router as experience_router
-from .routes.skill import router as skill_router
-from .routes.payment import router as payment_router
-from .applicant import router as applicant_router
-from .routes.jobSeekerProfile import router as jobSeekerProfile_router
-from .admin_users import router as admin_users_router
-from .savedJob import router as saved_jobs_router
-from .notifications import router as notifications_router
-from .notifications import get_unread_notifications_count
-from .routes.companyBrowse import router as company_browse_router
-from .routes.companyDetails import router as company_details_router
-from .routes.writeCompanyReview import router as write_company_review_router
-from .routes.adminTransaction import router as admin_transaction_router
 from .routes.employerPlans import router as employer_plans_router
-from .routes.stripePayment import router as stripe_payment_router
 from .routes.employerTransactions import router as employer_transactions_router
-from .privacy import router as privacy_router
-from .routes.adminAnalytics import router as admin_analytics_router
+from .routes.jobSeekerProfile import router as jobSeekerProfile_router
+from .routes.payment import router as payment_router
+from .routes.skill import router as skill_router
+from .routes.stripePayment import router as stripe_payment_router
+from .routes.writeCompanyReview import router as write_company_review_router
+from .saved_job import router as saved_jobs_router
 
 # ==================================================
 # APP
@@ -284,9 +286,6 @@ def messages_page(request: Request):
     )
 
 
-
-
-
 # ==================================================
 # CHAT PAGE
 # ==================================================
@@ -357,7 +356,12 @@ def login_page(request: Request):
 
 @app.get("/career-advice")
 def view_career_advice(request: Request):
-    return templates.TemplateResponse("jobSeekerCareerAdvice.html", {"request": request})
+    return templates.TemplateResponse(
+        request=request,
+        name="jobSeekerCareerAdvice.html",
+        context={"request": request},
+    )
+
 
 @app.get("/about-us", response_class=HTMLResponse)
 def about_us_page(request: Request):
@@ -368,19 +372,13 @@ def about_us_page(request: Request):
         applicant_id = request.session.get("applicant_id")
 
         if applicant_id:
-            user_document = (
-                db.collection("job_seeker")
-                .document(str(applicant_id))
-                .get()
-            )
+            user_document = db.collection("job_seeker").document(str(applicant_id)).get()
 
             if user_document.exists:
                 user = user_document.to_dict() or {}
                 user["applicant_id"] = applicant_id
 
-                unread_notifications_count = (
-                    get_unread_notifications_count(request)
-                )
+                unread_notifications_count = get_unread_notifications_count(request)
 
     return templates.TemplateResponse(
         request=request,
@@ -389,11 +387,11 @@ def about_us_page(request: Request):
             "request": request,
             "user": user,
             "active_page": "about-us",
-            "unread_notifications_count": (
-                unread_notifications_count
-            ),
+            "unread_notifications_count": (unread_notifications_count),
         },
     )
+
+
 # ==================================================
 # RUN
 # ==================================================

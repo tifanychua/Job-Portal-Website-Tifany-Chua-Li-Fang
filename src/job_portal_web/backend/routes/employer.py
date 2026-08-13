@@ -1,14 +1,11 @@
 import math
 import os
-
 from datetime import (
+    UTC,
     datetime,
     timedelta,
-    timezone,
 )
-
 from pathlib import Path
-
 
 from fastapi import (
     APIRouter,
@@ -16,19 +13,15 @@ from fastapi import (
     HTTPException,
     Request,
 )
-
 from fastapi.responses import (
     HTMLResponse,
     JSONResponse,
     RedirectResponse,
 )
-
 from fastapi.templating import (
     Jinja2Templates,
 )
-
 from firebase_admin import firestore
-
 
 from ..database import db
 from ..helper import get_company
@@ -61,7 +54,6 @@ def get_current_company_id(request: Request):
     # ==========================================
 
     if os.getenv("PYTEST_CURRENT_TEST"):
-
         return "C000001"
 
     # ==========================================
@@ -69,13 +61,11 @@ def get_current_company_id(request: Request):
     # ==========================================
 
     if request.session.get("user_type") != "employer":
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     company_id = request.session.get("company_id")
 
     if not company_id:
-
         raise HTTPException(status_code=401, detail="Company not logged in")
 
     return company_id
@@ -89,12 +79,10 @@ def get_current_company_id(request: Request):
 def make_aware_datetime(value):
 
     if not value:
-
         return None
 
     if value.tzinfo is None:
-
-        return value.replace(tzinfo=timezone.utc)
+        return value.replace(tzinfo=UTC)
 
     return value
 
@@ -112,23 +100,18 @@ def build_salary_display(
 ):
 
     if salary_type == "fixed":
-
         if salary:
-
             return f"RM {salary}"
 
         return "-"
 
     if salary_type == "range":
-
         if min_salary and max_salary:
-
-            return f"RM {min_salary}" f" - RM {max_salary}"
+            return f"RM {min_salary} - RM {max_salary}"
 
         return "-"
 
     if salary_type == "negotiable":
-
         return "Negotiable"
 
     return "-"
@@ -161,7 +144,6 @@ def build_job_data(
     other_benefit = other_benefit.strip()
 
     if other_benefit and other_benefit not in benefits:
-
         benefits.append(other_benefit)
 
     salary_display = build_salary_display(
@@ -232,7 +214,6 @@ async def publish_job(request: Request):
     company = get_company(request)
 
     if company is None:
-
         return RedirectResponse("/login", status_code=303)
 
     unread_count = get_unread_notifications_count(request)
@@ -246,7 +227,6 @@ async def publish_job(request: Request):
     categories = []
 
     for doc in industry_docs:
-
         data = doc.to_dict()
 
         categories.append(data)
@@ -302,7 +282,6 @@ async def review_job(
     company = get_company(request)
 
     if company is None:
-
         return RedirectResponse("/login", status_code=303)
 
     company_id = get_current_company_id(request)
@@ -333,7 +312,6 @@ async def review_job(
     # =================================================
 
     if action == "draft":
-
         job["status"] = "Draft"
 
         job["publish_date"] = None
@@ -449,7 +427,7 @@ async def publish_job_confirm(
         request.session.pop("job", None)
 
         return RedirectResponse(
-            ("/manage-jobs" "?error=insufficient_credit" "&saved=draft"),
+            ("/manage-jobs?error=insufficient_credit&saved=draft"),
             status_code=303,
         )
 
@@ -457,7 +435,7 @@ async def publish_job_confirm(
     # Publish Job
     # =================================================
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     expiry_date = now + timedelta(days=duration)
 
     job["company_id"] = company_id
@@ -492,7 +470,7 @@ async def publish_job_confirm(
             "company_id": company_id,
             "date": firestore.SERVER_TIMESTAMP,
             "type": "JOB_POST",
-            "description": (f"Published " f"'{job.get('job_title', 'Job')}'"),
+            "description": (f"Published '{job.get('job_title', 'Job')}'"),
             "credit": -required_credit,
             "balance": (available_credit - required_credit),
             "reference": job_ref.id,
@@ -522,11 +500,9 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
     # ==========================================
 
     if os.getenv("PYTEST_CURRENT_TEST"):
-
         company_id = "C000001"
 
         if company is None:
-
             company = {
                 "company_id": "C000001",
                 "companyName": "Test Company",
@@ -534,13 +510,10 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
             }
 
     else:
-
         if company is None:
-
             return RedirectResponse("/login", status_code=303)
 
         if company.get("status") != "Active":
-
             return templates.TemplateResponse(
                 request=request,
                 name="companyPending.html",
@@ -561,10 +534,9 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
 
     all_jobs = []
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     for doc in job_docs:
-
         job_data = doc.to_dict()
 
         job_data["job_id"] = doc.id
@@ -576,7 +548,6 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
         # ======================================
 
         if current_status.lower() == "deleted":
-
             continue
 
         # ======================================
@@ -586,7 +557,6 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
         expiry = make_aware_datetime(job_data.get("expiry_date"))
 
         if expiry and expiry <= now and current_status.lower() == "active":
-
             db.collection("job_list").document(doc.id).update(
                 {
                     "status": "Expired",
@@ -621,7 +591,7 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
     # =================================================
 
     all_jobs.sort(
-        key=lambda item: (item.get("_sort_date") or datetime.min.replace(tzinfo=timezone.utc)),
+        key=lambda item: item.get("_sort_date") or datetime.min.replace(tzinfo=UTC),
         reverse=True,
     )
 
@@ -638,11 +608,9 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
     }
 
     for job in all_jobs:
-
         job_status = str(job.get("status", "")).lower()
 
         if job_status in counts:
-
             counts[job_status] += 1
 
     # =================================================
@@ -660,13 +628,11 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
     }
 
     if status not in allowed_statuses:
-
         status = "all"
 
     filtered_jobs = all_jobs
 
     if status != "all":
-
         filtered_jobs = [
             job for job in filtered_jobs if str(job.get("status", "")).lower() == status
         ]
@@ -678,7 +644,6 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
     clean_keyword = keyword.strip()
 
     if clean_keyword:
-
         search_text = clean_keyword.lower()
 
         filtered_jobs = [
@@ -702,13 +667,9 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
 
     total_pages = max(1, math.ceil(total_filtered_jobs / PER_PAGE))
 
-    if page < 1:
+    page = max(page, 1)
 
-        page = 1
-
-    if page > total_pages:
-
-        page = total_pages
+    page = min(page, total_pages)
 
     start_index = (page - 1) * PER_PAGE
 
@@ -717,7 +678,6 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
     jobs = filtered_jobs[start_index:end_index]
 
     for job in jobs:
-
         job.pop("_sort_date", None)
 
     # =================================================
@@ -725,13 +685,11 @@ async def manage_jobs(request: Request, page: int = 1, status: str = "all", keyw
     # =================================================
 
     if total_filtered_jobs > 0:
-
         showing_from = start_index + 1
 
         showing_to = min(end_index, total_filtered_jobs)
 
     else:
-
         showing_from = 0
 
         showing_to = 0
@@ -775,7 +733,6 @@ async def close_job(request: Request, job_id: str):
     job_doc = job_ref.get()
 
     if not job_doc.exists:
-
         raise HTTPException(status_code=404, detail="Job not found")
 
     job = job_doc.to_dict()
@@ -785,7 +742,6 @@ async def close_job(request: Request, job_id: str):
     # ==========================================
 
     if job.get("company_id") != company_id:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     # ==========================================
@@ -793,7 +749,6 @@ async def close_job(request: Request, job_id: str):
     # ==========================================
 
     if str(job.get("status", "")).lower() != "active":
-
         return RedirectResponse("/manage-jobs", status_code=303)
 
     # ==========================================
@@ -822,7 +777,6 @@ async def edit_job(request: Request, job_id: str):
     company = get_company(request)
 
     if company is None:
-
         return RedirectResponse("/login", status_code=303)
 
     company_id = get_current_company_id(request)
@@ -834,7 +788,6 @@ async def edit_job(request: Request, job_id: str):
     job_doc = db.collection("job_list").document(job_id).get()
 
     if not job_doc.exists:
-
         raise HTTPException(status_code=404, detail="Job not found")
 
     job = job_doc.to_dict()
@@ -846,7 +799,6 @@ async def edit_job(request: Request, job_id: str):
     # ==========================================
 
     if job.get("company_id") != company_id:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     # ==========================================
@@ -858,7 +810,6 @@ async def edit_job(request: Request, job_id: str):
     categories = []
 
     for doc in category_docs:
-
         data = doc.to_dict()
 
         categories.append(
@@ -918,7 +869,6 @@ async def review_edit_job(
     company = get_company(request)
 
     if company is None:
-
         return RedirectResponse("/login", status_code=303)
 
     company_id = get_current_company_id(request)
@@ -932,7 +882,6 @@ async def review_edit_job(
     job_doc = job_ref.get()
 
     if not job_doc.exists:
-
         raise HTTPException(status_code=404, detail="Job not found")
 
     old_job = job_doc.to_dict()
@@ -942,7 +891,6 @@ async def review_edit_job(
     # =================================================
 
     if old_job.get("company_id") != company_id:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     # =================================================
@@ -991,7 +939,6 @@ async def review_edit_job(
     # =================================================
 
     if action == "draft" and edited_job["status"].lower() == "draft":
-
         update_data = get_job_update_data(edited_job)
 
         update_data["status"] = "Draft"
@@ -1038,7 +985,6 @@ async def confirm_edit_job(request: Request, job_id: str):
     edited_job = request.session.get("edit_job")
 
     if not edited_job:
-
         return RedirectResponse(f"/edit-job/{job_id}", status_code=303)
 
     job_ref = db.collection("job_list").document(job_id)
@@ -1046,20 +992,17 @@ async def confirm_edit_job(request: Request, job_id: str):
     job_doc = job_ref.get()
 
     if not job_doc.exists:
-
         raise HTTPException(status_code=404, detail="Job not found")
 
     current_job = job_doc.to_dict()
 
     if current_job.get("company_id") != company_id:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     current_status = str(current_job.get("status", "")).lower()
 
     # Draft must use Publish route
     if current_status == "draft":
-
         return RedirectResponse(f"/edit-job/{job_id}", status_code=303)
 
     update_data = get_job_update_data(edited_job)
@@ -1092,7 +1035,6 @@ async def publish_draft_job(
     edited_job = request.session.get("edit_job")
 
     if not edited_job:
-
         return RedirectResponse(f"/edit-job/{job_id}", status_code=303)
 
     # =================================================
@@ -1104,17 +1046,14 @@ async def publish_draft_job(
     job_doc = job_ref.get()
 
     if not job_doc.exists:
-
         raise HTTPException(status_code=404, detail="Job not found")
 
     current_job = job_doc.to_dict()
 
     if current_job.get("company_id") != company_id:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     if str(current_job.get("status", "")).lower() != "draft":
-
         return RedirectResponse("/manage-jobs", status_code=303)
 
     # =================================================
@@ -1128,7 +1067,6 @@ async def publish_draft_job(
     }
 
     if duration not in CREDIT_RULES:
-
         raise HTTPException(status_code=400, detail="Invalid posting duration")
 
     required_credit = CREDIT_RULES[duration]
@@ -1142,7 +1080,6 @@ async def publish_draft_job(
     company_doc = company_ref.get()
 
     if not company_doc.exists:
-
         raise HTTPException(status_code=404, detail="Company not found")
 
     company = company_doc.to_dict()
@@ -1155,7 +1092,6 @@ async def publish_draft_job(
     # =================================================
 
     if available_credit < required_credit:
-
         update_data = get_job_update_data(edited_job)
 
         update_data.update(
@@ -1172,14 +1108,14 @@ async def publish_draft_job(
         request.session.pop("edit_job", None)
 
         return RedirectResponse(
-            ("/manage-jobs" "?error=insufficient_credit" "&saved=draft"), status_code=303
+            ("/manage-jobs?error=insufficient_credit&saved=draft"), status_code=303
         )
 
     # =================================================
     # Publish Same Draft Document
     # =================================================
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
 
     expiry_date = now + timedelta(days=duration)
 
@@ -1221,7 +1157,7 @@ async def publish_draft_job(
             "company_id": company_id,
             "date": firestore.SERVER_TIMESTAMP,
             "type": "JOB_POST",
-            "description": ("Published draft job " f"'{edited_job.get('job_title', 'Job')}'"),
+            "description": (f"Published draft job '{edited_job.get('job_title', 'Job')}'"),
             "credit": -required_credit,
             "balance": (available_credit - required_credit),
             "reference": job_id,
@@ -1248,13 +1184,11 @@ async def delete_job(request: Request, job_id: str):
     job_doc = job_ref.get()
 
     if not job_doc.exists:
-
         return RedirectResponse("/manage-jobs?error=notfound", status_code=303)
 
     job = job_doc.to_dict()
 
     if job.get("company_id") != company_id:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     # Soft Delete
@@ -1285,7 +1219,6 @@ async def view_job(request: Request, job_id: str):
     company_doc = db.collection("company").document(company_id).get()
 
     if not company_doc.exists:
-
         raise HTTPException(status_code=404, detail="Company not found")
 
     company = company_doc.to_dict()
@@ -1297,7 +1230,6 @@ async def view_job(request: Request, job_id: str):
     job_doc = db.collection("job_list").document(job_id).get()
 
     if not job_doc.exists:
-
         raise HTTPException(status_code=404, detail="Job not found")
 
     job = job_doc.to_dict()
@@ -1309,7 +1241,6 @@ async def view_job(request: Request, job_id: str):
     # ==========================================
 
     if job.get("company_id") != company_id:
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     # ==========================================
@@ -1357,17 +1288,14 @@ async def job_statistics(request: Request):
     }
 
     for doc in docs:
-
         status = str(doc.to_dict().get("status", "")).lower()
 
         if status == "deleted":
-
             continue
 
         result["total"] += 1
 
         if status in result:
-
             result[status] += 1
 
     return JSONResponse({"success": True, **result})

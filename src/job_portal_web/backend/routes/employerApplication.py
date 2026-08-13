@@ -7,8 +7,9 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore
 from pydantic import BaseModel
-from ..helper import get_company
+
 from ..database import db
+from ..helper import get_company
 from ..notifications import get_unread_notifications_count
 
 # ==================================================
@@ -72,7 +73,6 @@ async def view_applications(request: Request, page: int = 1):
     # ==================================================
 
     if os.getenv("PYTEST_CURRENT_TEST"):
-
         company_id = "C000001"
 
         company = {
@@ -81,7 +81,6 @@ async def view_applications(request: Request, page: int = 1):
         }
 
     else:
-
         company_id, company = get_current_company(request)
 
     # ==================================================
@@ -92,7 +91,6 @@ async def view_applications(request: Request, page: int = 1):
     jobs_map = {}
 
     for job_doc in db.collection("job_list").stream():
-
         job = job_doc.to_dict()
 
         jobs_map[job_doc.id] = job
@@ -101,7 +99,6 @@ async def view_applications(request: Request, page: int = 1):
             job.get("company_id") == company_id
             and str(job.get("status", "")).strip().lower() != "deleted"
         ):
-
             jobs.append(
                 {
                     "job_id": job_doc.id,
@@ -118,7 +115,6 @@ async def view_applications(request: Request, page: int = 1):
     job_seekers = {}
 
     for doc in db.collection("job_seeker").stream():
-
         job_seekers[doc.id] = doc.to_dict()
 
     # ==================================================
@@ -128,31 +124,26 @@ async def view_applications(request: Request, page: int = 1):
     all_applications = []
 
     for application_doc in db.collection("application").stream():
-
         application = application_doc.to_dict()
 
         status = str(application.get("status", "") or "").strip().lower()
 
         # Do not show cancelled
         if status in {"cancelled", "canceled"}:
-
             continue
 
         job_id = application.get("job_id")
 
         if not job_id:
-
             continue
 
         job = jobs_map.get(job_id)
 
         if not job:
-
             continue
 
         # Only current employer
         if job.get("company_id") != company_id:
-
             continue
 
         # ==================================================
@@ -182,7 +173,6 @@ async def view_applications(request: Request, page: int = 1):
         job_seeker = job_seekers.get(job_seeker_id)
 
         if job_seeker:
-
             application["applicant_name"] = job_seeker.get("name") or "Unknown Applicant"
 
             application["applicant_email"] = job_seeker.get("email") or "No email provided"
@@ -200,13 +190,11 @@ async def view_applications(request: Request, page: int = 1):
             experiences = []
 
             for doc in experience_docs:
-
                 exp = doc.to_dict()
 
                 job_title = exp.get("job_title")
 
                 if job_title:
-
                     experiences.append(job_title)
 
             application["experience"] = ", ".join(experiences) if experiences else "Not provided"
@@ -224,23 +212,19 @@ async def view_applications(request: Request, page: int = 1):
             skills = []
 
             for doc in skill_docs:
-
                 data = doc.to_dict()
 
                 skill_id = data.get("skill_id")
 
                 if not skill_id:
-
                     continue
 
                 skill_doc = db.collection("skills").document(skill_id).get()
 
                 if skill_doc.exists:
-
                     skill_name = skill_doc.to_dict().get("skill_name")
 
                     if skill_name:
-
                         skills.append(skill_name)
 
             application["skills"] = skills
@@ -267,7 +251,7 @@ async def view_applications(request: Request, page: int = 1):
     # ==================================================
 
     all_applications.sort(
-        key=lambda application: (application.get("_sort_date") or datetime.min.replace(tzinfo=UTC)),
+        key=lambda application: application.get("_sort_date") or datetime.min.replace(tzinfo=UTC),
         reverse=True,
     )
 
@@ -299,13 +283,9 @@ async def view_applications(request: Request, page: int = 1):
 
     total_pages = max(1, math.ceil(total_applications / PER_PAGE))
 
-    if page < 1:
+    page = max(page, 1)
 
-        page = 1
-
-    if page > total_pages:
-
-        page = total_pages
+    page = min(page, total_pages)
 
     start_index = (page - 1) * PER_PAGE
 
@@ -314,7 +294,6 @@ async def view_applications(request: Request, page: int = 1):
     applications = all_applications[start_index:end_index]
 
     for application in applications:
-
         application.pop("_sort_date", None)
 
     # ==================================================
@@ -322,13 +301,11 @@ async def view_applications(request: Request, page: int = 1):
     # ==================================================
 
     if total_applications > 0:
-
         showing_from = start_index + 1
 
         showing_to = min(end_index, total_applications)
 
     else:
-
         showing_from = 0
         showing_to = 0
 
@@ -392,7 +369,6 @@ async def update_application_status(application_id: str, status_data: Applicatio
     # ==================================================
 
     if received_status not in status_mapping:
-
         raise HTTPException(
             status_code=400, detail=("Invalid application status: " + status_data.status)
         )
@@ -408,7 +384,6 @@ async def update_application_status(application_id: str, status_data: Applicatio
     application_doc = application_ref.get()
 
     if not application_doc.exists:
-
         raise HTTPException(status_code=404, detail="Application not found.")
 
     application = application_doc.to_dict()
@@ -426,7 +401,6 @@ async def update_application_status(application_id: str, status_data: Applicatio
     # ==================================================
 
     if not os.getenv("PYTEST_CURRENT_TEST") and current_status in {"offered", "rejected"}:
-
         raise HTTPException(
             status_code=400,
             detail=(
@@ -459,23 +433,20 @@ async def update_application_status(application_id: str, status_data: Applicatio
     job_id = application.get("job_id")
 
     if job_seeker_id:
-
         job_title = "your application"
 
         if job_id:
-
             job_doc = db.collection("job_list").document(job_id).get()
 
             if job_doc.exists:
-
                 job_title = job_doc.to_dict().get("job_title", job_title)
 
         status_messages = {
             "Submitted": "has been submitted",
             "Reviewed": "is now being reviewed",
             "Shortlisted": "has been shortlisted",
-            "Offered": ("has received a job offer " "— congratulations!"),
-            "Rejected": ("was not successful " "this time"),
+            "Offered": ("has received a job offer — congratulations!"),
+            "Rejected": ("was not successful this time"),
         }
 
         status_message = status_messages.get(firestore_status, "has been updated")
@@ -487,7 +458,7 @@ async def update_application_status(application_id: str, status_data: Applicatio
                 "is_read": False,
                 "type": "application",
                 "title": "Application status updated",
-                "message": (f"Your application for " f"{job_title} " f"{status_message}."),
+                "message": (f"Your application for {job_title} {status_message}."),
                 "link": f"/application/{application_id}",
                 "created_at": datetime.now(UTC),
             }
@@ -498,6 +469,6 @@ async def update_application_status(application_id: str, status_data: Applicatio
 
     return {
         "success": True,
-        "message": ("Application status updated " "successfully."),
+        "message": ("Application status updated successfully."),
         "status": firestore_status,
     }

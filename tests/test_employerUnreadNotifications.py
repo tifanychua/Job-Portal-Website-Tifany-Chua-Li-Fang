@@ -7,14 +7,14 @@ shares the same is_read / data-read data contract.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
+from fakes import FakeFirestore, patch_db_everywhere
 from fastapi.testclient import TestClient
+from html_helpers import item_block, tab_count
 from pytest_bdd import given, scenarios, then, when
 
-from fakes import FakeFirestore, patch_db_everywhere
-from html_helpers import item_block, tab_count
 from job_portal_web.backend import notifications
 from job_portal_web.backend.main import app
 
@@ -74,7 +74,7 @@ def seed_notification(fake_db, doc_id, *, is_read, title="Notice", message="msg"
             "title": title,
             "message": message,
             "link": "",
-            "created_at": datetime.now(timezone.utc),
+            "created_at": datetime.now(UTC),
         },
     )
 

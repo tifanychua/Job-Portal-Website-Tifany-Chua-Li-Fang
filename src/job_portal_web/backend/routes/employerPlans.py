@@ -1,25 +1,12 @@
 import os
+from datetime import UTC, datetime
+from typing import Any, TypedDict
 
 import stripe
-from datetime import datetime, timezone
-
-from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-
-from fastapi import (
-    APIRouter,
-    Request,
-    HTTPException,
-    Form,
-)
-
-from fastapi.responses import (
-    HTMLResponse,
-    RedirectResponse,
-)
-
+from fastapi import APIRouter, Form, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-
 from firebase_admin import firestore
 
 # =====================================================
@@ -30,11 +17,8 @@ load_dotenv()
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
-
 router = APIRouter()
-
 templates = Jinja2Templates(directory="src/job_portal_web/ui")
-
 db = firestore.client()
 
 
@@ -42,7 +26,17 @@ db = firestore.client()
 # Plan Configuration
 # =====================================================
 
-PLANS = {
+
+class PlanConfig(TypedDict):
+    id: str
+    name: str
+    price: int
+    credits: int
+    description: str
+    stripe_price_id: str | None
+
+
+PLANS: dict[str, PlanConfig] = {
     "starter": {
         "id": "starter",
         "name": "Starter Pack",
@@ -71,65 +65,77 @@ PLANS = {
 
 
 # =====================================================
-# Current Company
+# Helpers
 # =====================================================
 
 
-def get_current_company_id(request: Request):
-
+def get_current_company_id(request: Request) -> str:
     if os.getenv("PYTEST_CURRENT_TEST"):
-
         return "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
 
     if request.session.get("user_type") != "employer":
-
         raise HTTPException(status_code=403, detail="Access denied")
 
     company_id = request.session.get("company_id")
 
     if not company_id:
-
         raise HTTPException(status_code=401, detail="Company not logged in")
 
-    return company_id
+    return str(company_id)
 
 
-# =====================================================
-# Get Company
-# =====================================================
-
-
-def get_company(company_id: str):
-
+def get_company(company_id: str) -> dict[str, Any]:
     company_doc = db.collection("company").document(company_id).get()
 
     if not company_doc.exists:
-
         raise HTTPException(status_code=404, detail="Company not found")
 
-    return company_doc.to_dict()
+    company = company_doc.to_dict()
+
+    if company is None:
+        raise HTTPException(status_code=404, detail="Company data not found")
+
+    return company
 
 
-# =====================================================
-# Create Stripe Customer If Missing
-# =====================================================
+def get_stripe_price_id(plan: PlanConfig) -> str:
+    stripe_price_id = plan["stripe_price_id"]
+
+    if not stripe_price_id:
+        raise HTTPException(
+            status_code=500,
+            detail="Stripe Price ID is not configured.",
+        )
+
+    return stripe_price_id
 
 
-def get_or_create_stripe_customer(company_id: str, company: dict):
-
+def get_or_create_stripe_customer(
+    company_id: str,
+    company: dict[str, Any],
+) -> str:
     customer_id = company.get("stripe_customer_id")
 
-    if customer_id:
-
+    if isinstance(customer_id, str) and customer_id:
         return customer_id
 
+    customer_email = company.get("email") or company.get("businessEmail")
+
+    if not isinstance(customer_email, str) or not customer_email.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Company email is required",
+        )
+
+    customer_name = str(company.get("companyName") or "JobConnect Employer")
+
     customer = stripe.Customer.create(
-        name=company.get("companyName", "JobConnect Employer"),
-        email=(company.get("email") or company.get("businessEmail")),
+        name=customer_name,
+        email=customer_email.strip(),
         metadata={"company_id": company_id},
     )
 
-    (db.collection("company").document(company_id).update({"stripe_customer_id": customer.id}))
+    db.collection("company").document(company_id).update({"stripe_customer_id": customer.id})
 
     return customer.id
 
@@ -141,11 +147,8 @@ def get_or_create_stripe_customer(company_id: str, company: dict):
 
 @router.get("/employer-plans", response_class=HTMLResponse)
 def employer_plans(request: Request):
-
     company_id = get_current_company_id(request)
-
     company = get_company(company_id)
-
     current_plan = str(company.get("subscription_plan", "") or "").lower()
 
     return templates.TemplateResponse(
@@ -168,33 +171,24 @@ def employer_plans(request: Request):
 
 @router.post("/employer/subscription/start/{plan_name}")
 def start_subscription(request: Request, plan_name: str):
-
     company_id = get_current_company_id(request)
-
     company = get_company(company_id)
-
     plan = PLANS.get(plan_name)
 
-    if not plan:
-
+    if plan is None:
         raise HTTPException(status_code=404, detail="Plan not found")
 
-    if not plan["stripe_price_id"]:
+    stripe_price_id = get_stripe_price_id(plan)
 
-        raise HTTPException(status_code=500, detail=("Stripe Price ID " "is not configured."))
-
-    # Existing Stripe subscription?
     existing_subscription = company.get("stripe_subscription_id")
 
     if existing_subscription:
-
-        return RedirectResponse(url="/employer-plans", status_code=303)
+        return RedirectResponse(
+            url="/employer-plans",
+            status_code=303,
+        )
 
     customer_id = get_or_create_stripe_customer(company_id, company)
-
-    # =================================================
-    # Stripe Checkout
-    # =================================================
 
     checkout_session = stripe.checkout.Session.create(
         customer=customer_id,
@@ -202,7 +196,7 @@ def start_subscription(request: Request, plan_name: str):
         payment_method_types=["card"],
         line_items=[
             {
-                "price": plan["stripe_price_id"],
+                "price": stripe_price_id,
                 "quantity": 1,
             }
         ],
@@ -213,12 +207,20 @@ def start_subscription(request: Request, plan_name: str):
             }
         },
         success_url=(
-            "http://127.0.0.1:8000/" "stripe/payment-success" "?session_id={CHECKOUT_SESSION_ID}"
+            "http://127.0.0.1:8000/stripe/payment-success?session_id={CHECKOUT_SESSION_ID}"
         ),
-        cancel_url=("http://127.0.0.1:8000/" "employer-plans" "?subscription=cancelled"),
+        cancel_url=("http://127.0.0.1:8000/employer-plans?subscription=cancelled"),
     )
 
-    return RedirectResponse(checkout_session.url, status_code=303)
+    checkout_url = checkout_session.url
+
+    if not checkout_url:
+        raise HTTPException(
+            status_code=502,
+            detail="Stripe did not return a checkout URL.",
+        )
+
+    return RedirectResponse(url=checkout_url, status_code=303)
 
 
 # =====================================================
@@ -234,20 +236,17 @@ def change_subscription(
 ):
     company_id = get_current_company_id(request)
     company = get_company(company_id)
-
     plan = PLANS.get(plan_name)
 
-    if not plan:
-        raise HTTPException(
-            status_code=404,
-            detail="Plan not found",
-        )
+    if plan is None:
+        raise HTTPException(status_code=404, detail="Plan not found")
 
+    stripe_price_id = get_stripe_price_id(plan)
     current_plan = str(company.get("subscription_plan", "") or "").lower()
 
     if current_plan == plan_name:
         return RedirectResponse(
-            "/employer-plans",
+            url="/employer-plans",
             status_code=303,
         )
 
@@ -257,14 +256,12 @@ def change_subscription(
         raise HTTPException(
             status_code=400,
             detail=(
-                "This account does not yet have a "
-                "Stripe subscription. Start a Stripe "
-                "subscription first."
+                "This account does not yet have a Stripe subscription. "
+                "Start a Stripe subscription first."
             ),
         )
 
     subscription = stripe.Subscription.retrieve(subscription_id)
-
     subscription_items = subscription["items"]["data"]
 
     if not subscription_items:
@@ -275,76 +272,74 @@ def change_subscription(
 
     subscription_item_id = subscription_items[0]["id"]
 
-    # Use the time supplied by the preview page. If it was
-    # not supplied, use the current UTC timestamp.
     if proration_date is None:
-        proration_date = int(datetime.now(timezone.utc).timestamp())
+        proration_date = int(datetime.now(UTC).timestamp())
 
     stripe.Subscription.modify(
         subscription_id,
         items=[
             {
                 "id": subscription_item_id,
-                "price": plan["stripe_price_id"],
+                "price": stripe_price_id,
             }
         ],
         proration_behavior="always_invoice",
-        payment_behavior="pending_if_incomplete",
         proration_date=proration_date,
+        payment_behavior="pending_if_incomplete",
+        metadata={
+            "company_id": company_id,
+            "plan": plan_name,
+        },
     )
 
-    # Firestore should be updated by the Stripe webhook
-    # after Stripe confirms the subscription change.
     return RedirectResponse(
-        "/employer-credit?plan_change=processing",
+        url="/employer-credit?plan_change=processing",
         status_code=303,
     )
 
 
+# =====================================================
+# Preview Subscription Change
+# =====================================================
+
+
 @router.get("/employer/subscription/preview/{plan_name}")
 def preview_subscription_change(request: Request, plan_name: str):
-
     company_id = get_current_company_id(request)
-
     company = get_company(company_id)
-
     plan = PLANS.get(plan_name)
 
-    if not plan:
-
+    if plan is None:
         raise HTTPException(status_code=404, detail="Plan not found")
 
+    stripe_price_id = get_stripe_price_id(plan)
     current_plan = str(company.get("subscription_plan", "") or "").lower()
 
     if current_plan == plan_name:
-
-        raise HTTPException(status_code=400, detail=("This is already your " "current plan."))
+        raise HTTPException(
+            status_code=400,
+            detail="This is already your current plan.",
+        )
 
     subscription_id = company.get("stripe_subscription_id")
 
     if not subscription_id:
-
-        raise HTTPException(status_code=400, detail=("No active Stripe " "subscription found."))
+        raise HTTPException(
+            status_code=400,
+            detail="No active Stripe subscription found.",
+        )
 
     subscription = stripe.Subscription.retrieve(subscription_id)
-
     subscription_items = subscription["items"]["data"]
 
     if not subscription_items:
-
-        raise HTTPException(status_code=400, detail=("Subscription item " "not found."))
+        raise HTTPException(
+            status_code=400,
+            detail="Subscription item not found.",
+        )
 
     subscription_item_id = subscription_items[0]["id"]
-
-    # ==========================================
-    # Use one fixed proration timestamp
-    # ==========================================
-
-    proration_date = int(datetime.now(timezone.utc).timestamp())
-
-    # ==========================================
-    # Stripe Preview
-    # ==========================================
+    proration_date = int(datetime.now(UTC).timestamp())
 
     preview = stripe.Invoice.create_preview(
         subscription=subscription_id,
@@ -352,7 +347,7 @@ def preview_subscription_change(request: Request, plan_name: str):
             "items": [
                 {
                     "id": subscription_item_id,
-                    "price": plan["stripe_price_id"],
+                    "price": stripe_price_id,
                 }
             ],
             "proration_behavior": "always_invoice",
@@ -360,60 +355,53 @@ def preview_subscription_change(request: Request, plan_name: str):
         },
     )
 
-    # ==========================================
-    # Amounts
-    # Stripe values are cents
-    # ==========================================
-
     amount_due = float(preview.amount_due or 0) / 100
-
     subtotal = float(preview.subtotal or 0) / 100
-
-    # ==========================================
-    # Find proration adjustment
-    # ==========================================
 
     adjustment_cents = 0
 
     for line in preview.lines.data:
-
         parent = getattr(line, "parent", None)
 
         if not parent:
             continue
 
-        details = getattr(parent, "subscription_item_details", None)
+        details = getattr(
+            parent,
+            "subscription_item_details",
+            None,
+        )
 
         if details and getattr(details, "proration", False):
-
-            # Negative amount = credit
             if line.amount < 0:
-
                 adjustment_cents += line.amount
 
     adjustment = float(adjustment_cents) / 100
-
-    # ==========================================
-    # Saved Card Display
-    # ==========================================
-
     card_display = "Saved card"
-
     customer_id = company.get("stripe_customer_id")
 
     if customer_id:
-
         customer = stripe.Customer.retrieve(
-            customer_id, expand=["invoice_settings.default_payment_method"]
+            customer_id,
+            expand=["invoice_settings.default_payment_method"],
         )
 
-        payment_method = customer.invoice_settings.default_payment_method
+        invoice_settings = customer.invoice_settings
 
-        if payment_method and payment_method.card:
+        if invoice_settings is not None:
+            payment_method = invoice_settings.default_payment_method
 
-            card_display = (
-                f"{payment_method.card.brand.upper()} " f"•••• {payment_method.card.last4}"
-            )
+            if isinstance(payment_method, str):
+                payment_method = stripe.PaymentMethod.retrieve(payment_method)
+
+            card = getattr(payment_method, "card", None)
+
+            if card is not None:
+                brand = str(getattr(card, "brand", "Card")).upper()
+                last4 = str(getattr(card, "last4", ""))
+
+                if last4:
+                    card_display = f"{brand} •••• {last4}"
 
     return JSONResponse(
         {
@@ -435,41 +423,38 @@ def preview_subscription_change(request: Request, plan_name: str):
 
 @router.post("/employer/subscription/cancel")
 def cancel_subscription(request: Request):
-
     company_id = get_current_company_id(request)
-
     company = get_company(company_id)
-
     subscription_id = company.get("stripe_subscription_id")
 
     if not subscription_id:
-
-        raise HTTPException(status_code=400, detail="No active subscription found.")
+        raise HTTPException(
+            status_code=400,
+            detail="No active subscription found.",
+        )
 
     try:
-
         stripe.Subscription.modify(
             subscription_id,
             cancel_at_period_end=True,
         )
-
-    except stripe.error.StripeError as e:
-
-        raise HTTPException(status_code=400, detail=str(e))
-
-    # Stripe webhook will also receive
-    # customer.subscription.updated.
-    # We update this immediately so UI
-    # can show the scheduled cancellation.
+    except stripe.error.StripeError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        ) from error
 
     db.collection("company").document(company_id).update(
         {
             "cancel_at_period_end": True,
-            "updatedAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(UTC),
         }
     )
 
-    return RedirectResponse("/employer-credit?cancel=scheduled", status_code=303)
+    return RedirectResponse(
+        url="/employer-credit?cancel=scheduled",
+        status_code=303,
+    )
 
 
 # =====================================================
@@ -479,36 +464,38 @@ def cancel_subscription(request: Request):
 
 @router.post("/employer/subscription/resume")
 def resume_subscription(request: Request):
-
     company_id = get_current_company_id(request)
-
     company = get_company(company_id)
-
     subscription_id = company.get("stripe_subscription_id")
 
     if not subscription_id:
-
-        raise HTTPException(status_code=400, detail="No subscription found.")
+        raise HTTPException(
+            status_code=400,
+            detail="No subscription found.",
+        )
 
     try:
-
         stripe.Subscription.modify(
             subscription_id,
             cancel_at_period_end=False,
         )
-
-    except stripe.error.StripeError as e:
-
-        raise HTTPException(status_code=400, detail=str(e))
+    except stripe.error.StripeError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        ) from error
 
     db.collection("company").document(company_id).update(
         {
             "cancel_at_period_end": False,
-            "updatedAt": datetime.now(timezone.utc),
+            "updatedAt": datetime.now(UTC),
         }
     )
 
-    return RedirectResponse("/employer-credit?subscription=resumed", status_code=303)
+    return RedirectResponse(
+        url="/employer-credit?subscription=resumed",
+        status_code=303,
+    )
 
 
 # =====================================================
@@ -518,26 +505,28 @@ def resume_subscription(request: Request):
 
 @router.post("/employer/payment-method/manage")
 def manage_payment_method(request: Request):
-
     company_id = get_current_company_id(request)
-
     company = get_company(company_id)
-
     customer_id = company.get("stripe_customer_id")
 
     if not customer_id:
-
-        raise HTTPException(status_code=400, detail=("Stripe customer account " "not found."))
-
-    try:
-
-        portal_session = stripe.billing_portal.Session.create(
-            customer=customer_id,
-            return_url=("http://127.0.0.1:8000/" "employer-credit"),
+        raise HTTPException(
+            status_code=400,
+            detail="Stripe customer account not found.",
         )
 
-    except stripe.error.StripeError as e:
+    try:
+        portal_session = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url="http://127.0.0.1:8000/employer-credit",
+        )
+    except stripe.error.StripeError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error),
+        ) from error
 
-        raise HTTPException(status_code=400, detail=str(e))
-
-    return RedirectResponse(portal_session.url, status_code=303)
+    return RedirectResponse(
+        url=portal_session.url,
+        status_code=303,
+    )

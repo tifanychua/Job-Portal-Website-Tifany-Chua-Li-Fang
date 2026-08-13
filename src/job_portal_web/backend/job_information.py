@@ -169,7 +169,6 @@ def job_detail(request: Request, job_id: str):
     # after switching accounts) could make this page report "already
     # applied" even though the header shows the visitor as logged out.
     if request.session.get("user_type") == "job_seeker":
-
         job_seeker_id = request.session.get("applicant_id")
 
         applications = (
@@ -205,7 +204,6 @@ def job_detail(request: Request, job_id: str):
     scored_jobs = []
 
     for doc in docs:
-
         if doc.id == job_id:
             continue
 

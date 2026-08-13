@@ -1,7 +1,7 @@
 import json
 import os
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -102,7 +102,7 @@ def create_career_advice_post(
     post_id,
     status="Draft",
 ):
-    current_time = datetime.now(timezone.utc)
+    current_time = datetime.now(UTC)
 
     db.collection("career_advice").document(post_id).set(
         {
@@ -142,7 +142,7 @@ def admin_logged_in(client):
 # =====================================
 
 
-@when("the admin enters the career advice post details " "and submits the form")
+@when("the admin enters the career advice post details and submits the form")
 def submit_career_advice_post(client, context):
     context["post_title"] = f"Career Advice Test {uuid4().hex}"
 
@@ -210,7 +210,7 @@ def existing_career_advice_post(context, post_id):
 
 @when("the admin selects the publish option")
 def publish_career_advice_post(client, context):
-    context["response"] = client.post(("/api/admin/career-advice/" f"{context['post_id']}/publish"))
+    context["response"] = client.post(f"/api/admin/career-advice/{context['post_id']}/publish")
 
 
 @then('the system should update the post status to "Published"')
@@ -268,7 +268,7 @@ def submit_invalid_post(client, context):
     )
 
 
-@then("the system should display a validation message " "requesting the missing details")
+@then("the system should display a validation message requesting the missing details")
 def verify_validation_message(context):
     response = context["response"]
 
@@ -312,7 +312,7 @@ def access_career_advice_management(client, context):
     )
 
 
-@then("the system should display the published post " "with its current status")
+@then("the system should display the published post with its current status")
 def verify_published_post_displayed(context):
     response = context["response"]
 

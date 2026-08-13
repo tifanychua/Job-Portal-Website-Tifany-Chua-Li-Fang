@@ -29,15 +29,30 @@ def context():
     return Context()
 
 
+# ============================================================
+# DIRECT PYTEST TESTS
+# ============================================================
+
+
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
 @patch("job_portal_web.backend.auth.db")
 def test_login_success(mock_db, mock_verify, client):
-    mock_verify.return_value = {"uid": "user123"}
+    mock_verify.return_value = {
+        "uid": "user123",
+    }
+
     doc = MagicMock()
     doc.exists = True
+    doc.to_dict.return_value = {
+        "accountStatus": "Active",
+    }
+
     mock_db.collection.return_value.document.return_value.get.return_value = doc
 
-    response = client.post("/firebase-login", json={"token": "valid_token"})
+    response = client.post(
+        "/firebase-login",
+        json={"token": "valid_token"},
+    )
 
     assert response.status_code == 200
     assert response.json()["redirect"] == "/"
@@ -47,21 +62,30 @@ def test_login_success(mock_db, mock_verify, client):
 def test_login_invalid_token(mock_verify, client):
     mock_verify.side_effect = Exception("Invalid Token")
 
-    response = client.post("/firebase-login", json={"token": "wrong_token"})
+    response = client.post(
+        "/firebase-login",
+        json={"token": "wrong_token"},
+    )
 
     assert response.status_code == 401
     assert response.json()["error"] == "Invalid Token"
 
 
 def test_login_empty_token(client):
-    response = client.post("/firebase-login", json={})
+    response = client.post(
+        "/firebase-login",
+        json={},
+    )
+
     assert response.status_code == 422
 
 
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
 @patch("job_portal_web.backend.auth.db")
 def test_login_user_not_found(mock_db, mock_verify, client):
-    mock_verify.return_value = {"uid": "abc123"}
+    mock_verify.return_value = {
+        "uid": "abc123",
+    }
 
     job_doc = MagicMock()
     job_doc.exists = False
@@ -69,20 +93,32 @@ def test_login_user_not_found(mock_db, mock_verify, client):
     company_doc = MagicMock()
     company_doc.exists = False
 
+    job_collection = MagicMock()
+    job_collection.document.return_value.get.return_value = job_doc
+
+    company_collection = MagicMock()
+    company_collection.document.return_value.get.return_value = company_doc
+
     mock_db.collection.side_effect = [
-        MagicMock(document=MagicMock(return_value=MagicMock(get=MagicMock(return_value=job_doc)))),
-        MagicMock(
-            document=MagicMock(return_value=MagicMock(get=MagicMock(return_value=company_doc)))
-        ),
+        job_collection,
+        company_collection,
     ]
 
-    response = client.post("/firebase-login", json={"token": "valid"})
+    response = client.post(
+        "/firebase-login",
+        json={"token": "valid"},
+    )
 
     assert response.status_code == 404
-    assert (
-        response.json()["error"]
-        == "No account information was found. Please complete your registration or contact support."
+
+    assert response.json()["error"] == (
+        "No account information was found. Please complete your registration or contact support."
     )
+
+
+# ============================================================
+# SUCCESSFUL LOGIN BDD STEPS
+# ============================================================
 
 
 @given("the job seeker has a registered account")
@@ -96,12 +132,22 @@ def step_valid_login(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-        verify.return_value = {"uid": "user123"}
+        verify.return_value = {
+            "uid": "user123",
+        }
+
         doc = MagicMock()
         doc.exists = True
+        doc.to_dict.return_value = {
+            "accountStatus": "Active",
+        }
+
         db.collection.return_value.document.return_value.get.return_value = doc
 
-        context.response = client.post("/firebase-login", json={"token": "valid_token"})
+        context.response = client.post(
+            "/firebase-login",
+            json={"token": "valid_token"},
+        )
 
 
 @then("the system should authenticate the user successfully")
@@ -114,6 +160,11 @@ def step_redirect(context):
     assert context.response.json()["redirect"] == "/"
 
 
+# ============================================================
+# INVALID CREDENTIAL BDD STEPS
+# ============================================================
+
+
 @given("the job seeker has entered incorrect login credentials")
 def step_invalid_credentials():
     pass
@@ -123,7 +174,11 @@ def step_invalid_credentials():
 def step_attempt_login(client, context):
     with patch("job_portal_web.backend.auth.auth.verify_id_token") as verify:
         verify.side_effect = Exception("Invalid Token")
-        context.response = client.post("/firebase-login", json={"token": "wrong_token"})
+
+        context.response = client.post(
+            "/firebase-login",
+            json={"token": "wrong_token"},
+        )
 
 
 @then("the system should display an error message")
@@ -136,6 +191,11 @@ def step_prevent(context):
     assert context.response.json()["error"] == "Invalid Token"
 
 
+# ============================================================
+# EMPTY CREDENTIAL BDD STEPS
+# ============================================================
+
+
 @given("the job seeker is on the login page")
 def step_login_page():
     pass
@@ -143,7 +203,10 @@ def step_login_page():
 
 @when("the job seeker leaves the email address or password field empty")
 def step_empty(client, context):
-    context.response = client.post("/firebase-login", json={})
+    context.response = client.post(
+        "/firebase-login",
+        json={},
+    )
 
 
 @when("attempts to log in")
@@ -161,26 +224,52 @@ def step_required():
     pass
 
 
+# ============================================================
+# ACCESS FEATURES AFTER LOGIN BDD STEPS
+# ============================================================
+
+
 @given("the job seeker has logged in successfully")
 def job_seeker_logged_in(client, context):
     with (
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-        verify.return_value = {"uid": "user123"}
+        verify.return_value = {
+            "uid": "user123",
+        }
+
         doc = MagicMock()
         doc.exists = True
+        doc.to_dict.return_value = {
+            "accountStatus": "Active",
+        }
+
         db.collection.return_value.document.return_value.get.return_value = doc
 
-        context.login_response = client.post("/firebase-login", json={"token": "valid_token"})
+        context.login_response = client.post(
+            "/firebase-login",
+            json={"token": "valid_token"},
+        )
+
         context.auth_token = context.login_response.json().get("token")
 
 
 @when("the job seeker accesses the platform")
 def job_seeker_access(client, context):
-    headers = {"Authorization": f"Bearer {context.auth_token}"}
-    context.profile_response = client.get("/profile", headers=headers)
-    context.jobs_response = client.get("/jobs", headers=headers)
+    headers = {
+        "Authorization": f"Bearer {context.auth_token}",
+    }
+
+    context.profile_response = client.get(
+        "/profile",
+        headers=headers,
+    )
+
+    context.jobs_response = client.get(
+        "/jobs",
+        headers=headers,
+    )
 
 
 @then("the system should allow access to profile and job search features")
