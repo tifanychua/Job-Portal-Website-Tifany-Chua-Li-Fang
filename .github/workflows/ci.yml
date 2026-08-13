@@ -7,6 +7,7 @@ on:
       - main
       - sprint-1
       - sprint-2
+      - sprint-3
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -33,8 +34,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-python-${{ matrix.python-version }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
+            ${{ runner.os }}-python-${{ matrix.python-version }}-pip-
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
@@ -43,15 +45,13 @@ jobs:
           pip install -r requirements.txt
           pip install ruff mypy types-requests pytest pytest-cov bandit selenium webdriver-manager
 
-      - name: Install Chrome for Selenium tests
+      - name: Lint
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
+          ruff check .
 
-      - name: Lint & Format
+      - name: Check formatting
         run: |
-          ruff check . --fix
-          ruff format .
+          ruff format --check .
 
       - name: Type check
         continue-on-error: true
@@ -68,7 +68,9 @@ jobs:
           FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
         run: |
           pytest --maxfail=1 --disable-warnings -q \
-            --cov=src --cov-report=xml --cov-report=term-missing \
+            --cov=src \
+            --cov-report=xml \
+            --cov-report=term-missing \
             -k "not selenium"
 
       - name: Upload coverage artifact
@@ -77,6 +79,7 @@ jobs:
         with:
           name: coverage-${{ matrix.python-version }}
           path: coverage.xml
+          if-no-files-found: warn
 
       - name: Upload security report
         uses: actions/upload-artifact@v4
@@ -84,3 +87,4 @@ jobs:
         with:
           name: security-report-${{ matrix.python-version }}
           path: bandit-report.json
+          if-no-files-found: warn
