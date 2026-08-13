@@ -66,6 +66,7 @@ jobs:
       - name: Test with coverage
         env:
           FIREBASE_KEY: ${{ secrets.FIREBASE_KEY }}
+          MESSAGE_ENCRYPTION_KEY: ${{ secrets.MESSAGE_ENCRYPTION_KEY }}
         run: |
           pytest --maxfail=1 --disable-warnings -q \
             --cov=src \
