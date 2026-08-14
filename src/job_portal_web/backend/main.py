@@ -31,7 +31,6 @@ from .jobs import router as jobs_router
 from .messages import router as messages_router
 from .notifications import get_unread_notifications_count
 from .notifications import router as notifications_router
-from .privacy import router as privacy_router
 from .routes.admin import router as admin_router
 from .routes.adminAnalytics import router as admin_analytics_router
 from .routes.adminTransaction import router as admin_transaction_router
@@ -211,9 +210,6 @@ app.include_router(employer_plans_router)
 app.include_router(stripe_payment_router)
 
 app.include_router(employer_transactions_router)
-
-
-app.include_router(privacy_router)
 
 app.include_router(admin_analytics_router)
 # ==================================================

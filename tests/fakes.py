@@ -257,7 +257,6 @@ _DB_MODULES = [
     "job_portal_web.backend.interview",
     "job_portal_web.backend.main",
     "job_portal_web.backend.routes.employerApplication",
-    "job_portal_web.backend.privacy",
 ]
 
 

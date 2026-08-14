@@ -10,7 +10,7 @@
 
      active_page:
      "profile" | "application" | "saved_jobs" |
-     "saved_posts" | "privacy_settings"
+     "saved_posts"
 ===================================================== -->
 
 <aside class="profile-sidebar">
@@ -41,12 +41,6 @@
            class="sidebar-link {{ 'active' if active_page == 'saved_posts' else '' }}">
             <i class="fa-regular fa-bookmark"></i>
             Saved Posts
-        </a>
-
-        <a href="/privacy-settings"
-           class="sidebar-link {{ 'active' if active_page == 'privacy_settings' else '' }}">
-            <i class="fa-solid fa-shield-halved"></i>
-            Privacy
         </a>
 
         <a href="/logout"
