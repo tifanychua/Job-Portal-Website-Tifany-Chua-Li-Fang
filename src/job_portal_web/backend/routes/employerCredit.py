@@ -45,6 +45,16 @@ async def employer_credit(request: Request):
 
     company_id = get_current_company_id(request)
 
+    plan_change = request.query_params.get(
+        "plan_change",
+        "",
+    )
+
+    expected_plan = request.query_params.get(
+        "expected_plan",
+        "",
+    )
+
     # =================================================
     # Company
     # =================================================
@@ -151,5 +161,7 @@ async def employer_credit(request: Request):
             "subscription_status": subscription_status,
             "subscription_end": subscription_end_display,
             "cancel_at_period_end": cancel_at_period_end,
+            "plan_change": plan_change,
+            "expected_plan": expected_plan,
         },
     )

@@ -28,6 +28,39 @@
 {% include "employerHeader.html" %}
 
 
+<!-- ================================================= -->
+<!-- PLAN CHANGE PROCESSING -->
+<!-- ================================================= -->
+
+{% if plan_change == "processing" %}
+
+<div id="planChangeOverlay"
+     class="plan-change-processing">
+
+    <div class="plan-change-processing-card">
+
+        <div class="plan-processing-icon">
+
+            <i class="fa-solid fa-spinner fa-spin"></i>
+
+        </div>
+
+        <h3>
+            Updating Your Subscription
+        </h3>
+
+        <p>
+            Please wait while we confirm your
+            new subscription plan.
+        </p>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+
 <div class="main-content">
 
 
@@ -782,32 +815,6 @@
         </div>
 
         {% endif %}
-
-
-        <!-- No Refund -->
-
-        <div class="cancel-refund-warning">
-
-            <i class="fa-solid fa-circle-exclamation"></i>
-
-            <div>
-
-                <strong>
-                    No refund will be provided
-                </strong>
-
-                <p>
-
-                    Payments already made for the current
-                    billing period are non-refundable.
-                    Your subscription benefits remain
-                    available until the billing period ends.
-
-                </p>
-
-            </div>
-
-        </div>
 
 
         <!-- No More Charges -->

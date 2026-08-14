@@ -293,8 +293,104 @@ def change_subscription(
     )
 
     return RedirectResponse(
-        url="/employer-credit?plan_change=processing",
+        url=("/employer-credit" f"?plan_change=processing" f"&expected_plan={plan_name}"),
         status_code=303,
+    )
+
+
+# =====================================================
+# Check Subscription Change Status
+# =====================================================
+
+
+@router.get("/employer/subscription/status")
+def get_subscription_status(
+    request: Request,
+    expected_plan: str = "",
+):
+
+    company_id = get_current_company_id(request)
+
+    company = get_company(company_id)
+
+    expected_plan = expected_plan.strip().lower()
+
+    if expected_plan not in PLANS:
+        return JSONResponse(
+            {
+                "updated": False,
+                "reason": "invalid_plan",
+            }
+        )
+
+    subscription_id = company.get("stripe_subscription_id")
+
+    if not subscription_id:
+        return JSONResponse(
+            {
+                "updated": False,
+                "reason": "no_subscription",
+            }
+        )
+
+    try:
+
+        subscription = stripe.Subscription.retrieve(subscription_id)
+
+    except stripe.error.StripeError as error:
+
+        print("Stripe subscription check error:", error)
+
+        return JSONResponse(
+            {
+                "updated": False,
+                "reason": "stripe_error",
+            }
+        )
+
+    items = subscription["items"]["data"]
+
+    if not items:
+        return JSONResponse(
+            {
+                "updated": False,
+                "reason": "no_subscription_item",
+            }
+        )
+
+    current_price_id = items[0]["price"]["id"]
+
+    expected_price_id = PLANS[expected_plan]["stripe_price_id"]
+
+    print("Expected plan:", expected_plan)
+
+    print("Stripe current price:", current_price_id)
+
+    print("Expected Stripe price:", expected_price_id)
+
+    if current_price_id == expected_price_id:
+
+        return JSONResponse(
+            {
+                "updated": True,
+                "current_plan": expected_plan,
+                "subscription_status": str(
+                    subscription.get(
+                        "status",
+                        "",
+                    )
+                ),
+            }
+        )
+
+    return JSONResponse(
+        {
+            "updated": False,
+            "current_plan": company.get(
+                "subscription_plan",
+                "",
+            ),
+        }
     )
 
 

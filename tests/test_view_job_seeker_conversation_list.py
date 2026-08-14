@@ -289,9 +289,9 @@ def verify_conversation_list(context):
         None,
     )
 
-    assert conversation is not None, (
-        f"Expected conversation {CONVERSATION_ID}, but received: {data}"
-    )
+    assert (
+        conversation is not None
+    ), f"Expected conversation {CONVERSATION_ID}, but received: {data}"
 
 
 @then("the system should display the latest message and conversation details")
