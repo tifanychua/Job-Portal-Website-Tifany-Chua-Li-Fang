@@ -65,12 +65,13 @@ COMPANY_ID = "8r1bqsSUA8SqEsjlUr1tFyLtaOW2"
 
 
 class FakeRequest:
-    def __init__(self):
-
+    def __init__(self, query_params=None):
         self.session = {
             "user_type": "employer",
             "company_id": COMPANY_ID,
         }
+
+        self.query_params = query_params or {}
 
 
 # ============================================================
