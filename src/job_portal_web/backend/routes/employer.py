@@ -378,7 +378,7 @@ async def publish_job_confirm(
 
     credit_rules = {
         14: 1,
-        30: 2,
+        30: 1,
         60: 2,
         90: 3,
     }
