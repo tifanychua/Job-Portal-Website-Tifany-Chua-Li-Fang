@@ -11,14 +11,11 @@ from starlette.middleware.sessions import SessionMiddleware
 from job_portal_web.backend.database import db
 from job_portal_web.backend.main import app
 
-
 # ==========================================
 # Feature File
 # ==========================================
 
-scenarios(
-    "features/view_job_seeker_conversation_list.feature"
-)
+scenarios("features/view_job_seeker_conversation_list.feature")
 
 
 # ==========================================
@@ -37,9 +34,7 @@ COMPANY_ID = EMPLOYER_ID
 
 # The API expects exactly one underscore because it uses:
 # conversation_id.split("_")
-CONVERSATION_ID = (
-    f"{EMPLOYER_ID}_{JOB_SEEKER_ID}"
-)
+CONVERSATION_ID = f"{EMPLOYER_ID}_{JOB_SEEKER_ID}"
 
 MESSAGE_ID = f"TESTMSG{RUN_ID}"
 
@@ -50,6 +45,7 @@ LATEST_MESSAGE_TIME = "2099-07-30T10:00:00+00:00"
 # ==========================================
 # Fixtures
 # ==========================================
+
 
 @pytest.fixture
 def client():
@@ -68,6 +64,7 @@ def context():
 # Session Helpers
 # ==========================================
 
+
 def create_session(client, data):
     secret_key = None
 
@@ -77,19 +74,13 @@ def create_session(client, data):
             break
 
     if secret_key is None:
-        raise RuntimeError(
-            "SessionMiddleware secret key not found"
-        )
+        raise RuntimeError("SessionMiddleware secret key not found")
 
-    encoded_data = base64.b64encode(
-        json.dumps(data).encode("utf-8")
-    )
+    encoded_data = base64.b64encode(json.dumps(data).encode("utf-8"))
 
     signer = TimestampSigner(str(secret_key))
 
-    cookie_value = signer.sign(
-        encoded_data
-    ).decode("utf-8")
+    cookie_value = signer.sign(encoded_data).decode("utf-8")
 
     client.cookies.set(
         "session",
@@ -129,36 +120,17 @@ def set_empty_job_seeker_session(client):
 # Test Data Cleanup
 # ==========================================
 
+
 def remove_test_data():
-    db.collection(
-        "messages"
-    ).document(
-        MESSAGE_ID
-    ).delete()
+    db.collection("messages").document(MESSAGE_ID).delete()
 
-    db.collection(
-        "conversations"
-    ).document(
-        CONVERSATION_ID
-    ).delete()
+    db.collection("conversations").document(CONVERSATION_ID).delete()
 
-    db.collection(
-        "conversation"
-    ).document(
-        CONVERSATION_ID
-    ).delete()
+    db.collection("conversation").document(CONVERSATION_ID).delete()
 
-    db.collection(
-        "company"
-    ).document(
-        COMPANY_ID
-    ).delete()
+    db.collection("company").document(COMPANY_ID).delete()
 
-    db.collection(
-        "job_seeker"
-    ).document(
-        JOB_SEEKER_ID
-    ).delete()
+    db.collection("job_seeker").document(JOB_SEEKER_ID).delete()
 
 
 @pytest.fixture(autouse=True)
@@ -174,15 +146,12 @@ def cleanup():
 # Test Data Creation
 # ==========================================
 
+
 def insert_test_data():
     remove_test_data()
 
     # Create the test job seeker.
-    db.collection(
-        "job_seeker"
-    ).document(
-        JOB_SEEKER_ID
-    ).set(
+    db.collection("job_seeker").document(JOB_SEEKER_ID).set(
         {
             "applicantId": JOB_SEEKER_ID,
             "jobSeekerId": JOB_SEEKER_ID,
@@ -193,11 +162,7 @@ def insert_test_data():
     )
 
     # Create the test company.
-    db.collection(
-        "company"
-    ).document(
-        COMPANY_ID
-    ).set(
+    db.collection("company").document(COMPANY_ID).set(
         {
             "companyId": COMPANY_ID,
             "employerId": EMPLOYER_ID,
@@ -226,30 +191,14 @@ def insert_test_data():
     }
 
     # Support implementations using the plural collection.
-    db.collection(
-        "conversations"
-    ).document(
-        CONVERSATION_ID
-    ).set(
-        conversation_data
-    )
+    db.collection("conversations").document(CONVERSATION_ID).set(conversation_data)
 
     # Support implementations using the singular collection.
-    db.collection(
-        "conversation"
-    ).document(
-        CONVERSATION_ID
-    ).set(
-        conversation_data
-    )
+    db.collection("conversation").document(CONVERSATION_ID).set(conversation_data)
 
     # The current API constructs the conversation list
     # from the messages collection.
-    db.collection(
-        "messages"
-    ).document(
-        MESSAGE_ID
-    ).set(
+    db.collection("messages").document(MESSAGE_ID).set(
         {
             "messageId": MESSAGE_ID,
             "conversationId": CONVERSATION_ID,
@@ -272,32 +221,21 @@ def insert_test_data():
     )
 
     # Confirm the test message was inserted.
-    message_snapshot = (
-        db.collection("messages")
-        .document(MESSAGE_ID)
-        .get()
-    )
+    message_snapshot = db.collection("messages").document(MESSAGE_ID).get()
 
-    assert message_snapshot.exists, (
-        "The test message was not inserted into Firestore."
-    )
+    assert message_snapshot.exists, "The test message was not inserted into Firestore."
 
     inserted_message = message_snapshot.to_dict() or {}
 
-    assert (
-        inserted_message.get("conversationId")
-        == CONVERSATION_ID
-    )
+    assert inserted_message.get("conversationId") == CONVERSATION_ID
 
 
 # ==========================================
 # Given Steps
 # ==========================================
 
-@given(
-    "the job seeker is logged in and has "
-    "existing conversations with employers"
-)
+
+@given("the job seeker is logged in and has existing conversations with employers")
 def job_seeker_has_conversations(client):
     insert_test_data()
     set_job_seeker_session(client)
@@ -319,28 +257,23 @@ def job_seeker_no_conversations(client):
 # When Steps
 # ==========================================
 
+
 @when("the job seeker opens the Messages page")
 def open_messages_page(context, client):
-    context["response"] = client.get(
-        "/api/conversations"
-    )
+    context["response"] = client.get("/api/conversations")
 
 
 @when("the conversations are loaded")
 def load_conversations(context, client):
-    context["response"] = client.get(
-        "/api/conversations"
-    )
+    context["response"] = client.get("/api/conversations")
 
 
 # ==========================================
 # Then Steps
 # ==========================================
 
-@then(
-    "the system should display the list of "
-    "conversations with employers"
-)
+
+@then("the system should display the list of conversations with employers")
 def verify_conversation_list(context):
     response = context["response"]
 
@@ -352,25 +285,16 @@ def verify_conversation_list(context):
     assert isinstance(data, list), data
 
     conversation = next(
-        (
-            item
-            for item in data
-            if item.get("conversationId")
-            == CONVERSATION_ID
-        ),
+        (item for item in data if item.get("conversationId") == CONVERSATION_ID),
         None,
     )
 
     assert conversation is not None, (
-        f"Expected conversation {CONVERSATION_ID}, "
-        f"but received: {data}"
+        f"Expected conversation {CONVERSATION_ID}, but received: {data}"
     )
 
 
-@then(
-    "the system should display the latest message "
-    "and conversation details"
-)
+@then("the system should display the latest message and conversation details")
 def verify_latest_information(context):
     response = context["response"]
 
@@ -382,42 +306,22 @@ def verify_latest_information(context):
     assert isinstance(data, list), data
 
     conversation = next(
-        (
-            item
-            for item in data
-            if item.get("conversationId")
-            == CONVERSATION_ID
-        ),
+        (item for item in data if item.get("conversationId") == CONVERSATION_ID),
         None,
     )
 
     assert conversation is not None, data
 
-    assert (
-        conversation.get("lastMessage")
-        == LATEST_MESSAGE
-    )
+    assert conversation.get("lastMessage") == LATEST_MESSAGE
 
-    assert (
-        conversation.get("employerId")
-        == EMPLOYER_ID
-    )
+    assert conversation.get("employerId") == EMPLOYER_ID
 
-    assert (
-        conversation.get("jobSeekerId")
-        == JOB_SEEKER_ID
-    )
+    assert conversation.get("jobSeekerId") == JOB_SEEKER_ID
 
-    assert (
-        conversation.get("name")
-        == "ABC Company"
-    )
+    assert conversation.get("name") == "ABC Company"
 
 
-@then(
-    'the system should display a '
-    '"No conversations available" message'
-)
+@then('the system should display a "No conversations available" message')
 def verify_no_conversation(context):
     response = context["response"]
 
