@@ -293,7 +293,7 @@ def change_subscription(
     )
 
     return RedirectResponse(
-        url=("/employer-credit" f"?plan_change=processing" f"&expected_plan={plan_name}"),
+        url=(f"/employer-credit?plan_change=processing&expected_plan={plan_name}"),
         status_code=303,
     )
 
@@ -334,11 +334,9 @@ def get_subscription_status(
         )
 
     try:
-
         subscription = stripe.Subscription.retrieve(subscription_id)
 
     except stripe.error.StripeError as error:
-
         print("Stripe subscription check error:", error)
 
         return JSONResponse(
@@ -369,17 +367,11 @@ def get_subscription_status(
     print("Expected Stripe price:", expected_price_id)
 
     if current_price_id == expected_price_id:
-
         return JSONResponse(
             {
                 "updated": True,
                 "current_plan": expected_plan,
-                "subscription_status": str(
-                    subscription.get(
-                        "status",
-                        "",
-                    )
-                ),
+                "subscription_status": str(subscription.status or ""),
             }
         )
 
