@@ -43,7 +43,6 @@ from .routes.adminTransaction import router as admin_transaction_router
 from .routes.employerPlans import router as employer_plans_router
 from .routes.stripePayment import router as stripe_payment_router
 from .routes.employerTransactions import router as employer_transactions_router
-from .privacy import router as privacy_router
 
 # ==================================================
 # APP
@@ -191,8 +190,6 @@ app.include_router(stripe_payment_router)
 
 app.include_router(employer_transactions_router)
 
-
-app.include_router(privacy_router)
 # ==================================================
 # TEMPLATE HELPER
 # ==================================================

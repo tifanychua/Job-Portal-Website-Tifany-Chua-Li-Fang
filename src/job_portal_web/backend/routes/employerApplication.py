@@ -479,6 +479,8 @@ async def update_application_status(application_id: str, status_data: Applicatio
             "Rejected": ("was not successful " "this time"),
         }
 
+        status_text = status_messages.get(firestore_status, "has been updated")
+
         db.collection("notification").document().set(
             {
                 "user_id": job_seeker_id,
@@ -486,10 +488,7 @@ async def update_application_status(application_id: str, status_data: Applicatio
                 "is_read": False,
                 "type": "application",
                 "title": "Application status updated",
-                "message": (f"Your application for " f"{job_title} " f"{status_messages.get(
-                        firestore_status,
-                        'has been updated'
-                    )}."),
+                "message": f"Your application for {job_title} {status_text}.",
                 "link": f"/application/{application_id}",
                 "created_at": datetime.now(UTC),
             }
