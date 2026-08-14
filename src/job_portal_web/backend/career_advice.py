@@ -665,3 +665,82 @@ def career_advice_details_page(request: Request, post_id: str):
             "active_page": "career_advice",
         },
     )
+
+
+def display_date(value) -> str:
+    """Convert a Firestore datetime value into a short page-friendly date."""
+    if isinstance(value, datetime):
+        return value.strftime("%d %b %Y")
+    return "Recently"
+
+
+@router.get("/saved-posts", response_class=HTMLResponse)
+def saved_career_advice_page(request: Request):
+    """Display published career advice saved by the logged-in job seeker."""
+    seeker_id = job_seeker_id(request)
+
+    if not seeker_id:
+        return RedirectResponse("/login", status_code=303)
+
+    user = get_current_job_seeker(request)
+
+    saved_snapshots = (
+        db.collection(SAVED_COLLECTION_NAME).where("jobSeekerId", "==", str(seeker_id)).stream()
+    )
+
+    saved_records = []
+    for saved_snapshot in saved_snapshots:
+        saved_record = saved_snapshot.to_dict() or {}
+        saved_record["savedDocumentId"] = saved_snapshot.id
+        saved_records.append(saved_record)
+
+    saved_records.sort(
+        key=lambda record: timestamp_number(record.get("savedAt")),
+        reverse=True,
+    )
+
+    posts = []
+
+    for saved_record in saved_records:
+        post_id = str(saved_record.get("careerAdviceId") or "").strip()
+        if not post_id:
+            continue
+
+        post_snapshot = db.collection(COLLECTION_NAME).document(post_id).get()
+
+        # Ignore saved records whose original post was deleted or unpublished.
+        if not post_snapshot.exists:
+            continue
+
+        post = snapshot_to_dict(post_snapshot)
+        if post.get("status") != "Published":
+            continue
+
+        saved_at = saved_record.get("savedAt")
+        publication_date = post.get("publicationDate")
+
+        post["saved_at_sort"] = timestamp_number(saved_at)
+        post["saved_at_display"] = display_date(saved_at)
+        post["publication_date_display"] = display_date(publication_date)
+        posts.append(post)
+
+    categories = sorted(
+        {
+            str(post.get("category") or "").strip()
+            for post in posts
+            if str(post.get("category") or "").strip()
+        },
+        key=str.casefold,
+    )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="savedCareerAdvice.html",
+        context={
+            "user": user,
+            "posts": posts,
+            "categories": categories,
+            "total_saved": len(posts),
+            "active_page": "saved_posts",
+        },
+    )

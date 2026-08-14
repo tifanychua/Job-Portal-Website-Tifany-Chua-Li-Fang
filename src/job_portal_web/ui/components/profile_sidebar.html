@@ -1,8 +1,16 @@
 <!-- =====================================================
      SHARED JOB SEEKER SIDEBAR
-     Included on: jobSeekerProfile.html, saved_jobs.html, job_application.html
+     Included on:
+     jobSeekerProfile.html,
+     saved_jobs.html,
+     job_application.html,
+     savedCareerAdvice.html
+
      Requires context vars: user, active_page
-     (active_page: "profile" | "saved_jobs" | "application")
+
+     active_page:
+     "profile" | "application" | "saved_jobs" |
+     "saved_posts" | "privacy_settings"
 ===================================================== -->
 
 <aside class="profile-sidebar">
@@ -28,6 +36,11 @@
             <i class="fa-regular fa-heart"></i>
             Saved Jobs
         </a>
+
+        <a href="/saved-posts"
+           class="sidebar-link {{ 'active' if active_page == 'saved_posts' else '' }}">
+            <i class="fa-regular fa-bookmark"></i>
+            Saved Posts
         </a>
 
         <a href="/privacy-settings"
@@ -36,10 +49,12 @@
             Privacy
         </a>
 
-        <a href="/logout" class="sidebar-link sidebar-logout">
+        <a href="/logout"
+           class="sidebar-link sidebar-logout">
             <i class="fa-solid fa-right-from-bracket"></i>
             Log Out
         </a>
 
     </nav>
+
 </aside>

@@ -23,8 +23,7 @@
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 {% endif %}
 
-<link rel="stylesheet" href="/css/chat.css">
-
+<link rel="stylesheet" href="/css/chat.css?v=2">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -62,9 +61,32 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
             Messages
         </h2>
 
-        <p>
-            View and continue your conversations
-        </p>
+        <p>View and continue your conversations</p>
+
+    </div>
+
+    <!-- Conversation Search -->
+
+    <div class="conversation-search">
+
+        <i class="fa-solid fa-magnifying-glass"></i>
+
+        <input
+            type="search"
+            id="conversationSearch"
+            placeholder="Search conversations..."
+            aria-label="Search conversations"
+            autocomplete="off"
+        >
+
+        <button
+            type="button"
+            id="clearConversationSearch"
+            aria-label="Clear search"
+            hidden
+        >
+            <i class="fa-solid fa-xmark"></i>
+        </button>
 
     </div>
 
@@ -91,125 +113,58 @@ id="conversationList">
 // ==========================================
 
 const currentUserId = "{{ userId }}";
-
 const currentUserType = "{{ userType }}";
+
+const conversationList =
+    document.getElementById("conversationList");
+
+const searchInput =
+    document.getElementById("conversationSearch");
+
+const clearSearchButton =
+    document.getElementById("clearConversationSearch");
+
+let allConversations = [];
 
 
 // ==========================================
 // Load Conversations
 // ==========================================
 
-async function loadConversations(){
+async function loadConversations() {
 
-    try{
+    try {
 
         const response = await fetch(
-
-            `/api/conversations?userId=${currentUserId}&userType=${currentUserType}`
-
+            `/api/conversations?userId=${encodeURIComponent(currentUserId)}` +
+            `&userType=${encodeURIComponent(currentUserType)}`
         );
 
-        const conversations = await response.json();
-
-        console.log(conversations);
-
-        const list = document.getElementById("conversationList");
-
-        list.innerHTML = "";
-
-        if(conversations.length === 0){
-
-            list.innerHTML = `
-
-                <div class="empty-message">
-
-                    <i class="fa-solid fa-comment-slash"></i>
-
-                    <h3>No conversations yet</h3>
-
-                    <p>
-                        Your conversations will appear here.
-                    </p>
-
-                </div>
-
-            `;
-
-            return;
-
+        if (!response.ok) {
+            throw new Error("Failed to load conversations.");
         }
 
-        conversations.forEach(chat=>{
+        const data = await response.json();
 
-            const div = document.createElement("div");
+        allConversations = Array.isArray(data) ? data : [];
 
-            div.className = "conversation-item";
+        renderConversations(allConversations);
 
-            div.innerHTML = `
-
-<div class="conversation-avatar">
-
-    ${chat.name.charAt(0).toUpperCase()}
-
-</div>
-
-<div class="conversation-content">
-
-    <div class="conversation-top">
-
-        <h3>
-
-            ${chat.name}
-
-        </h3>
-
-        <span class="conversation-time">
-
-            ${formatTime(chat.time)}
-
-        </span>
-
-    </div>
-
-    <div class="conversation-bottom">
-
-        <p>
-
-            ${chat.lastMessage}
-
-        </p>
-
-        <i class="fa-solid fa-chevron-right"></i>
-
-    </div>
-
-</div>
-
-`;
-
-            div.addEventListener("click",()=>{
-
-                window.location.href=
-
-                `/chat?employerId=${chat.employerId}`+
-
-                `&jobSeekerId=${chat.jobSeekerId}`+
-
-                `&senderId=${chat.senderId}`+
-
-                `&senderType=${chat.senderType}`;
-
-            });
-
-            list.appendChild(div);
-
-        });
-
-    }
-
-    catch(error){
+    } catch (error) {
 
         console.error(error);
+
+        conversationList.innerHTML = `
+            <div class="empty-message">
+
+                <i class="fa-solid fa-circle-exclamation"></i>
+
+                <h3>Unable to load conversations</h3>
+
+                <p>Please refresh the page and try again.</p>
+
+            </div>
+        `;
 
     }
 
@@ -217,26 +172,206 @@ async function loadConversations(){
 
 
 // ==========================================
+// Render Conversations
+// ==========================================
+
+function renderConversations(conversations, isSearching = false) {
+
+    conversationList.innerHTML = "";
+
+    if (conversations.length === 0) {
+
+        if (isSearching) {
+
+            conversationList.innerHTML = `
+                <div class="empty-message">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <h3>No conversations found</h3>
+
+                    <p>Try searching for another name or message.</p>
+
+                </div>
+            `;
+
+        } else {
+
+            conversationList.innerHTML = `
+                <div class="empty-message">
+
+                    <i class="fa-solid fa-comment-slash"></i>
+
+                    <h3>No conversations yet</h3>
+
+                    <p>Your conversations will appear here.</p>
+
+                </div>
+            `;
+
+        }
+
+        return;
+
+    }
+
+    conversations.forEach(chat => {
+
+        const div = document.createElement("div");
+        div.className = "conversation-item";
+
+        const chatName = chat.name || "Unknown User";
+        const lastMessage =
+            chat.lastMessage || "No messages yet";
+
+        div.innerHTML = `
+            <div class="conversation-avatar">
+                ${escapeHtml(chatName.charAt(0).toUpperCase())}
+            </div>
+
+            <div class="conversation-content">
+
+                <div class="conversation-top">
+
+                    <h3>${escapeHtml(chatName)}</h3>
+
+                    <span class="conversation-time">
+                        ${formatTime(chat.time)}
+                    </span>
+
+                </div>
+
+                <div class="conversation-bottom">
+
+                    <p>${escapeHtml(lastMessage)}</p>
+
+                    <i class="fa-solid fa-chevron-right"></i>
+
+                </div>
+
+            </div>
+        `;
+
+        div.addEventListener("click", () => {
+
+            const parameters = new URLSearchParams({
+                employerId: chat.employerId || "",
+                jobSeekerId: chat.jobSeekerId || "",
+                senderId: chat.senderId || "",
+                senderType: chat.senderType || ""
+            });
+
+            window.location.href =
+                `/chat?${parameters.toString()}`;
+
+        });
+
+        conversationList.appendChild(div);
+
+    });
+
+}
+
+
+// ==========================================
+// Search Conversations
+// ==========================================
+
+function searchConversations() {
+
+    const searchText =
+        searchInput.value.trim().toLowerCase();
+
+    clearSearchButton.hidden = searchText === "";
+
+    if (searchText === "") {
+
+        renderConversations(allConversations);
+        return;
+
+    }
+
+    const filteredConversations =
+        allConversations.filter(chat => {
+
+            const name =
+                String(chat.name || "").toLowerCase();
+
+            const message =
+                String(chat.lastMessage || "").toLowerCase();
+
+            return (
+                name.includes(searchText) ||
+                message.includes(searchText)
+            );
+
+        });
+
+    renderConversations(filteredConversations, true);
+
+}
+
+
+// Search while typing
+
+searchInput.addEventListener(
+    "input",
+    searchConversations
+);
+
+
+// ==========================================
+// Clear Search
+// ==========================================
+
+clearSearchButton.addEventListener("click", () => {
+
+    searchInput.value = "";
+    clearSearchButton.hidden = true;
+
+    renderConversations(allConversations);
+
+    searchInput.focus();
+
+});
+
+
+// ==========================================
 // Format Time
 // ==========================================
 
-function formatTime(time){
+function formatTime(time) {
 
-    if(!time){
-
+    if (!time) {
         return "";
-
     }
 
     const date = new Date(time);
 
-    return date.toLocaleTimeString([],{
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
 
-        hour:"2-digit",
-
-        minute:"2-digit"
-
+    return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
     });
+
+}
+
+
+// ==========================================
+// Prevent HTML Injection
+// ==========================================
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 
 }
 
