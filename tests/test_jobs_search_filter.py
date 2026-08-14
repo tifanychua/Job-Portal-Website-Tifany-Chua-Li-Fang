@@ -603,9 +603,9 @@ def verify_combined_category_benefit(search_context, benefit):
     # Verify each result
     for job in search_context["search_results"]:
         # Check category
-        assert (
-            job["category"] == "Information Technology"
-        ), f"Expected 'Information Technology', got '{job['category']}'"
+        assert job["category"] == "Information Technology", (
+            f"Expected 'Information Technology', got '{job['category']}'"
+        )
         # Check benefit
         assert benefit in job["benefits"], f"Expected '{benefit}' in {job['benefits']}"
 

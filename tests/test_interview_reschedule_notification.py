@@ -197,9 +197,9 @@ def update_interview(client, interview_id):
         },
     )
 
-    assert (
-        response.status_code == 200
-    ), f"Update failed for {interview_id}: {response.status_code} {response.text}"
+    assert response.status_code == 200, (
+        f"Update failed for {interview_id}: {response.status_code} {response.text}"
+    )
 
     return response
 
