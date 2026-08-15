@@ -3,6 +3,20 @@ from fastapi import Request
 from .database import db
 
 
+def parse_salary(value):
+
+    if value in (None, ""):
+        return 0
+
+    if isinstance(value, str):
+        value = value.replace(",", "").strip()
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0
+
+
 def get_company(request: Request):
 
     company_id = request.session.get("company_id")

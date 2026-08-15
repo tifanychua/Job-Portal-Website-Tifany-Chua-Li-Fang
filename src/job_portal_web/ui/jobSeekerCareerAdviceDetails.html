@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ post.title|default("Career Advice") }} | JobConnect</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/css/jobSeekerCareerAdviceDetails.css">
+</head>
+<body>
+    {% include "components/header.html" %}
+
+    <main class="career-article-page">
+        <div class="career-article-container">
+            <nav class="article-breadcrumb" aria-label="Breadcrumb">
+                <a href="/career-advice">Career Advice</a>
+                <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+                <span aria-current="page">{{ post.category|default("Article") }}</span>
+            </nav>
+
+            <article>
+                <header class="article-hero">
+                    <span class="article-category">{{ post.category|default("Career Guidance") }}</span>
+                    <h1>{{ post.title }}</h1>
+
+                    <div class="article-information-row">
+                        <div class="article-meta">
+                            <span>
+                                <i class="fa-regular fa-calendar"></i>
+                                {{ post.published_at|default(post.publishedAt|default("Recently published")) }}
+                            </span>
+                            <span>
+                                <i class="fa-regular fa-folder"></i>
+                                {{ post.category|default("Career Guidance") }}
+                            </span>
+                        </div>
+                        <div class="article-actions">
+                            <button class="article-save {% if post.is_saved or post.isSaved %}saved{% endif %}" type="button" data-id="{{ post.id }}" data-saved="{{ 'true' if post.is_saved or post.isSaved else 'false' }}">
+                                <i class="{% if post.is_saved or post.isSaved %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+                                <span>{% if post.is_saved or post.isSaved %}Saved{% else %}Save{% endif %}</span>
+                            </button>
+                            <button id="shareArticle" class="article-share" type="button">
+                                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                                Share
+                            </button>
+                        </div>
+                    </div>
+
+                    {% if post.summary %}
+                    <div class="article-summary">
+                        <h2 class="summary-label">
+                            <i class="fa-regular fa-lightbulb"></i>
+                            Article summary
+                        </h2>
+                        <p>{{ post.summary }}</p>
+                    </div>
+                    {% endif %}
+                </header>
+
+                {% if post.image_url or post.imageUrl %}
+                <figure class="article-featured-image">
+                    <img src="{{ post.image_url or post.imageUrl }}" alt="{{ post.title }}">
+                </figure>
+                {% else %}
+                <div class="article-featured-placeholder" aria-hidden="true">
+                    <i class="fa-regular fa-lightbulb"></i>
+                </div>
+                {% endif %}
+
+                <section class="article-reading-card" aria-label="Article content">
+                    <div class="article-content">{{ post.content|default("Article content is not available.")|safe }}</div>
+
+                    <div class="article-save-panel">
+                        <div>
+                            <h2>Found this helpful?</h2>
+                            <p>Save this article so you can return to it later.</p>
+                        </div>
+                        <button class="panel-save {% if post.is_saved or post.isSaved %}saved{% endif %}" type="button" data-id="{{ post.id }}" data-saved="{{ 'true' if post.is_saved or post.isSaved else 'false' }}">
+                            <i class="{% if post.is_saved or post.isSaved %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+                            <span>{% if post.is_saved or post.isSaved %}Saved{% else %}Save article{% endif %}</span>
+                        </button>
+                    </div>
+                </section>
+            </article>
+
+            <a class="back-to-advice" href="/career-advice">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to all career advice
+            </a>
+        </div>
+    </main>
+
+    {% include "components/footer.html" %}
+
+    <script>
+        (() => {
+            const page = document.querySelector(".career-article-page");
+            if (!page) return;
+            const saveButtons = [...page.querySelectorAll("[data-saved]")];
+
+            function updateSaveButtons(saved) {
+                saveButtons.forEach((button) => {
+                    button.dataset.saved = String(saved);
+                    button.classList.toggle("saved", saved);
+                    button.querySelector("i").className = `${saved ? "fa-solid" : "fa-regular"} fa-bookmark`;
+                    button.querySelector("span").textContent = saved
+                        ? "Saved"
+                        : button.classList.contains("panel-save") ? "Save article" : "Save";
+                });
+            }
+
+            saveButtons.forEach((button) => button.addEventListener("click", async () => {
+                const saved = button.dataset.saved === "true";
+                saveButtons.forEach((item) => item.disabled = true);
+                try {
+                    const response = await fetch(`/api/career-advice/${encodeURIComponent(button.dataset.id)}/save`, {
+                        method: saved ? "DELETE" : "POST"
+                    });
+                    if (!response.ok) throw new Error();
+                    updateSaveButtons(!saved);
+                } catch {
+                    alert("Unable to update saved career advice. Please try again.");
+                } finally {
+                    saveButtons.forEach((item) => item.disabled = false);
+                }
+            }));
+
+            document.getElementById("shareArticle").addEventListener("click", async () => {
+                try {
+                    if (navigator.share) {
+                        await navigator.share({ title: document.title, url: window.location.href });
+                    } else {
+                        await navigator.clipboard.writeText(window.location.href);
+                        alert("Article link copied.");
+                    }
+                } catch (error) {
+                    if (error.name !== "AbortError") alert("Unable to share this article.");
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

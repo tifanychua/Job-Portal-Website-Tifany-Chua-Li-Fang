@@ -1,686 +1,534 @@
-/* ===================================
-            PAGE
-=================================== */
-
-.main-content{
-
-    margin-left:220px;
-    margin-top:85px;
-
-    padding:35px;
-
-    background:#f8fafc;
-
-    min-height:100vh;
-
+:root {
+    --review-primary: #2563eb;
+    --review-heading: #172033;
+    --review-text: #334155;
+    --review-muted: #64748b;
+    --review-border: #e2e8f0;
+    --review-background: #f6f8fc;
+    --review-card: #ffffff;
 }
 
-
-/* ===================================
-          PAGE HEADER
-=================================== */
-
-
-.page-header{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin-bottom:30px;
-
+* {
+    box-sizing: border-box;
 }
 
-
-.page-header h1{
-
-    font-size:30px;
-
-    font-weight:700;
-
-    color:#1f2937;
-
-    margin-bottom:8px;
-
+body {
+    margin: 0;
+    color: var(--review-text);
+    background: var(--review-background);
+    font-family: Arial, sans-serif;
 }
 
-
-.page-header p{
-
-    font-size:15px;
-
-    color:#6b7280;
-
+.company-review-page {
+    min-height: 100vh;
+    margin-left: 250px;
+    padding: 105px 35px 44px;
 }
 
-
-
-
-/* ===================================
-          HEADER BUTTONS
-=================================== */
-
-
-.header-buttons{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:15px;
-
+.company-review-breadcrumb,
+.company-review-header,
+.company-overview-card,
+.company-review-notice,
+.company-review-content,
+.company-decision-bar {
+    width: 100%;
+    max-width: 1450px;
+    margin-right: auto;
+    margin-left: auto;
 }
 
-
-
-.back-btn,
-.approve-header-btn{
-
-
-    height:46px;
-
-    padding:0 24px;
-
-    border-radius:8px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:10px;
-
-
-    font-size:14px;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    text-decoration:none;
-
-
+.company-review-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 18px;
+    color: #94a3b8;
+    font-size: 12px;
 }
 
-
-
-.back-btn{
-
-
-    background:white;
-
-    color:#374151;
-
-    border:1px solid #d1d5db;
-
+.company-review-breadcrumb a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--review-primary);
+    font-weight: 600;
+    text-decoration: none;
 }
 
-
-
-.back-btn:hover{
-
-    background:#f3f4f6;
-
+.company-review-breadcrumb a:hover {
+    text-decoration: underline;
 }
 
-
-
-.approve-header-btn{
-
-
-    background:#16A34A;
-
-    color:white;
-
-    border:none;
-
+.company-review-breadcrumb > i {
+    font-size: 8px;
 }
 
-
-
-.approve-header-btn:hover{
-
-    background:#15803D;
-
+.company-review-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
 }
 
-
-
-
-
-/* ===================================
-            CARD
-=================================== */
-
-
-.preview-card{
-
-
-    background:#ffffff;
-
-
-    border:1px solid #e5e7eb;
-
-
-    border-radius:12px;
-
-
-    padding:28px;
-
-
-    margin-bottom:30px;
-
-
-    box-shadow:0 2px 10px rgba(0,0,0,.03);
-
-
+.company-review-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 9px;
+    color: var(--review-primary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
 }
 
-
-
-
-
-/* ===================================
-          CARD TITLE
-=================================== */
-
-
-.preview-title{
-
-
-    display:flex;
-
-    align-items:center;
-
-    margin-bottom:28px;
-
-
+.company-review-header h1 {
+    margin: 0 0 7px;
+    color: var(--review-heading);
+    font-size: 30px;
+    line-height: 1.2;
 }
 
-
-
-.preview-title div{
-
-
-    display:flex;
-
-    align-items:center;
-
-    gap:12px;
-
-
+.company-review-header > div > p:last-child {
+    max-width: 660px;
+    margin: 0;
+    color: var(--review-muted);
+    font-size: 14px;
+    line-height: 1.6;
 }
 
-
-
-.preview-title img{
-
-
-    width:34px;
-
-    height:34px;
-
-    object-fit:contain;
-
-
+.company-review-back-button {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    color: #475569;
+    background: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
 }
 
-
-
-.preview-title h2{
-
-
-    font-size:22px;
-
-    font-weight:700;
-
-    color:#1f2937;
-
-
+.company-review-back-button:hover {
+    border-color: var(--review-primary);
+    color: var(--review-primary);
 }
 
-
-
-
-
-
-/* ===================================
-          INFORMATION GRID
-=================================== */
-
-
-.preview-grid{
-
-
-    display:grid;
-
-
-    grid-template-columns:repeat(3,1fr);
-
-
-    gap:28px;
-
-
+.company-overview-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 18px;
+    padding: 23px 25px;
+    border: 1px solid var(--review-border);
+    border-radius: 14px;
+    background: var(--review-card);
+    box-shadow: 0 6px 22px rgba(15, 23, 42, 0.045);
 }
 
-
-
-.preview-grid label{
-
-
-    display:block;
-
-
-    margin-bottom:8px;
-
-
-    color:#6b7280;
-
-
-    font-size:13px;
-
-
-    font-weight:600;
-
-
+.company-overview-identity {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 15px;
 }
 
-
-
-
-.preview-grid p{
-
-
-    font-size:15px;
-
-
-    font-weight:600;
-
-
-    color:#111827;
-
-
-    word-break:break-word;
-
-
+.company-review-logo {
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    background: #ffffff;
+    object-fit: contain;
 }
 
-
-
-
-
-
-
-/* ===================================
-          NORMAL SECTION
-=================================== */
-
-
-.preview-section{
-
-
-    margin-top:10px;
-
-
+.company-logo-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--review-primary);
+    background: #eff6ff;
+    font-size: 22px;
+    font-weight: 700;
 }
 
-
-
-.preview-section label{
-
-
-    display:block;
-
-
-    margin-bottom:10px;
-
-
-    color:#6b7280;
-
-
-    font-size:13px;
-
-
-    font-weight:600;
-
-
+.company-logo-fallback[hidden] {
+    display: none;
 }
 
-
-
-.preview-section p{
-
-
-    background:#f9fafb;
-
-
-    padding:18px;
-
-
-    border-radius:8px;
-
-
-    color:#374151;
-
-
-    font-size:15px;
-
-
-    line-height:1.8;
-
-
+.company-overview-label {
+    display: block;
+    margin-bottom: 4px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
 }
 
-
-
-
-
-
-
-/* ===================================
-          STATUS DISPLAY
-=================================== */
-
-
-.preview-card .status{
-
-
-    display:inline-flex;
-
-    padding:6px 14px;
-
-    border-radius:20px;
-
-    font-size:12px;
-
-    font-weight:600;
-
-
+.company-overview-identity h2 {
+    margin: 0 0 6px;
+    color: var(--review-heading);
+    font-size: 21px;
 }
 
-
-
-.pending{
-
-
-    background:#fef3c7;
-
-    color:#92400e;
-
-
+.company-overview-identity p {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    color: var(--review-muted);
+    font-size: 11px;
 }
 
-
-
-.approved{
-
-
-    background:#dcfce7;
-
-    color:#166534;
-
-
+.company-review-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-
-
-.rejected{
-
-
-    background:#fee2e2;
-
-    color:#b91c1c;
-
-
+.company-review-status > span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
 }
 
-
-
-
-
-
-
-/* ===================================
-          BOTTOM BUTTONS
-=================================== */
-
-
-.bottom-buttons{
-
-
-    display:flex;
-
-
-    justify-content:flex-end;
-
-
-    gap:15px;
-
-
-    margin-top:40px;
-
-
+.company-review-status.pending {
+    color: #92400e;
+    background: #fef3c7;
 }
 
-
-
-
-.reject-btn,
-.approve-btn{
-
-
-    height:46px;
-
-
-    padding:0 26px;
-
-
-    border:none;
-
-
-    border-radius:8px;
-
-
-    display:flex;
-
-
-    align-items:center;
-
-
-    justify-content:center;
-
-
-    gap:10px;
-
-
-    font-size:14px;
-
-
-    font-weight:600;
-
-
-    cursor:pointer;
-
-
+.company-review-status.active {
+    color: #166534;
+    background: #dcfce7;
 }
 
-
-
-
-
-.reject-btn{
-
-
-    background:#DC2626;
-
-
-    color:white;
-
-
+.company-review-status.rejected,
+.company-review-status.deactive,
+.company-review-status.deactivated {
+    color: #991b1b;
+    background: #fee2e2;
 }
 
-
-
-.reject-btn:hover{
-
-
-    background:#B91C1C;
-
-
+.company-review-status.unknown {
+    color: #475569;
+    background: #f1f5f9;
 }
 
-
-
-
-
-
-.approve-btn{
-
-
-    background:#16A34A;
-
-
-    color:white;
-
-
+.company-review-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 14px 17px;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    color: #1e40af;
+    background: #eff6ff;
 }
 
-
-
-.approve-btn:hover{
-
-
-    background:#15803D;
-
-
+.company-review-notice > i {
+    margin-top: 2px;
 }
 
-
-/* ===================================
-          DEACTIVATE BUTTON
-=================================== */
-
-
-.deactivate-btn{
-
-
-    height:46px;
-
-
-    padding:0 26px;
-
-
-    border:none;
-
-
-    border-radius:8px;
-
-
-    display:flex;
-
-
-    align-items:center;
-
-
-    justify-content:center;
-
-
-    gap:10px;
-
-
-    font-size:14px;
-
-
-    font-weight:600;
-
-
-    cursor:pointer;
-
-
-    background:#F59E0B;
-
-
-    color:white;
-
-
+.company-review-notice strong {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 12px;
 }
 
-
-
-.deactivate-btn:hover{
-
-
-    background:#D97706;
-
-
+.company-review-notice p {
+    margin: 0;
+    color: #475569;
+    font-size: 11px;
+    line-height: 1.55;
 }
 
+.company-review-content {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
 
+.company-information-card {
+    overflow: hidden;
+    border: 1px solid var(--review-border);
+    border-radius: 13px;
+    background: var(--review-card);
+    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.035);
+}
 
+.information-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid #edf1f6;
+    background: #fbfcfe;
+}
 
-/* ===================================
-          RESPONSIVE
-=================================== */
+.information-step {
+    display: inline-flex;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 34px;
+    border-radius: 9px;
+    color: #ffffff;
+    background: var(--review-primary);
+    font-size: 12px;
+    font-weight: 700;
+}
 
+.information-card-header h2 {
+    margin: 0 0 3px;
+    color: var(--review-heading);
+    font-size: 15px;
+}
 
-@media(max-width:1100px){
+.information-card-header p {
+    margin: 0;
+    color: var(--review-muted);
+    font-size: 10px;
+}
 
+.information-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    padding: 7px 20px;
+}
 
-    .preview-grid{
+.information-field {
+    display: flex;
+    min-width: 0;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 15px 8px;
+    border-bottom: 1px solid #f0f3f7;
+}
 
+.information-field:nth-last-child(-n + 2) {
+    border-bottom: 0;
+}
 
-        grid-template-columns:repeat(2,1fr);
+.field-icon {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 30px;
+    border-radius: 8px;
+    color: var(--review-primary);
+    background: #eff6ff;
+    font-size: 11px;
+}
 
+.information-field > div {
+    min-width: 0;
+}
 
+.information-field label,
+.address-information label,
+.company-description-panel label {
+    display: block;
+    margin-bottom: 5px;
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.045em;
+    text-transform: uppercase;
+}
+
+.information-field p,
+.address-information p,
+.company-description-panel p {
+    margin: 0;
+    color: var(--review-text);
+    font-size: 12px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.address-information {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 22px;
+}
+
+.address-icon {
+    display: inline-flex;
+    width: 38px;
+    height: 38px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 38px;
+    border-radius: 9px;
+    color: var(--review-primary);
+    background: #eff6ff;
+}
+
+.company-description-panel {
+    padding: 22px;
+}
+
+.company-description-panel p {
+    min-height: 62px;
+    white-space: pre-line;
+    line-height: 1.75;
+}
+
+.company-decision-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-top: 20px;
+    padding: 20px 22px;
+    border: 1px solid var(--review-border);
+    border-radius: 13px;
+    background: #ffffff;
+    box-shadow: 0 7px 22px rgba(15, 23, 42, 0.045);
+}
+
+.company-decision-bar > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.decision-bar-icon {
+    display: inline-flex;
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    border-radius: 9px;
+    color: var(--review-primary);
+    background: #eff6ff;
+}
+
+.company-decision-bar h2 {
+    margin: 0 0 4px;
+    color: var(--review-heading);
+    font-size: 14px;
+}
+
+.company-decision-bar p {
+    margin: 0;
+    color: var(--review-muted);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.company-decision-actions {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+}
+
+.company-decision-actions form {
+    margin: 0;
+}
+
+.company-action-button {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 15px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.company-action-button.reject {
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    background: #fff7f7;
+}
+
+.company-action-button.approve {
+    border: 1px solid #16a34a;
+    color: #ffffff;
+    background: #16a34a;
+}
+
+.company-action-button.deactivate {
+    border: 1px solid #dc2626;
+    color: #ffffff;
+    background: #dc2626;
+}
+
+.company-action-button:hover {
+    filter: brightness(0.97);
+}
+
+@media (max-width: 1100px) {
+    .company-review-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .company-review-page {
+        margin-left: 0;
+        padding: 95px 20px 36px;
+    }
+}
+
+@media (max-width: 680px) {
+    .company-review-header,
+    .company-overview-card,
+    .company-decision-bar {
+        align-items: stretch;
+        flex-direction: column;
     }
 
-
-}
-
-
-
-
-
-@media(max-width:800px){
-
-
-    .main-content{
-
-
-        margin-left:0;
-
-        padding:20px;
-
-
+    .company-review-back-button {
+        align-self: flex-start;
     }
 
-
-
-    .page-header{
-
-
-        flex-direction:column;
-
-        align-items:flex-start;
-
-        gap:20px;
-
-
+    .information-grid {
+        grid-template-columns: 1fr;
     }
 
-
-
-
-    .preview-grid{
-
-
-        grid-template-columns:1fr;
-
-
+    .information-field:nth-last-child(-n + 2) {
+        border-bottom: 1px solid #f0f3f7;
     }
 
+    .information-field:last-child {
+        border-bottom: 0;
+    }
 
+    .company-decision-actions {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .company-decision-actions form,
+    .company-action-button {
+        width: 100%;
+    }
 }

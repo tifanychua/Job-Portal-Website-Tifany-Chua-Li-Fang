@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {{ post.get("title", "Career Advice") }}
+    </title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Existing Admin Header -->
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+
+    <style>
+
+        /* ================================== */
+        /* PAGE                               */
+        /* ================================== */
+
+        body {
+            margin: 0;
+            color: #334155;
+            background: #f8fafc;
+            font-family: Arial, sans-serif;
+        }
+
+        .cad-page {
+            min-height: 100vh;
+            margin-left: 250px;
+
+            /* Space below fixed admin header */
+            padding: 105px 35px 35px;
+
+            box-sizing: border-box;
+        }
+
+
+        /* ================================== */
+        /* PAGE HEADER                        */
+        /* ================================== */
+
+        .cad-page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 26px;
+        }
+
+        .cad-page-header h1 {
+            margin: 0 0 6px;
+            color: #1e293b;
+            font-size: 28px;
+        }
+
+        .cad-page-header p {
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+
+        /* ================================== */
+        /* BREADCRUMB                         */
+        /* ================================== */
+
+        .cad-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 11px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .cad-breadcrumb a {
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .cad-breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .cad-breadcrumb i {
+            font-size: 9px;
+        }
+
+
+        /* ================================== */
+        /* HEADER BUTTONS                     */
+        /* ================================== */
+
+        .cad-header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .cad-back-button,
+        .cad-edit-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 11px 17px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .cad-back-button {
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            background: white;
+        }
+
+        .cad-back-button:hover {
+            color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .cad-edit-button {
+            color: white;
+            background: #2563eb;
+        }
+
+        .cad-edit-button:hover {
+            background: #1d4ed8;
+        }
+
+
+        /* ================================== */
+        /* COMBINED CARD                      */
+        /* ================================== */
+
+        .cad-card {
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
+        }
+
+
+        /* ================================== */
+        /* TOP SECTION                        */
+        /* ================================== */
+
+        .cad-top {
+            display: grid;
+            grid-template-columns: minmax(300px, 40%) 1fr;
+            align-items: start;
+        }
+
+
+        /* ================================== */
+        /* COVER IMAGE                        */
+        /* ================================== */
+
+        .cad-cover {
+            padding: 24px 0 24px 24px;
+        }
+
+        .cad-cover img {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 320px;
+            border-radius: 9px;
+            object-fit: cover;
+        }
+
+        .cad-cover-placeholder {
+            display: flex;
+            width: 100%;
+            height: 280px;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            border-radius: 9px;
+            color: #2563eb;
+            background:
+                linear-gradient(
+                    135deg,
+                    #eff6ff,
+                    #eef2ff
+                );
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .cad-cover-placeholder i {
+            font-size: 48px;
+        }
+
+
+        /* ================================== */
+        /* POST INFORMATION                   */
+        /* ================================== */
+
+        .cad-information {
+            padding: 28px 32px;
+        }
+
+        .cad-labels {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .cad-category,
+        .cad-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .cad-category {
+            color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .cad-status {
+            color: #166534;
+            background: #dcfce7;
+        }
+
+        .cad-information h2 {
+            margin: 17px 0 12px;
+            color: #1e293b;
+            font-size: 29px;
+            line-height: 1.25;
+        }
+
+        .cad-summary {
+            margin: 0;
+            color: #64748b;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+
+        /* ================================== */
+        /* METADATA                           */
+        /* ================================== */
+
+        .cad-metadata {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 11px;
+            margin-top: 22px;
+        }
+
+        .cad-metadata-item {
+            display: flex;
+            min-width: 165px;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        .cad-metadata-icon {
+            display: flex;
+            width: 32px;
+            height: 32px;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 50%;
+            color: #2563eb;
+            background: #dbeafe;
+        }
+
+        .cad-metadata-item > div:last-child {
+            display: flex;
+            min-width: 0;
+            flex-direction: column;
+        }
+
+        .cad-metadata-label {
+            color: #94a3b8;
+            font-size: 9px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .cad-metadata-value {
+            margin-top: 3px;
+            overflow: hidden;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 600;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+
+        /* ================================== */
+        /* ARTICLE CONTENT                    */
+        /* ================================== */
+
+        .cad-content-section {
+            padding: 27px 34px 30px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .cad-content-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cad-content-heading-icon {
+            display: flex;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 8px;
+            color: white;
+            background: #2563eb;
+        }
+
+        .cad-content-heading h3 {
+            margin: 0 0 3px;
+            color: #1e293b;
+            font-size: 17px;
+        }
+
+        .cad-content-heading p {
+            margin: 0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .cad-divider {
+            height: 1px;
+            margin: 20px 0;
+            background: #e2e8f0;
+        }
+
+        .cad-article-content {
+            color: #334155;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            font-size: 15px;
+            line-height: 1.85;
+        }
+
+        .cad-article-content h1,
+        .cad-article-content h2,
+        .cad-article-content h3 {
+            margin: 1.6em 0 0.65em;
+            color: #1e293b;
+            font-weight: 700;
+            line-height: 1.3;
+            white-space: normal;
+        }
+
+        .cad-article-content h1:first-child,
+        .cad-article-content h2:first-child,
+        .cad-article-content h3:first-child {
+            margin-top: 0;
+        }
+
+        .cad-article-content h1 { font-size: 28px; }
+        .cad-article-content h2 { font-size: 22px; }
+        .cad-article-content h3 { font-size: 18px; }
+
+        .cad-article-content p {
+            margin: 0 0 1.2em;
+            white-space: pre-wrap;
+        }
+
+        .cad-article-content ul,
+        .cad-article-content ol {
+            margin: 0 0 1.25em;
+            padding-left: 1.6em;
+            white-space: normal;
+        }
+
+        .cad-article-content li {
+            margin-bottom: 0.45em;
+        }
+
+        .cad-article-content blockquote {
+            margin: 1.5em 0;
+            padding: 14px 18px;
+            border-left: 4px solid #2563eb;
+            border-radius: 0 8px 8px 0;
+            color: #475569;
+            background: #f8fafc;
+            white-space: normal;
+        }
+
+        .cad-article-content a {
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+
+        /* ================================== */
+        /* FOOTER                             */
+        /* ================================== */
+
+        .cad-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .cad-footer-information,
+        .cad-footer a {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .cad-footer a {
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+
+        /* ================================== */
+        /* RESPONSIVE                         */
+        /* ================================== */
+
+        @media (max-width: 1000px) {
+            .cad-top {
+                grid-template-columns: 38% 62%;
+            }
+
+            .cad-information {
+                padding: 24px;
+            }
+
+            .cad-information h2 {
+                font-size: 26px;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .cad-page {
+                margin-left: 0;
+                padding: 95px 20px 25px;
+            }
+
+            .cad-top {
+                grid-template-columns: 1fr;
+            }
+
+            .cad-cover {
+                padding: 22px 22px 0;
+            }
+
+            .cad-cover img {
+                max-height: 350px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .cad-page-header {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .cad-header-actions {
+                width: 100%;
+            }
+
+            .cad-back-button,
+            .cad-edit-button {
+                flex: 1;
+            }
+
+            .cad-cover {
+                padding: 18px 18px 0;
+            }
+
+            .cad-information,
+            .cad-content-section {
+                padding: 22px 18px;
+            }
+
+            .cad-information h2 {
+                font-size: 24px;
+            }
+
+            .cad-metadata {
+                flex-direction: column;
+            }
+
+            .cad-metadata-item {
+                box-sizing: border-box;
+                width: 100%;
+            }
+
+            .cad-footer {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+{% include "adminHeader.html" %}
+
+
+<!-- ============================== -->
+<!-- POST VARIABLES                 -->
+<!-- ============================== -->
+
+{% set post_title =
+    post.get("title", "Untitled") %}
+
+{% set category =
+    post.get("category", "Uncategorised") %}
+
+{% set image_url =
+    post.get("imageUrl", "") %}
+
+{% set summary =
+    post.get("summary", "No summary is available.") %}
+
+{% set content =
+    post.get("content", "No article content is available.") %}
+
+{% set publication_date =
+    post.get("publicationDate") %}
+
+{% set updated_date =
+    post.get("updatedAt") %}
+
+
+<main class="cad-page">
+
+
+    <!-- ============================== -->
+    <!-- PAGE HEADER                    -->
+    <!-- ============================== -->
+
+    <div class="cad-page-header">
+
+        <div>
+
+            <div class="cad-breadcrumb">
+
+                <a href="/admin/career-advice">
+                    Career Advice
+                </a>
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+                <span>
+                    Post Details
+                </span>
+
+            </div>
+
+
+            <h1>
+                Career Advice Details
+            </h1>
+
+            <p>
+                Review the complete published career advice post.
+            </p>
+
+        </div>
+
+
+        <div class="cad-header-actions">
+
+            <a href="/admin/career-advice"
+               class="cad-back-button">
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back
+
+            </a>
+
+
+            <a href="/admin/career-advice/{{ post.get('id') }}/edit"
+               class="cad-edit-button">
+
+                <i class="fa-solid fa-pen"></i>
+
+                Edit Post
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- COMBINED CARD                  -->
+    <!-- ============================== -->
+
+    <article class="cad-card">
+
+
+        <!-- Top: Image and Information -->
+
+        <div class="cad-top">
+
+
+            <!-- Cover Image -->
+
+            <div class="cad-cover">
+
+                {% if image_url %}
+
+                    <img src="{{ image_url }}"
+                         alt="{{ post_title }}">
+
+                {% else %}
+
+                    <div class="cad-cover-placeholder">
+
+                        <i class="fa-regular fa-newspaper"></i>
+
+                        <span>
+                            Career Advice
+                        </span>
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- Post Information -->
+
+            <div class="cad-information">
+
+
+                <!-- Labels -->
+
+                <div class="cad-labels">
+
+                    <span class="cad-category">
+
+                        <i class="fa-regular fa-folder"></i>
+
+                        {{ category }}
+
+                    </span>
+
+
+                    <span class="cad-status">
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        Published
+
+                    </span>
+
+                </div>
+
+
+                <!-- Title -->
+
+                <h2>
+                    {{ post_title }}
+                </h2>
+
+
+                <!-- Summary -->
+
+                <p class="cad-summary">
+                    {{ summary }}
+                </p>
+
+
+                <!-- Metadata -->
+
+                <div class="cad-metadata">
+
+
+                    <!-- Published -->
+
+                    <div class="cad-metadata-item">
+
+                        <div class="cad-metadata-icon">
+
+                            <i class="fa-regular fa-calendar"></i>
+
+                        </div>
+
+                        <div>
+
+                            <span class="cad-metadata-label">
+                                Published
+                            </span>
+
+                            <span class="cad-metadata-value">
+
+                                {% if publication_date %}
+
+                                    {{ publication_date.strftime("%d %B %Y") }}
+
+                                {% else %}
+
+                                    Date unavailable
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Updated -->
+
+                    <div class="cad-metadata-item">
+
+                        <div class="cad-metadata-icon">
+
+                            <i class="fa-regular fa-clock"></i>
+
+                        </div>
+
+                        <div>
+
+                            <span class="cad-metadata-label">
+                                Last Updated
+                            </span>
+
+                            <span class="cad-metadata-value">
+
+                                {% if updated_date %}
+
+                                    {{ updated_date.strftime("%d %B %Y") }}
+
+                                {% else %}
+
+                                    Date unavailable
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Publisher -->
+
+                    <div class="cad-metadata-item">
+
+                        <div class="cad-metadata-icon">
+
+                            <i class="fa-regular fa-user"></i>
+
+                        </div>
+
+                        <div>
+
+                            <span class="cad-metadata-label">
+                                Published By
+                            </span>
+
+                            <span class="cad-metadata-value">
+                                JobConnect Administrator
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ============================== -->
+        <!-- ARTICLE CONTENT                -->
+        <!-- ============================== -->
+
+        <section class="cad-content-section">
+
+            <div class="cad-content-heading">
+
+                <div class="cad-content-heading-icon">
+
+                    <i class="fa-regular fa-file-lines"></i>
+
+                </div>
+
+                <div>
+
+                    <h3>
+                        Article Content
+                    </h3>
+
+                    <p>
+                        Complete career guidance for job seekers.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="cad-divider"></div>
+
+
+            <div class="cad-article-content">{{ content|safe }}</div>
+
+
+            <footer class="cad-footer">
+
+                <div class="cad-footer-information">
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                    <span>
+                        Published by the JobConnect
+                        career guidance team.
+                    </span>
+
+                </div>
+
+
+              
+
+            </footer>
+
+        </section>
+
+    </article>
+
+</main>
+
+</body>
+
+</html>

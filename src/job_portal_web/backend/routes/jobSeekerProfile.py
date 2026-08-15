@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from job_portal_web.backend.database import db
+from job_portal_web.backend.notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -137,6 +138,8 @@ async def profile(request: Request):
             "user": applicant,
             # Profile page
             "applicant": applicant,
+            "active_page": "profile",
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 

@@ -1,620 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-
-    <title>Review Company Registration</title>
-
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Company Registration | JobConnect Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="/css/employerHeader.css">
-
     <link rel="stylesheet" href="/css/reviewCompany.css">
-
-
 </head>
-
-
 <body>
-
-
-{% include "adminHeader.html" %}
-
-
-
-<main class="main-content">
-
-
-
-<!-- ====================================== -->
-<!-- Page Header -->
-<!-- ====================================== -->
-
-
-<div class="page-header">
-
-
-    <div>
-
-
-        <h1>
-            Review Company Registration
-        </h1>
-
-
-        <p>
-            Review all submitted company information carefully before approving the registration.
-        </p>
-
-
-    </div>
-
-
-
-    <div class="header-buttons">
-
-
-        <a href="/admin/company-requests"
-           class="back-btn">
-
-
-            <i class="fa-solid fa-arrow-left"></i>
-
-            Back
-
-
-        </a>
-
-
-
-    </div>
-
-
-
-</div>
-
-
-
-
-
-<!-- ====================================== -->
-<!-- Company Information -->
-<!-- ====================================== -->
-
-
-<div class="preview-card">
-
-
-    <div class="preview-title">
-
-
-        <div>
-
-            <img src="/images/number-1.png">
-
-            <h2>
-                Company Information
-            </h2>
-
-        </div>
-
-
-    </div>
-
-
-
-
-
-    <div class="preview-grid">
-
-
-
-        <div>
-
-            <label>
-                Company Name
-            </label>
-
-
-            <p>
-                {{ company.companyName }}
-            </p>
-
-        </div>
-
-
-
-
-        <div>
-
-            <label>
-                Registration Number
-            </label>
-
-
-            <p>
-                {{ company.registrationNumber }}
-            </p>
-
-        </div>
-
-
-
-
-
-        <div>
-
-            <label>
-                Industry
-            </label>
-
-
-            <p>
-                {{ company.industry }}
-            </p>
-
-
-        </div>
-
-
-
-
-
-        <div>
-
-            <label>
-                Company Size
-            </label>
-
-
-            <p>
-                {{ company.companySize }}
-            </p>
-
-
-        </div>
-
-
-
-
-
-        <div>
-
-            <label>
-                Website
-            </label>
-
-
-            <p>
-
-                {% if company.companyWebsite %}
-
-                    {{ company.companyWebsite }}
-
+    {% include "adminHeader.html" %}
+
+    {% set company_status = company.get("status", "Unknown") %}
+    {% set company_id = company.get("company_id", company.get("id", "")) %}
+    {% set contact = company.get("contactPerson", {}) or {} %}
+    {% set logo_url = company.get("logo", "") %}
+
+    <main class="company-review-page">
+        <nav class="company-review-breadcrumb" aria-label="Breadcrumb">
+            <a href="/admin/company-requests">
+                <i class="fa-solid fa-building-circle-check"></i>
+                Company registrations
+            </a>
+            <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+            <span aria-current="page">Review application</span>
+        </nav>
+
+        <section class="company-review-header" aria-labelledby="companyReviewTitle">
+            <div>
+                <p class="company-review-eyebrow">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Registration review
+                </p>
+                <h1 id="companyReviewTitle">Review Company Registration</h1>
+                <p>Verify the submitted company and contact information before making a decision.</p>
+            </div>
+
+            <a href="/admin/company-requests" class="company-review-back-button">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to requests
+            </a>
+        </section>
+
+        <article class="company-overview-card">
+            <div class="company-overview-identity">
+                {% if logo_url and logo_url != "companyLogo.png" %}
+                <img
+                    class="company-review-logo"
+                    src="{{ logo_url }}"
+                    alt="{{ company.get('companyName', 'Company') }} logo"
+                    onerror="this.hidden=true; this.nextElementSibling.hidden=false;"
+                >
+                <span class="company-review-logo company-logo-fallback" hidden>
+                    {{ company.get("companyName", "C")[:1]|upper }}
+                </span>
                 {% else %}
-
-                    -
-
+                <span class="company-review-logo company-logo-fallback">
+                    {{ company.get("companyName", "C")[:1]|upper }}
+                </span>
                 {% endif %}
 
-            </p>
+                <div>
+                    <span class="company-overview-label">Company application</span>
+                    <h2>{{ company.get("companyName", "Unnamed company") }}</h2>
+                    <p>
+                        <i class="fa-regular fa-id-card"></i>
+                        Registration No. {{ company.get("registrationNumber", "Not provided") }}
+                    </p>
+                </div>
+            </div>
 
+            <span class="company-review-status {{ company_status|lower|replace(' ', '-') }}">
+                <span></span>
+                {{ company_status }}
+            </span>
+        </article>
 
+        {% if company_status == "Pending" %}
+        <aside class="company-review-notice">
+            <i class="fa-solid fa-circle-info"></i>
+            <div>
+                <strong>Decision required</strong>
+                <p>Review every section carefully. Approving the application allows the employer to use company features.</p>
+            </div>
+        </aside>
+        {% endif %}
+
+        <div class="company-review-content">
+            <section class="company-information-card">
+                <header class="information-card-header">
+                    <span class="information-step">1</span>
+                    <div>
+                        <h2>Company Information</h2>
+                        <p>Business identity and organisation details</p>
+                    </div>
+                </header>
+
+                <div class="information-grid">
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-solid fa-building"></i></span>
+                        <div><label>Company Name</label><p>{{ company.get("companyName", "Not provided") }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-regular fa-id-card"></i></span>
+                        <div><label>Registration Number</label><p>{{ company.get("registrationNumber", "Not provided") }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-solid fa-briefcase"></i></span>
+                        <div><label>Industry</label><p>{{ company.get("industry", "Not provided") }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-solid fa-users"></i></span>
+                        <div><label>Company Size</label><p>{{ company.get("companySize", "Not provided") }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-solid fa-globe"></i></span>
+                        <div><label>Website</label><p>{{ company.get("companyWebsite") or "Not provided" }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-regular fa-envelope"></i></span>
+                        <div><label>Business Email</label><p>{{ company.get("businessEmail") or company.get("email") or "Not provided" }}</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="company-information-card">
+                <header class="information-card-header">
+                    <span class="information-step">2</span>
+                    <div>
+                        <h2>Contact Information</h2>
+                        <p>Primary representative and communication preferences</p>
+                    </div>
+                </header>
+
+                <div class="information-grid">
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-solid fa-user"></i></span>
+                        <div><label>Contact Person</label><p>{{ contact.get("fullName", "Not provided") }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-solid fa-user-tie"></i></span>
+                        <div><label>Job Title</label><p>{{ contact.get("jobTitle", "Not provided") }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-regular fa-envelope"></i></span>
+                        <div><label>Email</label><p>{{ contact.get("email", "Not provided") }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-solid fa-phone"></i></span>
+                        <div><label>Phone Number</label><p>{{ contact.get("phone", "Not provided") }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-solid fa-sitemap"></i></span>
+                        <div><label>Department</label><p>{{ contact.get("department") or "Not provided" }}</p></div>
+                    </div>
+
+                    <div class="information-field">
+                        <span class="field-icon"><i class="fa-solid fa-comment-dots"></i></span>
+                        <div><label>Preferred Contact</label><p>{{ contact.get("preferredContactMethod", "Not provided") }}</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="company-information-card">
+                <header class="information-card-header">
+                    <span class="information-step">3</span>
+                    <div>
+                        <h2>Company Address</h2>
+                        <p>Registered business location</p>
+                    </div>
+                </header>
+
+                <div class="address-information">
+                    <span class="address-icon"><i class="fa-solid fa-location-dot"></i></span>
+                    <div>
+                        <label>Full Address</label>
+                        <p>
+                            {{ company.get("address", "Not provided") }},
+                            {{ company.get("city", "") }},
+                            {{ company.get("state", "") }},
+                            {{ company.get("country", "") }}
+                            {{ company.get("postalCode", "") }}
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="company-information-card">
+                <header class="information-card-header">
+                    <span class="information-step">4</span>
+                    <div>
+                        <h2>Company Description</h2>
+                        <p>Background and business activities</p>
+                    </div>
+                </header>
+
+                <div class="company-description-panel">
+                    <label>About Company</label>
+                    <p>{{ company.get("companyDescription") or "No company description was provided." }}</p>
+                </div>
+            </section>
         </div>
 
-
-
-
-
-        <div>
-
-            <label>
-                Status
-            </label>
-
-
-            <p>
-                {{ company.status }}
-            </p>
-
-
-        </div>
-
-
-
-    </div>
-
-
-
-</div>
-
-
-
-
-
-
-<!-- ====================================== -->
-<!-- Contact Information -->
-<!-- ====================================== -->
-
-
-<div class="preview-card">
-
-
-    <div class="preview-title">
-
-
-        <div>
-
-            <img src="/images/number-2.png">
-
-            <h2>
-                Contact Information
-            </h2>
-
-
-        </div>
-
-
-    </div>
-
-
-
-
-
-    <div class="preview-grid">
-
-
-
-        <div>
-
-            <label>
-                Contact Person
-            </label>
-
-
-            <p>
-                {{ company.contactPerson.fullName }}
-            </p>
-
-
-        </div>
-
-
-
-
-        <div>
-
-            <label>
-                Job Title
-            </label>
-
-
-            <p>
-                {{ company.contactPerson.jobTitle }}
-            </p>
-
-
-        </div>
-
-
-
-
-        <div>
-
-            <label>
-                Email
-            </label>
-
-
-            <p>
-                {{ company.contactPerson.email }}
-            </p>
-
-
-        </div>
-
-
-
-
-
-        <div>
-
-            <label>
-                Phone Number
-            </label>
-
-
-            <p>
-                {{ company.contactPerson.phone }}
-            </p>
-
-
-        </div>
-
-
-
-
-        <div>
-
-            <label>
-                Department
-            </label>
-
-
-            <p>
-
-                {% if company.contactPerson.department %}
-
-                    {{ company.contactPerson.department }}
-
-                {% else %}
-
-                    -
-
+        {% if company_status in ["Pending", "Active"] %}
+        <section class="company-decision-bar" aria-label="Company registration actions">
+            <div>
+                <span class="decision-bar-icon"><i class="fa-solid fa-gavel"></i></span>
+                <div>
+                    <h2>{{ "Make a registration decision" if company_status == "Pending" else "Manage company access" }}</h2>
+                    <p>{{ "Approve or reject this application after completing your review." if company_status == "Pending" else "Deactivate this company if it should no longer access employer features." }}</p>
+                </div>
+            </div>
+
+            <div class="company-decision-actions">
+                {% if company_status == "Pending" %}
+                <form action="/admin/company/{{ company_id }}/reject" method="post">
+                    <button class="company-action-button reject" type="submit" onclick="return confirm('Reject this registration?')">
+                        <i class="fa-solid fa-xmark"></i>
+                        Reject
+                    </button>
+                </form>
+
+                <form action="/admin/company/{{ company_id }}/approve" method="post">
+                    <button class="company-action-button approve" type="submit" onclick="return confirm('Approve this company?')">
+                        <i class="fa-solid fa-check"></i>
+                        Approve Company
+                    </button>
+                </form>
+                {% elif company_status == "Active" %}
+                <form action="/admin/company/{{ company_id }}/deactivate" method="post">
+                    <button class="company-action-button deactivate" type="submit" onclick="return confirm('Deactivate this company?')">
+                        <i class="fa-solid fa-ban"></i>
+                        Deactivate Company
+                    </button>
+                </form>
                 {% endif %}
-
-            </p>
-
-
-        </div>
-
-
-
-        <div>
-
-            <label>
-                Preferred Contact Method
-            </label>
-
-
-            <p>
-                {{ company.contactPerson.preferredContactMethod }}
-            </p>
-
-
-        </div>
-
-
-
-    </div>
-
-
-
-
-</div>
-
-
-
-
-
-
-<!-- ====================================== -->
-<!-- Address -->
-<!-- ====================================== -->
-
-
-<div class="preview-card">
-
-
-    <div class="preview-title">
-
-
-        <div>
-
-            <img src="/images/number-3.png">
-
-            <h2>
-                Company Address
-            </h2>
-
-
-        </div>
-
-
-    </div>
-
-
-
-
-    <div class="preview-section">
-
-
-        <p>
-
-
-            {{ company.address }},
-            {{ company.city }},
-            {{ company.state }},
-            {{ company.country }}
-            {{ company.postalCode }}
-
-
-        </p>
-
-
-
-    </div>
-
-
-
-</div>
-
-
-
-
-
-
-<!-- ====================================== -->
-<!-- Company Description -->
-<!-- ====================================== -->
-
-
-<div class="preview-card">
-
-
-    <div class="preview-title">
-
-
-        <div>
-
-            <img src="/images/number-4.png">
-
-            <h2>
-                Company Description
-            </h2>
-
-
-        </div>
-
-
-    </div>
-
-
-
-
-    <div class="preview-section">
-
-
-        <label>
-            About Company
-        </label>
-
-
-        <p style="white-space:pre-line;">
-
-            {{ company.companyDescription }}
-
-        </p>
-
-
-
-    </div>
-
-
-
-</div>
-
-
-
-
-
-
-<!-- ====================================== -->
-<!-- Bottom Buttons -->
-<!-- ====================================== -->
-
-
-<!-- ====================================== -->
-<!-- Bottom Buttons -->
-<!-- ====================================== -->
-
-
-<div class="bottom-buttons">
-
-
-{% if company.status == "Pending" %}
-
-
-    <!-- Reject Button -->
-
-    <form action="/admin/company/{{ company.company_id }}/reject"
-          method="post">
-
-
-        <button class="reject-btn"
-                type="submit"
-                onclick="return confirm('Reject this registration?')">
-
-
-            <i class="fa-solid fa-xmark"></i>
-
-
-            Reject
-
-
-        </button>
-
-
-    </form>
-
-
-
-
-
-    <!-- Approve Button -->
-
-    <form action="/admin/company/{{ company.company_id }}/approve"
-          method="post">
-
-
-        <button class="approve-btn"
-                type="submit"
-                onclick="return confirm('Approve this company?')">
-
-
-            <i class="fa-solid fa-check"></i>
-
-
-            Approve Company
-
-
-        </button>
-
-
-    </form>
-
-
-
-{% elif company.status == "Active" %}
-
-
-
-    <!-- Deactivate Button -->
-
-    <form action="/admin/company/{{ company.company_id }}/deactivate"
-          method="post">
-
-
-        <button class="reject-btn"
-                type="submit"
-                onclick="return confirm('Deactivate this company?')">
-
-
-            <i class="fa-solid fa-ban"></i>
-
-
-            Deactivate Company
-
-
-        </button>
-
-
-    </form>
-
-
-
-{% endif %}
-
-
-
-</div>
-
-
-
-</main>
-
-
-
+            </div>
+        </section>
+        {% endif %}
+    </main>
 </body>
-
 </html>

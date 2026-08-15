@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Transaction History - JobConnect
+    </title>
+
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+
+    <link rel="stylesheet"
+          href="/css/employerTransactions.css">
+
+</head>
+
+
+<body>
+
+
+{% include "employerHeader.html" %}
+
+
+<div class="main-content">
+
+
+    <!-- ================================================= -->
+    <!-- PAGE HEADER -->
+    <!-- ================================================= -->
+
+    <div class="transaction-page-header">
+
+        <div>
+
+            <h1>
+                Transaction History
+            </h1>
+
+            <p>
+                View all subscription payments and
+                billing transactions.
+            </p>
+
+        </div>
+
+
+        <a href="/employer-credit"
+           class="back-btn">
+
+            <i class="fa-solid fa-arrow-left"></i>
+
+            Back to Subscription
+
+        </a>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- SUMMARY -->
+    <!-- ================================================= -->
+
+    <section class="transaction-summary">
+
+
+        <div class="summary-item">
+
+            <div class="summary-icon blue">
+
+                <i class="fa-solid fa-wallet"></i>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Total Spent
+                </span>
+
+                <strong>
+
+                    RM {{
+                        "%.2f"|
+                        format(
+                            total_spent
+                        )
+                    }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="summary-item">
+
+            <div class="summary-icon purple">
+
+                <i class="fa-solid fa-receipt"></i>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Total Transactions
+                </span>
+
+                <strong>
+                    {{ total_transactions }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="summary-item">
+
+            <div class="summary-icon green">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Completed
+                </span>
+
+                <strong>
+                    {{ completed_count }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="summary-item">
+
+            <div class="summary-icon orange">
+
+                <i class="fa-regular fa-clock"></i>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    Pending
+                </span>
+
+                <strong>
+                    {{ pending_count }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================================================= -->
+    <!-- FILTER BAR -->
+    <!-- ================================================= -->
+
+    <section class="transaction-card">
+
+
+        <div class="filter-toolbar">
+
+
+            <!-- Search -->
+
+            <div class="search-wrapper">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    id="transactionSearch"
+                    placeholder="Search transaction ID, plan..."
+                    value="{{ keyword }}">
+
+            </div>
+
+
+            <!-- Status -->
+
+            <select
+                id="statusFilter"
+                class="status-filter">
+
+                <option
+                    value=""
+                    {% if not current_status %}
+                        selected
+                    {% endif %}>
+
+                    All Status
+
+                </option>
+
+
+                <option
+                    value="COMPLETED"
+                    {% if current_status == "COMPLETED" %}
+                        selected
+                    {% endif %}>
+
+                    Completed
+
+                </option>
+
+
+                <option
+                    value="PENDING"
+                    {% if current_status == "PENDING" %}
+                        selected
+                    {% endif %}>
+
+                    Pending
+
+                </option>
+
+
+                <option
+                    value="FAILED"
+                    {% if current_status == "FAILED" %}
+                        selected
+                    {% endif %}>
+
+                    Failed
+
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- TABLE -->
+        <!-- ================================================= -->
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Transaction ID
+                        </th>
+
+                        <th>
+                            Plan
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            Payment Method
+                        </th>
+
+                        <th>
+                            Credits
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+
+                        <th>
+                            Receipt
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                {% if transactions %}
+
+
+                    {% for transaction in transactions %}
+
+                    <tr>
+
+
+                        <!-- ID -->
+
+                        <td>
+
+                            <span class="transaction-id">
+
+                                {{
+                                    transaction.transaction_id
+                                }}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- Plan -->
+
+                        <td>
+
+                            <strong>
+
+                                {{
+                                    transaction.package
+                                }}
+
+                            </strong>
+
+                        </td>
+
+
+                        <!-- Date -->
+
+                        <td>
+
+                            <div class="date-cell">
+
+                                <strong>
+                                    {{ transaction.date }}
+                                </strong>
+
+                                {% if transaction.time %}
+
+                                <span>
+                                    {{ transaction.time }}
+                                </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Method -->
+
+                        <td>
+
+                            <div class="payment-method">
+
+                                <i class="fa-regular fa-credit-card"></i>
+
+                                {{
+                                    transaction.payment_method
+                                }}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- Credits -->
+
+                        <td>
+
+                            {{
+                                transaction.credits
+                            }}
+
+                        </td>
+
+
+                        <!-- Status -->
+
+                        <td>
+
+
+                            {% if transaction.status == "COMPLETED" %}
+
+                                <span class="status-badge completed">
+
+                                    <i class="fa-solid fa-circle-check"></i>
+
+                                    Completed
+
+                                </span>
+
+
+                            {% elif transaction.status == "PENDING" %}
+
+                                <span class="status-badge pending">
+
+                                    <i class="fa-regular fa-clock"></i>
+
+                                    Pending
+
+                                </span>
+
+
+                            {% elif transaction.status == "FAILED" %}
+
+                                <span class="status-badge failed">
+
+                                    <i class="fa-solid fa-circle-xmark"></i>
+
+                                    Failed
+
+                                </span>
+
+
+                            {% else %}
+
+                                <span class="status-badge">
+
+                                    {{
+                                        transaction.status|title
+                                    }}
+
+                                </span>
+
+                            {% endif %}
+
+
+                        </td>
+
+
+                        <!-- Amount -->
+
+                        <td>
+
+                            <strong class="amount">
+
+                                RM {{
+                                    "%.2f"|
+                                    format(
+                                        transaction.amount
+                                    )
+                                }}
+
+                            </strong>
+
+                        </td>
+
+
+                        <!-- Receipt -->
+
+                        <td>
+
+
+                            {% if transaction.status == "COMPLETED" %}
+
+                                <a
+                                    href="/payment-receipt/{{ transaction.transaction_id }}"
+                                    class="receipt-btn">
+
+                                    <i class="fa-solid fa-receipt"></i>
+
+                                    View
+
+                                </a>
+
+                            {% else %}
+
+                                <span class="no-receipt">
+                                    -
+                                </span>
+
+                            {% endif %}
+
+
+                        </td>
+
+
+                    </tr>
+
+                    {% endfor %}
+
+
+                {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="8"
+                            class="empty-state">
+
+                            <i class="fa-regular fa-folder-open"></i>
+
+                            <h3>
+                                No transactions found
+                            </h3>
+
+                            <p>
+                                No payment records match
+                                your current search or filter.
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- PAGINATION -->
+        <!-- ================================================= -->
+
+        {% if total_pages > 1 %}
+
+        <div class="pagination">
+
+
+            <!-- Previous -->
+
+            {% if current_page > 1 %}
+
+                <a
+                    href="/employer-transactions?page={{ current_page - 1 }}&status={{ current_status }}&keyword={{ keyword }}"
+                    class="page-btn">
+
+                    <i class="fa-solid fa-chevron-left"></i>
+
+                </a>
+
+            {% endif %}
+
+
+            <!-- Pages -->
+
+            {% for page_number in range(1, total_pages + 1) %}
+
+                <a
+                    href="/employer-transactions?page={{ page_number }}&status={{ current_status }}&keyword={{ keyword }}"
+                    class="page-btn
+                    {% if page_number == current_page %}
+                        active
+                    {% endif %}
+                    ">
+
+                    {{ page_number }}
+
+                </a>
+
+            {% endfor %}
+
+
+            <!-- Next -->
+
+            {% if current_page < total_pages %}
+
+                <a
+                    href="/employer-transactions?page={{ current_page + 1 }}&status={{ current_status }}&keyword={{ keyword }}"
+                    class="page-btn">
+
+                    <i class="fa-solid fa-chevron-right"></i>
+
+                </a>
+
+            {% endif %}
+
+
+        </div>
+
+        {% endif %}
+
+
+    </section>
+
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- SEARCH + FILTER -->
+<!-- ================================================= -->
+
+<script>
+
+    const searchInput =
+        document.getElementById(
+            "transactionSearch"
+        );
+
+    const statusFilter =
+        document.getElementById(
+            "statusFilter"
+        );
+
+
+    let searchTimer;
+
+
+    function updateTransactionFilters() {
+
+        const params =
+            new URLSearchParams();
+
+
+        const keyword =
+            searchInput.value.trim();
+
+
+        const status =
+            statusFilter.value;
+
+
+        if (keyword) {
+
+            params.set(
+                "keyword",
+                keyword
+            );
+
+        }
+
+
+        if (status) {
+
+            params.set(
+                "status",
+                status
+            );
+
+        }
+
+
+        params.set(
+            "page",
+            "1"
+        );
+
+
+        window.location.href =
+            "/employer-transactions?"
+            +
+            params.toString();
+
+    }
+
+
+    // Search after user stops typing
+
+    searchInput.addEventListener(
+        "input",
+        function() {
+
+            clearTimeout(
+                searchTimer
+            );
+
+
+            searchTimer = setTimeout(
+                updateTransactionFilters,
+                500
+            );
+
+        }
+    );
+
+
+    // Status filter
+
+    statusFilter.addEventListener(
+        "change",
+        updateTransactionFilters
+    );
+
+</script>
+
+
+</body>
+
+</html>

@@ -92,7 +92,10 @@ def save_interview(client, context, mocker):
 
     mock_company.exists = True
 
-    mock_company.to_dict.return_value = {"companyName": "ABC Company", "address": "Penang"}
+    mock_company.to_dict.return_value = {
+        "companyName": "ABC Company",
+        "address": "Penang",
+    }
 
     mock_seeker = mocker.Mock()
 

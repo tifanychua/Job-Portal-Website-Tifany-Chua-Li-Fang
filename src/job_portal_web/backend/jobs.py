@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 from .database import db
+from .notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -320,5 +321,6 @@ def browse_jobs(
             "selected_locations": location,
             "selected_positions": position,
             "selected_benefits": benefits,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )

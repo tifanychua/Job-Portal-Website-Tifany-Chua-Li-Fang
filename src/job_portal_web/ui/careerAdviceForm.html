@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {{ "Edit" if post else "Create" }} Career Advice
+    </title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Admin Header -->
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+    <!-- Career Advice CSS -->
+    <link rel="stylesheet"
+          href="/css/adminCareerAdvice.css">
+
+    <!-- Quill rich-text editor -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
+
+    <style>
+        .career-rich-text-editor {
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        .career-rich-text-editor:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px #dbeafe;
+        }
+
+        .career-rich-text-editor .ql-toolbar.ql-snow {
+            border: 0;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .career-rich-text-editor .ql-container.ql-snow {
+            min-height: 320px;
+            border: 0;
+            color: #334155;
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        .career-rich-text-editor .ql-editor {
+            min-height: 320px;
+            padding: 18px;
+            line-height: 1.75;
+        }
+
+        .career-rich-text-editor .ql-editor.ql-blank::before {
+            left: 18px;
+            color: #94a3b8;
+            font-style: normal;
+        }
+
+        .rich-text-help {
+            display: block;
+            margin-top: 8px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+    </style>
+
+</head>
+
+<body>
+
+{% include "adminHeader.html" %}
+
+
+{% set existing_image =
+    post.get("imageUrl", "") if post else "" %}
+
+{% set existing_status =
+    post.get("status", "Draft") if post else "Draft" %}
+
+
+<main class="main-content">
+
+
+    <!-- ============================== -->
+    <!-- PAGE HEADER                    -->
+    <!-- ============================== -->
+
+    <div class="page-header">
+
+        <div>
+
+            <a href="/admin/career-advice"
+               class="back-link">
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back
+
+            </a>
+
+
+            <h1>
+
+                {% if post %}
+
+                    Edit Career Advice
+
+                {% else %}
+
+                    Create Career Advice
+
+                {% endif %}
+
+            </h1>
+
+
+            <p>
+                Publish completed advice or save unfinished work
+                as a draft.
+            </p>
+
+        </div>
+
+
+        {% if post %}
+
+            <span class="status {{ existing_status|lower }}">
+
+                {{ existing_status }}
+
+            </span>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- FORM CARD                      -->
+    <!-- ============================== -->
+
+    <div class="form-card">
+
+
+        <!-- Message -->
+        <div id="messageBox"
+             class="message-box"
+             hidden>
+        </div>
+
+
+        <form id="careerAdviceForm">
+
+
+            <!-- Hidden values used by JavaScript -->
+
+            <input type="hidden"
+                   id="postIdValue"
+                   value="{{ post.get('id', '') if post else '' }}">
+
+            <input type="hidden"
+                   id="existingImageUrl"
+                   value="{{ existing_image }}">
+
+
+            <!-- ============================== -->
+            <!-- COVER IMAGE                    -->
+            <!-- ============================== -->
+
+            <div class="form-group">
+
+                <label>
+                    Cover Image
+                </label>
+
+
+                <input type="file"
+                       id="coverImage"
+                       class="hidden-file"
+                       accept="image/jpeg,image/png,image/webp">
+
+
+                <label for="coverImage"
+                       class="image-upload-label">
+
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                    <strong>
+                        Choose Cover Image
+                    </strong>
+
+                    <small>
+                        JPG, PNG or WebP. Maximum 5 MB.
+                    </small>
+
+                </label>
+
+
+                <div id="imagePreviewContainer"
+                     class="image-preview-container"
+                     {% if not existing_image %}
+                     hidden
+                     {% endif %}>
+
+                    <img id="imagePreview"
+                         src="{{ existing_image }}"
+                         alt="Cover image preview">
+
+
+                    <button type="button"
+                            id="removeImageButton"
+                            class="remove-image-btn">
+
+                        <i class="fa-solid fa-trash"></i>
+
+                        Remove Image
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- ============================== -->
+            <!-- TITLE                          -->
+            <!-- ============================== -->
+
+            <div class="form-group">
+
+                <label for="title">
+
+                    Post Title
+
+                    <span class="required">
+                        *
+                    </span>
+
+                </label>
+
+
+                <input type="text"
+                       id="title"
+                       maxlength="150"
+                       value="{{ post.get('title', '') if post else '' }}"
+                       placeholder="Enter career advice title">
+
+
+                <div class="field-information">
+
+                    <small>
+                        Required for drafts and published posts.
+                    </small>
+
+                    <span id="titleCount">
+                        0/150
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ============================== -->
+            <!-- CATEGORY                       -->
+            <!-- ============================== -->
+
+            <div class="form-group">
+
+                <label for="category">
+                    Category
+                </label>
+
+
+                {% set selected_category =
+                    post.get("category", "") if post else "" %}
+
+
+                <select id="category">
+
+                    <option value="">
+                        Select a category
+                    </option>
+
+
+                    <option value="Job Search"
+                        {% if selected_category == "Job Search" %}
+                            selected
+                        {% endif %}>
+
+                        Job Search
+
+                    </option>
+
+
+                    <option value="Resume Writing"
+                        {% if selected_category == "Resume Writing" %}
+                            selected
+                        {% endif %}>
+
+                        Resume Writing
+
+                    </option>
+
+
+                    <option value="Interview"
+                        {% if selected_category == "Interview" %}
+                            selected
+                        {% endif %}>
+
+                        Interview
+
+                    </option>
+
+
+                    <option value="Career Development"
+                        {% if selected_category == "Career Development" %}
+                            selected
+                        {% endif %}>
+
+                        Career Development
+
+                    </option>
+
+
+                    <option value="Workplace Skills"
+                        {% if selected_category == "Workplace Skills" %}
+                            selected
+                        {% endif %}>
+
+                        Workplace Skills
+
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- ============================== -->
+            <!-- SUMMARY                        -->
+            <!-- ============================== -->
+
+            <div class="form-group">
+
+                <label for="summary">
+                    Summary
+                </label>
+
+
+                <textarea id="summary"
+                          rows="4"
+                          maxlength="300"
+                          placeholder="Enter a short summary">{{ post.get("summary", "") if post else "" }}</textarea>
+
+
+                <div class="field-information">
+
+                    <small>
+                        The summary is shown on the job seeker
+                        listing page.
+                    </small>
+
+                    <span id="summaryCount">
+                        0/300
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ============================== -->
+            <!-- CONTENT                        -->
+            <!-- ============================== -->
+
+            <div class="form-group">
+
+                <label for="contentEditor">
+                    Post Content
+                </label>
+
+
+                <textarea id="content"
+                          rows="16"
+                          placeholder="Write the complete career advice here">{{ post.get("content", "") if post else "" }}</textarea>
+
+
+                <div id="richTextEditorWrapper"
+                     class="career-rich-text-editor">
+
+                    <div id="contentEditor"></div>
+
+                </div>
+
+
+                <small class="rich-text-help">
+                    Use the toolbar to format paragraphs, headings,
+                    bold text, lists, links and quotations. Category,
+                    summary and at least 50 text characters are required
+                    before publishing.
+                </small>
+
+            </div>
+
+
+            <!-- ============================== -->
+            <!-- ACTION BUTTONS                 -->
+            <!-- ============================== -->
+
+            <div class="form-actions">
+
+                <a href="/admin/career-advice"
+                   class="cancel-btn">
+
+                    Cancel
+
+                </a>
+
+
+                <button type="button"
+                        id="saveDraftButton"
+                        class="save-draft-btn">
+
+                    <i class="fa-regular fa-floppy-disk"></i>
+
+                    Save Draft
+
+                </button>
+
+
+                <button type="button"
+                        id="publishButton"
+                        class="publish-main-btn">
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                    Publish
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+
+
+<script>
+
+/* ================================== */
+/* PAGE VALUES                        */
+/* ================================== */
+
+const postIdValue =
+    document.getElementById(
+        "postIdValue"
+    ).value;
+
+
+const postId =
+    postIdValue || null;
+
+
+let currentImageUrl =
+    document.getElementById(
+        "existingImageUrl"
+    ).value;
+
+
+const titleInput =
+    document.getElementById(
+        "title"
+    );
+
+
+const summaryInput =
+    document.getElementById(
+        "summary"
+    );
+
+
+const contentInput =
+    document.getElementById(
+        "content"
+    );
+
+
+const contentEditorElement =
+    document.getElementById(
+        "contentEditor"
+    );
+
+
+const richTextEditorWrapper =
+    document.getElementById(
+        "richTextEditorWrapper"
+    );
+
+
+let contentEditor = null;
+
+
+if (typeof Quill !== "undefined") {
+
+    contentEditor = new Quill(
+        contentEditorElement,
+        {
+            theme: "snow",
+
+            placeholder:
+                "Write the complete career advice here",
+
+            formats: [
+                "header",
+                "bold",
+                "italic",
+                "underline",
+                "list",
+                "blockquote",
+                "link"
+            ],
+
+            modules: {
+                toolbar: [
+                    [
+                        {
+                            header: [
+                                1,
+                                2,
+                                3,
+                                false
+                            ]
+                        }
+                    ],
+                    [
+                        "bold",
+                        "italic",
+                        "underline"
+                    ],
+                    [
+                        { list: "ordered" },
+                        { list: "bullet" }
+                    ],
+                    [
+                        "blockquote",
+                        "link"
+                    ],
+                    ["clean"]
+                ]
+            }
+        }
+    );
+
+
+    const existingContent =
+        contentInput.value.trim();
+
+
+    if (existingContent) {
+
+        const containsHtml =
+            /<[a-z][\s\S]*>/i.test(
+                existingContent
+            );
+
+
+        if (containsHtml) {
+
+            contentEditor.clipboard.dangerouslyPasteHTML(
+                existingContent
+            );
+
+        }
+        else {
+
+            contentEditor.setText(
+                existingContent
+            );
+
+        }
+
+    }
+
+
+    contentInput.hidden = true;
+
+}
+else {
+
+    richTextEditorWrapper.hidden = true;
+
+}
+
+
+function getContentText() {
+
+    if (contentEditor) {
+
+        return contentEditor
+            .getText()
+            .trim();
+
+    }
+
+
+    return contentInput.value.trim();
+
+}
+
+
+function getContentHtml() {
+
+    const contentText =
+        getContentText();
+
+
+    if (!contentText) {
+
+        return "";
+
+    }
+
+
+    if (contentEditor) {
+
+        return contentEditor
+            .getSemanticHTML()
+            .trim();
+
+    }
+
+
+    return contentInput.value.trim();
+
+}
+
+
+function focusContentEditor() {
+
+    if (contentEditor) {
+
+        contentEditor.focus();
+
+    }
+    else {
+
+        contentInput.focus();
+
+    }
+
+}
+
+
+const categoryInput =
+    document.getElementById(
+        "category"
+    );
+
+
+const imageInput =
+    document.getElementById(
+        "coverImage"
+    );
+
+
+const imagePreview =
+    document.getElementById(
+        "imagePreview"
+    );
+
+
+const imagePreviewContainer =
+    document.getElementById(
+        "imagePreviewContainer"
+    );
+
+
+const saveDraftButton =
+    document.getElementById(
+        "saveDraftButton"
+    );
+
+
+const publishButton =
+    document.getElementById(
+        "publishButton"
+    );
+
+
+let previewObjectUrl = null;
+
+
+/* ================================== */
+/* CHARACTER COUNTERS                 */
+/* ================================== */
+
+function updateCounters() {
+
+    document.getElementById(
+        "titleCount"
+    ).textContent =
+        titleInput.value.length + "/150";
+
+
+    document.getElementById(
+        "summaryCount"
+    ).textContent =
+        summaryInput.value.length + "/300";
+
+}
+
+
+titleInput.addEventListener(
+    "input",
+    updateCounters
+);
+
+
+summaryInput.addEventListener(
+    "input",
+    updateCounters
+);
+
+
+updateCounters();
+
+
+/* ================================== */
+/* DISPLAY MESSAGE                    */
+/* ================================== */
+
+function displayMessage(
+    message,
+    type
+) {
+
+    const messageBox =
+        document.getElementById(
+            "messageBox"
+        );
+
+
+    messageBox.hidden = false;
+
+    messageBox.className =
+        "message-box " + type;
+
+    messageBox.textContent =
+        message;
+
+
+    messageBox.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+
+}
+
+
+/* ================================== */
+/* FORMAT API ERROR                   */
+/* ================================== */
+
+function getErrorMessage(data) {
+
+    if (Array.isArray(data.detail)) {
+
+        return data.detail.join(" ");
+
+    }
+
+
+    if (typeof data.detail === "string") {
+
+        return data.detail;
+
+    }
+
+
+    return (
+        data.message ||
+        "Unable to complete the request."
+    );
+
+}
+
+
+/* ================================== */
+/* IMAGE PREVIEW                      */
+/* ================================== */
+
+imageInput.addEventListener(
+    "change",
+    function () {
+
+        const selectedImage =
+            imageInput.files[0];
+
+
+        if (!selectedImage) {
+
+            return;
+
+        }
+
+
+        const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp"
+        ];
+
+
+        if (!allowedTypes.includes(
+            selectedImage.type
+        )) {
+
+            imageInput.value = "";
+
+            displayMessage(
+                "Only JPG, PNG and WebP images are allowed.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        const maximumSize =
+            5 * 1024 * 1024;
+
+
+        if (selectedImage.size > maximumSize) {
+
+            imageInput.value = "";
+
+            displayMessage(
+                "Image size cannot exceed 5 MB.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (previewObjectUrl) {
+
+            URL.revokeObjectURL(
+                previewObjectUrl
+            );
+
+        }
+
+
+        previewObjectUrl =
+            URL.createObjectURL(
+                selectedImage
+            );
+
+
+        imagePreview.src =
+            previewObjectUrl;
+
+
+        imagePreviewContainer.hidden =
+            false;
+
+    }
+);
+
+
+/* ================================== */
+/* REMOVE IMAGE                       */
+/* ================================== */
+
+document.getElementById(
+    "removeImageButton"
+).addEventListener(
+    "click",
+    function () {
+
+        imageInput.value = "";
+
+        currentImageUrl = "";
+
+
+        if (previewObjectUrl) {
+
+            URL.revokeObjectURL(
+                previewObjectUrl
+            );
+
+            previewObjectUrl = null;
+
+        }
+
+
+        imagePreview.src = "";
+
+        imagePreviewContainer.hidden =
+            true;
+
+    }
+);
+
+
+/* ================================== */
+/* UPLOAD IMAGE                       */
+/* ================================== */
+
+async function uploadSelectedImage() {
+
+    const selectedImage =
+        imageInput.files[0];
+
+
+    /*
+     * If the administrator did not choose a new image,
+     * retain the existing image URL.
+     */
+    if (!selectedImage) {
+
+        return currentImageUrl;
+
+    }
+
+
+    const formData =
+        new FormData();
+
+
+    formData.append(
+        "image",
+        selectedImage
+    );
+
+
+    const response =
+        await fetch(
+            "/api/admin/career-advice/upload-image",
+            {
+                method: "POST",
+                body: formData
+            }
+        );
+
+
+    const data =
+        await response.json();
+
+
+    if (!response.ok) {
+
+        throw new Error(
+            getErrorMessage(data)
+        );
+
+    }
+
+
+    return data.imageUrl;
+
+}
+
+
+/* ================================== */
+/* VALIDATE FORM                      */
+/* ================================== */
+
+function validateForm(action) {
+
+    const title =
+        titleInput.value.trim();
+
+
+    const category =
+        categoryInput.value;
+
+
+    const summary =
+        summaryInput.value.trim();
+
+
+    const content =
+        getContentText();
+
+
+    if (!title) {
+
+        displayMessage(
+            "Please enter a post title.",
+            "error"
+        );
+
+        titleInput.focus();
+
+        return false;
+
+    }
+
+
+    if (action === "publish") {
+
+        if (!category) {
+
+            displayMessage(
+                "Please select a category before publishing.",
+                "error"
+            );
+
+            categoryInput.focus();
+
+            return false;
+
+        }
+
+
+        if (!summary) {
+
+            displayMessage(
+                "Please enter a summary before publishing.",
+                "error"
+            );
+
+            summaryInput.focus();
+
+            return false;
+
+        }
+
+
+        if (!content) {
+
+            displayMessage(
+                "Please enter the post content before publishing.",
+                "error"
+            );
+
+            focusContentEditor();
+
+            return false;
+
+        }
+
+
+        if (content.length < 50) {
+
+            displayMessage(
+                "Post content must contain at least 50 characters.",
+                "error"
+            );
+
+            focusContentEditor();
+
+            return false;
+
+        }
+
+    }
+
+
+    return true;
+
+}
+
+
+/* ================================== */
+/* SUBMIT POST                        */
+/* ================================== */
+
+async function submitPost(action) {
+
+    if (!validateForm(action)) {
+
+        return;
+
+    }
+
+
+    if (action === "publish") {
+
+        const confirmed =
+            window.confirm(
+                "Publish this career advice post? " +
+                "Job seekers will be able to view it."
+            );
+
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+    }
+
+
+    saveDraftButton.disabled = true;
+
+    publishButton.disabled = true;
+
+
+    try {
+
+        const imageUrl =
+            await uploadSelectedImage();
+
+
+        const endpoint =
+            postId
+                ? `/api/admin/career-advice/${postId}`
+                : "/api/admin/career-advice";
+
+
+        const method =
+            postId
+                ? "PUT"
+                : "POST";
+
+
+        const response =
+            await fetch(
+                endpoint,
+                {
+                    method: method,
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        title:
+                            titleInput.value.trim(),
+
+                        category:
+                            categoryInput.value,
+
+                        summary:
+                            summaryInput.value.trim(),
+
+                        content:
+                            getContentHtml(),
+
+                        imageUrl:
+                            imageUrl,
+
+                        action:
+                            action
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                getErrorMessage(data)
+            );
+
+        }
+
+
+        displayMessage(
+            data.message,
+            "success"
+        );
+
+
+        setTimeout(
+            function () {
+
+                window.location.href =
+                    "/admin/career-advice";
+
+            },
+            800
+        );
+
+    }
+    catch (error) {
+
+        displayMessage(
+            error.message,
+            "error"
+        );
+
+    }
+    finally {
+
+        saveDraftButton.disabled = false;
+
+        publishButton.disabled = false;
+
+    }
+
+}
+
+
+/* ================================== */
+/* BUTTON EVENTS                      */
+/* ================================== */
+
+saveDraftButton.addEventListener(
+    "click",
+    function () {
+
+        submitPost("draft");
+
+    }
+);
+
+
+publishButton.addEventListener(
+    "click",
+    function () {
+
+        submitPost("publish");
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

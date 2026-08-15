@@ -15,6 +15,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore, storage
 
+from job_portal_web.backend.notifications import get_unread_notifications_count
+
 router = APIRouter()
 
 db = firestore.client()
@@ -75,6 +77,7 @@ async def edit_profile(request: Request):
         context={
             "seeker": seeker,
             "today": datetime.now(UTC).date().isoformat(),
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -126,6 +129,7 @@ async def update_profile(
                     "seeker": seeker,
                     "today": datetime.now(UTC).date().isoformat(),
                     "error": "Date of birth must be before today.",
+                    "unread_notifications_count": get_unread_notifications_count(request),
                 },
                 status_code=400,
             )
@@ -144,6 +148,7 @@ async def update_profile(
                     "seeker": seeker,
                     "today": datetime.now(UTC).date().isoformat(),
                     "error": "Please enter a valid email address.",
+                    "unread_notifications_count": get_unread_notifications_count(request),
                 },
                 status_code=400,
             )
@@ -163,6 +168,7 @@ async def update_profile(
                     "seeker": seeker,
                     "today": datetime.now(UTC).date().isoformat(),
                     "error": "Please enter a valid phone number.",
+                    "unread_notifications_count": get_unread_notifications_count(request),
                 },
                 status_code=400,
             )

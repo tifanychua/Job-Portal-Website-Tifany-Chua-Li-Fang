@@ -31,26 +31,41 @@ def context():
     return Context()
 
 
+# ============================================================
+# MOCK HELPERS
+# ============================================================
+
+
 def mock_company_login(db_mock, status="Active"):
+    """Configure Firestore mocks for an existing employer."""
+
     job_doc = MagicMock()
     job_doc.exists = False
 
     company_doc = MagicMock()
     company_doc.exists = True
-    company_doc.to_dict.return_value = {"status": status}
+    company_doc.to_dict.return_value = {
+        "status": status,
+        "accountStatus": "Active",
+    }
 
     def collection_side_effect(name):
         collection = MagicMock()
+
         if name == "job_seeker":
             collection.document.return_value.get.return_value = job_doc
+
         elif name == "company":
             collection.document.return_value.get.return_value = company_doc
+
         return collection
 
     db_mock.collection.side_effect = collection_side_effect
 
 
 def mock_company_not_found(db_mock):
+    """Configure Firestore mocks when no account exists."""
+
     job_doc = MagicMock()
     job_doc.exists = False
 
@@ -59,22 +74,36 @@ def mock_company_not_found(db_mock):
 
     def collection_side_effect(name):
         collection = MagicMock()
+
         if name == "job_seeker":
             collection.document.return_value.get.return_value = job_doc
+
         elif name == "company":
             collection.document.return_value.get.return_value = company_doc
+
         return collection
 
     db_mock.collection.side_effect = collection_side_effect
 
 
+# ============================================================
+# DIRECT PYTEST TESTS
+# ============================================================
+
+
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
 @patch("job_portal_web.backend.auth.db")
 def test_employer_login_success(mock_db, mock_verify, client):
-    mock_verify.return_value = {"uid": "company123"}
+    mock_verify.return_value = {
+        "uid": "company123",
+    }
+
     mock_company_login(mock_db)
 
-    response = client.post("/firebase-login", json={"token": "valid_token"})
+    response = client.post(
+        "/firebase-login",
+        json={"token": "valid_token"},
+    )
 
     assert response.status_code == 200
     assert response.json()["redirect"] == "/manage-jobs"
@@ -84,60 +113,98 @@ def test_employer_login_success(mock_db, mock_verify, client):
 def test_employer_invalid_token(mock_verify, client):
     mock_verify.side_effect = Exception("Authentication failed. Please sign in again.")
 
-    response = client.post("/firebase-login", json={"token": "wrong_token"})
+    response = client.post(
+        "/firebase-login",
+        json={"token": "wrong_token"},
+    )
 
     assert response.status_code == 401
-    assert response.json()["error"] == "Authentication failed. Please sign in again."
+
+    assert response.json()["error"] == ("Authentication failed. Please sign in again.")
 
 
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
 @patch("job_portal_web.backend.auth.db")
 def test_employer_not_found(mock_db, mock_verify, client):
-    mock_verify.return_value = {"uid": "company123"}
+    mock_verify.return_value = {
+        "uid": "company123",
+    }
+
     mock_company_not_found(mock_db)
 
-    response = client.post("/firebase-login", json={"token": "valid_token"})
+    response = client.post(
+        "/firebase-login",
+        json={"token": "valid_token"},
+    )
 
     assert response.status_code == 404
-    assert (
-        response.json()["error"]
-        == "No account information was found. Please complete your registration or contact support."
+
+    assert response.json()["error"] == (
+        "No account information was found. Please complete your registration or contact support."
     )
 
 
 def test_employer_empty_token(client):
-    response = client.post("/firebase-login", json={})
+    response = client.post(
+        "/firebase-login",
+        json={},
+    )
+
     assert response.status_code == 422
 
 
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
 @patch("job_portal_web.backend.auth.db")
 def test_employer_rejected_account(mock_db, mock_verify, client):
-    mock_verify.return_value = {"uid": "company123"}
-    mock_company_login(mock_db, "Rejected")
+    mock_verify.return_value = {
+        "uid": "company123",
+    }
 
-    response = client.post("/firebase-login", json={"token": "valid_token"})
+    mock_company_login(
+        mock_db,
+        status="Rejected",
+    )
+
+    response = client.post(
+        "/firebase-login",
+        json={"token": "valid_token"},
+    )
 
     assert response.status_code == 403
-    assert (
-        response.json()["error"]
-        == "Your company registration has been rejected. Please contact the administrator for assistance."
+
+    assert response.json()["error"] == (
+        "Your company registration has been rejected. "
+        "Please contact the administrator for assistance."
     )
 
 
 @patch("job_portal_web.backend.auth.auth.verify_id_token")
 @patch("job_portal_web.backend.auth.db")
 def test_employer_deactive_account(mock_db, mock_verify, client):
-    mock_verify.return_value = {"uid": "company123"}
-    mock_company_login(mock_db, "Deactive")
+    mock_verify.return_value = {
+        "uid": "company123",
+    }
 
-    response = client.post("/firebase-login", json={"token": "valid_token"})
+    mock_company_login(
+        mock_db,
+        status="Deactive",
+    )
+
+    response = client.post(
+        "/firebase-login",
+        json={"token": "valid_token"},
+    )
 
     assert response.status_code == 403
-    assert (
-        response.json()["error"]
-        == "Your company account has been deactivated. Please contact the administrator."
+
+    assert response.json()["error"] == (
+        "Your company account has been deactivated. Please contact the administrator."
     )
+
+
+# ============================================================
+# SUCCESSFUL EMPLOYER LOGIN BDD STEPS
+# ============================================================
 
 
 @given("the employer has a registered company account")
@@ -151,10 +218,16 @@ def valid_login(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-        verify.return_value = {"uid": "company123"}
+        verify.return_value = {
+            "uid": "company123",
+        }
+
         mock_company_login(db)
 
-        context.response = client.post("/firebase-login", json={"token": "valid_token"})
+        context.response = client.post(
+            "/firebase-login",
+            json={"token": "valid_token"},
+        )
 
 
 @then("the system should authenticate the employer successfully")
@@ -167,6 +240,11 @@ def redirect_dashboard(context):
     assert context.response.json()["redirect"] == "/manage-jobs"
 
 
+# ============================================================
+# INVALID EMPLOYER LOGIN BDD STEPS
+# ============================================================
+
+
 @given("the employer has entered incorrect login credentials")
 def invalid_credentials():
     pass
@@ -176,18 +254,28 @@ def invalid_credentials():
 def invalid_login(client, context):
     with patch("job_portal_web.backend.auth.auth.verify_id_token") as verify:
         verify.side_effect = Exception("Authentication failed. Please sign in again.")
-        context.response = client.post("/firebase-login", json={"token": "wrong_token"})
+
+        context.response = client.post(
+            "/firebase-login",
+            json={"token": "wrong_token"},
+        )
 
 
 @then("the system should display an error message")
 def error_message(context):
     assert context.response.status_code == 401
-    assert context.response.json()["error"] == "Authentication failed. Please sign in again."
+
+    assert context.response.json()["error"] == ("Authentication failed. Please sign in again.")
 
 
 @then("prevent access to the account")
 def prevent_access(context):
     assert context.response.status_code == 401
+
+
+# ============================================================
+# ACCESS EMPLOYER FEATURES BDD STEPS
+# ============================================================
 
 
 @given("the employer has logged in successfully")
@@ -196,11 +284,19 @@ def employer_logged_in(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-        verify.return_value = {"uid": "company123"}
+        verify.return_value = {
+            "uid": "company123",
+        }
+
         mock_company_login(db)
 
-        context.login_response = client.post("/firebase-login", json={"token": "valid_token"})
+        context.login_response = client.post(
+            "/firebase-login",
+            json={"token": "valid_token"},
+        )
+
         assert context.login_response.status_code == 200
+
         context.auth_token = context.login_response.json().get("token")
 
 
@@ -208,7 +304,10 @@ def employer_logged_in(client, context):
 def access_platform(client, context):
     cookies = context.login_response.cookies
 
-    context.dashboard_response = client.get("/manage-jobs", cookies=cookies)
+    context.dashboard_response = client.get(
+        "/manage-jobs",
+        cookies=cookies,
+    )
 
     context.post_job_response = context.dashboard_response
     context.manage_applications_response = context.dashboard_response
@@ -220,9 +319,15 @@ def access_platform(client, context):
 )
 def allow_access(context):
     assert context.login_response.status_code == 200
+
     assert context.login_response.json()["redirect"] == "/manage-jobs"
 
     assert context.dashboard_response.status_code == 200
+
+
+# ============================================================
+# EMPLOYER ROLE RESTRICTION
+# ============================================================
 
 
 def test_employer_cannot_access_job_seeker_features(client):
@@ -230,13 +335,25 @@ def test_employer_cannot_access_job_seeker_features(client):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-        verify.return_value = {"uid": "company123"}
+        verify.return_value = {
+            "uid": "company123",
+        }
+
         mock_company_login(db)
 
-        login_response = client.post("/firebase-login", json={"token": "valid_token"})
+        login_response = client.post(
+            "/firebase-login",
+            json={"token": "valid_token"},
+        )
 
         assert login_response.status_code == 200
+
         assert login_response.json()["redirect"] == "/manage-jobs"
+
+
+# ============================================================
+# BLOCKED EMPLOYER ACCOUNT BDD STEPS
+# ============================================================
 
 
 @given('the employer account status is "Rejected" or "Deactive"')
@@ -250,9 +367,14 @@ def blocked_login(client, context):
         patch("job_portal_web.backend.auth.auth.verify_id_token") as verify,
         patch("job_portal_web.backend.auth.db") as db,
     ):
-        verify.return_value = {"uid": "company123"}
+        verify.return_value = {
+            "uid": "company123",
+        }
 
-        mock_company_login(db, "Rejected")
+        mock_company_login(
+            db,
+            status="Rejected",
+        )
 
         context.response = client.post(
             "/firebase-login",
@@ -267,7 +389,7 @@ def block_login(context):
 
 @then("display an account status error message")
 def account_status_error(context):
-    assert (
-        context.response.json()["error"]
-        == "Your company registration has been rejected. Please contact the administrator for assistance."
+    assert context.response.json()["error"] == (
+        "Your company registration has been rejected. "
+        "Please contact the administrator for assistance."
     )

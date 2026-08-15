@@ -84,36 +84,53 @@
 .job-tabs {
     display: flex;
     align-items: center;
-    gap: 40px;
-    flex-shrink: 0;
+    gap: 48px;
 }
 
 .job-tab {
-    appearance: none;
-    border: none;
-    background: transparent;
+    position: relative;
 
-    color: #6b7280;
-    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+
+    padding: 12px 0 16px;
+
+    color: #64748b;
+
+    font-size: 15px;
     font-weight: 600;
-    font-family: inherit;
 
-    padding: 0 0 12px 0;
+    text-decoration: none !important;
 
-    cursor: pointer;
+    border-bottom: 3px solid transparent;
 
-    border-bottom: 2px solid transparent;
+    transition: 0.2s ease;
 }
 
+.job-tab:link,
+.job-tab:visited,
+.job-tab:hover,
+.job-tab:active {
+    text-decoration: none !important;
+}
+
+/* Number */
+.job-tab span {
+    color: inherit;
+    text-decoration: none !important;
+}
+
+/* Hover */
 .job-tab:hover {
     color: #2563eb;
 }
 
+/* Current selected tab */
 .job-tab.active {
     color: #2563eb;
-    border-bottom: 2px solid #2563eb;
+    border-bottom-color: #2563eb;
 }
-
 
 /* Right side: Search + Filter */
 .toolbar {
@@ -361,4 +378,319 @@
     padding: 50px !important;
     text-align: center;
     color: #94a3b8 !important;
+}
+
+/* ===========================
+   CLOSED STATUS
+=========================== */
+
+.status-closed{
+    background:#FEE2E2;
+    color:#B91C1C;
+}
+
+
+/* ===========================
+   CLOSE JOB DROPDOWN ACTION
+=========================== */
+
+.action-dropdown form{
+    width:100%;
+    margin:0;
+    padding:0;
+}
+
+
+.close-action{
+    width:100%;
+
+    display:flex;
+    align-items:center;
+
+    gap:10px;
+
+    padding:10px 14px;
+
+    border:none;
+
+    background:#FFFFFF;
+
+    color:#D97706;
+
+    font-size:13px;
+    font-weight:500;
+
+    text-align:left;
+
+    cursor:pointer;
+}
+
+
+.close-action:hover{
+    background:#FFF7ED;
+}
+
+
+.close-action i{
+    width:16px;
+    color:#F59E0B;
+}
+
+
+/* ===========================
+   APPLICATION NUMBER
+=========================== */
+
+.application-count{
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+}
+
+
+.application-count i{
+    color:#94A3B8;
+}
+
+
+.application-count strong{
+    color:#1F2937;
+}
+
+
+/* ===========================
+   PAGINATION
+=========================== */
+
+.pagination-container{
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    gap:8px;
+
+    margin-top:28px;
+    margin-bottom:25px;
+}
+
+
+.page-btn{
+    width:48px;
+    height:48px;
+
+    display:inline-flex;
+
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #E2E8F0;
+
+    border-radius:12px;
+
+    background:#FFFFFF;
+
+    color:#475569;
+
+    font-size:15px;
+    font-weight:700;
+
+    text-decoration:none;
+
+    transition:.2s;
+}
+
+
+.page-btn:hover{
+    background:#EFF6FF;
+
+    color:#2563EB;
+
+    border-color:#BFDBFE;
+}
+
+
+.page-btn.active{
+    background:#2563EB;
+
+    color:#FFFFFF;
+
+    border-color:#2563EB;
+}
+
+/* ==========================================
+   CLICKABLE JOB ROW
+========================================== */
+
+.clickable-job-row{
+    cursor:pointer;
+
+    transition:
+        background .2s ease,
+        transform .2s ease;
+}
+
+
+.clickable-job-row:hover{
+    background:#F8FBFF;
+}
+
+
+/* Keep action buttons normal */
+
+.clickable-job-row .action-cell{
+    cursor:default;
+}
+
+/* ==========================================
+   SUCCESS TOAST
+========================================== */
+
+.success-toast{
+    position: fixed !important;
+
+    top: 85px !important;
+    right: 30px !important;
+
+    width: 380px;
+    max-width: calc(100vw - 40px);
+
+    z-index: 99999;
+
+    margin: 0 !important;
+
+    background: #ffffff;
+
+    border: 1px solid #dcfce7 !important;
+    border-left: 4px solid #22c55e !important;
+
+    border-radius: 12px;
+
+    padding: 16px 18px;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+
+    box-shadow:
+        0 12px 35px
+        rgba(15, 23, 42, 0.16);
+
+    animation:
+        successToastIn .35s ease forwards;
+}
+
+
+/* ICON */
+
+.success-toast .alert-icon{
+    width: 38px;
+    height: 38px;
+
+    min-width: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #dcfce7;
+
+    color: #16a34a;
+
+    border-radius: 10px;
+
+    font-size: 17px;
+}
+
+
+/* CONTENT */
+
+.success-toast .alert-content{
+    flex: 1;
+}
+
+
+.success-toast .alert-content strong{
+    display: block;
+
+    color: #0f172a;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    margin-bottom: 4px;
+}
+
+
+.success-toast .alert-content p{
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* CLOSE */
+
+.success-toast .alert-close-btn{
+    width: 28px;
+    height: 28px;
+
+    min-width: 28px;
+
+    padding: 0;
+
+    border: none;
+
+    background: transparent;
+
+    color: #94a3b8;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    border-radius: 6px;
+}
+
+
+.success-toast .alert-close-btn:hover{
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+/* APPEAR */
+
+@keyframes successToastIn{
+
+    from{
+        opacity: 0;
+        transform: translateX(40px);
+    }
+
+    to{
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+/* DISAPPEAR */
+
+.success-toast.toast-out{
+    opacity: 0;
+    transform: translateX(40px);
+
+    transition:
+        opacity .3s ease,
+        transform .3s ease;
 }

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Job Details - JobConnect
+    </title>
+
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <link
+        rel="stylesheet"
+        href="/css/employerHeader.css">
+
+
+    <link
+        rel="stylesheet"
+        href="/css/viewJob.css">
+
+</head>
+
+
+<body>
+
+
+{% include "employerHeader.html" %}
+
+
+<main class="main-content">
+
+
+    <!-- ============================================== -->
+    <!-- PAGE HEADER -->
+    <!-- ============================================== -->
+
+    <div class="job-details-header">
+
+        <div class="header-title">
+
+            <h1>Job Details</h1>
+
+            <p>
+                View complete information for this job posting.
+            </p>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <!-- Edit Job -->
+            <a href="/edit-job/{{ job.job_id }}"
+            class="header-action-btn edit-job-btn">
+
+                <i class="fa-regular fa-pen-to-square"></i>
+
+                Edit Job
+
+            </a>
+
+
+            <!-- Back to Jobs -->
+            <a href="/manage-jobs"
+            class="header-action-btn back-jobs-btn">
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back to Jobs
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ============================================== -->
+    <!-- JOB SUMMARY -->
+    <!-- ============================================== -->
+
+    <section class="job-summary-card">
+
+
+        <div class="job-summary-main">
+
+
+            <div class="job-icon">
+
+                <i class="fa-solid fa-briefcase"></i>
+
+            </div>
+
+
+            <div class="job-summary-content">
+
+                <div class="job-title-row">
+
+                    <h2>
+                        {{ job.job_title }}
+                    </h2>
+
+
+                    <span
+                        class="status-badge status-{{ job.status|lower }}">
+
+                        {{ job.status }}
+
+                    </span>
+
+                </div>
+
+
+                <div class="job-meta">
+
+
+                    <span>
+
+                        <i class="fa-solid fa-location-dot"></i>
+
+                        {{ job.location }}
+
+                    </span>
+
+
+                    <span>
+
+                        <i class="fa-solid fa-clock"></i>
+
+                        {{ job.employment_type }}
+
+                    </span>
+
+
+                    <span>
+
+                        <i class="fa-solid fa-user-tie"></i>
+
+                        {{ job.position }}
+
+                    </span>
+
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="summary-stats">
+
+            <div class="summary-stat">
+
+                <span>
+                    Applications
+                </span>
+
+                <strong>
+                    {{ job.application_count|default(0, true) }}
+                </strong>
+
+            </div>
+
+
+            <div class="summary-stat">
+
+                <span>
+                    Vacancies
+                </span>
+
+                <strong>
+                    {{ job.vacancies|default(0, true) }}
+                </strong>
+
+            </div>
+
+
+            <div class="summary-stat">
+
+                <span>
+                    Posted On
+                </span>
+
+                <strong>
+
+                    {% if job.publish_date %}
+
+                        {{ job.publish_date.strftime("%d %b %Y") }}
+
+                    {% elif job.created_at %}
+
+                        {{ job.created_at.strftime("%d %b %Y") }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <div class="summary-stat">
+
+                <span>
+                    Expiry Date
+                </span>
+
+                <strong>
+
+                    {% if job.expiry_date %}
+
+                        {{ job.expiry_date.strftime("%d %b %Y") }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- BASIC INFORMATION -->
+    <!-- ============================================== -->
+
+    <section class="details-card">
+
+
+        <div class="section-heading">
+
+            <div class="section-icon">
+
+                <i class="fa-solid fa-circle-info"></i>
+
+            </div>
+
+
+            <div>
+
+                <h2>
+                    Job Information
+                </h2>
+
+                <p>
+                    Basic details of the job posting.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="information-grid">
+
+
+            <div class="information-item">
+
+                <label>
+                    Job Category
+                </label>
+
+                <strong>
+                    {{ job.category }}
+                </strong>
+
+            </div>
+
+
+            <div class="information-item">
+
+                <label>
+                    Employment Type
+                </label>
+
+                <strong>
+                    {{ job.employment_type }}
+                </strong>
+
+            </div>
+
+
+            <div class="information-item">
+
+                <label>
+                    Position Level
+                </label>
+
+                <strong>
+                    {{ job.position }}
+                </strong>
+
+            </div>
+
+
+            <div class="information-item">
+
+                <label>
+                    Vacancies
+                </label>
+
+                <strong>
+                    {{ job.vacancies }}
+                </strong>
+
+            </div>
+
+
+            <div class="information-item full-width">
+
+                <label>
+                    Work Location
+                </label>
+
+                <strong>
+                    {{ job.location }}
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- DESCRIPTION -->
+    <!-- ============================================== -->
+
+    <section class="details-card">
+
+
+        <div class="section-heading">
+
+            <div class="section-icon">
+
+                <i class="fa-regular fa-file-lines"></i>
+
+            </div>
+
+
+            <div>
+
+                <h2>
+                    Job Details
+                </h2>
+
+                <p>
+                    Description, responsibilities and requirements.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="text-detail-section">
+
+            <label>
+                Job Description
+            </label>
+
+            <div class="detail-text">
+                {{ job.job_desc }}
+            </div>
+
+        </div>
+
+
+        <div class="text-detail-section">
+
+            <label>
+                Job Responsibilities
+            </label>
+
+            <div
+                class="detail-text"
+                style="white-space:pre-line;">{{ job.job_responsibility }}</div>
+
+        </div>
+
+
+        <div class="text-detail-section">
+
+            <label>
+                Job Requirements
+            </label>
+
+            <div
+                class="detail-text"
+                style="white-space:pre-line;">{{ job.job_req }}</div>
+
+        </div>
+
+
+        <div class="text-detail-section">
+
+            <label>
+                Additional Information
+            </label>
+
+
+            <div class="detail-text">
+
+                {% if job.additional_info %}
+
+                    {{ job.additional_info }}
+
+                {% else %}
+
+                    <span class="empty-information">
+                        No additional information provided.
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- SALARY -->
+    <!-- ============================================== -->
+
+    <section class="details-card">
+
+
+        <div class="section-heading">
+
+            <div class="section-icon">
+
+                <i class="fa-solid fa-money-bill-wave"></i>
+
+            </div>
+
+
+            <div>
+
+                <h2>
+                    Salary & Benefits
+                </h2>
+
+                <p>
+                    Compensation and benefits provided.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="salary-display">
+
+
+            <div>
+
+                <label>
+                    Salary Type
+                </label>
+
+                <strong>
+                    {{ job.salaryType|title }}
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <label>
+                    Salary
+                </label>
+
+                <strong class="salary-value">
+
+                    {% if job.salary_display %}
+
+                        {{ job.salary_display }}
+
+                    {% elif job.salary %}
+
+                        RM {{ job.salary }}
+
+                    {% else %}
+
+                        Negotiable
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="benefit-section">
+
+            <label>
+                Benefits
+            </label>
+
+
+            <div class="benefit-list">
+
+                {% if job.benefits %}
+
+                    {% for benefit in job.benefits %}
+
+                    <span>
+
+                        <i class="fa-solid fa-check"></i>
+
+                        {{ benefit }}
+
+                    </span>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <span class="no-benefits">
+                        No benefits specified
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+<script>
+
+function confirmCloseJob(form){
+
+    const jobTitle =
+        form.dataset.jobTitle;
+
+    return confirm(
+        'Close Job Posting\n\n'
+        +
+        'Are you sure you want to close "'
+        +
+        jobTitle
+        +
+        '"?\n\n'
+        +
+        'Job seekers will no longer be able '
+        +
+        'to apply for this job.'
+    );
+}
+
+</script>
+
+
+</body>
+
+</html>

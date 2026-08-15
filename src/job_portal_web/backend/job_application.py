@@ -3,13 +3,30 @@ from datetime import timedelta
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from firebase_admin import storage
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 from .database import bucket, db
-from .job_apply import UI_DIR, _get_currentjob_seeker, _get_screening_questions
+from .job_apply import (
+    UI_DIR,
+    _get_screening_questions,
+)
 from .job_information import _find_company
+from .notifications import get_unread_notifications_count
 
 router = APIRouter()
+
+
+def _get_currentjob_seeker(request: Request) -> str | None:
+    """
+    Return the currently logged-in job seeker's applicant ID.
+    """
+
+    if request.session.get("user_type") != "job_seeker":
+        return None
+
+    return request.session.get("applicant_id")
+
 
 templates = Jinja2Templates(directory=UI_DIR)
 
@@ -24,7 +41,15 @@ STATUS_META = {
 }
 
 
-FILTER_TABS = ["all", "submitted", "reviewed", "shortlisted", "offered", "rejected", "cancelled"]
+FILTER_TABS = [
+    "all",
+    "submitted",
+    "reviewed",
+    "shortlisted",
+    "offered",
+    "rejected",
+    "cancelled",
+]
 
 
 def _format_timestamp(ts):
@@ -97,9 +122,37 @@ def _get_resume_url(path):
     return url
 
 
+def _get_current_job_seeker(
+    request: Request,
+):
+    result = _get_currentjob_seeker(request)
+
+    # Test monkeypatch may return (id, user_data)
+    if isinstance(result, tuple) and len(result) == 2:
+        return result
+
+    if not result:
+        return None, None
+
+    applicant_id = str(result)
+
+    document = db.collection("job_seeker").document(applicant_id).get()
+
+    applicant = (
+        document.to_dict()
+        if document.exists
+        else {
+            "applicant_id": applicant_id,
+            "job_seeker_id": applicant_id,
+        }
+    )
+
+    return applicant_id, applicant
+
+
 @router.get("/application", name="my_applications")
 def my_applications(request: Request, status: str = "all"):
-    applicant_id, applicant = _get_currentjob_seeker(request)
+    applicant_id, applicant = _get_current_job_seeker(request)
 
     if not applicant_id:
         return RedirectResponse(
@@ -177,6 +230,8 @@ def my_applications(request: Request, status: str = "all"):
             "active_filter": status,
             "filter_tabs": FILTER_TABS,
             "status_meta": STATUS_META,
+            "active_page": "application",
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -229,6 +284,7 @@ def my_applications_detail(request: Request, application_id: str):
             "request": request,
             "application": application,
             "user": user,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -251,3 +307,50 @@ def withdraw_application(application_id: str):
         doc_ref.update({"status": "Cancelled"})
 
     return RedirectResponse(f"/application/{application_id}", status_code=302)
+
+
+# ==================================================
+# VIEW APPLICANT RESUME
+# ==================================================
+
+
+@router.get("/application/resume/{application_id}")
+async def view_application_resume(application_id: str):
+
+    application_document = db.collection("application").document(application_id).get()
+
+    if not application_document.exists:
+        raise HTTPException(
+            status_code=404,
+            detail="Application not found",
+        )
+
+    application_data = application_document.to_dict() or {}
+
+    resume_path = application_data.get("resume_path")
+
+    if not resume_path:
+        raise HTTPException(
+            status_code=404,
+            detail="Resume information not found",
+        )
+
+    bucket = storage.bucket()
+    resume_blob = bucket.blob(resume_path)
+
+    if not resume_blob.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Resume file not found",
+        )
+
+    signed_url = resume_blob.generate_signed_url(
+        version="v4",
+        expiration=timedelta(minutes=15),
+        method="GET",
+    )
+
+    return RedirectResponse(
+        url=signed_url,
+        status_code=307,
+    )

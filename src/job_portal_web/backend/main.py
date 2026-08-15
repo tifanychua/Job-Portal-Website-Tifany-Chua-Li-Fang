@@ -2,7 +2,10 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import (
+    HTMLResponse,
+    RedirectResponse,
+)
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -10,12 +13,15 @@ from starlette.middleware.sessions import SessionMiddleware
 from job_portal_web.backend.routes.education import router as education_router
 from job_portal_web.backend.routes.experience import router as experience_router
 
+from .admin_users import router as admin_users_router
 from .applicant import router as applicant_router
 
 # Routers
 from .auth import router as auth_router
+from .career_advice import router as career_advice_router
 from .chat import router as chat_router
 from .database import db
+from .helper import get_company
 from .homepage import router as home_router
 from .interview import router as interview_router
 from .job_application import router as job_application_router
@@ -23,14 +29,27 @@ from .job_apply import router as job_apply_router
 from .job_information import router as job_information_router
 from .jobs import router as jobs_router
 from .messages import router as messages_router
+from .notifications import get_unread_notifications_count
+from .notifications import router as notifications_router
 from .routes.admin import router as admin_router
+from .routes.adminAnalytics import router as admin_analytics_router
+from .routes.adminTransaction import router as admin_transaction_router
+from .routes.companyBrowse import router as company_browse_router
+from .routes.companyDetails import router as company_details_router
 from .routes.companyProfile import router as companyProfile_router
 from .routes.editCompanyProfile import router as editCompanyProfile_router
 from .routes.editProfile import router as editProfile_router
 from .routes.employer import router as employer_router
 from .routes.employerApplication import router as employer_application_router
+from .routes.employerCredit import router as employer_credit_router
+from .routes.employerPlans import router as employer_plans_router
+from .routes.employerTransactions import router as employer_transactions_router
 from .routes.jobSeekerProfile import router as jobSeekerProfile_router
+from .routes.payment import router as payment_router
 from .routes.skill import router as skill_router
+from .routes.stripePayment import router as stripe_payment_router
+from .routes.writeCompanyReview import router as write_company_review_router
+from .saved_job import router as saved_jobs_router
 
 # ==================================================
 # APP
@@ -157,7 +176,42 @@ app.include_router(skill_router)
 
 app.include_router(editCompanyProfile_router)
 
+# Career advice feature
+app.include_router(career_advice_router)
 
+app.include_router(education_router)
+
+app.include_router(experience_router)
+
+app.include_router(companyProfile_router)
+
+app.include_router(skill_router)
+
+app.include_router(editCompanyProfile_router)
+
+app.include_router(admin_users_router)
+app.include_router(saved_jobs_router)
+app.include_router(employer_credit_router)
+
+app.include_router(payment_router)
+
+app.include_router(company_browse_router)
+
+app.include_router(company_details_router)
+
+app.include_router(write_company_review_router)
+
+app.include_router(notifications_router)
+
+app.include_router(admin_transaction_router)
+
+app.include_router(employer_plans_router)
+
+app.include_router(stripe_payment_router)
+
+app.include_router(employer_transactions_router)
+
+app.include_router(admin_analytics_router)
 # ==================================================
 # TEMPLATE HELPER
 # ==================================================
@@ -168,15 +222,17 @@ def render_template(request: Request, template: str, context=None):
     if context is None:
         context = {}
 
-    # Get current logged-in user
+    # Current user
     user = get_current_user(request)
-
-    # Existing user variable
     context["user"] = user
 
-    # Add company variable for employerHeader.html
+    # Employer information
     if request.session.get("user_type") == "employer":
-        context["company"] = user
+        company = get_company(request)
+        context["company"] = company
+
+    # Live unread notification badge
+    context.setdefault("unread_notifications_count", get_unread_notifications_count(request))
 
     return templates.TemplateResponse(request=request, name=template, context=context)
 
@@ -289,6 +345,49 @@ def schedule_list_page(request: Request):
     return render_template(request, "schedule_list.html", {"active_page": "schedule_list"})
 
 
+@app.get("/login")
+def login_page(request: Request):
+    return render_template(request, "login.html")
+
+
+@app.get("/career-advice")
+def view_career_advice(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="jobSeekerCareerAdvice.html",
+        context={"request": request},
+    )
+
+
+@app.get("/about-us", response_class=HTMLResponse)
+def about_us_page(request: Request):
+    user = None
+    unread_notifications_count = 0
+
+    if request.session.get("user_type") == "job_seeker":
+        applicant_id = request.session.get("applicant_id")
+
+        if applicant_id:
+            user_document = db.collection("job_seeker").document(str(applicant_id)).get()
+
+            if user_document.exists:
+                user = user_document.to_dict() or {}
+                user["applicant_id"] = applicant_id
+
+                unread_notifications_count = get_unread_notifications_count(request)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="aboutUs.html",
+        context={
+            "request": request,
+            "user": user,
+            "active_page": "about-us",
+            "unread_notifications_count": (unread_notifications_count),
+        },
+    )
+
+
 # ==================================================
 # RUN
 # ==================================================
@@ -297,8 +396,3 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
-
-
-@app.get("/login")
-def login_page(request: Request):
-    return render_template(request, "login.html")

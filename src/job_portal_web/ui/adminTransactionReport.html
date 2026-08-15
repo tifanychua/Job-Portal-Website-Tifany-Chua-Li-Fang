@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Transaction Report - JobConnect</title>
+
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+    <link rel="stylesheet"
+          href="/css/adminTransactions.css">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+</head>
+
+<body>
+
+{% include "adminHeader.html" %}
+
+
+<div class="admin-page">
+
+<main>
+
+    <!-- ========================================= -->
+    <!-- HEADER -->
+    <!-- ========================================= -->
+
+    <div class="page-header">
+
+        <div>
+
+            <h1>
+                Transaction Report
+            </h1>
+
+            <p>
+                Generate and download transaction reports based on selected filters.
+            </p>
+
+        </div>
+
+
+        <div class="header-buttons">
+
+            <a href="/admin/transactions"
+               class="back-btn">
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- REPORT FILTER CARD -->
+    <!-- ========================================= -->
+
+    <div class="report-filter-card">
+
+        <div class="report-filter-title">
+
+            <div class="report-filter-title-icon">
+                <i class="fa-solid fa-filter"></i>
+            </div>
+
+            <div>
+                <h2>Report Filters</h2>
+
+                <p>
+                    Select the criteria below to generate a transaction report.
+                </p>
+            </div>
+
+        </div>
+
+
+        <form
+            method="GET"
+            action="/admin/transactions/report">
+
+            <input
+                type="hidden"
+                name="generate"
+                value="1">
+
+            <div class="report-filter-grid">
+
+
+                <div>
+
+                    <label>
+                        From Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="from_date"
+                        id="reportFromDate"
+                        value="{{ from_date }}">
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        To Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="to_date"
+                        id="reportToDate"
+                        value="{{ to_date }}">
+
+                </div>
+
+
+                <div>
+
+                    <label>
+                        Status
+                    </label>
+
+                    <select name="status">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="COMPLETED"
+                            {% if current_status == "COMPLETED" %}
+                            selected
+                            {% endif %}>
+                            Completed
+                        </option>
+
+                        <option value="PENDING"
+                            {% if current_status == "PENDING" %}
+                            selected
+                            {% endif %}>
+                            Pending
+                        </option>
+
+                        <option value="FAILED"
+                            {% if current_status == "FAILED" %}
+                            selected
+                            {% endif %}>
+                            Failed
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div>
+
+                    <!-- <label>
+                        Payment Method
+                    </label>
+
+                    <select name="payment_method">
+
+                        <option value="">
+                            All Payment Methods
+                        </option>
+
+                        <option value="PayPal"
+                            {% if current_payment_method == "PayPal" %}
+                            selected
+                            {% endif %}>
+                            PayPal
+                        </option>
+
+                        <option value="Credit Card"
+                            {% if current_payment_method == "Credit Card" %}
+                            selected
+                            {% endif %}>
+                            Credit Card
+                        </option>
+
+                    </select> -->
+
+                </div>
+
+            </div>
+
+
+            <div class="report-filter-actions">
+
+                <a
+                    href="/admin/transactions/report"
+                    class="clear-report-btn">
+
+                    Clear
+
+                </a>
+
+
+                <button
+                    type="submit"
+                    class="generate-report-btn">
+
+                    <i class="fa-solid fa-chart-column"></i>
+
+                    Generate Report
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- REPORT PREVIEW -->
+    <!-- ========================================= -->
+
+    {% if generated %}
+    <div class="report-preview-card">
+
+        <div class="report-preview-header">
+
+            <div>
+
+                <h2>
+                    Report Preview
+                </h2>
+
+                <p>
+                    Review the generated transaction report before downloading.
+                </p>
+
+            </div>
+
+
+            <a
+                href="/admin/transactions/report/download?from_date={{ from_date }}&to_date={{ to_date }}&status={{ current_status }}"
+                class="download-report-btn">
+
+                <i class="fa-solid fa-download"></i>
+
+                Download PDF
+
+            </a>
+
+        </div>
+
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Transaction ID</th>
+                        <th>Company</th>
+                        <th>Package</th>
+                        <th>Payment Method</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                {% if transactions %}
+
+                    {% for transaction in transactions %}
+
+                    <tr>
+
+                        <td>
+                            {{ transaction.transaction_id }}
+                        </td>
+
+                        <td>
+                            {{ transaction.company_name }}
+                        </td>
+
+                        <td>
+                            {{ transaction.package }}
+                        </td>
+
+                        <td>
+                            {{ transaction.payment_method }}
+                        </td>
+
+                        <td>
+                            RM {{ "%.2f"|format(transaction.amount|float) }}
+                        </td>
+
+                        <td>
+
+                            {% if transaction.status == "COMPLETED" %}
+
+                            <span class="status success">
+                                Completed
+                            </span>
+
+                            {% elif transaction.status == "PENDING" %}
+
+                            <span class="status pending">
+                                Pending
+                            </span>
+
+                            {% elif transaction.status == "FAILED" %}
+
+                            <span class="status failed">
+                                Failed
+                            </span>
+
+                            {% else %}
+
+                            <span class="status">
+                                {{ transaction.status }}
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+
+                        <td>
+
+                            {% if transaction.completed_at %}
+
+                                {{ transaction.completed_at.strftime("%d %b %Y") }}
+
+                            {% elif transaction.created_at %}
+
+                                {{ transaction.created_at.strftime("%d %b %Y") }}
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                {% else %}
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="empty-state">
+
+                            <i class="fa-solid fa-receipt"></i>
+
+                            <p>
+                                No transactions found for this report.
+                            </p>
+
+                        </td>
+
+                    </tr>
+
+                {% endif %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+    {% endif %}
+
+</main>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const fromDate = document.getElementById("reportFromDate");
+    const toDate = document.getElementById("reportToDate");
+
+    const today = new Date().toISOString().split("T")[0];
+
+    fromDate.max = today;
+    toDate.max = today;
+
+    fromDate.addEventListener("change", function () {
+
+        if (fromDate.value) {
+            toDate.min = fromDate.value;
+        } else {
+            toDate.removeAttribute("min");
+        }
+
+        if (
+            fromDate.value &&
+            toDate.value &&
+            toDate.value < fromDate.value
+        ) {
+            toDate.value = "";
+        }
+
+    });
+
+    toDate.addEventListener("change", function () {
+
+        if (toDate.value) {
+            fromDate.max = toDate.value;
+        } else {
+            fromDate.max = today;
+        }
+
+        if (
+            fromDate.value &&
+            toDate.value &&
+            fromDate.value > toDate.value
+        ) {
+            fromDate.value = "";
+        }
+
+    });
+
+    if (fromDate.value) {
+        toDate.min = fromDate.value;
+    }
+
+    if (toDate.value) {
+        fromDate.max = toDate.value;
+    }
+
+});
+</script>
+
+</body>
+
+</html>

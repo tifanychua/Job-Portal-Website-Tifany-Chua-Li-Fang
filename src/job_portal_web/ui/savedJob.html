@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobConnect — Saved Jobs</title>
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/jobs.css">
+  <link rel="stylesheet" href="/css/profile.css">
+  <link rel="stylesheet" href="/css/savedJob.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+  {% include "components/header.html" %}
+
+  <div class="profile-page">
+    <div class="profile-layout">
+
+      {% include "components/profile_sidebar.html" %}
+
+      <div class="profile-main">
+
+  <div class="saved-page">
+
+    <!-- ============================== PAGE HEADER ============================== -->
+    <div class="saved-header">
+      <div class="saved-header-title">
+        <div>
+          <h1 class="text-page-title">Saved Jobs</h1>
+          <p class="text-normal">Keep track of interesting job opportunities and apply anytime.</p>
+        </div>
+      </div>
+
+        <div class="sort-select">
+          <span>Sort by:</span>
+          <select id="savedSort" onchange="filterSavedJobs()">
+            <option value="recent">Recently Saved</option>
+            <option value="oldest">Oldest Saved</option>
+            <option value="title-asc">Title (A-Z)</option>
+            <option value="title-desc">Title (Z-A)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================== TABS ============================== -->
+    <div class="saved-tabs">
+      <button type="button" class="saved-tab active" data-filter="all" onclick="setSavedTab('all', this)">
+        All Saved <span class="tab-count">({{ total_saved }})</span>
+      </button>
+      <button type="button" class="saved-tab" data-filter="applied" onclick="setSavedTab('applied', this)">
+        Applied <span class="tab-count">({{ total_applied }})</span>
+      </button>
+    </div>
+
+    <!-- ============================== SAVED JOB LIST ============================== -->
+    <div class="saved-grid" id="savedGrid">
+
+      {% for job in saved_jobs %}
+
+      <div class="saved-card"
+        data-id="{{ job.id }}"
+        data-title="{{ job.job_title | lower }}"
+        data-company="{{ job.companyName | lower }}"
+        data-saved-ts="{{ job.saved_at_sort }}"
+        data-applied="{{ 'true' if job.is_applied else 'false' }}"
+        onclick="window.location.href='/jobs/{{ job.id }}'">
+
+        <button type="button" class="saved-unsave-btn" title="Remove from saved jobs"
+          onclick="event.stopPropagation(); unsaveJob('{{ job.id }}', this)">
+          <i class="fa-solid fa-heart"></i>
+        </button>
+
+        <div class="saved-card-top">
+          <div class="job-logo">
+            {% if job.company_logo and job.company_logo != "default.jpg" %}
+              <div class="logo-placeholder"><img src="{{ job.company_logo }}" alt="{{ job.companyName }}" loading="lazy"></div>
+            {% else %}
+              <div class="logo-placeholder">{{ job.companyName[:1] | upper }}</div>
+            {% endif %}
+          </div>
+
+          <div class="job-info">
+            <a href="/jobs/{{ job.id }}" class="job-title">{{ job.job_title }}</a>
+            <div class="job-company">{{ job.companyName }}</div>
+
+            <div class="saved-meta-row">
+              <span class="job-meta"><i class="fa-solid fa-location-dot"></i> {{ job.location }}</span>
+              {% if job.employment_type and job.employment_type != "Not specified" %}
+              <span class="badge-pill badge-success">{{ job.employment_type }}</span>
+              {% endif %}
+              {% if job.is_applied %}
+              <span class="badge-pill badge-info">Applied</span>
+              {% endif %}
+            </div>
+
+            <div class="saved-salary">{{ job.salary_display }}</div>
+
+            {% if job.benefits %}
+            <div class="job-tags">
+              {% for tag in job.benefits[:4] %}
+              <span class="tag">{{ tag }}</span>
+              {% endfor %}
+              {% if job.benefits | length > 4 %}
+              <span class="tag">+{{ job.benefits | length - 4 }}</span>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="saved-card-footer">
+          <span class="saved-on">Saved on {{ job.saved_at_display }}</span>
+          <a href="/jobs/{{ job.id }}" class="view-details">View Details <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+      </div>
+
+      {% endfor %}
+
+    </div>
+
+    <!-- ============================== EMPTY STATE ============================== -->
+    <div class="saved-empty" id="savedEmpty" {% if saved_jobs %}style="display:none"{% endif %}>
+      <div class="saved-empty-icon"><i class="fa-regular fa-heart"></i></div>
+      <h3>No saved jobs yet</h3>
+      <p>Jobs you save will show up here so you can find them again quickly.</p>
+      <a href="/jobs" class="btn btn-primary text-button">Browse Jobs</a>
+    </div>
+
+    <!-- No results after search/filter -->
+    <div class="saved-empty" id="savedNoResults" style="display:none">
+      <div class="saved-empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <h3>No matching saved jobs</h3>
+      <p>Try a different search term or switch tabs.</p>
+    </div>
+
+  </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  {% include "components/footer.html" %}
+
+  <!-- ============================== TOAST ============================== -->
+  <div class="saved-toast" id="savedToast">
+    <span id="savedToastMessage">Job removed from saved list.</span>
+    <button type="button" id="savedToastUndo" onclick="undoUnsave()">Undo</button>
+  </div>
+
+  <script>
+
+    let currentTab = "all";
+    let lastRemovedCard = null;
+    let lastRemovedJobId = null;
+    let toastTimer = null;
+
+    // ---------- Unsave ----------
+    function unsaveJob(jobId, buttonEl) {
+
+      const card = buttonEl.closest(".saved-card");
+
+      fetch(`/api/saved-jobs/${jobId}`, { method: "DELETE" })
+        .then(res => res.json())
+        .then(data => {
+
+          if (!data.success) {
+            alert(data.message || "Could not remove this job. Please try again.");
+            return;
+          }
+
+          // Cache the card so "Undo" can restore it
+          lastRemovedCard = card.cloneNode(true);
+          lastRemovedJobId = jobId;
+
+          card.style.transition = "opacity 0.2s ease, transform 0.2s ease";
+          card.style.opacity = "0";
+          card.style.transform = "scale(0.97)";
+
+          setTimeout(() => {
+            card.remove();
+            updateEmptyState();
+          }, 200);
+
+          showToast("Job removed from saved list.");
+        })
+        .catch(() => {
+          alert("Network error. Please try again.");
+        });
+    }
+
+    // ---------- Undo ----------
+    function undoUnsave() {
+
+      if (!lastRemovedJobId || !lastRemovedCard) return;
+
+      fetch(`/api/saved-jobs/${lastRemovedJobId}`, { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+
+          if (!data.success) return;
+
+          const grid = document.getElementById("savedGrid");
+          grid.prepend(lastRemovedCard);
+
+          // Re-bind the unsave button on the restored card
+          const restoredBtn = lastRemovedCard.querySelector(".saved-unsave-btn");
+          restoredBtn.setAttribute("onclick", `event.stopPropagation(); unsaveJob('${lastRemovedJobId}', this)`);
+
+          lastRemovedCard = null;
+          lastRemovedJobId = null;
+
+          hideToast();
+          updateEmptyState();
+          filterSavedJobs();
+        });
+    }
+
+    function showToast(message) {
+
+      const toast = document.getElementById("savedToast");
+      document.getElementById("savedToastMessage").textContent = message;
+
+      toast.classList.add("show");
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(hideToast, 6000);
+    }
+
+    function hideToast() {
+      document.getElementById("savedToast").classList.remove("show");
+    }
+
+    // ---------- Tabs ----------
+    function setSavedTab(tab, buttonEl) {
+
+      currentTab = tab;
+
+      document.querySelectorAll(".saved-tab").forEach(btn => btn.classList.remove("active"));
+      buttonEl.classList.add("active");
+
+      filterSavedJobs();
+    }
+
+    // ---------- Sort + Tab filter ----------
+    function filterSavedJobs() {
+
+      const searchEl = document.getElementById("savedSearch");
+      const keyword = searchEl ? searchEl.value.toLowerCase() : "";
+
+      const sortBy = document.getElementById("savedSort").value;
+
+      const grid = document.getElementById("savedGrid");
+      const cards = Array.from(grid.querySelectorAll(".saved-card"));
+
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+
+        const matchesSearch =
+          card.dataset.title.includes(keyword) || card.dataset.company.includes(keyword);
+
+        const matchesTab =
+          currentTab === "all" ||
+          (currentTab === "applied" && card.dataset.applied === "true");
+
+        const visible = matchesSearch && matchesTab;
+
+        card.style.display = visible ? "" : "none";
+
+        if (visible) visibleCount++;
+      });
+
+      // Sort visible+hidden together so DOM order stays consistent
+      const sorted = cards.slice().sort((a, b) => {
+
+        if (sortBy === "recent") return b.dataset.savedTs.localeCompare(a.dataset.savedTs);
+        if (sortBy === "oldest") return a.dataset.savedTs.localeCompare(b.dataset.savedTs);
+        if (sortBy === "title-asc") return a.dataset.title.localeCompare(b.dataset.title);
+        if (sortBy === "title-desc") return b.dataset.title.localeCompare(a.dataset.title);
+        return 0;
+      });
+
+      sorted.forEach(card => grid.appendChild(card));
+
+      document.getElementById("savedNoResults").style.display =
+        (visibleCount === 0 && cards.length > 0) ? "" : "none";
+    }
+
+    function updateEmptyState() {
+
+      const grid = document.getElementById("savedGrid");
+      const hasCards = grid.querySelectorAll(".saved-card").length > 0;
+
+      document.getElementById("savedEmpty").style.display = hasCards ? "none" : "";
+
+      updateTabCounts();
+
+      if (hasCards) filterSavedJobs();
+    }
+
+    // ---------- Recount tab badges from whatever's currently in the DOM ----------
+    function updateTabCounts() {
+
+      const cards = document.querySelectorAll("#savedGrid .saved-card");
+
+      let applied = 0;
+
+      cards.forEach(card => {
+        if (card.dataset.applied === "true") applied++;
+      });
+
+      document.querySelector('.saved-tab[data-filter="all"] .tab-count').textContent = `(${cards.length})`;
+      document.querySelector('.saved-tab[data-filter="applied"] .tab-count').textContent = `(${applied})`;
+
+    }
+
+    updateEmptyState();
+
+  </script>
+
+</body>
+
+</html>

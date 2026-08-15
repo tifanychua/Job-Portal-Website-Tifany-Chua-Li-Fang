@@ -195,8 +195,8 @@
 
 /* ---------- Top companies ---------- */
 .companies-grid {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
+  display: flex;
+  flex-wrap: wrap;
   gap: 16px;
 }
 .company-card {
@@ -243,12 +243,11 @@
   .home-hero-inner { grid-template-columns: 1fr; }
   .hero-illustration { display: none; }
   .featured-grid { grid-template-columns: repeat(2, 1fr); }
-  .companies-grid { grid-template-columns: repeat(4, 1fr); }
   .categories-bar { overflow-x: auto; }
 }
 @media (max-width: 700px) {
   .home-hero, .categories-section, .home-section { padding-left: 16px; padding-right: 16px; }
   .home-search-card { padding: 16px; margin-left: 16px; margin-right: 16px; }
   .featured-grid { grid-template-columns: 1fr; }
-  .companies-grid { grid-template-columns: repeat(2, 1fr); }
+  .company-card { width: 100%; }
 }

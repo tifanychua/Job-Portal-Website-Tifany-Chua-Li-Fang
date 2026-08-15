@@ -5,6 +5,7 @@ from fastapi.templating import Jinja2Templates
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 from .database import db
+from .notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -162,23 +163,29 @@ def job_detail(request: Request, job_id: str):
     application_status = None
     application_id = None
 
-    job_seeker_id = request.session.get("applicant_id")
+    # Only check for an existing application when this session is actually
+    # a logged-in job seeker -- matches the `user` check above. Without
+    # this, a stale `applicant_id` left over from a previous login (e.g.
+    # after switching accounts) could make this page report "already
+    # applied" even though the header shows the visitor as logged out.
+    if request.session.get("user_type") == "job_seeker":
+        job_seeker_id = request.session.get("applicant_id")
 
-    applications = (
-        db.collection("application").where(filter=FieldFilter("job_id", "==", job_id)).stream()
-    )
+        applications = (
+            db.collection("application").where(filter=FieldFilter("job_id", "==", job_id)).stream()
+        )
 
-    for app in applications:
-        application = app.to_dict()
+        for app in applications:
+            application = app.to_dict()
 
-        if (
-            application.get("job_seeker_id") == job_seeker_id
-            and application.get("status") == "Submitted"
-        ):
-            application_status = "Submitted"
-            application_id = app.id
+            if (
+                application.get("job_seeker_id") == job_seeker_id
+                and application.get("status") == "Submitted"
+            ):
+                application_status = "Submitted"
+                application_id = app.id
 
-            break
+                break
 
     # -----------------------------
     # Similar jobs
@@ -187,14 +194,14 @@ def job_detail(request: Request, job_id: str):
     similar_jobs = []
 
     category = job.get("category")
+    job_position = job.get("job_title")
+    location = job.get("location")
 
-    query = db.collection("job_list")
+    query = db.collection("job_list").where(filter=FieldFilter("status", "==", "Active"))
 
-    if category:
-        query = query.where(filter=FieldFilter("category", "==", category))
-        query = query.where(filter=FieldFilter("status", "==", "Active"))
+    docs = query.stream()
 
-    docs = query.limit(4).stream()
+    scored_jobs = []
 
     for doc in docs:
         if doc.id == job_id:
@@ -202,28 +209,62 @@ def job_detail(request: Request, job_id: str):
 
         sim = doc.to_dict()
 
-        sim["id"] = doc.id
+        score = 0
 
-        sim.setdefault("job_title", "Untitled Position")
+        # -----------------------------
+        # Category
+        # -----------------------------
+        sim_category = sim.get("category")
 
-        sim.setdefault("location", "Not specified")
+        if category is not None and sim_category is not None:
+            if category.lower() == sim_category.lower():
+                score += 1
 
-        sim_company = _find_company(sim.get("company_id"))
+        # -----------------------------
+        # Job Position
+        # -----------------------------
+        sim_position = sim.get("job_title")
 
-        if sim_company:
-            sim["companyName"] = sim_company.get("companyName", "Unknown")
+        if job_position is not None and sim_position is not None:
+            if job_position.lower() == sim_position.lower():
+                score += 1
 
-            sim["company_logo"] = sim_company.get("logo", "default.jpg")
+        # -----------------------------
+        # Location
+        # -----------------------------
+        sim_location = sim.get("location")
 
-        else:
-            sim["companyName"] = "Unknown"
+        if location is not None and sim_location is not None:
+            if location.lower() == sim_location.lower():
+                score += 1
 
-            sim["company_logo"] = "default.jpg"
+        # Only keep jobs with at least one similarity
+        if score > 0:
+            sim["id"] = doc.id
+            sim["similarity_score"] = score
 
-        similar_jobs.append(sim)
+            sim.setdefault("job_title", "Untitled Position")
+            sim.setdefault("location", "Not specified")
 
-        if len(similar_jobs) >= 3:
-            break
+            sim_company = _find_company(sim.get("company_id"))
+
+            if sim_company:
+                sim["companyName"] = sim_company.get("companyName", "Unknown")
+                sim["company_logo"] = sim_company.get("logo", "default.jpg")
+            else:
+                sim["companyName"] = "Unknown"
+                sim["company_logo"] = "default.jpg"
+
+            scored_jobs.append(sim)
+
+    # -----------------------------
+    # Highest similarity first
+    # -----------------------------
+
+    scored_jobs.sort(key=lambda x: x["similarity_score"], reverse=True)
+
+    # Maximum 2 similar jobs
+    similar_jobs = scored_jobs[:2]
 
     return templates.TemplateResponse(
         request=request,
@@ -236,5 +277,6 @@ def job_detail(request: Request, job_id: str):
             # new data
             "application_status": application_status,
             "application_id": application_id,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )

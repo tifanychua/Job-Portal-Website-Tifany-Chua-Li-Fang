@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Review Job Changes - JobConnect</title>
+
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <!-- Header -->
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+
+    <!-- SAME CSS AS REVIEW JOB -->
+    <link rel="stylesheet"
+          href="/css/reviewJob.css">
+
+</head>
+
+
+<body>
+
+
+{% include "employerHeader.html" %}
+
+
+<main class="main-content">
+
+
+    <!-- ================================================= -->
+    <!-- PAGE HEADER -->
+    <!-- ================================================= -->
+
+    <div class="page-header">
+
+
+        <div>
+
+            <h1>
+                Review Job Changes
+            </h1>
+
+            <p>
+                Review all job information carefully
+                before saving your changes.
+            </p>
+
+        </div>
+
+
+        <div class="header-buttons">
+
+
+            <!-- ========================================= -->
+            <!-- BACK TO EDIT -->
+            <!-- ========================================= -->
+
+            <a
+                href="/edit-job/{{ job.job_id }}"
+                class="back-btn">
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back
+
+            </a>
+
+
+            <!-- ========================================= -->
+            <!-- DRAFT JOB -->
+            <!-- ========================================= -->
+
+            {% if job.status|lower == "draft" %}
+
+
+                <form
+                    id="publishForm"
+                    action="/publish-draft-job/{{ job.job_id }}"
+                    method="post">
+
+
+                    <input
+                        type="hidden"
+                        id="durationInput"
+                        name="duration"
+                        value="14">
+
+
+                    <input
+                        type="hidden"
+                        id="creditInput"
+                        name="credit_used"
+                        value="1">
+
+
+                    <button
+                        type="button"
+                        class="publish-btn"
+                        id="openPublishModal">
+
+                        <i class="fa-solid fa-paper-plane"></i>
+
+                        Publish Job
+
+                    </button>
+
+
+                </form>
+
+
+            <!-- ========================================= -->
+            <!-- ACTIVE / CLOSED / EXPIRED -->
+            <!-- ========================================= -->
+
+            {% else %}
+
+
+                <form
+                    action="/confirm-edit-job/{{ job.job_id }}"
+                    method="post">
+
+
+                    <button
+                        type="submit"
+                        class="publish-btn"
+                        onclick="return confirm(
+                            'Are you sure you want to update this job posting?'
+                        )">
+
+                        <i class="fa-solid fa-check"></i>
+
+                        Confirm Update
+
+                    </button>
+
+
+                </form>
+
+
+            {% endif %}
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ================================================= -->
+    <!-- JOB INFORMATION -->
+    <!-- ================================================= -->
+
+    <section class="preview-card">
+
+
+        <div class="preview-title">
+
+
+            <div class="preview-title-left">
+
+
+                <img
+                    src="/images/number-1.png"
+                    alt="Step 1">
+
+
+                <div>
+
+                    <h2>
+                        Job Information
+                    </h2>
+
+                    <span>
+                        Basic information about the vacancy
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="preview-grid">
+
+
+            <!-- Job Title -->
+
+            <div class="info-item">
+
+                <label>
+                    Job Title
+                </label>
+
+                <p>
+                    {{ job.job_title|default("-", true) }}
+                </p>
+
+            </div>
+
+
+            <!-- Job Category -->
+
+            <div class="info-item">
+
+                <label>
+                    Job Category
+                </label>
+
+                <p>
+                    {{ job.category|default("-", true) }}
+                </p>
+
+            </div>
+
+
+            <!-- Employment Type -->
+
+            <div class="info-item">
+
+                <label>
+                    Employment Type
+                </label>
+
+                <p>
+                    {{ job.employment_type|default("-", true) }}
+                </p>
+
+            </div>
+
+
+            <!-- Position -->
+
+            <div class="info-item">
+
+                <label>
+                    Job Position / Level
+                </label>
+
+                <p>
+                    {{ job.position|default("-", true) }}
+                </p>
+
+            </div>
+
+
+            <!-- Vacancies -->
+
+            <div class="info-item">
+
+                <label>
+                    Number of Vacancies
+                </label>
+
+                <p>
+                    {{ job.vacancies|default(0, true) }}
+                </p>
+
+            </div>
+
+
+            <!-- Location -->
+
+            <div class="info-item">
+
+                <label>
+                    Work Location
+                </label>
+
+                <p>
+                    {{ job.location|default("-", true) }}
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- JOB DETAILS -->
+    <!-- ================================================= -->
+
+    <section class="preview-card">
+
+
+        <div class="preview-title">
+
+
+            <div class="preview-title-left">
+
+
+                <img
+                    src="/images/number-2.png"
+                    alt="Step 2">
+
+
+                <div>
+
+                    <h2>
+                        Job Details
+                    </h2>
+
+                    <span>
+                        Description, responsibilities and requirements
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- Job Description -->
+
+        <div class="preview-section">
+
+            <label>
+                Job Description
+            </label>
+
+            <div
+                class="content-box"
+                style="white-space:pre-line;">{{ job.job_desc|default("-", true) }}</div>
+
+        </div>
+
+
+
+        <!-- Responsibilities -->
+
+        <div class="preview-section">
+
+            <label>
+                Job Responsibilities
+            </label>
+
+            <div
+                class="content-box"
+                style="white-space:pre-line;">{{ job.job_responsibility|default("-", true) }}</div>
+
+        </div>
+
+
+
+        <!-- Requirements -->
+
+        <div class="preview-section">
+
+            <label>
+                Job Requirements
+            </label>
+
+            <div
+                class="content-box"
+                style="white-space:pre-line;">{{ job.job_req|default("-", true) }}</div>
+
+        </div>
+
+
+
+        <!-- Additional Information -->
+
+        <div class="preview-section">
+
+            <label>
+                Additional Information
+            </label>
+
+
+            <div class="content-box">
+
+
+                {% if job.additional_info %}
+
+                    {{ job.additional_info }}
+
+                {% else %}
+
+                    <span class="empty-value">
+                        No additional information provided.
+                    </span>
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- SALARY & BENEFITS -->
+    <!-- ================================================= -->
+
+    <section class="preview-card">
+
+
+        <div class="preview-title">
+
+
+            <div class="preview-title-left">
+
+
+                <img
+                    src="/images/number-3.png"
+                    alt="Step 3">
+
+
+                <div>
+
+                    <h2>
+                        Salary & Benefits
+                    </h2>
+
+                    <span>
+                        Compensation and employee benefits
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="preview-grid">
+
+
+            <!-- Salary Type -->
+
+            <div class="info-item">
+
+                <label>
+                    Salary Type
+                </label>
+
+                <p>
+
+                    {% if job.salaryType %}
+
+                        {{ job.salaryType|title }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+
+            <!-- Salary -->
+
+            <div class="info-item">
+
+                <label>
+                    Salary
+                </label>
+
+
+                <p>
+
+                    {% if job.salary_display %}
+
+                        {{ job.salary_display }}
+
+                    {% elif job.salary %}
+
+                        RM {{ job.salary }}
+
+                    {% else %}
+
+                        Negotiable
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- Benefits -->
+
+        <div class="preview-section">
+
+            <label>
+                Benefits
+            </label>
+
+
+            <div class="benefit-tags">
+
+
+                {% if job.benefits %}
+
+
+                    {% for benefit in job.benefits %}
+
+
+                        <span>
+
+                            <i class="fa-solid fa-check"></i>
+
+                            {{ benefit }}
+
+                        </span>
+
+
+                    {% endfor %}
+
+
+                {% else %}
+
+
+                    <span class="no-benefit">
+                        No benefits selected
+                    </span>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- ================================================= -->
+    <!-- DRAFT PUBLISH MODAL -->
+    <!-- ================================================= -->
+
+    {% if job.status|lower == "draft" %}
+
+
+    <div
+        id="publishModal"
+        class="modal">
+
+
+        <div class="modal-card">
+
+
+            <!-- ========================================= -->
+            <!-- MODAL HEADER -->
+            <!-- ========================================= -->
+
+            <div class="modal-header">
+
+
+                <div>
+
+                    <span class="modal-eyebrow">
+                        Final Step
+                    </span>
+
+
+                    <h2>
+                        Publish Job
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="close-modal-btn"
+                    id="closeModalIcon">
+
+                    <i class="fa-solid fa-xmark"></i>
+
+                </button>
+
+
+            </div>
+
+
+
+            <p class="modal-description">
+
+                Select how long you want this job posting
+                to remain active. Job posting credits will
+                be deducted based on the selected duration.
+
+            </p>
+
+
+
+            <!-- ========================================= -->
+            <!-- DURATION OPTIONS -->
+            <!-- ========================================= -->
+
+            <div class="duration-list">
+
+
+                <!-- ===================================== -->
+                <!-- 14 DAYS -->
+                <!-- ===================================== -->
+
+                <label class="duration-option">
+
+
+                    <input
+                        type="radio"
+                        name="duration"
+                        value="14"
+                        data-credit="1"
+                        checked>
+
+
+                    <div class="duration-radio-ui"></div>
+
+
+                    <div class="duration-content">
+
+
+                        <div>
+
+                            <strong>
+                                14 Days
+                            </strong>
+
+                            <p>
+                                Suitable for short-term recruitment
+                            </p>
+
+                        </div>
+
+
+                        <span class="credit-pill">
+                            1 Credit
+                        </span>
+
+
+                    </div>
+
+
+                </label>
+
+
+
+                <!-- ===================================== -->
+                <!-- 30 DAYS -->
+                <!-- ===================================== -->
+
+                <label class="duration-option recommended">
+
+
+                    <input
+                        type="radio"
+                        name="duration"
+                        value="30"
+                        data-credit="2">
+
+
+                    <div class="duration-radio-ui"></div>
+
+
+                    <div class="duration-content">
+
+
+                        <div>
+
+
+                            <div class="duration-title-row">
+
+                                <strong>
+                                    30 Days
+                                </strong>
+
+                                <span class="recommended-badge">
+                                    Most Popular
+                                </span>
+
+                            </div>
+
+
+                            <p>
+                                Recommended for most job postings
+                            </p>
+
+
+                        </div>
+
+
+                        <span class="credit-pill">
+                            2 Credits
+                        </span>
+
+
+                    </div>
+
+
+                </label>
+
+
+
+                <!-- ===================================== -->
+                <!-- 60 DAYS -->
+                <!-- ===================================== -->
+
+                <label class="duration-option">
+
+
+                    <input
+                        type="radio"
+                        name="duration"
+                        value="60"
+                        data-credit="2">
+
+
+                    <div class="duration-radio-ui"></div>
+
+
+                    <div class="duration-content">
+
+
+                        <div>
+
+                            <strong>
+                                60 Days
+                            </strong>
+
+                            <p>
+                                Extended visibility for ongoing hiring
+                            </p>
+
+                        </div>
+
+
+                        <span class="credit-pill">
+                            2 Credits
+                        </span>
+
+
+                    </div>
+
+
+                </label>
+
+
+
+                <!-- ===================================== -->
+                <!-- 90 DAYS -->
+                <!-- ===================================== -->
+
+                <label class="duration-option">
+
+
+                    <input
+                        type="radio"
+                        name="duration"
+                        value="90"
+                        data-credit="3">
+
+
+                    <div class="duration-radio-ui"></div>
+
+
+                    <div class="duration-content">
+
+
+                        <div>
+
+                            <strong>
+                                90 Days
+                            </strong>
+
+                            <p>
+                                Maximum visibility for long-term hiring
+                            </p>
+
+                        </div>
+
+
+                        <span class="credit-pill">
+                            3 Credits
+                        </span>
+
+
+                    </div>
+
+
+                </label>
+
+
+            </div>
+
+
+
+            <!-- ========================================= -->
+            <!-- CREDIT WARNING -->
+            <!-- ========================================= -->
+
+            <div
+                id="creditWarning"
+                class="credit-warning"
+                style="display:none;">
+
+
+                <div class="warning-icon">
+
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                </div>
+
+
+                <div>
+
+
+                    <strong>
+                        Insufficient job posting credits
+                    </strong>
+
+
+                    <p>
+
+                        You do not have enough credits for
+                        the selected posting duration.
+
+                        The job will remain as a draft and
+                        will not be published.
+
+                    </p>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ========================================= -->
+            <!-- SUMMARY -->
+            <!-- ========================================= -->
+
+            <div class="publish-summary">
+
+
+                <!-- Available -->
+
+                <div class="summary-item">
+
+
+                    <div class="summary-icon blue">
+
+                        <i class="fa-solid fa-coins"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Available Credits
+                        </span>
+
+                        <strong id="availableCreditDisplay">
+
+                            {{ company.available_credit|default(0, true) }}
+
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- Required -->
+
+                <div class="summary-item">
+
+
+                    <div class="summary-icon purple">
+
+                        <i class="fa-solid fa-ticket"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Credits Required
+                        </span>
+
+                        <strong id="creditRequired">
+                            1
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+
+                <!-- Expiry -->
+
+                <div class="summary-item">
+
+
+                    <div class="summary-icon green">
+
+                        <i class="fa-regular fa-calendar-check"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Posting Ends On
+                        </span>
+
+                        <strong id="expiryDate">
+                            -
+                        </strong>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ========================================= -->
+            <!-- FOOTER -->
+            <!-- ========================================= -->
+
+            <div class="modal-footer">
+
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    id="closePublishModal">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="modal-publish-btn"
+                    id="confirmPublishBtn"
+                    onclick="submitPublish()">
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                    Publish Job
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+    {% endif %}
+
+
+</main>
+
+
+
+<!-- ================================================= -->
+<!-- DRAFT PUBLISH JAVASCRIPT -->
+<!-- ================================================= -->
+
+{% if job.status|lower == "draft" %}
+
+
+<script>
+
+
+    const modal =
+        document.getElementById(
+            "publishModal"
+        );
+
+
+    const openBtn =
+        document.getElementById(
+            "openPublishModal"
+        );
+
+
+    const closeBtn =
+        document.getElementById(
+            "closePublishModal"
+        );
+
+
+    const closeIcon =
+        document.getElementById(
+            "closeModalIcon"
+        );
+
+
+    const radios =
+        document.querySelectorAll(
+            "input[name='duration']"
+        );
+
+
+    const credit =
+        document.getElementById(
+            "creditRequired"
+        );
+
+
+    const expiry =
+        document.getElementById(
+            "expiryDate"
+        );
+
+
+    const warning =
+        document.getElementById(
+            "creditWarning"
+        );
+
+
+    const confirmPublishButton =
+        document.getElementById(
+            "confirmPublishBtn"
+        );
+
+
+    const availableCredit =
+        Number(
+            "{{ company.available_credit|default(0, true) }}"
+        );
+
+
+
+    // =================================================
+    // OPEN MODAL
+    // =================================================
+
+    openBtn.addEventListener(
+        "click",
+        function(){
+
+            updatePublishSummary();
+
+            modal.classList.add(
+                "show"
+            );
+
+            document.body.classList.add(
+                "modal-open"
+            );
+
+        }
+    );
+
+
+
+    // =================================================
+    // CLOSE MODAL
+    // =================================================
+
+    function closePublishModal(){
+
+        modal.classList.remove(
+            "show"
+        );
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+
+    }
+
+
+    closeBtn.addEventListener(
+        "click",
+        closePublishModal
+    );
+
+
+    closeIcon.addEventListener(
+        "click",
+        closePublishModal
+    );
+
+
+    modal.addEventListener(
+        "click",
+        function(event){
+
+            if(
+                event.target
+                === modal
+            ){
+
+                closePublishModal();
+
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        function(event){
+
+            if(
+                event.key
+                === "Escape"
+            ){
+
+                closePublishModal();
+
+            }
+
+        }
+    );
+
+
+
+    // =================================================
+    // UPDATE SUMMARY
+    // =================================================
+
+    function updatePublishSummary(){
+
+        const selected =
+            document.querySelector(
+                "input[name='duration']:checked"
+            );
+
+
+        if(!selected){
+
+            return;
+
+        }
+
+
+        const requiredCredit =
+            Number(
+                selected.dataset.credit
+            );
+
+
+        const duration =
+            Number(
+                selected.value
+            );
+
+
+        // =============================================
+        // Credit Required
+        // =============================================
+
+        credit.textContent =
+            requiredCredit;
+
+
+
+        // =============================================
+        // Expiry Date
+        // =============================================
+
+        const date =
+            new Date();
+
+
+        date.setDate(
+            date.getDate()
+            +
+            duration
+        );
+
+
+        expiry.textContent =
+            date.toLocaleDateString(
+                "en-GB",
+                {
+                    day:
+                        "2-digit",
+
+                    month:
+                        "short",
+
+                    year:
+                        "numeric"
+                }
+            );
+
+
+
+        // =============================================
+        // Insufficient Credit
+        // =============================================
+
+        if(
+            availableCredit
+            <
+            requiredCredit
+        ){
+
+            warning.style.display =
+                "flex";
+
+
+            confirmPublishButton
+                .classList
+                .add(
+                    "draft-mode"
+                );
+
+
+            confirmPublishButton.innerHTML =
+                `
+                    <i class="fa-solid fa-file-lines"></i>
+                    Keep as Draft
+                `;
+
+        }
+
+        else{
+
+            warning.style.display =
+                "none";
+
+
+            confirmPublishButton
+                .classList
+                .remove(
+                    "draft-mode"
+                );
+
+
+            confirmPublishButton.innerHTML =
+                `
+                    <i class="fa-solid fa-paper-plane"></i>
+                    Publish Job
+                `;
+
+        }
+
+    }
+
+
+
+    // =================================================
+    // DURATION CHANGE
+    // =================================================
+
+    radios.forEach(
+        function(radio){
+
+            radio.addEventListener(
+                "change",
+                updatePublishSummary
+            );
+
+        }
+    );
+
+
+
+    // =================================================
+    // SUBMIT
+    // =================================================
+
+    function submitPublish(){
+
+        const selected =
+            document.querySelector(
+                "input[name='duration']:checked"
+            );
+
+
+        if(!selected){
+
+            return;
+
+        }
+
+
+        document.getElementById(
+            "durationInput"
+        ).value =
+            selected.value;
+
+
+        document.getElementById(
+            "creditInput"
+        ).value =
+            selected.dataset.credit;
+
+
+        confirmPublishButton.disabled =
+            true;
+
+
+        confirmPublishButton.innerHTML =
+            `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Processing...
+            `;
+
+
+        document.getElementById(
+            "publishForm"
+        ).submit();
+
+    }
+
+
+
+    // Initial summary
+    updatePublishSummary();
+
+
+</script>
+
+
+{% endif %}
+
+
+</body>
+
+</html>

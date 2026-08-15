@@ -2,12 +2,13 @@ import os
 from datetime import UTC, datetime
 from urllib.parse import quote
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from firebase_admin import auth, firestore
 from pydantic import BaseModel
 
+from .admin_users import ensure_account_can_log_in
 from .database import db
 from .email_service import send_password_reset_email
 
@@ -130,6 +131,16 @@ def login_page(request: Request):
     )
 
 
+def _job_seeker_account_is_active(account_data: dict) -> bool:
+    account_status = (
+        account_data.get("accountStatus")
+        or account_data.get("account_status")
+        or account_data.get("status")
+    )
+
+    return str(account_status).strip().lower() == "active"
+
+
 @router.post("/firebase-login")
 async def firebase_login(request: Request, data: LoginToken):
 
@@ -139,54 +150,89 @@ async def firebase_login(request: Request, data: LoginToken):
         uid = decoded["uid"]
 
     except Exception as e:
-        return JSONResponse(status_code=401, content={"error": str(e)})
+        return JSONResponse(
+            status_code=401,
+            content={"error": str(e)},
+        )
+
+    request.session.clear()
 
     # Job Seeker
     job = db.collection("job_seeker").document(uid).get()
 
     if job.exists:
+        job_data = job.to_dict() or {}
+
+        if not _job_seeker_account_is_active(job_data):
+            return JSONResponse(
+                content={
+                    "error": ("Your account is not active. Please contact the administrator.")
+                },
+                status_code=403,
+            )
+
         request.session["user_type"] = "job_seeker"
         request.session["applicant_id"] = uid
+
         return {"redirect": "/"}
 
     # Employer
     company = db.collection("company").document(uid).get()
 
     if company.exists:
-        company_data = company.to_dict()
+        company_data = company.to_dict() or {}
+
+        try:
+            ensure_account_can_log_in(company_data)
+
+        except HTTPException as error:
+            return JSONResponse(
+                content={"error": error.detail},
+                status_code=error.status_code,
+            )
+
         status = company_data.get("status")
 
         if status in ["Pending", "Active"]:
             request.session["user_type"] = "employer"
             request.session["company_id"] = uid
+
             return {"redirect": "/manage-jobs"}
 
-        elif status == "Rejected":
+        if status == "Rejected":
             return JSONResponse(
-                {
-                    "error": "Your company registration has been rejected. Please contact the administrator for assistance."
+                content={
+                    "error": (
+                        "Your company registration has been rejected. "
+                        "Please contact the administrator for assistance."
+                    )
                 },
                 status_code=403,
             )
 
-        elif status == "Deactive":
+        if status == "Deactive":
             return JSONResponse(
-                {
-                    "error": "Your company account has been deactivated. Please contact the administrator."
+                content={
+                    "error": (
+                        "Your company account has been deactivated. "
+                        "Please contact the administrator."
+                    )
                 },
                 status_code=403,
             )
 
-        else:
-            return JSONResponse(
-                {"error": "Your company account is not permitted to log in."},
-                status_code=403,
-            )
+        return JSONResponse(
+            content={"error": "Your company account is not permitted to log in."},
+            status_code=403,
+        )
 
-    # User exists in Firebase Authentication but not in Firestore
+    # Firebase user exists but no matching Firestore account exists
     return JSONResponse(
-        {
-            "error": "No account information was found. Please complete your registration or contact support."
+        content={
+            "error": (
+                "No account information was found. "
+                "Please complete your registration or contact support."
+            )
         },
         status_code=404,
     )
@@ -236,6 +282,7 @@ async def firebase_register_job_seeker(data: JobSeekerRegisterRequest):
                 "phone": data.phone,
                 "profileImage": "",
                 "status": "Active",
+                "accountStatus": "Active",
                 "createdAt": firestore.SERVER_TIMESTAMP,
             }
         )
@@ -285,6 +332,7 @@ async def firebase_register_employer(data: EmployerRegisterRequest):
             },
             "logo": "companyLogo.png",
             "status": "Pending",
+            "accountStatus": "Active",
             "createdAt": firestore.SERVER_TIMESTAMP,
         }
 
@@ -401,10 +449,14 @@ async def admin_firebase_login(request: Request, data: LoginToken):
     if not admin.exists:
         return JSONResponse({"error": "Access denied."}, status_code=403)
 
+    # See firebase_login() above -- clear any previous identity before
+    # establishing the new one.
+    request.session.clear()
+
     request.session["user_type"] = "admin"
     request.session["admin_id"] = uid
 
-    return {"redirect": "/admin/company-requests"}
+    return {"redirect": "/admin/dashboard"}
 
 
 @router.get("/admin/dashboard")

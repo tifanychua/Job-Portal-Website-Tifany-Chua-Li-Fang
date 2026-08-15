@@ -22,6 +22,7 @@ scenarios("features/viewResume.feature")
 # ==================================================
 
 TEST_RESUME_PATH = "resumes/test-resume.pdf"
+
 TEST_SIGNED_URL = "https://example.com/signed-test-resume.pdf"
 
 
@@ -37,7 +38,11 @@ class FakeBlob:
     def exists(self, *args, **kwargs) -> bool:
         return self.name == TEST_RESUME_PATH
 
-    def generate_signed_url(self, *args, **kwargs) -> str:
+    def generate_signed_url(
+        self,
+        *args,
+        **kwargs,
+    ) -> str:
         return TEST_SIGNED_URL
 
 
@@ -118,7 +123,10 @@ def application_id():
 # ==================================================
 
 
-def test_view_resume_success(client, application_id):
+def test_view_resume_success(
+    client,
+    application_id,
+):
     response = client.get(
         f"/application/resume/{application_id}",
         follow_redirects=False,
@@ -152,7 +160,10 @@ def test_resume_exists(application_id):
 # ==================================================
 
 
-def test_secure_resume_link(client, application_id):
+def test_secure_resume_link(
+    client,
+    application_id,
+):
     response = client.get(
         f"/application/resume/{application_id}",
         follow_redirects=False,
@@ -187,12 +198,18 @@ def test_unauthorized_resume_access(client):
 
 
 @given("the employer has received a job application")
-def received_application(context, application_id):
+def received_application(
+    context,
+    application_id,
+):
     context.application_id = application_id
 
 
 @when("the employer accesses the applicant's resume")
-def access_resume(client, context):
+def access_resume(
+    client,
+    context,
+):
     context.response = client.get(
         f"/application/resume/{context.application_id}",
         follow_redirects=False,
@@ -220,7 +237,10 @@ def unauthorized_user(context):
 
 
 @when("the user attempts to access the applicant's resume")
-def unauthorized_access(client, context):
+def unauthorized_access(
+    client,
+    context,
+):
     context.response = client.get(
         f"/application/resume/{context.application_id}",
         follow_redirects=False,

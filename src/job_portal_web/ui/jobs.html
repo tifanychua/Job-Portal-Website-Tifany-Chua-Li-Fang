@@ -205,7 +205,7 @@
             </div>
 
             <div class="job-side">
-              <button type="button" class="bookmark-btn">
+              <button type="button" class="bookmark-btn" data-job-id="{{ job.id }}">
                 <i class="fa-regular fa-heart"></i>
               </button>
               <div class="job-posted">
@@ -259,7 +259,7 @@
         <div class="save-icon" style="justify-content: center;"><i class="fa-solid fa-heart"></i></div>
         <h4>Saved Jobs</h4>
         <p>Keep track of interesting job opportunities and apply anytime.</p>
-        <button class="btn btn-primary btn-block text-button">View Saved Jobs</button>
+        <button class="btn btn-primary btn-block text-button"><a href="/saved-jobs">View Saved Jobs</a></button>
       </div>
 
       <div class="side-card">
@@ -379,6 +379,73 @@ document.querySelectorAll(".show-more").forEach(button => {
             button.dataset.expanded = "false";
 
         }
+
+    });
+
+});
+
+// ============================== SAVE / UNSAVE JOB ==============================
+
+function setBookmarkState(btn, saved) {
+
+    btn.dataset.saved = saved ? "true" : "false";
+
+    const icon = btn.querySelector("i");
+
+    if (icon) {
+        icon.classList.toggle("fa-solid", saved);
+        icon.classList.toggle("fa-regular", !saved);
+    }
+
+    btn.classList.toggle("saved", saved);
+
+}
+
+document.querySelectorAll(".bookmark-btn[data-job-id]").forEach(btn => {
+
+    const jobId = btn.dataset.jobId;
+
+    // Reflect current saved state on page load
+    fetch(`/api/saved-jobs/${jobId}/status`)
+        .then(res => res.json())
+        .then(data => setBookmarkState(btn, data.saved))
+        .catch(() => {});
+
+    btn.addEventListener("click", function (e) {
+
+        // The button sits inside the job card's <a>, don't navigate away
+        e.preventDefault();
+        e.stopPropagation();
+
+        const alreadySaved = btn.dataset.saved === "true";
+        const method = alreadySaved ? "DELETE" : "POST";
+
+        fetch(`/api/saved-jobs/${jobId}`, { method: method })
+            .then(res => {
+
+                if (res.status === 401) {
+                    alert("Please log in to save jobs.");
+                    return null;
+                }
+
+                return res.json();
+
+            })
+            .then(data => {
+
+                if (!data) return;
+
+                if (!data.success) {
+                    alert(data.message || "Something went wrong. Please try again.");
+                    return;
+                }
+
+                setBookmarkState(btn, data.saved);
+
+            })
+            .catch(() => {
+                alert("Network error. Please try again.");
+            });
 
     });
 

@@ -40,6 +40,13 @@ body{
     align-items:flex-end;
 }
 
+/* When the title row sits at the top of the right-hand content
+   (profile-main) instead of the old full-width hero band, give it
+   its own breathing room above the profile card. */
+.profile-main > .profile-top{
+    margin-bottom:24px;
+}
+
 .profile-top h1{
     font-size:36px;
     font-weight:600;
@@ -108,6 +115,7 @@ body{
 
 .profile-basic{
     flex:1;
+    min-width: 0;
 }
 
 .profile-name{
@@ -115,6 +123,7 @@ body{
     align-items:center;
     gap:10px;
     margin-bottom:6px;
+    flex-wrap: wrap;
 }
 
 .profile-name h2{
@@ -136,6 +145,9 @@ body{
 
     padding:4px 10px;
     border-radius:20px;
+
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* =====================================================
@@ -1242,63 +1254,278 @@ body{
     background:#F8FAFC;
 }
 
-/* ================= LOGOUT ================= */
+/* =====================================================
+   PROFILE LAYOUT (Sidebar + Main)
+===================================================== */
 
-.logout-section {
-
-    display: flex;
-
-    justify-content: center;
-
-    margin: 40px 0 20px;
-
+.profile-layout{
+    display:flex;
+    align-items:flex-start;
+    gap:24px;
 }
 
-
-.logout-btn {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 10px;
-
-    padding: 12px 35px;
-
-    border: none;
-
-    border-radius: 10px;
-
-    background: #dc2626;
-
-    color: white;
-
-    font-size: 16px;
-
-    font-weight: 600;
-
-    font-family: 'Poppins', sans-serif;
-
-    cursor: pointer;
-
-    transition: all 0.3s ease;
-
+.profile-main{
+    flex:1;
+    min-width:0;
 }
 
+/* =====================================================
+   SIDEBAR
+===================================================== */
 
-.logout-btn i {
+.profile-sidebar{
+    width:260px;
+    flex-shrink:0;
 
-    font-size: 16px;
+    background:#FFFFFF;
+    border:1px solid #E5E7EB;
+    border-radius:8px;
 
+    padding:20px;
+
+    position:sticky;
+    top:24px;
 }
 
+.sidebar-label{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.06em;
+    color:#9CA3AF;
 
-.logout-btn:hover {
+    padding:0 12px;
+    margin-bottom:12px;
+}
 
-    background: #b91c1c;
+.sidebar-nav{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
 
-    transform: translateY(-2px);
+    padding-bottom:16px;
+    margin-bottom:16px;
 
+    border-bottom:1px solid #F1F5F9;
+}
+
+.sidebar-link{
+    display:flex;
+    align-items:center;
+    gap:12px;
+
+    padding:10px 12px;
+
+    border-radius:8px;
+
+    font-size:14px;
+    font-weight:500;
+
+    color:#4B5563;
+    text-decoration:none;
+
+    transition:.2s ease;
+}
+
+.sidebar-link i{
+    width:18px;
+    text-align:center;
+    font-size:15px;
+    color:#9CA3AF;
+
+    transition:.2s ease;
+}
+
+.sidebar-link:hover{
+    background:#F3F4F6;
+    color:#111827;
+}
+
+.sidebar-link:hover i{
+    color:#4B5563;
+}
+
+.sidebar-link.active{
+    background:#2563EB;
+    color:#FFFFFF;
+}
+
+.sidebar-link.active i{
+    color:#FFFFFF;
+}
+
+.sidebar-link.sidebar-logout{
+    margin-top:8px;
+    color:#DC2626;
+}
+
+.sidebar-link.sidebar-logout i{
+    color:#DC2626;
+}
+
+.sidebar-link.sidebar-logout:hover{
+    background:#FEE2E2;
+    color:#B91C1C;
+}
+
+.sidebar-link.sidebar-logout:hover i{
+    color:#B91C1C;
+}
+
+/* =====================================================
+   PROFILE STRENGTH CARD
+===================================================== */
+
+.strength-card{
+    background:#F8FAFC;
+    border:1px solid #E5E7EB;
+    border-radius:8px;
+
+    padding:18px;
+
+    text-align:center;
+}
+
+.strength-card h4{
+    font-size:13px;
+    font-weight:600;
+    color:#111827;
+
+    text-align:left;
+    margin-bottom:14px;
+}
+
+.strength-ring{
+    --pct:0;
+
+    width:88px;
+    height:88px;
+    margin:0 auto 14px;
+
+    border-radius:50%;
+
+    background:conic-gradient(#22C55E calc(var(--pct) * 3.6deg), #E5E7EB 0deg);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    position:relative;
+}
+
+.strength-ring::before{
+    content:"";
+    position:absolute;
+    inset:8px;
+
+    border-radius:50%;
+    background:#F8FAFC;
+}
+
+.strength-ring-label{
+    position:relative;
+    z-index:1;
+
+    font-size:16px;
+    font-weight:700;
+    color:#16A34A;
+}
+
+.strength-card p{
+    font-size:12px;
+    color:#6B7280;
+    line-height:1.5;
+    margin-bottom:10px;
+}
+
+.strength-link{
+    font-size:13px;
+    font-weight:600;
+    color:#2563EB;
+    text-decoration:none;
+
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+}
+
+.strength-link i{
+    font-size:11px;
+}
+
+.strength-link:hover{
+    text-decoration:underline;
+}
+
+@media (max-width:1200px){
+
+    .profile-layout{
+        flex-direction:column;
+    }
+
+    .profile-sidebar{
+        width:100%;
+        position:static;
+    }
+
+    .sidebar-nav{
+        flex-direction:row;
+        overflow-x:auto;
+        border-bottom:none;
+        padding-bottom:0;
+        margin-bottom:16px;
+    }
+
+    .sidebar-link{
+        white-space:nowrap;
+    }
+
+    .sidebar-link.sidebar-logout{
+        margin-top:0;
+    }
+
+    .strength-card{
+        max-width:280px;
+        margin:0 auto;
+    }
+}
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+.logout-section{
+    display:flex;
+    justify-content:center;
+    margin:40px 0 20px;
+}
+
+.logout-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+
+    padding:12px 35px;
+
+    border:none;
+    border-radius:10px;
+
+    background:#DC2626;
+    color:#FFFFFF;
+
+    font-size:16px;
+    font-weight:600;
+    font-family:'Poppins',sans-serif;
+
+    cursor:pointer;
+    transition:all .3s ease;
+}
+
+.logout-btn i{
+    font-size:16px;
+}
+
+.logout-btn:hover{
+    background:#B91C1C;
+    transform:translateY(-2px);
 }

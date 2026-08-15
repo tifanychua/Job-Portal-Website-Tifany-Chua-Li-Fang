@@ -4,6 +4,7 @@ annotated-types==0.7.0
 anyio==4.14.1
 ast_serialize==0.6.0
 blinker==1.9.0
+bleach==6.4.0
 CacheControl==0.14.4
 certifi==2026.6.17
 cffi==2.1.0
@@ -75,3 +76,6 @@ typing-inspection==0.4.2
 typing_extensions==4.16.0
 urllib3==2.7.0
 uvicorn==0.50.2
+pillow==12.3.0
+reportlab==5.0.0
+stripe==15.5.0

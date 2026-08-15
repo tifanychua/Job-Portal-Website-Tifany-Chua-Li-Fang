@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from job_portal_web.backend.database import db
+from job_portal_web.backend.notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -75,7 +76,11 @@ async def manage_experience(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="manageExperience.html",
-        context={"experience_list": experience_list, "user": user},
+        context={
+            "experience_list": experience_list,
+            "user": user,
+            "unread_notifications_count": get_unread_notifications_count(request),
+        },
     )
 
 
@@ -123,34 +128,40 @@ async def add_experience(
 
     if not job_title:
         return JSONResponse(
-            {"success": False, "message": "Please enter your job title."}, status_code=400
+            {"success": False, "message": "Please enter your job title."},
+            status_code=400,
         )
 
     if not company_name:
         return JSONResponse(
-            {"success": False, "message": "Please enter your company name."}, status_code=400
+            {"success": False, "message": "Please enter your company name."},
+            status_code=400,
         )
 
     if not employment_type:
         return JSONResponse(
-            {"success": False, "message": "Please select your employment type."}, status_code=400
+            {"success": False, "message": "Please select your employment type."},
+            status_code=400,
         )
 
     if not location:
         return JSONResponse(
-            {"success": False, "message": "Please enter your location."}, status_code=400
+            {"success": False, "message": "Please enter your location."},
+            status_code=400,
         )
 
     if not start_date:
         return JSONResponse(
-            {"success": False, "message": "Please select your start date."}, status_code=400
+            {"success": False, "message": "Please select your start date."},
+            status_code=400,
         )
 
     is_currently_working = currently_working in ("on", "true", "True", "1")
 
     if not is_currently_working and not end_date:
         return JSONResponse(
-            {"success": False, "message": "Please select your end date."}, status_code=400
+            {"success": False, "message": "Please select your end date."},
+            status_code=400,
         )
 
     if not is_currently_working and end_date and end_date < start_date:
@@ -171,7 +182,8 @@ async def add_experience(
 
     if next(duplicate.stream(), None):
         return JSONResponse(
-            {"success": False, "message": "This experience record already exists."}, status_code=409
+            {"success": False, "message": "This experience record already exists."},
+            status_code=409,
         )
 
     db.collection("job_seeker_experience").add(
@@ -229,34 +241,40 @@ async def edit_experience(
 
     if not job_title:
         return JSONResponse(
-            {"success": False, "message": "Please enter your job title."}, status_code=400
+            {"success": False, "message": "Please enter your job title."},
+            status_code=400,
         )
 
     if not company_name:
         return JSONResponse(
-            {"success": False, "message": "Please enter your company name."}, status_code=400
+            {"success": False, "message": "Please enter your company name."},
+            status_code=400,
         )
 
     if not employment_type:
         return JSONResponse(
-            {"success": False, "message": "Please select your employment type."}, status_code=400
+            {"success": False, "message": "Please select your employment type."},
+            status_code=400,
         )
 
     if not location:
         return JSONResponse(
-            {"success": False, "message": "Please enter your location."}, status_code=400
+            {"success": False, "message": "Please enter your location."},
+            status_code=400,
         )
 
     if not start_date:
         return JSONResponse(
-            {"success": False, "message": "Please select your start date."}, status_code=400
+            {"success": False, "message": "Please select your start date."},
+            status_code=400,
         )
 
     is_currently_working = currently_working in ("on", "true", "True", "1")
 
     if not is_currently_working and not end_date:
         return JSONResponse(
-            {"success": False, "message": "Please select your end date."}, status_code=400
+            {"success": False, "message": "Please select your end date."},
+            status_code=400,
         )
 
     if not is_currently_working and end_date and end_date < start_date:

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Payment Successful</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+    <link rel="stylesheet"
+          href="/css/paymentSuccess.css">
+
+</head>
+
+<body>
+
+{% include "employerHeader.html" %}
+
+<div class="main-content">
+
+    <div class="success-card">
+
+        <!-- Success Icon -->
+
+        <div class="success-icon">
+
+            <i class="fa-solid fa-circle-check"></i>
+
+        </div>
+
+        <h1>
+
+            Payment Successful!
+
+        </h1>
+
+        <p>
+
+            Thank you for your purchase.
+
+            Your job posting credits have been added to your account.
+
+        </p>
+
+        <!-- ====================================== -->
+        <!-- Receipt -->
+        <!-- ====================================== -->
+
+        <div class="receipt-card">
+
+            <div class="receipt-title">
+
+                <i class="fa-solid fa-receipt"></i>
+
+                Payment Receipt
+
+            </div>
+
+            <div class="receipt-row">
+
+                <span>
+
+                    Transaction ID
+
+                </span>
+
+                <strong>
+
+                    {{ order_id }}
+
+                </strong>
+
+            </div>
+
+            <div class="receipt-row">
+
+                <span>
+
+                    Company
+
+                </span>
+
+                <strong>
+
+                    {{ company.companyName }}
+
+                </strong>
+
+            </div>
+
+            <div class="receipt-row">
+
+                <span>
+                    Payment Method
+                </span>
+
+                <strong>
+                    {{ payment.payment_method }}
+                </strong>
+
+            </div>
+
+            <div class="receipt-row">
+
+                <span>
+
+                    Payment Status
+
+                </span>
+
+                <strong class="completed">
+
+                    Completed
+
+                </strong>
+
+            </div>
+
+            <div class="receipt-row">
+
+                <span>
+
+                    Purchase Date
+
+                </span>
+
+                <strong>
+
+                    {{ payment.completed_at }}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+        <!-- ====================================== -->
+        <!-- Buttons -->
+        <!-- ====================================== -->
+
+        <div class="button-group">
+
+            {% if order_id %}
+
+            <a href="/payment-receipt/{{ order_id }}"
+            class="secondary-btn">
+
+                <i class="fa-solid fa-receipt"></i>
+
+                View Receipt
+
+            </a>
+
+            {% endif %}
+
+
+            <a href="/employer-credit"
+            class="primary-btn">
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Back to Subscription
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

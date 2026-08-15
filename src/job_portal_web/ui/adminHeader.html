@@ -14,16 +14,7 @@
     <div class="topbar-right">
 
 
-        <!-- Notification -->
-        <button class="icon-btn notification">
 
-            <i class="fa-regular fa-bell"></i>
-
-            <span class="badge">
-                3
-            </span>
-
-        </button>
 
 
 
@@ -151,189 +142,34 @@
 
         </li>
 
+       
+        <!-- Career Advice -->
 
+<li>
 
+    <a href="/admin/career-advice"
 
+       class="
+       {% if
+            request.url.path == '/admin/career-advice'
+            or request.url.path.startswith('/admin/career-advice/')
+       %}
+            active
+       {% endif %}
+       ">
 
-        <!-- Employer Management -->
 
-        <li>
+        <i class="fa-regular fa-newspaper"></i>
 
 
-            <a href="/admin/employers"
+        <span>
+            Career Advice
+        </span>
 
-               class="
-               {% if
-                    request.url.path == '/admin/employers'
-                    or request.url.path.startswith('/admin/employer/')
-               %}
-                    active
-               {% endif %}
-               ">
 
+    </a>
 
-                <i class="fa-regular fa-building"></i>
-
-
-                <span>
-                    Employer Management
-                </span>
-
-
-            </a>
-
-
-        </li>
-
-
-
-
-
-        <!-- Job Management -->
-
-        <li>
-
-
-            <a href="/admin/jobs"
-
-               class="
-               {% if
-                    request.url.path == '/admin/jobs'
-                    or request.url.path.startswith('/admin/job/')
-               %}
-                    active
-               {% endif %}
-               ">
-
-
-                <i class="fa-regular fa-folder-open"></i>
-
-
-                <span>
-                    Job Management
-                </span>
-
-
-            </a>
-
-
-        </li>
-
-
-
-
-
-
-        <!-- Applications -->
-
-        <li>
-
-
-            <a href="/admin/applications"
-
-               class="{% if request.url.path == '/admin/applications' %}active{% endif %}">
-
-
-                <i class="fa-regular fa-file-lines"></i>
-
-
-                <span>
-                    Applications
-                </span>
-
-
-            </a>
-
-
-        </li>
-
-
-
-
-
-        <!-- Interviews -->
-
-        <li>
-
-
-            <a href="/admin/interviews"
-
-               class="{% if request.url.path == '/admin/interviews' %}active{% endif %}">
-
-
-                <i class="fa-regular fa-calendar-check"></i>
-
-
-                <span>
-                    Interviews
-                </span>
-
-
-            </a>
-
-
-        </li>
-
-
-
-
-
-        <!-- Reports -->
-
-        <li>
-
-
-            <a href="/admin/reports"
-
-               class="
-               {% if
-                    request.url.path == '/admin/reports'
-                    or request.url.path.startswith('/admin/report/')
-               %}
-                    active
-               {% endif %}
-               ">
-
-
-                <i class="fa-regular fa-flag"></i>
-
-
-                <span>
-                    Reports
-                </span>
-
-
-            </a>
-
-
-        </li>
-
-
-
-
-
-        <!-- Analytics -->
-
-        <li>
-
-
-            <a href="/admin/analytics"
-
-               class="{% if request.url.path == '/admin/analytics' %}active{% endif %}">
-
-
-                <i class="fa-solid fa-chart-pie"></i>
-
-
-                <span>
-                    Analytics
-                </span>
-
-
-            </a>
-
-
-        </li>
+</li>
 
 
 

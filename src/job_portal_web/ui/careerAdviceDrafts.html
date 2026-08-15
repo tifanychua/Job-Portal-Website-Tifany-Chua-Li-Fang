@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Saved Career Advice Drafts</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Admin Header -->
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+    <!-- Career Advice -->
+    <link rel="stylesheet"
+          href="/css/adminCareerAdvice.css">
+
+</head>
+
+<body>
+
+{% include "adminHeader.html" %}
+
+
+<main class="main-content">
+
+
+    <!-- ============================== -->
+    <!-- PAGE HEADER                    -->
+    <!-- ============================== -->
+
+    <div class="page-header">
+
+        <div>
+
+            <div class="draft-breadcrumb">
+
+                <a href="/admin/career-advice">
+                    Career Advice
+                </a>
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+                <span>
+                    Saved Drafts
+                </span>
+
+            </div>
+
+
+            <h1>
+                Saved Drafts
+            </h1>
+
+
+            <p>
+                Continue editing unfinished career advice posts
+                before publishing them.
+            </p>
+
+        </div>
+
+
+        <div class="header-actions">
+
+            <a href="/admin/career-advice"
+               class="draft-list-btn">
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                Published Posts
+
+            </a>
+
+
+            <a href="/admin/career-advice/create"
+               class="create-btn">
+
+                <i class="fa-solid fa-plus"></i>
+
+                Create Post
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- SEARCH AND FILTER              -->
+    <!-- ============================== -->
+
+    <div class="advice-toolbar">
+
+
+        <!-- Search -->
+
+        <div class="advice-search-box">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input type="text"
+                   id="draftSearch"
+                   placeholder="Search title or summary...">
+
+        </div>
+
+
+        <!-- Category -->
+
+        <div class="advice-filter-box">
+
+            <i class="fa-solid fa-layer-group"></i>
+
+            <select id="categoryFilter">
+
+                <option value="All">
+                    All Categories
+                </option>
+
+                <option value="Job Search">
+                    Job Search
+                </option>
+
+                <option value="Resume Writing">
+                    Resume Writing
+                </option>
+
+                <option value="Interview">
+                    Interview
+                </option>
+
+                <option value="Career Development">
+                    Career Development
+                </option>
+
+                <option value="Workplace Skills">
+                    Workplace Skills
+                </option>
+
+                <option value="">
+                    Uncategorised
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- Sort -->
+
+        <div class="advice-filter-box">
+
+            <i class="fa-solid fa-arrow-down-wide-short"></i>
+
+            <select id="sortFilter">
+
+                <option value="newest">
+                    Recently Updated
+                </option>
+
+                <option value="oldest">
+                    Oldest Updated
+                </option>
+
+                <option value="title-asc">
+                    Title A–Z
+                </option>
+
+                <option value="title-desc">
+                    Title Z–A
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- MESSAGE                        -->
+    <!-- ============================== -->
+
+    <div id="messageBox"
+         class="message-box"
+         hidden>
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- RESULT COUNT                   -->
+    <!-- ============================== -->
+
+    <div class="result-information">
+
+        <span id="resultCount">
+
+            {{ drafts|length }}
+
+            {% if drafts|length == 1 %}
+                saved draft
+            {% else %}
+                saved drafts
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- DRAFT CARDS                    -->
+    <!-- ============================== -->
+
+    {% if drafts %}
+
+        <div id="draftGrid"
+             class="admin-advice-grid">
+
+
+            {% for post in drafts %}
+
+
+                {% set image_url =
+                    post.get("imageUrl", "") %}
+
+                {% set category =
+                    post.get("category", "") %}
+
+                {% set title =
+                    post.get("title", "Untitled") %}
+
+                {% set summary =
+                    post.get("summary", "") %}
+
+                {% set updated_date =
+                    post.get("updatedAt") %}
+
+
+                <article class="admin-advice-card draft-card"
+                         data-category="{{ category }}"
+                         data-title="{{ title|lower }}"
+                         data-updated-timestamp="{% if updated_date %}{{ updated_date.timestamp() }}{% else %}0{% endif %}">
+
+
+                    <!-- Cover Image -->
+
+                    <div class="admin-card-image">
+
+                        {% if image_url %}
+
+                            <img src="{{ image_url }}"
+                                 alt="{{ title }}">
+
+                        {% else %}
+
+                            <div class="admin-image-placeholder">
+
+                                <i class="fa-regular fa-file-lines"></i>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <span class="card-status draft">
+                            Draft
+                        </span>
+
+                    </div>
+
+
+                    <!-- Draft Information -->
+
+                    <div class="admin-card-content">
+
+
+                        <span class="category-badge">
+
+                            {{ category or "Uncategorised" }}
+
+                        </span>
+
+
+                        <h2 class="post-title">
+                            {{ title }}
+                        </h2>
+
+
+                        <p class="post-summary">
+
+                            {% if summary %}
+
+                                {{ summary }}
+
+                            {% else %}
+
+                                No summary has been added.
+
+                            {% endif %}
+
+                        </p>
+
+
+                        <div class="card-date">
+
+                            <i class="fa-regular fa-clock"></i>
+
+
+                            {% if updated_date %}
+
+                                Updated
+                                {{ updated_date.strftime("%d %b %Y") }}
+
+                            {% else %}
+
+                                Update date unavailable
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Actions -->
+
+                        <div class="draft-card-actions">
+
+
+                            <a href="/admin/career-advice/{{ post.get('id') }}/edit"
+                               class="card-edit-btn">
+
+                                <i class="fa-solid fa-pen"></i>
+
+                                View / Edit
+
+                            </a>
+
+
+                            <button type="button"
+                                    class="card-publish-btn publish-button"
+                                    data-post-id="{{ post.get('id') }}"
+                                    data-post-title="{{ title }}">
+
+                                <i class="fa-solid fa-paper-plane"></i>
+
+                                Publish
+
+                            </button>
+
+
+                            <button type="button"
+                                    class="card-delete-btn delete-button"
+                                    data-post-id="{{ post.get('id') }}"
+                                    data-post-title="{{ title }}">
+
+                                <i class="fa-solid fa-trash"></i>
+
+                                Delete
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+            {% endfor %}
+
+
+        </div>
+
+
+        <!-- No search results -->
+
+        <div id="noSearchResults"
+             class="empty-advice-state"
+             hidden>
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <h2>
+                No matching drafts
+            </h2>
+
+            <p>
+                Try changing the search term or category.
+            </p>
+
+        </div>
+
+
+    {% else %}
+
+
+        <!-- No drafts -->
+
+        <div class="empty-advice-state">
+
+            <i class="fa-regular fa-folder-open"></i>
+
+            <h2>
+                No saved drafts
+            </h2>
+
+            <p>
+                Posts saved as drafts will appear here.
+            </p>
+
+
+            <a href="/admin/career-advice/create"
+               class="create-btn">
+
+                <i class="fa-solid fa-plus"></i>
+
+                Create Career Advice
+
+            </a>
+
+        </div>
+
+
+    {% endif %}
+
+</main>
+
+
+<script>
+
+/* ================================== */
+/* PAGE ELEMENTS                      */
+/* ================================== */
+
+const searchInput =
+    document.getElementById(
+        "draftSearch"
+    );
+
+
+const categoryFilter =
+    document.getElementById(
+        "categoryFilter"
+    );
+
+
+const sortFilter =
+    document.getElementById(
+        "sortFilter"
+    );
+
+
+const resultCount =
+    document.getElementById(
+        "resultCount"
+    );
+
+
+const draftGrid =
+    document.getElementById(
+        "draftGrid"
+    );
+
+
+const noSearchResults =
+    document.getElementById(
+        "noSearchResults"
+    );
+
+
+/* ================================== */
+/* SEARCH AND FILTER                  */
+/* ================================== */
+
+function filterDrafts() {
+
+    const keyword =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+
+    const selectedCategory =
+        categoryFilter.value;
+
+
+    const cards =
+        document.querySelectorAll(
+            ".draft-card"
+        );
+
+
+    let visibleCount = 0;
+
+
+    cards.forEach(
+        function (card) {
+
+            const title =
+                card.querySelector(
+                    ".post-title"
+                )
+                .textContent
+                .trim()
+                .toLowerCase();
+
+
+            const summary =
+                card.querySelector(
+                    ".post-summary"
+                )
+                .textContent
+                .trim()
+                .toLowerCase();
+
+
+            const category =
+                card.dataset.category;
+
+
+            const matchesSearch =
+                title.includes(keyword) ||
+                summary.includes(keyword);
+
+
+            const matchesCategory =
+                selectedCategory === "All" ||
+                category === selectedCategory;
+
+
+            const visible =
+                matchesSearch &&
+                matchesCategory;
+
+
+            card.style.display =
+                visible ? "" : "none";
+
+
+            if (visible) {
+                visibleCount++;
+            }
+
+        }
+    );
+
+
+    resultCount.textContent =
+        visibleCount === 1
+            ? "1 saved draft"
+            : visibleCount + " saved drafts";
+
+
+    if (noSearchResults) {
+
+        noSearchResults.hidden =
+            visibleCount !== 0;
+
+    }
+
+}
+
+
+/* ================================== */
+/* SORT DRAFTS                        */
+/* ================================== */
+
+function sortDrafts() {
+
+    if (!draftGrid) {
+        return;
+    }
+
+
+    const sortValue =
+        sortFilter.value;
+
+
+    const cards =
+        Array.from(
+            draftGrid.querySelectorAll(
+                ".draft-card"
+            )
+        );
+
+
+    cards.sort(
+        function (firstCard, secondCard) {
+
+            const firstTitle =
+                firstCard.dataset.title;
+
+            const secondTitle =
+                secondCard.dataset.title;
+
+            const firstUpdated =
+                Number(
+                    firstCard.dataset
+                        .updatedTimestamp
+                );
+
+            const secondUpdated =
+                Number(
+                    secondCard.dataset
+                        .updatedTimestamp
+                );
+
+
+            if (sortValue === "oldest") {
+
+                return (
+                    firstUpdated -
+                    secondUpdated
+                );
+
+            }
+
+
+            if (sortValue === "title-asc") {
+
+                return firstTitle.localeCompare(
+                    secondTitle
+                );
+
+            }
+
+
+            if (sortValue === "title-desc") {
+
+                return secondTitle.localeCompare(
+                    firstTitle
+                );
+
+            }
+
+
+            return (
+                secondUpdated -
+                firstUpdated
+            );
+
+        }
+    );
+
+
+    cards.forEach(
+        function (card) {
+
+            draftGrid.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+/* ================================== */
+/* DISPLAY MESSAGE                    */
+/* ================================== */
+
+function displayMessage(
+    message,
+    type
+) {
+
+    const messageBox =
+        document.getElementById(
+            "messageBox"
+        );
+
+
+    messageBox.hidden = false;
+
+    messageBox.className =
+        "message-box " + type;
+
+    messageBox.textContent =
+        message;
+
+
+    messageBox.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+
+}
+
+
+/* ================================== */
+/* FORMAT ERROR                       */
+/* ================================== */
+
+function getErrorMessage(data) {
+
+    if (Array.isArray(data.detail)) {
+
+        return data.detail.join(" ");
+
+    }
+
+
+    return (
+        data.detail ||
+        data.message ||
+        "Unable to complete the request."
+    );
+
+}
+
+
+/* ================================== */
+/* PUBLISH DRAFT                      */
+/* ================================== */
+
+async function publishDraft(
+    postId,
+    postTitle,
+    button
+) {
+
+    const confirmed =
+        window.confirm(
+            `Publish "${postTitle}"? ` +
+            "Job seekers will be able to view it."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    button.disabled = true;
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/admin/career-advice/${postId}/publish`,
+                {
+                    method: "POST"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                getErrorMessage(data)
+            );
+
+        }
+
+
+        displayMessage(
+            data.message,
+            "success"
+        );
+
+
+        setTimeout(
+            function () {
+
+                window.location.href =
+                    "/admin/career-advice";
+
+            },
+            700
+        );
+
+    }
+    catch (error) {
+
+        displayMessage(
+            error.message,
+            "error"
+        );
+
+
+        button.disabled = false;
+
+    }
+
+}
+
+
+/* ================================== */
+/* DELETE DRAFT                       */
+/* ================================== */
+
+async function deleteDraft(
+    postId,
+    postTitle,
+    button
+) {
+
+    const confirmed =
+        window.confirm(
+            `Delete "${postTitle}"? ` +
+            "This action cannot be undone."
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    button.disabled = true;
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/admin/career-advice/${postId}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                getErrorMessage(data)
+            );
+
+        }
+
+
+        const card =
+            button.closest(
+                ".draft-card"
+            );
+
+
+        if (card) {
+            card.remove();
+        }
+
+
+        displayMessage(
+            data.message,
+            "success"
+        );
+
+
+        filterDrafts();
+
+
+        if (
+            document.querySelectorAll(
+                ".draft-card"
+            ).length === 0
+        ) {
+
+            setTimeout(
+                function () {
+
+                    window.location.reload();
+
+                },
+                600
+            );
+
+        }
+
+    }
+    catch (error) {
+
+        displayMessage(
+            error.message,
+            "error"
+        );
+
+
+        button.disabled = false;
+
+    }
+
+}
+
+
+/* ================================== */
+/* EVENTS                             */
+/* ================================== */
+
+searchInput.addEventListener(
+    "input",
+    filterDrafts
+);
+
+
+categoryFilter.addEventListener(
+    "change",
+    filterDrafts
+);
+
+
+sortFilter.addEventListener(
+    "change",
+    sortDrafts
+);
+
+
+document.querySelectorAll(
+    ".publish-button"
+).forEach(
+    function (button) {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                publishDraft(
+                    button.dataset.postId,
+                    button.dataset.postTitle,
+                    button
+                );
+
+            }
+        );
+
+    }
+);
+
+
+document.querySelectorAll(
+    ".delete-button"
+).forEach(
+    function (button) {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                deleteDraft(
+                    button.dataset.postId,
+                    button.dataset.postTitle,
+                    button
+                );
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

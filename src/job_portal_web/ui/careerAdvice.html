@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Career Advice Management</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="/css/employerHeader.css">
+
+    <link rel="stylesheet"
+          href="/css/adminCareerAdvice.css">
+</head>
+
+<body>
+
+{% include "adminHeader.html" %}
+
+<main class="main-content">
+
+    <!-- ============================== -->
+    <!-- PAGE HEADER                    -->
+    <!-- ============================== -->
+
+    <div class="page-header">
+
+        <div>
+            <h1>Career Advice</h1>
+
+            <p>
+                Manage published career guidance for job seekers.
+            </p>
+        </div>
+
+        <div class="header-actions">
+
+            <a href="/admin/career-advice/drafts"
+               class="draft-list-btn">
+
+                <i class="fa-regular fa-folder-open"></i>
+
+                Saved Drafts
+
+                {% if draft_count and draft_count > 0 %}
+
+                    <span class="draft-count">
+                        {{ draft_count }}
+                    </span>
+
+                {% endif %}
+
+            </a>
+
+            <a href="/admin/career-advice/create"
+               class="create-btn">
+
+                <i class="fa-solid fa-plus"></i>
+
+                Create Post
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- SEARCH AND FILTER              -->
+    <!-- ============================== -->
+
+    <div class="advice-toolbar">
+
+        <div class="advice-search-box">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input type="text"
+                   id="postSearch"
+                   placeholder="Search title or summary...">
+
+        </div>
+
+
+        <div class="advice-filter-box">
+
+            <i class="fa-solid fa-layer-group"></i>
+
+            <select id="categoryFilter">
+
+                <option value="All">
+                    All Categories
+                </option>
+
+                <option value="Job Search">
+                    Job Search
+                </option>
+
+                <option value="Resume Writing">
+                    Resume Writing
+                </option>
+
+                <option value="Interview">
+                    Interview
+                </option>
+
+                <option value="Career Development">
+                    Career Development
+                </option>
+
+                <option value="Workplace Skills">
+                    Workplace Skills
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="advice-filter-box">
+
+            <i class="fa-solid fa-arrow-down-wide-short"></i>
+
+            <select id="sortFilter">
+
+                <option value="newest">
+                    Newest First
+                </option>
+
+                <option value="oldest">
+                    Oldest First
+                </option>
+
+                <option value="title-asc">
+                    Title A–Z
+                </option>
+
+                <option value="title-desc">
+                    Title Z–A
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- MESSAGES                       -->
+    <!-- ============================== -->
+
+    <div id="messageBox"
+         class="message-box"
+         hidden>
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- RESULT COUNT                   -->
+    <!-- ============================== -->
+
+    <div class="result-information">
+
+        <span id="resultCount">
+
+            {{ posts|length }}
+
+            {% if posts|length == 1 %}
+                published post
+            {% else %}
+                published posts
+            {% endif %}
+
+        </span>
+
+    </div>
+
+
+    <!-- ============================== -->
+    <!-- PUBLISHED POST CARDS           -->
+    <!-- ============================== -->
+
+    {% if posts %}
+
+        <div id="careerAdviceGrid"
+             class="admin-advice-grid">
+
+            {% for post in posts %}
+
+                {% set image_url =
+                    post.get("imageUrl", "") %}
+
+                {% set category =
+                    post.get("category", "") %}
+
+                {% set title =
+                    post.get("title", "Untitled") %}
+
+                {% set summary =
+                    post.get("summary", "") %}
+
+                {% set publication_date =
+                    post.get("publicationDate") %}
+
+
+                <article class="admin-advice-card published-card"
+                         data-category="{{ category }}"
+                         data-title="{{ title|lower }}"
+                         data-publication-timestamp="{% if publication_date %}{{ publication_date.timestamp() }}{% else %}0{% endif %}">
+
+
+                    <!-- Cover Image -->
+
+                    <div class="admin-card-image">
+
+                        {% if image_url %}
+
+                            <img src="{{ image_url }}"
+                                 alt="{{ title }}">
+
+                        {% else %}
+
+                            <div class="admin-image-placeholder">
+
+                                <i class="fa-regular fa-newspaper"></i>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <span class="card-status published">
+                            Published
+                        </span>
+
+                    </div>
+
+
+                    <!-- Card Content -->
+
+                    <div class="admin-card-content">
+
+                        <span class="category-badge">
+
+                            {{ category or "Uncategorised" }}
+
+                        </span>
+
+
+                        <h2 class="post-title">
+                            {{ title }}
+                        </h2>
+
+
+                        <p class="post-summary">
+
+                            {% if summary %}
+
+                                {{ summary }}
+
+                            {% else %}
+
+                                No summary available.
+
+                            {% endif %}
+
+                        </p>
+
+
+                        <div class="card-date">
+
+                            <i class="fa-regular fa-calendar"></i>
+
+                            {% if publication_date %}
+
+                                Published
+                                {{ publication_date.strftime("%d %b %Y") }}
+
+                            {% else %}
+
+                                Publication date unavailable
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <!-- Actions -->
+
+                        <div class="card-actions">
+
+                            <a href="/career-advice/{{ post.get('id') }}"
+                               class="card-view-btn">
+
+                                <i class="fa-solid fa-eye"></i>
+
+                                View
+
+                            </a>
+
+
+                            <a href="/admin/career-advice/{{ post.get('id') }}/edit"
+                               class="card-edit-btn">
+
+                                <i class="fa-solid fa-pen"></i>
+
+                                Edit
+
+                            </a>
+
+
+                            <button type="button"
+                                    class="card-delete-btn delete-button"
+                                    data-post-id="{{ post.get('id') }}"
+                                    data-post-title="{{ title }}">
+
+                                <i class="fa-solid fa-trash"></i>
+
+                                Delete
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- No matching search results -->
+
+        <div id="noSearchResults"
+             class="empty-advice-state"
+             hidden>
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <h2>
+                No matching posts
+            </h2>
+
+            <p>
+                Try changing the search term or category.
+            </p>
+
+        </div>
+
+    {% else %}
+
+        <!-- No published posts -->
+
+        <div class="empty-advice-state">
+
+            <i class="fa-regular fa-newspaper"></i>
+
+            <h2>
+                No published posts
+            </h2>
+
+            <p>
+                Create a new post or complete one of your saved drafts.
+            </p>
+
+            <div class="empty-actions">
+
+                <a href="/admin/career-advice/drafts"
+                   class="draft-list-btn">
+
+                    <i class="fa-regular fa-folder-open"></i>
+
+                    View Saved Drafts
+
+                </a>
+
+
+                <a href="/admin/career-advice/create"
+                   class="create-btn">
+
+                    <i class="fa-solid fa-plus"></i>
+
+                    Create Post
+
+                </a>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</main>
+
+
+<script>
+
+const searchInput =
+    document.getElementById(
+        "postSearch"
+    );
+
+const categoryFilter =
+    document.getElementById(
+        "categoryFilter"
+    );
+
+const sortFilter =
+    document.getElementById(
+        "sortFilter"
+    );
+
+const resultCount =
+    document.getElementById(
+        "resultCount"
+    );
+
+const careerAdviceGrid =
+    document.getElementById(
+        "careerAdviceGrid"
+    );
+
+const noSearchResults =
+    document.getElementById(
+        "noSearchResults"
+    );
+
+
+/* ================================== */
+/* SEARCH AND CATEGORY FILTER         */
+/* ================================== */
+
+function filterPosts() {
+
+    const keyword =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+    const selectedCategory =
+        categoryFilter.value;
+
+    const cards =
+        document.querySelectorAll(
+            ".published-card"
+        );
+
+    let visibleCount = 0;
+
+
+    cards.forEach(
+        function (card) {
+
+            const title =
+                card.querySelector(
+                    ".post-title"
+                )
+                .textContent
+                .trim()
+                .toLowerCase();
+
+            const summary =
+                card.querySelector(
+                    ".post-summary"
+                )
+                .textContent
+                .trim()
+                .toLowerCase();
+
+            const category =
+                card.dataset.category;
+
+            const matchesSearch =
+                title.includes(keyword) ||
+                summary.includes(keyword);
+
+            const matchesCategory =
+                selectedCategory === "All" ||
+                category === selectedCategory;
+
+            const visible =
+                matchesSearch &&
+                matchesCategory;
+
+            card.style.display =
+                visible ? "" : "none";
+
+            if (visible) {
+                visibleCount++;
+            }
+
+        }
+    );
+
+
+    resultCount.textContent =
+        visibleCount === 1
+            ? "1 published post"
+            : visibleCount + " published posts";
+
+
+    if (noSearchResults) {
+
+        noSearchResults.hidden =
+            visibleCount !== 0;
+
+    }
+
+}
+
+
+/* ================================== */
+/* SORT POSTS                         */
+/* ================================== */
+
+function sortPosts() {
+
+    if (!careerAdviceGrid) {
+        return;
+    }
+
+    const sortValue =
+        sortFilter.value;
+
+    const cards =
+        Array.from(
+            careerAdviceGrid.querySelectorAll(
+                ".published-card"
+            )
+        );
+
+
+    cards.sort(
+        function (firstCard, secondCard) {
+
+            const firstTitle =
+                firstCard.dataset.title;
+
+            const secondTitle =
+                secondCard.dataset.title;
+
+            const firstDate =
+                Number(
+                    firstCard.dataset
+                        .publicationTimestamp
+                );
+
+            const secondDate =
+                Number(
+                    secondCard.dataset
+                        .publicationTimestamp
+                );
+
+
+            if (sortValue === "oldest") {
+
+                return firstDate - secondDate;
+
+            }
+
+
+            if (sortValue === "title-asc") {
+
+                return firstTitle.localeCompare(
+                    secondTitle
+                );
+
+            }
+
+
+            if (sortValue === "title-desc") {
+
+                return secondTitle.localeCompare(
+                    firstTitle
+                );
+
+            }
+
+
+            return secondDate - firstDate;
+
+        }
+    );
+
+
+    cards.forEach(
+        function (card) {
+
+            careerAdviceGrid.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+/* ================================== */
+/* DISPLAY MESSAGE                    */
+/* ================================== */
+
+function displayMessage(
+    message,
+    type
+) {
+
+    const messageBox =
+        document.getElementById(
+            "messageBox"
+        );
+
+    messageBox.hidden = false;
+
+    messageBox.className =
+        "message-box " + type;
+
+    messageBox.textContent =
+        message;
+
+    messageBox.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+
+}
+
+
+/* ================================== */
+/* FORMAT API ERROR                   */
+/* ================================== */
+
+function getErrorMessage(data) {
+
+    if (Array.isArray(data.detail)) {
+
+        return data.detail.join(" ");
+
+    }
+
+    return (
+        data.detail ||
+        data.message ||
+        "Unable to complete the request."
+    );
+
+}
+
+
+/* ================================== */
+/* DELETE POST                        */
+/* ================================== */
+
+async function deletePost(
+    postId,
+    postTitle,
+    button
+) {
+
+    const confirmed =
+        window.confirm(
+            `Delete "${postTitle}"? ` +
+            "This action cannot be undone."
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    button.disabled = true;
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/admin/career-advice/${postId}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                getErrorMessage(data)
+            );
+
+        }
+
+
+        const card =
+            button.closest(
+                ".published-card"
+            );
+
+
+        if (card) {
+
+            card.remove();
+
+        }
+
+
+        displayMessage(
+            data.message,
+            "success"
+        );
+
+
+        filterPosts();
+
+
+        if (
+            document.querySelectorAll(
+                ".published-card"
+            ).length === 0
+        ) {
+
+            setTimeout(
+                function () {
+
+                    window.location.reload();
+
+                },
+                600
+            );
+
+        }
+
+    }
+    catch (error) {
+
+        displayMessage(
+            error.message,
+            "error"
+        );
+
+        button.disabled = false;
+
+    }
+
+}
+
+
+/* ================================== */
+/* EVENTS                             */
+/* ================================== */
+
+searchInput.addEventListener(
+    "input",
+    filterPosts
+);
+
+categoryFilter.addEventListener(
+    "change",
+    filterPosts
+);
+
+sortFilter.addEventListener(
+    "change",
+    sortPosts
+);
+
+
+document.querySelectorAll(
+    ".delete-button"
+).forEach(
+    function (button) {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                deletePost(
+                    button.dataset.postId,
+                    button.dataset.postTitle,
+                    button
+                );
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

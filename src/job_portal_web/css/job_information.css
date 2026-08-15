@@ -103,6 +103,13 @@
   align-items: center;
   gap: 8px;
 }
+.btn-save.saved {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+.btn-save.saved i {
+  color: var(--color-danger);
+}
 
 .badge-muted {
   background: var(--color-bg);

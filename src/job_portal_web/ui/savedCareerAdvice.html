@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JobConnect — Saved Posts</title>
+
+  <link rel="stylesheet" href="/css/base.css">
+  <link rel="stylesheet" href="/css/profile.css">
+  <link rel="stylesheet" href="/css/savedPost.css">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+  {% include "components/header.html" %}
+
+  <div class="profile-page">
+    <div class="profile-layout">
+
+      {% include "components/profile_sidebar.html" %}
+
+      <main class="profile-main">
+        <section class="saved-post-page">
+
+          <div class="saved-post-header">
+            <div>
+              <h1>Saved Posts</h1>
+              <p>Keep useful career advice in one place and read it whenever you need it.</p>
+            </div>
+
+            <div class="saved-post-count" aria-label="Saved post count">
+              <i class="fa-regular fa-bookmark"></i>
+              <span id="savedPostTotal">{{ total_saved }}</span>
+              <span>saved</span>
+            </div>
+          </div>
+
+          <div class="saved-post-toolbar">
+            <label class="saved-post-search" for="savedPostSearch">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="search"
+                id="savedPostSearch"
+                placeholder="Search saved posts"
+                autocomplete="off"
+                oninput="filterSavedPosts()"
+              >
+            </label>
+
+            <label class="saved-post-filter" for="savedPostCategory">
+              <span>Category:</span>
+              <select id="savedPostCategory" onchange="filterSavedPosts()">
+                <option value="all">All categories</option>
+                {% for category in categories %}
+                <option value="{{ category | lower }}">{{ category }}</option>
+                {% endfor %}
+              </select>
+            </label>
+
+            <label class="saved-post-filter" for="savedPostSort">
+              <span>Sort by:</span>
+              <select id="savedPostSort" onchange="filterSavedPosts()">
+                <option value="recent">Recently saved</option>
+                <option value="oldest">Oldest saved</option>
+                <option value="title-asc">Title (A–Z)</option>
+                <option value="title-desc">Title (Z–A)</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="saved-post-result-row" id="savedPostResultRow"
+               {% if not posts %}style="display: none"{% endif %}>
+            <span id="savedPostResultText">
+              Showing {{ total_saved }} saved {{ "post" if total_saved == 1 else "posts" }}
+            </span>
+          </div>
+
+          <div class="saved-post-grid" id="savedPostGrid">
+            {% for post in posts %}
+            <article
+              class="saved-post-card"
+              data-id="{{ post.id }}"
+              data-title="{{ post.title | lower }}"
+              data-summary="{{ post.summary | lower }}"
+              data-category="{{ post.category | lower }}"
+              data-saved-ts="{{ post.saved_at_sort }}"
+              onclick="window.location.href='/job-seeker/career-advice/{{ post.id }}'"
+            >
+              <div class="saved-post-image-wrap">
+                {% if post.imageUrl %}
+                <img
+                  class="saved-post-image"
+                  src="{{ post.imageUrl }}"
+                  alt="Cover image for {{ post.title }}"
+                  loading="lazy"
+                >
+                {% else %}
+                <div class="saved-post-image-placeholder" aria-hidden="true">
+                  <i class="fa-regular fa-newspaper"></i>
+                </div>
+                {% endif %}
+
+                <span class="saved-post-category">{{ post.category }}</span>
+
+                <button
+                  type="button"
+                  class="saved-post-remove"
+                  title="Remove from saved posts"
+                  aria-label="Remove {{ post.title }} from saved posts"
+                  onclick="event.stopPropagation(); removeSavedPost('{{ post.id }}', this)"
+                >
+                  <i class="fa-solid fa-bookmark"></i>
+                </button>
+              </div>
+
+              <div class="saved-post-content">
+                <h2>
+                  <a href="/job-seeker/career-advice/{{ post.id }}"
+                     onclick="event.stopPropagation()">
+                    {{ post.title }}
+                  </a>
+                </h2>
+
+                <p class="saved-post-summary">{{ post.summary }}</p>
+
+                <div class="saved-post-meta">
+                  <span>
+                    <i class="fa-regular fa-calendar"></i>
+                    Published {{ post.publication_date_display }}
+                  </span>
+                  <span>
+                    <i class="fa-regular fa-bookmark"></i>
+                    Saved {{ post.saved_at_display }}
+                  </span>
+                </div>
+
+                <div class="saved-post-footer">
+                  <span>Career Advice</span>
+                  <a href="/job-seeker/career-advice/{{ post.id }}"
+                     onclick="event.stopPropagation()">
+                    Read article
+                    <i class="fa-solid fa-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+
+          <div class="saved-post-empty" id="savedPostEmpty"
+               {% if posts %}style="display: none"{% endif %}>
+            <div class="saved-post-empty-icon">
+              <i class="fa-regular fa-bookmark"></i>
+            </div>
+            <h2>No saved posts yet</h2>
+            <p>Save career advice posts to quickly find them again later.</p>
+            <a href="/career-advice" class="btn btn-primary">Browse Career Advice</a>
+          </div>
+
+          <div class="saved-post-empty" id="savedPostNoResults" style="display: none">
+            <div class="saved-post-empty-icon">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <h2>No matching posts</h2>
+            <p>Try another keyword or choose a different category.</p>
+            <button type="button" class="btn btn-secondary" onclick="clearSavedPostFilters()">
+              Clear filters
+            </button>
+          </div>
+
+        </section>
+      </main>
+
+    </div>
+  </div>
+
+  {% include "components/footer.html" %}
+
+  <div class="saved-post-toast" id="savedPostToast" role="status" aria-live="polite">
+    <span id="savedPostToastMessage">Post removed from your saved list.</span>
+    <button type="button" onclick="undoRemoveSavedPost()">Undo</button>
+  </div>
+
+  <script>
+    let lastRemovedCard = null;
+    let lastRemovedPostId = null;
+    let toastTimer = null;
+
+    async function requestSavedPost(url, method) {
+      const response = await fetch(url, {
+        method,
+        headers: { "Accept": "application/json" }
+      });
+
+      let data = {};
+      try {
+        data = await response.json();
+      } catch (error) {
+        data = {};
+      }
+
+      if (!response.ok || data.success === false) {
+        throw new Error(data.detail || data.message || "The request could not be completed.");
+      }
+
+      return data;
+    }
+
+    async function removeSavedPost(postId, buttonElement) {
+      const card = buttonElement.closest(".saved-post-card");
+      buttonElement.disabled = true;
+
+      try {
+        await requestSavedPost(`/api/career-advice/${postId}/save`, "DELETE");
+
+        lastRemovedCard = card.cloneNode(true);
+        lastRemovedPostId = postId;
+
+        card.classList.add("removing");
+        window.setTimeout(() => {
+          card.remove();
+          updateSavedPostPage();
+        }, 180);
+
+        showSavedPostToast("Post removed from your saved list.");
+      } catch (error) {
+        buttonElement.disabled = false;
+        window.alert(error.message || "Could not remove this post. Please try again.");
+      }
+    }
+
+    async function undoRemoveSavedPost() {
+      if (!lastRemovedCard || !lastRemovedPostId) return;
+
+      const cardToRestore = lastRemovedCard;
+      const postIdToRestore = lastRemovedPostId;
+
+      try {
+        await requestSavedPost(`/api/career-advice/${postIdToRestore}/save`, "POST");
+
+        cardToRestore.classList.remove("removing");
+        const removeButton = cardToRestore.querySelector(".saved-post-remove");
+        if (removeButton) removeButton.disabled = false;
+
+        document.getElementById("savedPostGrid").prepend(cardToRestore);
+
+        lastRemovedCard = null;
+        lastRemovedPostId = null;
+        hideSavedPostToast();
+        updateSavedPostPage();
+      } catch (error) {
+        window.alert(error.message || "Could not restore this post. Please try again.");
+      }
+    }
+
+    function filterSavedPosts() {
+      const keyword = document.getElementById("savedPostSearch").value.trim().toLowerCase();
+      const category = document.getElementById("savedPostCategory").value;
+      const sortBy = document.getElementById("savedPostSort").value;
+      const grid = document.getElementById("savedPostGrid");
+      const cards = Array.from(grid.querySelectorAll(".saved-post-card"));
+
+      cards.sort((first, second) => {
+        if (sortBy === "recent") {
+          return Number(second.dataset.savedTs) - Number(first.dataset.savedTs);
+        }
+        if (sortBy === "oldest") {
+          return Number(first.dataset.savedTs) - Number(second.dataset.savedTs);
+        }
+        if (sortBy === "title-asc") {
+          return first.dataset.title.localeCompare(second.dataset.title);
+        }
+        if (sortBy === "title-desc") {
+          return second.dataset.title.localeCompare(first.dataset.title);
+        }
+        return 0;
+      });
+
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const searchableText = `${card.dataset.title} ${card.dataset.summary}`;
+        const matchesKeyword = searchableText.includes(keyword);
+        const matchesCategory = category === "all" || card.dataset.category === category;
+        const isVisible = matchesKeyword && matchesCategory;
+
+        card.style.display = isVisible ? "" : "none";
+        if (isVisible) visibleCount += 1;
+        grid.appendChild(card);
+      });
+
+      const hasCards = cards.length > 0;
+      document.getElementById("savedPostNoResults").style.display =
+        hasCards && visibleCount === 0 ? "" : "none";
+
+      document.getElementById("savedPostResultText").textContent =
+        `Showing ${visibleCount} saved ${visibleCount === 1 ? "post" : "posts"}`;
+    }
+
+    function clearSavedPostFilters() {
+      document.getElementById("savedPostSearch").value = "";
+      document.getElementById("savedPostCategory").value = "all";
+      filterSavedPosts();
+    }
+
+    function updateSavedPostPage() {
+      const cards = document.querySelectorAll("#savedPostGrid .saved-post-card");
+      const hasCards = cards.length > 0;
+
+      document.getElementById("savedPostTotal").textContent = cards.length;
+      document.getElementById("savedPostEmpty").style.display = hasCards ? "none" : "";
+      document.getElementById("savedPostResultRow").style.display = hasCards ? "" : "none";
+
+      if (!hasCards) {
+        document.getElementById("savedPostNoResults").style.display = "none";
+      } else {
+        filterSavedPosts();
+      }
+    }
+
+    function showSavedPostToast(message) {
+      const toast = document.getElementById("savedPostToast");
+      document.getElementById("savedPostToastMessage").textContent = message;
+      toast.classList.add("show");
+
+      window.clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => {
+        hideSavedPostToast();
+        lastRemovedCard = null;
+        lastRemovedPostId = null;
+      }, 6000);
+    }
+
+    function hideSavedPostToast() {
+      document.getElementById("savedPostToast").classList.remove("show");
+      window.clearTimeout(toastTimer);
+    }
+
+    updateSavedPostPage();
+  </script>
+
+</body>
+</html>

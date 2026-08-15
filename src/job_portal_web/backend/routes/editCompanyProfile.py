@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from firebase_admin import firestore
 
 from job_portal_web.backend.database import bucket
+from job_portal_web.backend.notifications import get_unread_notifications_count
 
 router = APIRouter()
 
@@ -88,6 +89,7 @@ async def edit_company_profile(request: Request):
             "industries": industries,
             "categories": categories,
             "current_year": current_year,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
     )
 
@@ -127,6 +129,7 @@ def return_error(request, company_data, industries, categories, message):
             "industries": industries,
             "categories": categories,
             "error": message,
+            "unread_notifications_count": get_unread_notifications_count(request),
         },
         status_code=400,
     )
@@ -288,7 +291,11 @@ async def update_company_profile(
 
     if len(specialty_category_ids) > 6:
         return return_error(
-            request, company, industries, categories, "Maximum 6 company specialties allowed."
+            request,
+            company,
+            industries,
+            categories,
+            "Maximum 6 company specialties allowed.",
         )
 
     company_data = {
@@ -317,7 +324,11 @@ async def update_company_profile(
 
         if logo.content_type not in allowed_types:
             return return_error(
-                request, company, industries, categories, "Only PNG and JPG images are allowed."
+                request,
+                company,
+                industries,
+                categories,
+                "Only PNG and JPG images are allowed.",
             )
 
         extension = logo.filename.rsplit(".", 1)[-1]
