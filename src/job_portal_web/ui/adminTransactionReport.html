@@ -310,7 +310,7 @@
                         </td>
 
                         <td>
-                            RM {{ "%.2f"|format(transaction.amount|float) }}
+                            RM {{ "%.2f"|format(transaction.get("amount", 0)|float) }}
                         </td>
 
                         <td>

@@ -65,7 +65,7 @@ def create_active_user(user_id):
             "firstName": "Test",
             "lastName": "Restricted User",
             "email": f"{user_id.lower()}@example.com",
-            "accountStatus": "Active",
+            "status": "Active",
             "accountStatusReason": "",
             "createdAt": datetime.now(UTC),
             "test": True,
@@ -144,7 +144,7 @@ def verify_suspended_status(context):
     assert context["response"].status_code == 200
     user = get_user(context)
     assert user is not None
-    assert user["accountStatus"] == "Suspended"
+    assert user["status"] == "Suspended"
     assert user["accountStatusReason"] == context["reason"]
 
 
@@ -173,7 +173,7 @@ def verify_deactivated_status(context):
     assert context["response"].status_code == 200
     user = get_user(context)
     assert user is not None
-    assert user["accountStatus"] == "Deactivated"
+    assert user["status"] == "Deactivated"
     assert user["accountStatusReason"] == context["reason"]
 
 
@@ -209,7 +209,7 @@ def verify_reactivated_status(context):
     assert context["response"].status_code == 200
     user = get_user(context)
     assert user is not None
-    assert user["accountStatus"] == "Active"
+    assert user["status"] == "Active"
     assert user["accountStatusReason"] == ""
 
 
@@ -241,7 +241,7 @@ def admin_restricted_account(client, context, user_id):
 def status_is_updated(context):
     user = get_user(context)
     assert user is not None
-    assert user["accountStatus"] == context["action"]
+    assert user["status"] == context["action"]
 
 
 @then("the system should record the account status change")
@@ -286,4 +286,4 @@ def test_suspend_account_without_reason(client, user_id):
 
     user = db.collection("job_seeker").document(user_id).get().to_dict()
     assert user is not None
-    assert user["accountStatus"] == "Active"
+    assert user["status"] == "Active"

@@ -5,6 +5,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from google.cloud.firestore_v1.base_query import FieldFilter
 from pydantic import BaseModel, Field
 
 from job_portal_web.backend.database import db
@@ -13,12 +14,15 @@ router = APIRouter()
 
 PROJECT_DIRECTORY = Path(__file__).resolve().parents[1]
 TEMPLATE_DIRECTORY = PROJECT_DIRECTORY / "ui"
+
 templates = Jinja2Templates(directory=str(TEMPLATE_DIRECTORY))
+
 
 ACCOUNT_COLLECTIONS = {
     "job_seeker": "job_seeker",
     "employer": "company",
 }
+
 
 ACCOUNT_STATUS_LABELS = {
     "active": "Active",
@@ -34,12 +38,16 @@ class AccountStatusPayload(BaseModel):
 
 def is_admin(request: Request) -> bool:
     role = request.session.get("user_type") or request.session.get("userType")
+
     return str(role or "").strip().lower() == "admin"
 
 
 def require_admin(request: Request) -> None:
     if not is_admin(request):
-        raise HTTPException(status_code=403, detail="Administrator access is required.")
+        raise HTTPException(
+            status_code=403,
+            detail="Administrator access is required.",
+        )
 
 
 def current_admin_id(request: Request) -> str:
@@ -49,31 +57,43 @@ def current_admin_id(request: Request) -> str:
         or request.session.get("userId")
         or "unknown"
     )
+
     return str(value)
 
 
-def first_value(record: dict, *keys: str, default: str = "") -> str:
+def first_value(
+    record: dict,
+    *keys: str,
+    default: str = "",
+) -> str:
     for key in keys:
         value = record.get(key)
+
         if value is not None and str(value).strip():
             return str(value).strip()
+
     return default
 
 
 def account_status(record: dict) -> str:
     raw_status = first_value(
         record,
-        "accountStatus",
-        "account_status",
+        "status",
         default="Active",
     )
+
     normalized = raw_status.strip().lower()
-    return ACCOUNT_STATUS_LABELS.get(normalized, "Active")
+
+    return ACCOUNT_STATUS_LABELS.get(
+        normalized,
+        "Active",
+    )
 
 
 def timestamp_number(value) -> float:
     try:
         return value.timestamp()
+
     except (AttributeError, TypeError, ValueError):
         return 0.0
 
@@ -84,15 +104,68 @@ def display_date(value) -> str:
 
     try:
         return value.strftime("%d %b %Y")
+
     except (AttributeError, TypeError, ValueError):
         return str(value)
+
+
+# ==================================================
+# Deactivate Employer Jobs
+# ==================================================
+
+
+def deactivate_employer_jobs(company_ids: set[str]) -> int:
+    updated_count = 0
+
+    active_job_documents = (
+        db.collection("job_list")
+        .where(
+            filter=FieldFilter(
+                "status",
+                "==",
+                "Active",
+            )
+        )
+        .stream()
+    )
+
+    for job_document in active_job_documents:
+        job = job_document.to_dict() or {}
+
+        job_company_id = str(job.get("company_id", "")).strip()
+
+        if job_company_id in company_ids:
+            job_document.reference.update(
+                {
+                    "status": "Deactivated",
+                }
+            )
+
+            updated_count += 1
+
+    return updated_count
+
+
+# ==================================================
+# Normalize Job Seeker
+# ==================================================
 
 
 def normalize_job_seeker(document) -> dict:
     record = document.to_dict() or {}
 
-    first_name = first_value(record, "firstName", "first_name")
-    last_name = first_value(record, "lastName", "last_name")
+    first_name = first_value(
+        record,
+        "firstName",
+        "first_name",
+    )
+
+    last_name = first_value(
+        record,
+        "lastName",
+        "last_name",
+    )
+
     combined_name = " ".join(part for part in (first_name, last_name) if part)
 
     name = first_value(
@@ -116,8 +189,18 @@ def normalize_job_seeker(document) -> dict:
         "account_type": "job_seeker",
         "account_type_label": "Job Seeker",
         "name": name,
-        "email": first_value(record, "email", "emailAddress", default="No email"),
-        "phone": first_value(record, "phone", "phoneNumber", default="Not provided"),
+        "email": first_value(
+            record,
+            "email",
+            "emailAddress",
+            default="No email",
+        ),
+        "phone": first_value(
+            record,
+            "phone",
+            "phoneNumber",
+            default="Not provided",
+        ),
         "image_url": first_value(
             record,
             "profileImage",
@@ -131,8 +214,14 @@ def normalize_job_seeker(document) -> dict:
     }
 
 
+# ==================================================
+# Normalize Employer
+# ==================================================
+
+
 def normalize_employer(document) -> dict:
     record = document.to_dict() or {}
+
     created_at = (
         record.get("createdAt")
         or record.get("created_at")
@@ -165,11 +254,21 @@ def normalize_employer(document) -> dict:
             "phoneNumber",
             default="Not provided",
         ),
-        "image_url": first_value(record, "logo", "companyLogo", "logoUrl"),
+        "image_url": first_value(
+            record,
+            "logo",
+            "companyLogo",
+            "logoUrl",
+        ),
         "status": account_status(record),
         "created_at": created_at,
         "created_display": display_date(created_at),
     }
+
+
+# ==================================================
+# Retrieve Registered Accounts
+# ==================================================
 
 
 def get_registered_accounts() -> list[dict]:
@@ -192,7 +291,9 @@ def get_registered_accounts() -> list[dict]:
     return accounts
 
 
-def get_account_counts(accounts: list[dict]) -> dict:
+def get_account_counts(
+    accounts: list[dict],
+) -> dict:
     return {
         "total": len(accounts),
         "active": sum(account["status"] == "Active" for account in accounts),
@@ -201,10 +302,23 @@ def get_account_counts(accounts: list[dict]) -> dict:
     }
 
 
-@router.get("/admin/users", response_class=HTMLResponse)
-def admin_user_management_page(request: Request):
+# ==================================================
+# Admin User Management Page
+# ==================================================
+
+
+@router.get(
+    "/admin/users",
+    response_class=HTMLResponse,
+)
+def admin_user_management_page(
+    request: Request,
+):
     if not is_admin(request):
-        return RedirectResponse("/login/admin", status_code=303)
+        return RedirectResponse(
+            "/login/admin",
+            status_code=303,
+        )
 
     accounts = get_registered_accounts()
 
@@ -219,6 +333,11 @@ def admin_user_management_page(request: Request):
     )
 
 
+# ==================================================
+# Update Account Status
+# ==================================================
+
+
 @router.patch("/api/admin/users/{account_type}/{user_id}/status")
 def update_account_status(
     account_type: str,
@@ -229,35 +348,73 @@ def update_account_status(
     require_admin(request)
 
     collection_name = ACCOUNT_COLLECTIONS.get(account_type)
+
     if not collection_name:
-        raise HTTPException(status_code=404, detail="Account type was not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="Account type was not found.",
+        )
 
     reason = payload.reason.strip()
+
     if payload.status != "Active" and not reason:
         raise HTTPException(
             status_code=422,
-            detail="Please provide a reason for restricting this account.",
+            detail=("Please provide a reason for restricting this account."),
         )
 
     account_reference = db.collection(collection_name).document(user_id)
+
     snapshot = account_reference.get()
 
     if not snapshot.exists:
-        raise HTTPException(status_code=404, detail="User account was not found.")
+        raise HTTPException(
+            status_code=404,
+            detail="User account was not found.",
+        )
 
     previous_record = snapshot.to_dict() or {}
+
     previous_status = account_status(previous_record)
+
     changed_at = datetime.now(UTC)
     changed_by = current_admin_id(request)
 
     account_reference.update(
         {
-            "accountStatus": payload.status,
-            "accountStatusReason": reason if payload.status != "Active" else "",
+            "status": payload.status,
+            "accountStatusReason": (reason if payload.status != "Active" else ""),
             "accountStatusUpdatedAt": changed_at,
             "accountStatusUpdatedBy": changed_by,
         }
     )
+
+    # Deactivate the employer's active jobs.
+    updated_jobs = 0
+
+    restricted_statuses = {
+        "Suspended",
+        "Deactivated",
+    }
+
+    if account_type == "employer" and payload.status in restricted_statuses:
+        company_ids = {
+            str(user_id).strip(),
+            first_value(
+                previous_record,
+                "company_id",
+                "companyId",
+                "uid",
+                "user_id",
+                "userId",
+            ),
+        }
+
+        company_ids.discard("")
+
+        updated_jobs = deactivate_employer_jobs(company_ids)
+
+        print(f"Company identifiers: {company_ids}; deactivated jobs: {updated_jobs}")
 
     db.collection("account_status_audit").add(
         {
@@ -272,32 +429,41 @@ def update_account_status(
     )
 
     action_message = {
-        "Active": "Account reactivated successfully.",
-        "Suspended": "Account suspended successfully.",
-        "Deactivated": "Account deactivated successfully.",
+        "Active": ("Account reactivated successfully."),
+        "Suspended": ("Account suspended successfully."),
+        "Deactivated": ("Account deactivated successfully."),
     }[payload.status]
 
     return JSONResponse(
         content={
             "success": True,
             "status": payload.status,
+            "deactivated_jobs": updated_jobs,
             "message": action_message,
         }
     )
 
 
-def ensure_account_can_log_in(account_record: dict) -> None:
-    """Call this from login after credentials are valid."""
+# ==================================================
+# Login Status Validation
+# ==================================================
+
+
+def ensure_account_can_log_in(
+    account_record: dict,
+) -> None:
+    """Call this after the user's credentials are valid."""
+
     status = account_status(account_record)
 
     if status == "Suspended":
         raise HTTPException(
             status_code=403,
-            detail="This account is currently suspended. Please contact support.",
+            detail=("This account is currently suspended. Please contact support."),
         )
 
     if status == "Deactivated":
         raise HTTPException(
             status_code=403,
-            detail="This account has been deactivated. Please contact support.",
+            detail=("This account has been deactivated. Please contact support."),
         )
