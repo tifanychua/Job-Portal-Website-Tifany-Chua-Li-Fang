@@ -128,9 +128,9 @@ def _get_screening_questions(job: dict):
 
     location = job.get("location") or "this location"
 
-    questions[2][
-        "label"
-    ] = f"Are you willing to relocate or work from {company_name}'s office in {location}?"
+    questions[2]["label"] = (
+        f"Are you willing to relocate or work from {company_name}'s office in {location}?"
+    )
 
     return questions
 
