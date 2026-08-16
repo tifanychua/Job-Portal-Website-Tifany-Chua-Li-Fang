@@ -3,7 +3,6 @@ import os
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 
 # Import the email service for mocking
 from job_portal_web.backend import email_service
@@ -42,7 +41,7 @@ def driver():
     options.add_argument("--disable-software-rasterizer")
     options.add_argument("--disable-features=VizDisplayCompositor")
 
-    driver = webdriver.Chrome( options=options)
+    driver = webdriver.Chrome(options=options)
 
     driver.implicitly_wait(10)
 
