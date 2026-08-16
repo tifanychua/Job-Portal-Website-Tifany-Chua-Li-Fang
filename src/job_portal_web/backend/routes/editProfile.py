@@ -61,23 +61,22 @@ def get_current_job_seeker_id(request: Request):
 
 @router.get("/edit-profile", response_class=HTMLResponse)
 async def edit_profile(request: Request):
-
     applicant_id = get_current_job_seeker_id(request)
 
     seeker_doc = db.collection("job_seeker").document(applicant_id).get()
-
-    if seeker_doc.exists:
-        seeker = seeker_doc.to_dict()
-    else:
-        seeker = {}
+    seeker = seeker_doc.to_dict() if seeker_doc.exists else {}
 
     return templates.TemplateResponse(
         request=request,
         name="edit_jobSeeker_profile.html",
         context={
             "seeker": seeker,
+            # Required by the shared header
+            "user": seeker,
+            "is_logged_in": True,
+            "user_type": "job_seeker",
             "today": datetime.now(UTC).date().isoformat(),
-            "unread_notifications_count": get_unread_notifications_count(request),
+            "unread_notifications_count": (get_unread_notifications_count(request)),
         },
     )
 
