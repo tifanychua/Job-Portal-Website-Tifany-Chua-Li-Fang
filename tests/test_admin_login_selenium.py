@@ -44,7 +44,7 @@ def logged_in_admin(driver, base_url):
 
     admin_login(driver, "teohyongyun90@gmail.com", "Yy050613.")
 
-    WebDriverWait(driver, 20).until(lambda d: "/admin/dashboard" in d.current_url)
+    WebDriverWait(driver, 20).until(lambda d: "/admin/company-requests" in d.current_url)
 
 
 @when("the admin enters a valid email address and password")
@@ -82,13 +82,13 @@ def access_dashboard():
 @then("the system should authenticate the admin successfully")
 def login_success(driver):
 
-    WebDriverWait(driver, 20).until(lambda d: "/admin/dashboard" in d.current_url)
+    WebDriverWait(driver, 20).until(lambda d: "/admin/company-requests" in d.current_url)
 
 
 @then("redirect the admin to the administration dashboard")
 def redirect_dashboard(driver):
 
-    assert "/admin/dashboard" in driver.current_url
+    assert "/admin/company-requests" in driver.current_url
 
 
 @then("the system should display an error message")
@@ -106,7 +106,7 @@ def login_error(driver):
 @then("prevent access to administrative features")
 def no_dashboard(driver):
 
-    assert "/admin/dashboard" not in driver.current_url
+    assert "/admin/company-requests" not in driver.current_url
 
 
 @then("the system should display validation messages")
@@ -126,4 +126,4 @@ def request_complete(driver):
 @then("the system should allow access to platform management features")
 def access_features(driver):
 
-    assert "/admin/dashboard" in driver.current_url
+    assert "/admin/company-requests" in driver.current_url
