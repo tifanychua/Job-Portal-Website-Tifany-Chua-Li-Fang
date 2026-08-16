@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
+from google.api_core.retry import Retry
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from itsdangerous import TimestampSigner
@@ -20,6 +21,12 @@ from .notifications import get_unread_notifications_count
 
 router = APIRouter()
 
+FIRESTORE_RETRY = Retry(
+    initial=1.0,
+    maximum=10.0,
+    multiplier=2.0,
+    timeout=120.0,
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -203,7 +210,10 @@ def get_all_interviews():
     result = []
 
     try:
-        docs = db.collection("interviews").stream()
+        docs = db.collection("interviews").get(
+            retry=FIRESTORE_RETRY,
+            timeout=120.0,
+        )
 
         for doc in docs:
             try:
@@ -477,7 +487,14 @@ def get_applicant_interviews(request: Request):
 
     result = []
 
-    docs = db.collection("interviews").where("candidateId", "==", applicant_id).stream()
+    docs = (
+        db.collection("interviews")
+        .where("candidateId", "==", applicant_id)
+        .get(
+            retry=FIRESTORE_RETRY,
+            timeout=120.0,
+        )
+    )
 
     for doc in docs:
         data = doc.to_dict()
@@ -512,7 +529,14 @@ def filter_applicant_interviews(request: Request, status: str | None = None):
 
     result = []
 
-    docs = db.collection("interviews").where("candidateId", "==", applicant_id).stream()
+    docs = (
+        db.collection("interviews")
+        .where("candidateId", "==", applicant_id)
+        .get(
+            retry=FIRESTORE_RETRY,
+            timeout=120.0,
+        )
+    )
 
     for doc in docs:
         data = doc.to_dict()
@@ -567,7 +591,14 @@ async def search_interview_records(request: Request, keyword: str = ""):
 
     interviews = []
 
-    docs = db.collection("interviews").where("companyId", "==", company_id).stream()
+    docs = (
+        db.collection("interviews")
+        .where("companyId", "==", company_id)
+        .get(
+            retry=FIRESTORE_RETRY,
+            timeout=120.0,
+        )
+    )
 
     keyword = keyword.lower()
 
@@ -601,7 +632,14 @@ def get_employer_interviews(request: Request, status: str | None = None):
 
     print("LOGIN COMPANY ID:", company_id)
 
-    docs = db.collection("interviews").where("companyId", "==", company_id).stream()
+    docs = (
+        db.collection("interviews")
+        .where("companyId", "==", company_id)
+        .get(
+            retry=FIRESTORE_RETRY,
+            timeout=120.0,
+        )
+    )
 
     result = []
 
@@ -645,7 +683,14 @@ def search_employer_interviews(request: Request, keyword: str = ""):
 
     result = []
 
-    docs = db.collection("interviews").where("companyId", "==", company_id).stream()
+    docs = (
+        db.collection("interviews")
+        .where("companyId", "==", company_id)
+        .get(
+            retry=FIRESTORE_RETRY,
+            timeout=120.0,
+        )
+    )
 
     for doc in docs:
         data = doc.to_dict()
@@ -950,7 +995,14 @@ def search_applicant_interviews(request: Request, application_id: str, keyword: 
 
     result = []
 
-    docs = db.collection("interviews").where("candidateId", "==", applicant_id).stream()
+    docs = (
+        db.collection("interviews")
+        .where("candidateId", "==", applicant_id)
+        .get(
+            retry=FIRESTORE_RETRY,
+            timeout=120.0,
+        )
+    )
 
     for doc in docs:
         data = doc.to_dict()
@@ -1018,7 +1070,10 @@ def send_interview_reminders(hours_before: int = 24):
     docs = (
         db.collection("interviews")
         .where("status", "in", ["Scheduled", "Accepted", "Rescheduled"])
-        .stream()
+        .get(
+            retry=FIRESTORE_RETRY,
+            timeout=120.0,
+        )
     )
 
     sent = 0
