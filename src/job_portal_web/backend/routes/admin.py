@@ -1,7 +1,6 @@
-from typing import Any
 from datetime import UTC, datetime
+from typing import Any
 
-from google.cloud.firestore_v1.base_query import FieldFilter
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -9,6 +8,7 @@ from fastapi import (
 )
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 from ..database import db
 from ..email_service import (
