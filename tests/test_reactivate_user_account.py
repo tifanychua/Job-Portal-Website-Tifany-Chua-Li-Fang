@@ -64,7 +64,7 @@ def create_restricted_user(user_id, status):
             "firstName": "Test",
             "lastName": "Job Seeker",
             "email": f"{user_id.lower()}@example.com",
-            "accountStatus": status,
+            "status": status,
             "accountStatusReason": "Test restriction reason",
             "createdAt": datetime.now(UTC),
             "test": True,
@@ -121,7 +121,7 @@ def verify_active_status(context):
     assert context["response"].status_code == 200
     user = get_user(context)
     assert user is not None
-    assert user["accountStatus"] == "Active"
+    assert user["status"] == "Active"
     assert user["accountStatusReason"] == ""
 
 
@@ -199,7 +199,7 @@ def reactivated_account(client, context, user_id):
 def account_status_updated(context):
     user = get_user(context)
     assert user is not None
-    assert user["accountStatus"] == "Active"
+    assert user["status"] == "Active"
 
 
 @then("the system should record the reactivation activity")
@@ -244,7 +244,7 @@ def test_reactivate_suspended_user(client, user_id):
 
     user = db.collection("job_seeker").document(user_id).get().to_dict()
     assert user is not None
-    assert user["accountStatus"] == "Active"
+    assert user["status"] == "Active"
 
 
 # =====================================

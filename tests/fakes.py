@@ -44,29 +44,40 @@ class FakeDocumentRef:
         self._collection = collection
         self.id = doc_id
 
-    def get(self):
+    def get(self, retry=None, timeout=None, **kwargs):
+        """Return a document snapshot.
+
+        ``retry`` and ``timeout`` are accepted for compatibility with the
+        real Firestore DocumentReference.get() method. They are not needed
+        by the in-memory fake.
+        """
         data = self._collection._docs.get(self.id)
         return FakeSnapshot(self.id, data, data is not None)
 
-    def set(self, data, merge=False):
+    def set(self, data, merge=False, retry=None, timeout=None, **kwargs):
         if merge and self.id in self._collection._docs:
             self._collection._docs[self.id].update(data)
         else:
             self._collection._docs[self.id] = dict(data)
+
         return self
 
-    def update(self, data):
+    def update(self, data, retry=None, timeout=None, **kwargs):
         existing = self._collection._docs.setdefault(self.id, {})
         existing.update(data)
         return self
 
-    def delete(self):
+    def delete(self, retry=None, timeout=None, **kwargs):
         self._collection._docs.pop(self.id, None)
 
 
 class _FieldFilterLike:
-    """Duck-typed stand-in for google.cloud.firestore_v1.base_query.FieldFilter,
-    also accepts the (field, op, value) positional legacy form."""
+    """Duck-typed stand-in for Firestore's FieldFilter.
+
+    It also supports the legacy positional form:
+
+        where("field", "==", value)
+    """
 
     def __init__(self, field_path, op_string, value):
         self.field_path = field_path
@@ -83,18 +94,25 @@ def _matches(data, condition):
 
     if op == "==":
         return actual == value
+
     if op == "!=":
         return actual != value
+
     if op == "in":
         return actual in value
+
     if op == "not-in":
         return actual not in value
+
     if op == ">":
         return actual is not None and actual > value
+
     if op == ">=":
         return actual is not None and actual >= value
+
     if op == "<":
         return actual is not None and actual < value
+
     if op == "<=":
         return actual is not None and actual <= value
 
@@ -102,33 +120,65 @@ def _matches(data, condition):
 
 
 class _FakeQuery:
-    def __init__(self, collection: FakeCollection, conditions):
+    def __init__(self, collection: FakeCollection, conditions, limit_count=None):
         self._collection = collection
         self._conditions = conditions
+        self._limit_count = limit_count
 
     def where(self, *args, filter=None, **kwargs):
         condition = filter
 
         if condition is None and args:
+            if len(args) != 3:
+                raise TypeError("where() expects field, operator, and value")
+
             field, op, value = args
             condition = _FieldFilterLike(field, op, value)
 
-        return _FakeQuery(self._collection, [*self._conditions, condition])
+        if condition is None:
+            raise TypeError("where() requires either positional arguments or filter=")
 
-    def stream(self):
+        return _FakeQuery(
+            self._collection,
+            [*self._conditions, condition],
+            self._limit_count,
+        )
+
+    def stream(self, retry=None, timeout=None, **kwargs):
+        """Return matching snapshots.
+
+        ``retry`` and ``timeout`` are accepted for compatibility with the
+        real Firestore Query.stream() method.
+        """
         results = []
 
         for doc_id, data in list(self._collection._docs.items()):
             if all(_matches(data, condition) for condition in self._conditions):
                 results.append(FakeSnapshot(doc_id, data, True))
 
+        if self._limit_count is not None:
+            results = results[: self._limit_count]
+
         return results
 
-    def get(self):
-        return self.stream()
+    def get(self, retry=None, timeout=None, **kwargs):
+        """Return matching snapshots.
 
-    def limit(self, _n):
-        return self
+        The real Firestore Query.get() accepts ``retry`` and ``timeout``.
+        This fake accepts and ignores them.
+        """
+        return self.stream(
+            retry=retry,
+            timeout=timeout,
+            **kwargs,
+        )
+
+    def limit(self, number):
+        return _FakeQuery(
+            self._collection,
+            list(self._conditions),
+            number,
+        )
 
 
 class FakeCollection:
@@ -143,20 +193,33 @@ class FakeCollection:
 
         return FakeDocumentRef(self, doc_id)
 
-    def add(self, data):
+    def add(self, data, retry=None, timeout=None, **kwargs):
         doc_id = f"{self.name}_auto_{next(self._counter)}"
         self._docs[doc_id] = dict(data)
 
-        return (None, FakeDocumentRef(self, doc_id))
+        return None, FakeDocumentRef(self, doc_id)
 
     def where(self, *args, filter=None, **kwargs):
-        return _FakeQuery(self, []).where(*args, filter=filter, **kwargs)
+        return _FakeQuery(self, []).where(
+            *args,
+            filter=filter,
+            **kwargs,
+        )
 
-    def stream(self):
+    def stream(self, retry=None, timeout=None, **kwargs):
+        """Return every document in the collection."""
         return [FakeSnapshot(doc_id, data, True) for doc_id, data in list(self._docs.items())]
 
-    def get(self):
-        return self.stream()
+    def get(self, retry=None, timeout=None, **kwargs):
+        """Return every document in the collection."""
+        return self.stream(
+            retry=retry,
+            timeout=timeout,
+            **kwargs,
+        )
+
+    def limit(self, number):
+        return _FakeQuery(self, [], number)
 
 
 class FakeBatch:
@@ -164,22 +227,30 @@ class FakeBatch:
         self._ops = []
 
     def update(self, ref, data):
-        self._ops.append((ref, data))
+        self._ops.append(("update", ref, data, False))
+        return self
 
     def set(self, ref, data, merge=False):
-        self._ops.append((ref, data))
+        self._ops.append(("set", ref, data, merge))
+        return self
 
     def delete(self, ref):
-        self._ops.append((ref, None))
+        self._ops.append(("delete", ref, None, False))
+        return self
 
-    def commit(self):
-        for ref, data in self._ops:
-            if data is None:
-                ref.delete()
-            else:
-                ref.update(data)
+    def commit(self, retry=None, timeout=None, **kwargs):
+        results = []
+
+        for operation, ref, data, merge in self._ops:
+            if operation == "delete":
+                results.append(ref.delete())
+            elif operation == "set":
+                results.append(ref.set(data, merge=merge))
+            elif operation == "update":
+                results.append(ref.update(data))
 
         self._ops = []
+        return results
 
 
 class FakeFirestore:
@@ -200,9 +271,11 @@ class FakeFirestore:
     # -- test convenience -------------------------------------------------
 
     def seed(self, collection: str, doc_id: str, data: dict):
-        """Directly write a document, bypassing any route logic. Handy for
-        Gherkin ``Given`` steps that set up pre-existing state."""
+        """Directly write a document, bypassing route logic.
 
+        This is useful for Gherkin ``Given`` steps that set up
+        pre-existing state.
+        """
         self.collection(collection).document(doc_id).set(data)
         return doc_id
 
@@ -223,13 +296,20 @@ class FakeBlob:
         self.name = name
         self._uploaded = None
 
-    def upload_from_string(self, contents, content_type=None):
+    def upload_from_string(
+        self,
+        contents,
+        content_type=None,
+        retry=None,
+        timeout=None,
+        **kwargs,
+    ):
         self._uploaded = contents
 
     def generate_signed_url(self, **kwargs):
         return f"https://example.com/{self.name}"
 
-    def exists(self):
+    def exists(self, **kwargs):
         return True
 
 
@@ -242,11 +322,12 @@ class FakeBucket:
 # Cross-module patching helper
 # ======================================================================
 
-# Every backend module that imports `db` (or `bucket`) at module scope.
+# Every backend module that imports `db` or `bucket` at module scope.
+#
 # Functions look up `db` in the globals of the module where they are
-# *defined*, not where they are called from, so a page like /saved-jobs
-# that calls into notifications.get_unread_notifications_count() needs
-# notifications.db patched too, even though the test is "about" saved_job.py.
+# defined, not where they are called from. Therefore, a page such as
+# /saved-jobs that calls notifications.get_unread_notifications_count()
+# also requires notifications.db to be patched.
 _DB_MODULES = [
     "job_portal_web.backend.notifications",
     "job_portal_web.backend.saved_job",
@@ -261,14 +342,25 @@ _DB_MODULES = [
 
 
 def patch_db_everywhere(monkeypatch, fake_db, bucket=None):
-    """Point every backend module's module-level `db` (and `bucket`, if
-    given) at the same fake instance, so a single request that crosses
-    module boundaries stays internally consistent."""
+    """Patch backend modules to use the same fake database instance.
 
+    Using one shared instance ensures that a request crossing multiple
+    backend modules sees consistent in-memory data.
+    """
     for name in _DB_MODULES:
         module = importlib.import_module(name)
 
-        monkeypatch.setattr(module, "db", fake_db, raising=False)
+        monkeypatch.setattr(
+            module,
+            "db",
+            fake_db,
+            raising=False,
+        )
 
         if bucket is not None:
-            monkeypatch.setattr(module, "bucket", bucket, raising=False)
+            monkeypatch.setattr(
+                module,
+                "bucket",
+                bucket,
+                raising=False,
+            )

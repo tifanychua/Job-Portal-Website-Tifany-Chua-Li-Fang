@@ -3,7 +3,6 @@ import os
 import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
 
 # Import the email service for mocking
 from job_portal_web.backend import email_service
@@ -31,9 +30,6 @@ def driver():
 
     options = Options()
 
-    # Snap Chromium binary
-    options.binary_location = "/snap/chromium/current/usr/lib/chromium-browser/chrome"
-
     options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
@@ -45,9 +41,7 @@ def driver():
     options.add_argument("--disable-software-rasterizer")
     options.add_argument("--disable-features=VizDisplayCompositor")
 
-    service = Service("/snap/chromium/3499/usr/lib/chromium-browser/chromedriver")
-
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(options=options)
 
     driver.implicitly_wait(10)
 

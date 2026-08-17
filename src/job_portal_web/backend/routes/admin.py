@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import (
@@ -7,6 +8,7 @@ from fastapi import (
 )
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 from ..database import db
 from ..email_service import (
@@ -188,7 +190,6 @@ async def reject_company(company_id: str):
 @router.post("/admin/company/{company_id}/deactivate")
 def deactivate_company(company_id: str):
     company_ref = db.collection("company").document(company_id)
-
     company_doc = company_ref.get()
 
     if not company_doc.exists:
@@ -197,13 +198,42 @@ def deactivate_company(company_id: str):
             detail="Company not found",
         )
 
+    # Deactivate the company account.
     company_ref.update(
         {
             "status": "Deactivated",
         }
     )
 
+    # Find all jobs belonging to the company.
+    job_documents = (
+        db.collection("job_list")
+        .where(
+            filter=FieldFilter(
+                "company_id",
+                "==",
+                company_id,
+            )
+        )
+        .stream()
+    )
+
+    updated_jobs = 0
+
+    # Deactivate every job belonging to the company.
+    for job_document in job_documents:
+        db.collection("job_list").document(job_document.id).update(
+            {
+                "status": "Deactivated",
+                "updated_at": datetime.now(UTC),
+            }
+        )
+
+        updated_jobs += 1
+
+    print(f"Company {company_id} deactivated. {updated_jobs} job(s) deactivated.")
+
     return RedirectResponse(
-        url=("/admin/company-requests?status=Active"),
+        url="/admin/company-requests?status=Active",
         status_code=303,
     )
