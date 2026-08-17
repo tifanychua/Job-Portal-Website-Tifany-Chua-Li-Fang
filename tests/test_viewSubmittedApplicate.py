@@ -1,9 +1,78 @@
+from __future__ import annotations
+
 import pytest
+from fakes import FakeFirestore, patch_db_everywhere
 from fastapi.testclient import TestClient
 from pytest_bdd import given, scenarios, then, when
 
 from job_portal_web.backend import job_application
 from job_portal_web.backend.main import app
+
+APPLICATION_ID = "5iVgjmXsCDG4lpM5uUuj"
+JOB_SEEKER_ID = "J000001"
+
+
+# --------------------------------------------------
+# Fake Firestore
+# --------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def fake_db(monkeypatch):
+    db = FakeFirestore()
+    patch_db_everywhere(monkeypatch, db)
+
+    db.seed(
+        "application",
+        APPLICATION_ID,
+        {
+            "job_seeker_id": JOB_SEEKER_ID,
+            "jobSeekerId": JOB_SEEKER_ID,
+            "applicant_id": JOB_SEEKER_ID,
+            "job_id": "JOB001",
+            "jobId": "JOB001",
+            "company_id": "COMP001",
+            "companyId": "COMP001",
+            "status": "Submitted",
+        },
+    )
+
+    db.seed(
+        "job_seeker",
+        JOB_SEEKER_ID,
+        {
+            "name": "Test User",
+            "full_name": "Test User",
+            "email": "test@example.com",
+            "headline": "Software Engineer",
+            "photo": "user.png",
+        },
+    )
+
+    db.seed(
+        "company",
+        "COMP001",
+        {
+            "companyName": "ABC Technology",
+            "name": "ABC Technology",
+            "address": "Penang",
+        },
+    )
+
+    db.seed(
+        "job_list",
+        "JOB001",
+        {
+            "title": "Software Engineer",
+            "job_title": "Software Engineer",
+            "company_id": "COMP001",
+            "companyId": "COMP001",
+            "status": "Active",
+        },
+    )
+
+    return db
+
 
 # --------------------------------------------------
 # Fake Login
@@ -16,12 +85,12 @@ def fake_login(monkeypatch):
     def fake_current_user(request):
 
         request.session["user_type"] = "job_seeker"
-        request.session["applicant_id"] = "J000001"
+        request.session["applicant_id"] = JOB_SEEKER_ID
 
         return (
-            "J000001",
+            JOB_SEEKER_ID,
             {
-                "uid": "J000001",
+                "uid": JOB_SEEKER_ID,
                 "full_name": "Test User",
                 "headline": "Software Engineer",
                 "photo": "user.png",
@@ -45,9 +114,6 @@ def client():
     return TestClient(app)
 
 
-APPLICATION_ID = "5iVgjmXsCDG4lpM5uUuj"
-
-
 # --------------------------------------------------
 # 1. Acceptance Test
 # --------------------------------------------------
@@ -57,13 +123,9 @@ def test_view_submitted_application_list(client: TestClient):
 
     response = client.get("/application")
 
-    if response.status_code == 200:
-        print("✅ SUCCESS: Submitted application list displayed")
-
-    else:
-        print("❌ FAILED:", response.status_code, response.text)
-
     assert response.status_code == 200
+
+    print("✅ SUCCESS: Submitted application list displayed")
 
 
 # --------------------------------------------------
@@ -75,29 +137,21 @@ def test_view_submitted_application_details(client: TestClient):
 
     response = client.get(f"/application/{APPLICATION_ID}")
 
-    if response.status_code == 200:
-        data = response.text.lower()
-
-        required_fields = ["application", "status"]
-
-        missing = []
-
-        for field in required_fields:
-            if field not in data:
-                missing.append(field)
-
-        if not missing:
-            print("✅ SUCCESS: Application details and status displayed")
-
-        else:
-            print(f"❌ FAILED: Missing {missing}")
-
-        assert len(missing) == 0
-
-    else:
-        print("❌ FAILED:", response.status_code, response.text)
-
     assert response.status_code == 200
+
+    data = response.text.lower()
+
+    required_fields = ["application", "status"]
+
+    missing = []
+
+    for field in required_fields:
+        if field not in data:
+            missing.append(field)
+
+    assert len(missing) == 0
+
+    print("✅ SUCCESS: Application details and status displayed")
 
 
 # --------------------------------------------------
@@ -159,10 +213,6 @@ def verify_application_details(context):
         if field not in data:
             missing.append(field)
 
-    if missing:
-        print(f"❌ FAILED: Missing {missing}")
-
-    else:
-        print("✅ SUCCESS: Application details and status displayed")
-
     assert len(missing) == 0
+
+    print("✅ SUCCESS: Application details and status displayed")
