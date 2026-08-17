@@ -1,9 +1,79 @@
+from __future__ import annotations
+
 import pytest
+from fakes import FakeFirestore, patch_db_everywhere
 from fastapi.testclient import TestClient
 from pytest_bdd import given, scenarios, then, when
 
 from job_portal_web.backend import job_application
 from job_portal_web.backend.main import app
+
+JOB_SEEKER_ID = "J000001"
+APPLICATION_ID = "5iVgjmXsCDG4lpM5uUuj"
+
+
+# --------------------------------------------------
+# Fake Firestore
+# --------------------------------------------------
+
+
+@pytest.fixture(autouse=True)
+def fake_db(monkeypatch):
+    db = FakeFirestore()
+
+    patch_db_everywhere(monkeypatch, db)
+
+    db.seed(
+        "job_seeker",
+        JOB_SEEKER_ID,
+        {
+            "name": "Test User",
+            "full_name": "Test User",
+            "email": "test@example.com",
+            "headline": "Software Engineer",
+            "photo": "user.png",
+        },
+    )
+
+    db.seed(
+        "company",
+        "COMP001",
+        {
+            "companyName": "ABC Technology",
+            "name": "ABC Technology",
+            "address": "Penang",
+        },
+    )
+
+    db.seed(
+        "job_list",
+        "JOB001",
+        {
+            "job_title": "Software Engineer",
+            "title": "Software Engineer",
+            "company_id": "COMP001",
+            "companyId": "COMP001",
+            "status": "Active",
+        },
+    )
+
+    db.seed(
+        "application",
+        APPLICATION_ID,
+        {
+            "job_seeker_id": JOB_SEEKER_ID,
+            "jobSeekerId": JOB_SEEKER_ID,
+            "applicant_id": JOB_SEEKER_ID,
+            "job_id": "JOB001",
+            "jobId": "JOB001",
+            "company_id": "COMP001",
+            "companyId": "COMP001",
+            "status": "Shortlisted",
+        },
+    )
+
+    return db
+
 
 # --------------------------------------------------
 # Fake Login
@@ -14,14 +84,13 @@ from job_portal_web.backend.main import app
 def fake_login(monkeypatch):
 
     def fake_current_user(request):
-
         request.session["user_type"] = "job_seeker"
-        request.session["applicant_id"] = "J000001"
+        request.session["applicant_id"] = JOB_SEEKER_ID
 
         return (
-            "J000001",
+            JOB_SEEKER_ID,
             {
-                "uid": "J000001",
+                "uid": JOB_SEEKER_ID,
                 "full_name": "Test User",
                 "headline": "Software Engineer",
                 "photo": "user.png",
@@ -36,7 +105,7 @@ def fake_login(monkeypatch):
 
 
 # --------------------------------------------------
-# Test Client Fixture
+# Test Client
 # --------------------------------------------------
 
 
@@ -54,26 +123,16 @@ def test_view_application_status_list(client: TestClient):
 
     response = client.get("/application")
 
-    if response.status_code == 200:
-        page = response.text
-
-        statuses = [
-            "Submitted",
-            "Cancelled",
-            "Shortlisted",
-            "Rejected",
-            "Offered",
-        ]
-
-        if any(status in page for status in statuses):
-            print("✅ SUCCESS: Job seeker views application statuses")
-        else:
-            print("❌ FAILED: Application statuses not found")
-
-    else:
-        print("❌ FAILED:", response.status_code, response.text)
-
     assert response.status_code == 200
+
+    statuses = [
+        "Submitted",
+        "Cancelled",
+        "Shortlisted",
+        "Rejected",
+        "Offered",
+    ]
+
     assert any(status in response.text for status in statuses)
 
 
@@ -84,35 +143,23 @@ def test_view_application_status_list(client: TestClient):
 
 def test_view_updated_application_status(client: TestClient):
 
-    application_id = "5iVgjmXsCDG4lpM5uUuj"
-
-    response = client.get(f"/application/{application_id}")
-
-    if response.status_code == 200:
-        page = response.text
-
-        statuses = [
-            "Submitted",
-            "Cancelled",
-            "Shortlisted",
-            "Rejected",
-            "Offered",
-        ]
-
-        if any(status in page for status in statuses):
-            print("✅ SUCCESS: Job seeker views updated application status")
-        else:
-            print("❌ FAILED: Updated status not found")
-
-    else:
-        print("❌ FAILED:", response.status_code, response.text)
+    response = client.get(f"/application/{APPLICATION_ID}")
 
     assert response.status_code == 200
+
+    statuses = [
+        "Submitted",
+        "Cancelled",
+        "Shortlisted",
+        "Rejected",
+        "Offered",
+    ]
+
     assert any(status in response.text for status in statuses)
 
 
 # --------------------------------------------------
-# BDD Feature Loading
+# BDD Feature
 # --------------------------------------------------
 
 scenarios("features/viewApplicationStatus.feature")
@@ -125,14 +172,12 @@ scenarios("features/viewApplicationStatus.feature")
 
 class Context:
     def __init__(self):
-
         self.response = None
-        self.application_id = "5iVgjmXsCDG4lpM5uUuj"
+        self.application_id = APPLICATION_ID
 
 
 @pytest.fixture
 def context():
-
     return Context()
 
 
@@ -157,8 +202,6 @@ def verify_status_list(context):
 
     assert context.response.status_code == 200
 
-    page = context.response.text
-
     statuses = [
         "Submitted",
         "Cancelled",
@@ -167,9 +210,7 @@ def verify_status_list(context):
         "Offered",
     ]
 
-    assert any(status in page for status in statuses)
-
-    print("✅ SUCCESS: Application statuses displayed")
+    assert any(status in context.response.text for status in statuses)
 
 
 # --------------------------------------------------
@@ -193,8 +234,6 @@ def verify_updated_status(context):
 
     assert context.response.status_code == 200
 
-    page = context.response.text
-
     statuses = [
         "Submitted",
         "Cancelled",
@@ -203,6 +242,4 @@ def verify_updated_status(context):
         "Offered",
     ]
 
-    assert any(status in page for status in statuses)
-
-    print("✅ SUCCESS: Updated application status displayed")
+    assert any(status in context.response.text for status in statuses)
